@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5a4ed1de373397408e0510f2cba4762, type: 3}
+  m_Name: Ability Overflow To Score
+  m_EditorClassIdentifier: 
+  upgradeId: ablityoverflowtoscore
+  displayName: Ability Charge Overflow
+  descriptionTemplate: Each ability charge gained from any source while your ability
+    bar is full grants you <color=#00E676>{SCORE_PER_OVERFLOW}</color> score.
+  baseIcon: {fileID: -197724358, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  activeIcon: {fileID: -197724358, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  feedbackStyle: 2
+  scorePerOverflow: 50
+  bonusSound:
+    clip: {fileID: 0}
+    channel: 2
+    affectedByTimeScale: 1
+    volume: 0.2
+    pitch: 1
+    usePitchVariation: 0
+    pitchVariation: 0

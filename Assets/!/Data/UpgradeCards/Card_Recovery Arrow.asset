@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a6dce7903600e446915a27923e7c248, type: 3}
+  m_Name: Card_Recovery Arrow
+  m_EditorClassIdentifier: 
+  cardName: Recovery Arrow
+  description: "After damage, spawn \u201Crecovery arrow\u201D (faster / harder)
+    (heals / restores combo)\r\n\n"
+  cardIcon: {fileID: 491617348, guid: b0a5ba2851172754ea0220daf62541e4, type: 3}
+  upgrade: {fileID: 11400000, guid: 66aebf07526e1c145a1a14e8b4ac5cff, type: 2}
+  canStack: 0

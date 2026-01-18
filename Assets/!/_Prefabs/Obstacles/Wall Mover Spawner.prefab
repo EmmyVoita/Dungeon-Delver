@@ -1,0 +1,160 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1606375374996104432
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7544675817588112326}
+  - component: {fileID: 411476168216939335}
+  m_Layer: 0
+  m_Name: Wall Mover Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7544675817588112326
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606375374996104432}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8674865375378705862}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &411476168216939335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606375374996104432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de0925cd13b3abc4baaa66f35aa5c9b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnBeep:
+    clip: {fileID: 8300000, guid: 7b5af3e0a5cb3f94c96f6a46abb56915, type: 3}
+    channel: 0
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1
+    usePitchVariation: 0
+    pitchVariation: 0
+  beepPitchStart: 1
+  beepPitchStep: 0.1
+  baseMoveSpeed: 4
+  speedMultiplier: 0
+  speedVariation: 0.3
+  lifeDuration: 4
+  wallPrefabs:
+  - {fileID: 7710078017366974908, guid: d683f6379c14ef0458696a5bdb4ecb7a, type: 3}
+  - {fileID: 3049347904484405761, guid: fec3f8ff7baa5ac4eb265d8851136100, type: 3}
+  - {fileID: 4767743241583879861, guid: ac3526061a3ed174096c825aba5c3d01, type: 3}
+  fireDirections:
+  - {x: -1, y: 0}
+  autoSpawnOnStart: 1
+  spawnOffset: -10
+  spawnCount: 5
+  spawnInterval: 1.25
+--- !u!1 &4740895895095594392
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8674865375378705862}
+  - component: {fileID: 1108110177414258835}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8674865375378705862
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4740895895095594392}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7544675817588112326}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1108110177414258835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4740895895095594392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c37f6cd9b3fddbc4dbe8c74f531bdd26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lifetimeMode: 1
+  activationMode: 1
+  projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
+  linePrefab: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
+  fireMode: 1
+  projectileFireMode: 0
+  fireDelayMode: 0
+  firePositionMode: 1
+  unregisterDelay: 1
+  fireDelay: 1.5
+  continuousFireCount: 5
+  oscillateDistance: 0.5
+  oscillateSpeed: 2
+  predefinedOffsets:
+  - {x: -5.5, y: 2, z: 0}
+  - {x: -5.5, y: 0, z: 0}
+  - {x: -5.5, y: -2, z: 0}
+  - {x: -5.5, y: -3, z: 0}
+  - {x: -5.5, y: 3, z: 0}
+  projectileFireDirection: {x: 1, y: 0}
+  projectileCount: 1
+  projectileSpacing: 0
+  projectileSpeed: 15
+  firingWindupDuration: 0.75
+  maxRandFireDelay: 0.25
+  spawnPositionOffset: {x: -5.5, y: 0, z: 0}
+  randPosOffsetX: 0
+  randPosOffsetY: 0.15
+  fireSound:
+    clip: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1
+    usePitchVariation: 0
+    pitchVariation: 0
+  tickSound:
+    clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1
+    usePitchVariation: 0
+    pitchVariation: 0
+  tickCount: 3

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f647f10395ee3ce4a89a2a4d397a9375, type: 3}
+  m_Name: Golden Wave
+  m_EditorClassIdentifier: 
+  icon: {fileID: 78976016, guid: 7f239c827232d5e42b192d0ad4ee6875, type: 3}
+  displayName: Golden Wave
+  descriptionTemplate: This level, your ability releases a <color=#9C27B0>golden</color>
+    wave after time resumes. The wave grows with arrows caught during the slow.

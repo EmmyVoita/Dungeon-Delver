@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68813373f6a2a0c4e86f261ccf3a1703, type: 3}
+  m_Name: ObstacleF
+  m_EditorClassIdentifier: 
+  displayName: Shrinking Rings
+  obstaclePrefab: {fileID: 2876227516044993260, guid: 96ea9857e22397b458d2bffd3c3d58b5, type: 3}
+  previewImage: {fileID: 0}
+  description: Rotating rings that shrink towards the player

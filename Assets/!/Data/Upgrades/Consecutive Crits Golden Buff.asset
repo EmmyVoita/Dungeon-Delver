@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 579a39ae13e12ab47bf1c2aaf91b7991, type: 3}
+  m_Name: Consecutive Crits Golden Buff
+  m_EditorClassIdentifier: 
+  upgradeId: consecutivecritsgoldenbuff
+  displayName: Golden Buff
+  descriptionTemplate: Hitting <color=#FFD700>{CRITS_IN_A_ROW}</color> crits consecutively
+    causes the next <color=#00E676>{GOLDEN_GRANTED}</color> arrows to be <color=#9C27B0>golden</color>,
+    granting points when crit. This rearms after <color=#FFD700>{REARM_COUNT}</color>
+    arrows.
+  baseIcon: {fileID: 1074239189, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  activeIcon: {fileID: 1074239189, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  feedbackStyle: 3
+  critsInARowRequired: 5
+  rearmCountRequired: 20
+  goldenArrowsGranted: 3
+  bonusSound:
+    clip: {fileID: 8300000, guid: bda41de902222eb4ab895b9a967a6b74, type: 3}
+    channel: 0
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1
+    usePitchVariation: 0
+    pitchVariation: 0
+  bonusVFX: {fileID: 3620561930619786705, guid: f89ceb28d7ac6034ab8d1e2761601f42, type: 3}

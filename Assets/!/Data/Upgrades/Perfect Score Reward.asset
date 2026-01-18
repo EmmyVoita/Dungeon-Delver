@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca7675e511af8a54bb8747ed0525aa45, type: 3}
+  m_Name: Perfect Score Reward
+  m_EditorClassIdentifier: 
+  upgradeId: perfectroundbonus
+  displayName: Perfect Bonus
+  descriptionTemplate: Perfecting a level grants you <color=#00E676>{BONUS_SCORE}</color>
+    score.
+  baseIcon: {fileID: 1126896778, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  activeIcon: {fileID: 1126896778, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  feedbackStyle: 2
+  bonusScore: 10000
+  bonusSound: {fileID: 8300000, guid: ede150c8d29ad8540ba4b54b2831c9ec, type: 3}

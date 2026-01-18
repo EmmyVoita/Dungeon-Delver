@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a6dce7903600e446915a27923e7c248, type: 3}
+  m_Name: Card_TempBPMIncrease
+  m_EditorClassIdentifier: 
+  cardName: Speed Up
+  description: 'Increase the bpm of the next round by <color=#FFD700>15%</color>.
+    Heal for <color=#FF4040>4</color> health at the end of the round. '
+  icon: {fileID: 21300000, guid: dd3ed031dde692f4f8b6395cae357a4d, type: 3}
+  smallIcon: {fileID: 21300000, guid: dd3ed031dde692f4f8b6395cae357a4d, type: 3}
+  effect: {fileID: 7643052566124972097, guid: 200958df70c9d3c4786ca115b49ab3f1, type: 3}

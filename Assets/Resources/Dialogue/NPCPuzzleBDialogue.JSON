@@ -1,0 +1,38 @@
+{
+  "npcName": "PuzzleB",
+  "dialogueNodes": [
+    {
+      "state": "intro",
+      "lines": [
+        "Hello!",
+        "I need some help putting the furniture back.",
+        "Could you help me with that?",
+        "Talk to me again if you need to reset."
+      ],
+      "nextState": "waitingForQuest"
+    },
+    {
+      "state": "waitingForQuest",
+      "lines": [
+        "Ok I'll reset it for you"
+      ],
+      "onFinishEvent": "ResetBlockPuzzle",
+      "requiredAction": "BlockPuzzleBSolved",
+      "nextState": "questComplete"
+    },
+    {
+      "state": "questComplete",
+      "lines": [
+        "Thank you for the apple!",
+        "Here, take this key as thanks."
+      ],
+      "nextState": "done"
+    },
+    {
+      "state": "done",
+      "lines": [
+        "Good luck on your journey!"
+      ]
+    }
+  ]
+}

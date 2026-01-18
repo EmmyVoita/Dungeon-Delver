@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b146999b803cd0b4fa2a2b03732596de, type: 3}
+  m_Name: Score For Crit Window Cost
+  m_EditorClassIdentifier: 
+  upgradeId: scoreforcritwindowcost
+  displayName: Increase Crit Value
+  descriptionTemplate: Reduces your crit window by <color=#E53935>{CRIT_WINDOW_MULTIPLIER}</color>,
+    but increases crit value by <color=#00E676>{CRIT_HIT_VALUE_MULTIPLIER}</color>
+    and reduces non-crit value by <color=#E53935>{NORMAL_HIT_VALUE_MULTIPLIER}</color>.
+  baseIcon: {fileID: -130739521, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  activeIcon: {fileID: -130739521, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  feedbackStyle: 0
+  critWindowMultiplier: 0.8
+  CritHitValueMultiplier: 1.5
+  NormalHitValueMultiplier: 0.75

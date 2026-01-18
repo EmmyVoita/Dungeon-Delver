@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4df9467b72b68543a2825662f115579, type: 3}
+  m_Name: Nth Crit Bonus
+  m_EditorClassIdentifier: 
+  upgradeId: nthcritbonus
+  displayName: Nth Crit Bonus
+  descriptionTemplate: Every <color=#FFD700>{CRITS_REQUIRED}</color> crits that you
+    hit grants you <color=#00E676>{BONUS_SCORE}</color> score.
+  baseIcon: {fileID: 282753254, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  activeIcon: {fileID: 282753254, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  feedbackStyle: 2
+  critsRequired: 10
+  bonusScore: 250
+  bonusSound:
+    clip: {fileID: 8300000, guid: eb801c78f1645e5459c27f94fd8e7338, type: 3}
+    channel: 0
+    affectedByTimeScale: 0
+    volume: 0.5
+    pitch: 1
+    usePitchVariation: 1
+    pitchVariation: 0.05

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a6dce7903600e446915a27923e7c248, type: 3}
+  m_Name: Card_ShatterShield
+  m_EditorClassIdentifier: 
+  cardName: Shield
+  description: Gives a sheild that blocks an attack. When it breaks it spawns additional
+    arrows.
+  icon: {fileID: -2128282020, guid: 46d43ba10a464714a9f7c5111ab101ae, type: 3}
+  smallIcon: {fileID: -2128282020, guid: 46d43ba10a464714a9f7c5111ab101ae, type: 3}
+  effectPrefab: {fileID: 8435002614246266220, guid: a5fb7c0ed8c0130438f2e041da7f6c6d, type: 3}

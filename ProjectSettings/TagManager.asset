@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 3
+  tags:
+  - Arrow
+  - Obstacle
+  - OverlayVFX
+  - ScreenBounds
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - Interactable
+  - Block
+  - ParticleSystem
+  - VFXOverlay
+  - GamePostFX
+  - UIPostFX
+  - OverlayFX
+  - Test
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Background
+    uniqueID: 3196068679
+    locked: 0
+  - name: Gameplay Objects
+    uniqueID: 3133895597
+    locked: 0
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Player
+    uniqueID: 2192568577
+    locked: 0
+  - name: Foreground
+    uniqueID: 1708915515
+    locked: 0
+  - name: UI & Overlays
+    uniqueID: 4241496395
+    locked: 0
+  - name: UI & Overlay Effects
+    uniqueID: 366268737
+    locked: 0
+  - name: Screenspace Top
+    uniqueID: 1612319557
+    locked: 0
+  m_RenderingLayers:
+  - Default

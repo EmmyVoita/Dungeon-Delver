@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a6dce7903600e446915a27923e7c248, type: 3}
+  m_Name: HealArrowUpgradeCard
+  m_EditorClassIdentifier: 
+  cardName: Regenerative Arrow
+  description: Arrows have a chance to spawn hearts that heal for 1 health if collected
+  icon: {fileID: 1993608583, guid: 46d43ba10a464714a9f7c5111ab101ae, type: 3}
+  smallIcon: {fileID: 1993608583, guid: 46d43ba10a464714a9f7c5111ab101ae, type: 3}
+  effectPrefab: {fileID: 5482424202842767113, guid: 3e5f79b87db2c844f987d6219c9dd4a5, type: 3}

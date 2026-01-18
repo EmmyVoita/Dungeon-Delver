@@ -1,0 +1,12 @@
+{
+  "npcName": "DresserA",
+  "dialogueNodes": [
+    {
+      "state": "intro",
+      "lines": [
+        "Just a dresser.",
+        "its filled with clothes you never wear."
+      ]
+    }
+  ]
+}

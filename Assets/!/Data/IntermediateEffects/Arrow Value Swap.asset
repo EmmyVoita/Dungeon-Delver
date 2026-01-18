@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b26d7867975a6df4aa21517ef41e7bc7, type: 3}
+  m_Name: Arrow Value Swap
+  m_EditorClassIdentifier: 
+  icon: {fileID: 1338292498, guid: 02d318f1014e863469c320d37fea76d7, type: 3}
+  displayName: Value Trade
+  descriptionTemplate: For the next level, increases crit value by <color=#00E676>{CRIT_ARROW_MULTIPLIER}</color>
+    and reduces non-crit value by <color=#E53935>{NORMAL_ARROW_MULTIPLIER}</color>.
+  normalArrowMultiplier: 0.9
+  critArrowMultiplier: 1.2

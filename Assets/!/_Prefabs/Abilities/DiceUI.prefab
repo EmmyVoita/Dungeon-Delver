@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6490634606215358221
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5792207559991905319}
+  - component: {fileID: 2205549059453770110}
+  m_Layer: 0
+  m_Name: DiceUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5792207559991905319
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6490634606215358221}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2205549059453770110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6490634606215358221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48312096efe0c3d408abc319a24c21ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canvasGroup: {fileID: 0}
+  diceImage: {fileID: 0}
+  rollSprites:
+  - {fileID: -312084687, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  - {fileID: 1191756709, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  - {fileID: -2127062508, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  - {fileID: -919796718, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  faceSprites:
+  - {fileID: -1785926033, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  - {fileID: 1032448181, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  - {fileID: 742235910, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  - {fileID: 973197563, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  - {fileID: 1418208831, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  - {fileID: 1666844412, guid: 28547e74784ec414f8bd60baf6e9a926, type: 3}
+  rollDuration: 1.5
+  frameRate: 20
+  slideToCenterDuration: 0.5
+  fadeInDuration: 0.3
+  fadeOutDelay: 0.6
+  fadeOutDuration: 0.3
+  rollSound: {fileID: 8300000, guid: 3ea9d0581c226b242bc59013a1ce49fe, type: 3}
+  randomizeStartPosition: 1
+  spawnOffsetRange: {x: 200, y: 150}

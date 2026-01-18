@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &575627355034452027
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7308606011251844228}
+  - component: {fileID: 2355912909817408570}
+  m_Layer: 0
+  m_Name: RandomQuestionAbility
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7308606011251844228
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575627355034452027}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2355912909817408570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575627355034452027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8747ab8e9a2942e429b73cfd9a6518d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  abilityBaseCost: 15
+  abilitySpecificUpgrades: []
+  questions:
+  - questionText: Is 37 a prime number?
+    option1Text: yes
+    option2Text: no
+    option1IsCorrect: 1
+    option2IsCorrect: 0
+  - questionText: What is my favorite color?
+    option1Text: green
+    option2Text: purple
+    option1IsCorrect: 0
+    option2IsCorrect: 1
+  - questionText: Are you doing your best?
+    option1Text: yes
+    option2Text: no
+    option1IsCorrect: 1
+    option2IsCorrect: 0
+  - questionText: What is the color of the base arrow?
+    option1Text: white
+    option2Text: yellow
+    option1IsCorrect: 1
+    option2IsCorrect: 0
+  - questionText: Are there too many star shapes in this game?
+    option1Text: no
+    option2Text: no
+    option1IsCorrect: 1
+    option2IsCorrect: 1
+  questionUIPrefab: {fileID: 7956832456739650215, guid: e73556dfa3fb43545bad13109712ae96, type: 3}
+  dicePrefab: {fileID: 5352140506818712396, guid: 3b958c7b51e1e3a4d8398ee56d57d6bd, type: 3}
+  diceTypewriterPrefab: {fileID: 7000588216669808933, guid: d9276f898e4a2214da476d000e4707b3, type: 3}
+  diceParticleEffect: {fileID: 163289884831817616, guid: ad122f40d5a03054386771a542134137, type: 3}
+  questionAppearSound: {fileID: 8300000, guid: d09a4d281151c5c41a9cb8b4e504b0e7, type: 3}
+  correctSound: {fileID: 8300000, guid: ce9e54ce232380945a451b7e01c65ae8, type: 3}
+  wrongSound: {fileID: 8300000, guid: 7f6be2bcd886ed94eb782ad53ce14ffe, type: 3}
+  waitTimeAfterRoll: 0.5
+  possibleBuffs:
+  - {fileID: 5028588603137782800, guid: 4dbf246262f87dd42b442204fd44b6b1, type: 3}
+  - {fileID: 6710196785581659651, guid: 3082617c861d2554f8a9b27c2c2f4579, type: 3}
+  - {fileID: 6737182498026077659, guid: 430f78092380ad24fa6b2250fb3c294e, type: 3}
+  - {fileID: 4028554370563713070, guid: b172e3c93ebb5be4dbe14e853da2b893, type: 3}
+  buffDescriptions:
+  - The next 10 arrows are golden
+  - crits heal
+  - double combo after not taking damage
+  - slow time for a short duration
+  healthPenalty: 1
+  pauseFadeDuration: 0.3

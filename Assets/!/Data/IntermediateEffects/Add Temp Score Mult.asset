@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f40df4f5313f07b4d997c68297784ec2, type: 3}
+  m_Name: Add Temp Score Mult
+  m_EditorClassIdentifier: 
+  icon: {fileID: -1194955740, guid: 42bbe21d08e2c1f409778bef6d20109f, type: 3}
+  displayName: Temp Score Mult
+  descriptionTemplate: For the next level, arrows are worth <color=#00E676>{TEMP_SCORE_MULT_AMOUNT}</color>
+    more, and <color=#9C27B0>golden</color> arrows are worth  <color=#00E676>{GOLDEN_VALUE_MULTIPLIER}</color>
+    more.
+  tempScoreMultAmount: 0.05
+  goldenValueMultiplier: 1.5

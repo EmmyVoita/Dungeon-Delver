@@ -1,0 +1,11 @@
+using UnityEngine;
+
+[CreateAssetMenu(menuName = "Type Definitions/Obstacle Type Definition")]
+public class ObstacleTypeDefinition : ScriptableObject
+{
+    public string displayName;
+    public string fileName;
+    public GameObject prefab;
+    public Sprite icon;        // optional for UI
+    public string description;
+}

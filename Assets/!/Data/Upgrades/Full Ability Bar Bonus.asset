@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ccd5255b5a0c994c978c0853f89d196, type: 3}
+  m_Name: Full Ability Bar Bonus
+  m_EditorClassIdentifier: 
+  upgradeId: fullabilitybarbonus
+  displayName: Full Ability Bar Bonus
+  descriptionTemplate: Increases arrow value by <color=#00E676>{ARROW_VALUE_MULTIPLIER}</color>
+    while your ability bar is full.
+  baseIcon: {fileID: -102721807, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  activeIcon: {fileID: -102721807, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  feedbackStyle: 1
+  arrowValueMultiplier: 1.1

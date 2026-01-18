@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 849a206a4d3e00e46b64bab3deace790, type: 3}
+  m_Name: Prevent Combo Break
+  m_EditorClassIdentifier: 
+  icon: {fileID: -1392446627, guid: 02d318f1014e863469c320d37fea76d7, type: 3}
+  displayName: Prevent Combo Break
+  descriptionTemplate: The next combo break is ignored.

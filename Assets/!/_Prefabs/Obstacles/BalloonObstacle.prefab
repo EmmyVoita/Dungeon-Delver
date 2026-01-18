@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7999384303819695290
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1426759362409618033}
+  - component: {fileID: 4845529587058412629}
+  m_Layer: 0
+  m_Name: BalloonObstacle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1426759362409618033
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7999384303819695290}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4845529587058412629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7999384303819695290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5390c5082f2bc574cb32b5946f89ce70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  counterSound: {fileID: 8300000, guid: ab0a4b60b781260428b42974975c7881, type: 3}
+  successSound: {fileID: 8300000, guid: 7180df1f3e342c749a32b975a77341f0, type: 3}
+  failSound: {fileID: 8300000, guid: 5177ae0e3a416a643b925c2327a8beff, type: 3}
+  incorrectSound: {fileID: 8300000, guid: 13b87820f78e60f4da1325ac7e9a0733, type: 3}
+  dartThrowSound: {fileID: 8300000, guid: 7a8c63979c8a12f4cacdedace098a615, type: 3}
+  instructionCanvasPrefab: {fileID: 7128774934264875832, guid: 129d864c83f48c14b9ee12fefccf5ef5, type: 3}
+  timerRingPrefab: {fileID: 8144737655277662867, guid: be2a8c9bd72c5264fbc33bde4ece6f6c, type: 3}
+  timerVerticalOffset: -200
+  roundTimeLimit: 12
+  displayMessage: POP SAME COLOR
+  messageDuration: 2
+  balloonPrefab: {fileID: 8334657703983643082, guid: d437a80f0a8de3c4d95429f974ca9c01, type: 3}
+  spawnInterval: 0.4
+  row1MoveSpeed: 3
+  row2MoveSpeed: 3.5
+  row1SpawnPos: {x: -8, y: 4}
+  row2SpawnPos: {x: 8, y: 2}
+  despawnDistance: 15
+  row1MoveDirection: {x: 1, y: 0}
+  row2MoveDirection: {x: -1, y: 0}
+  allowedColors: 00000000010000000200000003000000
+  requiredStreak: 5
+  aimingDartPrefab: {fileID: 4647175256891880774, guid: 40db6e872b8b41d4f8be2f641ae51628, type: 3}
+  projectileDartPrefab: {fileID: 3027191043920795204, guid: 0f255ba97947b254fa1caac4093bd9ab, type: 3}
+  dartVisualOffset: {x: 0, y: 0, z: 0}
+  dartFireOffset: {x: 0, y: 0.2, z: 0}
+  dartSpeed: 15
+  pullBackDistance: 0.15
+  pullBackDuration: 0.08
+  fireDelay: 0.02
+  dartRespawnDelay: 0.8
+  forceCorrectEvery: 7

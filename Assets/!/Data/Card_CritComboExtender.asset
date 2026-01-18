@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a6dce7903600e446915a27923e7c248, type: 3}
+  m_Name: Card_CritComboExtender
+  m_EditorClassIdentifier: 
+  cardName: Crit Extension
+  description: Extend the crit combo window by (1) second
+  icon: {fileID: 8865467706393743458, guid: fe0a8e8539b1cf94380a557377d4afd1, type: 3}
+  smallIcon: {fileID: 8865467706393743458, guid: fe0a8e8539b1cf94380a557377d4afd1, type: 3}
+  effectPrefab: {fileID: 9142275461613247454, guid: a72e684a43decd94cbe1dbce881f7047, type: 3}

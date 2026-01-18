@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a6dce7903600e446915a27923e7c248, type: 3}
+  m_Name: Card_Score For Crit Window Cost
+  m_EditorClassIdentifier: 
+  cardName: Crit Value Up
+  description: "Decrease crit window \u2192 crits are worth more & non crits are
+    worth less\r\n"
+  cardIcon: {fileID: -1588081977, guid: b0a5ba2851172754ea0220daf62541e4, type: 3}
+  upgrade: {fileID: 11400000, guid: ba3937856a0192544b29e8e1e381c01a, type: 2}
+  canStack: 0

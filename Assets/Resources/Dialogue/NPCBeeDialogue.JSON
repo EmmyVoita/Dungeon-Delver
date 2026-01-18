@@ -1,0 +1,39 @@
+{
+  "npcName": "Rue",
+  "dialogueNodes": [
+    {
+      "state": "intro",
+      "lines": [
+        "Hello!",
+        "I need to practice my song.",
+        "Could can you play the tune with me?"
+      ],
+      "nextState": "waitingForQuest"
+    },
+    {
+      "state": "waitingForQuest",
+      "lines": [
+        "Ok Im going to start now...",
+        "Get Ready!",
+        "3... 2... 1..."
+      ],
+      "onFinishEvent": "StartMusicPuzzle",
+      "requiredAction": "CompletedMusicPuzzle",
+      "nextState": "questComplete"
+    },
+    {
+      "state": "questComplete",
+      "lines": [
+        "Thank you for the apple!",
+        "Here, take this key as thanks."
+      ],
+      "nextState": "done"
+    },
+    {
+      "state": "done",
+      "lines": [
+        "Good luck on your journey!"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1125683185736575710
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7670327755889252872}
+  - component: {fileID: 479429834741710709}
+  m_Layer: 0
+  m_Name: CupShuffleController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7670327755889252872
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1125683185736575710}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &479429834741710709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1125683185736575710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 846c228156e24964ab7f8ece39e76ba8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timerRingPrefab: {fileID: 8144737655277662867, guid: be2a8c9bd72c5264fbc33bde4ece6f6c, type: 3}
+  roundTimeLimit: 3
+  timerVerticalOffset: -200
+  sucessSound: {fileID: 8300000, guid: 7180df1f3e342c749a32b975a77341f0, type: 3}
+  failSound: {fileID: 8300000, guid: 5177ae0e3a416a643b925c2327a8beff, type: 3}
+  shuffleSound: {fileID: 8300000, guid: bdb0f8333dad32840802399a61713da4, type: 3}
+  coverSound: {fileID: 8300000, guid: 7eaf4e4005c474747bd6e3af6e0c1688, type: 3}
+  cupPrefab: {fileID: 5897424171031898252, guid: 007b3297b9e9f4148ab5ba0443527be4, type: 3}
+  ballPrefab: {fileID: 1969508496784148955, guid: ea438fe9f8a1c8746933e90f212b0c56, type: 3}
+  spikyballPrefab: {fileID: 8690361750371759487, guid: eb810cde725432f49972c48cd99fe4e8, type: 3}
+  shuffleCount: 12
+  shuffleTime: 0.3
+  spawnTopOffset: {x: 0, y: 2.4}
+  triangleLeftOffset: {x: -2, y: -0.75, z: 0}
+  triangleTopOffset: {x: 0, y: 0.6, z: 0}
+  triangleRightOffset: {x: 2, y: -0.75, z: 0}
+  leftOffset: {x: -3, y: 0}
+  topOffset: {x: 0, y: 3}
+  rightOffset: {x: 3, y: 0}
+  ballHeightOffset: 0
+  liftHeight: 1.15
+  hideDelay: 1
+  hideDuration: 0.5
+  cupToPlayerSideDuration: 0.8
+  wiggleStrength: 10
+  wiggleVibrato: 4
+  wiggleElasticity: 0.3
+  wiggleLength: 2

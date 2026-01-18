@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68813373f6a2a0c4e86f261ccf3a1703, type: 3}
+  m_Name: ObstacleK
+  m_EditorClassIdentifier: 
+  displayName: Wack a mole
+  obstaclePrefab: {fileID: 5496889813935503286, guid: 2552ae123efed8c4a9fb2439ec837ad8, type: 3}
+  previewImage: {fileID: 0}
+  description: wack the moles while they are up to increase fill bar. dont let it
+    run out.

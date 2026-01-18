@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fa28d592a2842f4abaaf3d7c3fa697e, type: 3}
+  m_Name: Refresh Charge
+  m_EditorClassIdentifier: 
+  icon: {fileID: -496092870, guid: 7f239c827232d5e42b192d0ad4ee6875, type: 3}
+  displayName: Refresh Charge
+  descriptionTemplate: Gain <color=#00E676>{REFRESH_AMOUNT}</color> shop refreshes.
+  refreshAmount: 1

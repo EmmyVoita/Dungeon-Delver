@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 593f2cc5920e9154fa2fa4f56af613a5, type: 3}
+  m_Name: BPM Up Challenge
+  m_EditorClassIdentifier: 
+  upgradeId: bpmupchallenge
+  displayName: BPM Up
+  descriptionTemplate: Increase BPM for the level by <color=#FFD700>{BPM_BONUS}</color>.
+    Then, gain <color=#00E676>{REFRESH_COUNT}</color> shop refreshes & permenantly
+    increase arrow score by <color=#00E676>{BONUS_SCORE_MODIFIER}</color>.
+  baseIcon: {fileID: 1008038945, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  activeIcon: {fileID: 1008038945, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  feedbackStyle: 0
+  shopRefreshesGranted: 1
+  bpmBonus: 0.15
+  bonusArrowScoreModifier: 1.05
+  bonusSound: {fileID: 0}

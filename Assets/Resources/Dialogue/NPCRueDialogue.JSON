@@ -1,0 +1,36 @@
+{
+  "npcName": "Rue",
+  "dialogueNodes": [
+    {
+      "state": "intro",
+      "lines": [
+        "Hello traveler!",
+        "Could you find my lucky sock?"
+      ],
+      "nextState": "waitingForQuest"
+    },
+    {
+      "state": "waitingForQuest",
+      "lines": [
+        "Still waiting for my sock...",
+        "Please hurry!"
+      ],
+      "requiredItem": "Sock",
+      "nextState": "questComplete"
+    },
+    {
+      "state": "questComplete",
+      "lines": [
+        "Thank you for the apple!",
+        "Here, take this key as thanks."
+      ],
+      "nextState": "done"
+    },
+    {
+      "state": "done",
+      "lines": [
+        "Good luck on your journey!"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee4c472005872e745856f60abe039939, type: 3}
+  m_Name: Recovery Crits
+  m_EditorClassIdentifier: 
+  upgradeId: recoverycrits
+  displayName: Recovery Crits
+  descriptionTemplate: After taking damage, if you sucessfully crit the next <color=#FFD700>{STREAK_REQUIRED}</color>
+    arrows, gain <color=#00E676>{ABILITY_CHARGE_BONUS}</color> ability charge
+  baseIcon: {fileID: 999328723, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  activeIcon: {fileID: 999328723, guid: 71da8e16089660e408fb515cdad0c61f, type: 3}
+  feedbackStyle: 2
+  abilityChargeBonus: 1
+  bonusSound:
+    clip: {fileID: 8300000, guid: a135f78a0a71cb645b6c87ef5db5a95e, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1
+    usePitchVariation: 0
+    pitchVariation: 0
+  streakRequired: 3

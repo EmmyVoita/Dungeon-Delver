@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3f6a0e3cd052a94787e24cf68a5e06f, type: 3}
+  m_Name: AbilityCard_ReturnToMenu
+  m_EditorClassIdentifier: 
+  scoreRequirement: 0
+  abilityName: Return
+  description: 'Return to menu
+
+'
+  icon: {fileID: 238605639, guid: 4f312bbd018fbc14287f1f9230b88433, type: 3}
+  abilityType: 1
+  cardMaterial: {fileID: 2100000, guid: 390bb009aa5f8e34987ef122035ecfad, type: 2}
