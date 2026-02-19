@@ -13,6 +13,7 @@ public class ComboUI : MonoBehaviour
     public int psComboCountThreshold = 15;
 
     [Header("Text Settings")]
+    public string comboPrefix = "X";
     public TextMeshProUGUI comboText;
     public int maxComboColor = 20;
     public float basePopScale = 1.2f;
@@ -49,7 +50,7 @@ public class ComboUI : MonoBehaviour
         originalScale = comboText.transform.localScale;
         originalRotation = comboText.transform.localRotation;
         originalPos = comboText.transform.localPosition;
-        comboText.text = "x0";
+        comboText.text = comboPrefix + "0";
         hasReset = true;
     }
 
@@ -121,7 +122,7 @@ public class ComboUI : MonoBehaviour
 
     void UpdateCombo(int count)
     {
-        comboText.text = "x" + count;
+        comboText.text = comboPrefix + count;
         lastUpdateTime = Time.time;
         hasReset = false;
 

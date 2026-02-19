@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ObstacleA
   m_EditorClassIdentifier: 
   displayName: Doors
-  obstaclePrefab: {fileID: 2820339958030797670, guid: 053f567cdac473a4384baf2ec61c4dd6, type: 3}
+  obstaclePrefab: {fileID: 6654523266709301360, guid: d808d695cb172a74b84be5bd44e2603a, type: 3}
   previewImage: {fileID: 0}
   description: doors that open and close that you must jump through

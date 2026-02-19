@@ -30,6 +30,7 @@ public class ComboManager : MonoBehaviour
     public static event Action<int> AddComboScoreDisplay;
     public static event Action<int, ComboBreakReason> OnComboBreak;
     public static event Action<int, ComboBreakReason> OnComboBreakImmediate;
+    public static event Action<int> OnCritStreakUpdated;
 
 
     [Header("References")]
@@ -86,14 +87,16 @@ public class ComboManager : MonoBehaviour
 
 
     private int comboCount;
+      private int critsInARow = 0;
 
     private bool hasPendingBreak = false;
     private ComboBreakPriority pendingBreakPriority;
     private ComboBreakReason pendingBreakReason;
     private GameObject activeShieldObject = null;
+  
 
 
-
+    public int CritsInARow => critsInARow;
     public int GetCurrentComboCount => comboCount;
     public int HighComboStep => highComboStep;
     public int HighComboStart => highComboStart;
@@ -145,6 +148,8 @@ public class ComboManager : MonoBehaviour
             ignoreNextMiss = false;
             Destroy(activeShieldObject);
             RequestComboBreak(ComboBreakReason.RoundEnd, ComboBreakPriority.RoundEnd);
+            critsInARow = 0;
+            OnCritStreakUpdated?.Invoke(critsInARow);
         }
     }
 
@@ -156,15 +161,53 @@ public class ComboManager : MonoBehaviour
 
     private void HandleArrowResolved(ArrowResolvedData data)
     {
-        if (data.goalType == Goal.GoalType.Normal || data.goalType == Goal.GoalType.Critical)
+        switch (data.goalType)
         {
-            AddHit();
-        }
-        else if (data.goalType == Goal.GoalType.Miss)
-        {
-            RequestComboBreak(ComboBreakReason.ArrowMiss, ComboBreakPriority.ArrowMiss);
+            case Goal.GoalType.Critical:
+                AddCrit();
+                break;
+
+            case Goal.GoalType.Normal:
+                AddHit();
+                ResetCritStreak();
+                break;
+
+            case Goal.GoalType.Miss:
+                ResetCritStreak();
+                RequestComboBreak(ComboBreakReason.ArrowMiss, ComboBreakPriority.ArrowMiss);
+                break;
         }
     }
+
+    private void AddCrit()
+    {
+        comboCount++;
+        critsInARow++;
+
+        OnComboUpdated?.Invoke(comboCount);
+
+        // Optional future event
+        OnCritStreakUpdated?.Invoke(critsInARow);
+
+        if (comboCount > minGoodComboCount)
+        {
+            PlayComboSound(comboSound, comboCount);
+            TryPlayHighComboAccent(comboCount);
+        }
+    }
+
+    private void ResetCritStreak()
+    {
+        if (critsInARow == 0)
+            return;
+
+        critsInARow = 0;
+
+        OnCritStreakUpdated?.Invoke(0);
+    }
+
+
+
 
     // Core Combo Logic
     // ------------------------------------------------------------------------------------

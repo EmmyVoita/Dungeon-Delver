@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 24, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6872009012597886830
 CanvasRenderer:
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 48b6c8685d2917345aa73170e8767840, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 067dcd7ed6994f64b839adcfc6934b24, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -109,8 +109,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.5, y: 150}
-  m_SizeDelta: {x: 216.75, y: 216.75}
+  m_AnchoredPosition: {x: -0.5, y: 135}
+  m_SizeDelta: {x: 205.9125, y: 205.9125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8798582535887469994
 CanvasRenderer:
@@ -163,7 +163,7 @@ GameObject:
   - component: {fileID: 5324052292931300280}
   - component: {fileID: 526039207652954397}
   m_Layer: 5
-  m_Name: Button
+  m_Name: InnerPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -318,8 +318,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Quick Heal
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 38279ce5ea27c68499c74e01219a1355, type: 2}
-  m_sharedMaterial: {fileID: -8852437591962295723, guid: 38279ce5ea27c68499c74e01219a1355, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5bbacf01a2a3d6e4dbba2d388838be94, type: 2}
+  m_sharedMaterial: {fileID: 5528336267779230484, guid: 5bbacf01a2a3d6e4dbba2d388838be94, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -343,8 +343,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 65.025
-  m_fontSizeBase: 65.025
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -424,7 +424,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 386.5375, y: 650.25}
+  m_SizeDelta: {x: 367.21063, y: 585.225}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3012325787629179888
 CanvasRenderer:

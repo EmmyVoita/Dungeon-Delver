@@ -23,7 +23,7 @@ public class PerfectFinish : UpgradeEffectBase
         if(newState != GameState.ItemActivations) return;
         
         // Only trigger if the player hit every arrow
-        if (RoundManager.Instance.RoundAccuracy == 1f)
+        if (RoundManager.Instance.stats.RoundAccuracy == 1f)
         {
             RoundManager.Instance.StartCoroutine(ActivateSequence());
         }

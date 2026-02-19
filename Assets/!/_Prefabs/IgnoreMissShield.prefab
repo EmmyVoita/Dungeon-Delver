@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 655650493894766017}
   - component: {fileID: 1525908173970393292}
+  - component: {fileID: 7776960971797369084}
   m_Layer: 0
   m_Name: IgnoreMissShield
   m_TagString: Untagged
@@ -87,3 +88,17 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &7776960971797369084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6998217769083237475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40420cdb7f15b4241958f7afe4ff6ea7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationSpeed: {x: 0, y: 0, z: 45}
+  rotationSpace: 1

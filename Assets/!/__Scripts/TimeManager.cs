@@ -1,9 +1,12 @@
 using UnityEngine;
 using DG.Tweening;
+using System;
 
 public class TimeManager : MonoBehaviour
 {
     public static TimeManager Instance { get; private set; }
+
+    public static event Action<float> OnTimeScaleChanged;
 
     [SerializeField] private float baseScale = 1f;
     [SerializeField] private float modifier = 1f;
@@ -13,6 +16,10 @@ public class TimeManager : MonoBehaviour
     private Tween baseTween;
     private Tween modifierTween;
 
+    private float previousModifier = 1f;
+    private float previousBase = 1f;
+    private bool paused = false;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -20,13 +27,27 @@ public class TimeManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        Time.timeScale = 1f;
+
+        ApplyCombinedScale();
     }
 
     // ------------------------------
-    // Public Controls
+    // Core Combiner
+    // ------------------------------
+    private void ApplyCombinedScale()
+    {
+        float scale = Mathf.Clamp(baseScale * modifier * impulse, 0.0f, 2f);
+        Time.timeScale = scale;
+        OnTimeScaleChanged?.Invoke(scale);
+    }
+
+    public float GetCurrentScale() => Time.timeScale;
+
+    // ------------------------------
+    // Controls
     // ------------------------------
 
     public void SetBaseScale(float newBase, float duration = 0.2f)
@@ -53,15 +74,22 @@ public class TimeManager : MonoBehaviour
         SetModifier(1f, duration);
     }
 
-    // ------------------------------
-    // Core Combiner
-    // ------------------------------
-    private void ApplyCombinedScale()
+    public void Pause()
     {
-        Time.timeScale = Mathf.Clamp(baseScale * modifier * impulse, 0f, 2f);
+        if(paused) return;
+        previousModifier = modifier;
+        previousBase = baseScale;
+        SetBaseScale(0f, duration: 0f);
+        SetModifier(0f, duration: 0f);
+        paused = true;
     }
 
-    public float GetCurrentScale() => Time.timeScale;
+    public void Resume()
+    {
+        SetBaseScale(previousBase, duration: 0f);
+        SetModifier(previousModifier, duration: 0f);
+        paused = false;
+    }
 
     public void PlayImpulseSlow(
         float slowMultiplier,
@@ -70,25 +98,19 @@ public class TimeManager : MonoBehaviour
         float outDuration
     )
     {
-        
         impulseTween?.Kill();
 
         impulseTween = DOTween.Sequence()
             .SetUpdate(true)
 
-            // Ease into slow
             .Append(DOTween.To(() => impulse, x => impulse = x, slowMultiplier, inDuration)
                 .SetEase(Ease.OutSine)
                 .OnUpdate(ApplyCombinedScale))
 
-            // Hold slow
             .AppendInterval(holdDuration)
 
-            // Ease back to normal
             .Append(DOTween.To(() => impulse, x => impulse = x, 1f, outDuration)
                 .SetEase(Ease.InSine)
                 .OnUpdate(ApplyCombinedScale));
-        
     }
-
 }

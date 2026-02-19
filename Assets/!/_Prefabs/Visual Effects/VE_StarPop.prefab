@@ -350,6 +350,9 @@ VisualEffect:
       - m_Value: 1
         m_Name: Use Cone?
         m_Overridden: 1
+      - m_Value: 0
+        m_Name: Use Circle?
+        m_Overridden: 1
 --- !u!73398921 &8873458394642710142
 VFXRenderer:
   serializedVersion: 1
@@ -537,6 +540,9 @@ VisualEffect:
       m_Array:
       - m_Value: 1
         m_Name: Use Cone?
+        m_Overridden: 1
+      - m_Value: 0
+        m_Name: Use Circle?
         m_Overridden: 1
 --- !u!73398921 &2054519016214086025
 VFXRenderer:

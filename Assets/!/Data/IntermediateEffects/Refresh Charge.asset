@@ -15,4 +15,4 @@ MonoBehaviour:
   icon: {fileID: -496092870, guid: 7f239c827232d5e42b192d0ad4ee6875, type: 3}
   displayName: Refresh Charge
   descriptionTemplate: Gain <color=#00E676>{REFRESH_AMOUNT}</color> shop refreshes.
-  refreshAmount: 1
+  refreshAmount: 2

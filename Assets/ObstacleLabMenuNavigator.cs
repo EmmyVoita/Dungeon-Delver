@@ -244,8 +244,15 @@ public class ObstacleLabMenuNavigator : BaseMenu
             else if (currentPanel == PanelSide.Right)
             {
                 AudioSettingsManager.PlaySelectSound();
-                ObstaclePracticeSession.SelectedObstacle = CurrentObstacle; 
-                SceneManager.LoadScene(SceneNames.ObstaclePractice);
+
+                GameSceneLoader.PendingConfig = new GameSceneConfig
+                {
+                    Mode = GameMode.ObstaclePractice,
+                    PracticeObstacle = CurrentObstacle,
+                    DirectionMode = JumpDirectionMode.FourDirectional
+                };
+
+                SceneManager.LoadScene(SceneNames.ArrowGameScene);
             }
         }
 

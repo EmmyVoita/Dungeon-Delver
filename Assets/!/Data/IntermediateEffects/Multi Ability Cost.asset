@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 994cc19eab867054cabacfd16e254f47, type: 3}
   m_Name: Multi Ability Cost
   m_EditorClassIdentifier: 
-  icon: {fileID: -943876076, guid: 42bbe21d08e2c1f409778bef6d20109f, type: 3}
+  icon: {fileID: 1506465343, guid: a9123ae3c843c0a46a2bafa36ed83d54, type: 3}
   displayName: Decrease Ability Cost
   descriptionTemplate: For the next level, decrease the ability cost by <color=#00E676>{TEMP_ABILITY_COST_MULT}</color>.
-  tempAbilityCostMult: 0.9
+  tempAbilityCostMult: 0.8

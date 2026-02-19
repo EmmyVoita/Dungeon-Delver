@@ -28,6 +28,7 @@ public class UpgradeCardManager : MonoBehaviour
     public Transform cardParent;
     public Transform descriptionBox;
     public Transform healOptionBox;
+    public Transform titleBox;
     public BackgroundDimmerController backgroundDimmer;
     public TextTypewriter descriptionTypewriter;
 
@@ -61,18 +62,20 @@ public class UpgradeCardManager : MonoBehaviour
         #endif
     }
 
-    private List<UpgradeCard> PickUniqueCards(List<UpgradeCard> source, int count)
+    private List<T> PickUnique<T>(List<T> source, int count)
     {
-        List<UpgradeCard> result = new List<UpgradeCard>();
+        List<T> result = new();
+
+        if (source.Count == 0)
+            return result;
 
         if (source.Count <= count)
         {
-            // Not enough unique cards — allow duplicates later if needed
             result.AddRange(source);
             return result;
         }
 
-        List<UpgradeCard> pool = new List<UpgradeCard>(source);
+        List<T> pool = new(source);
 
         for (int i = 0; i < count; i++)
         {
@@ -83,6 +86,7 @@ public class UpgradeCardManager : MonoBehaviour
 
         return result;
     }
+
 
     public void MarkCardSelected(UpgradeCard card)
     {
@@ -140,11 +144,13 @@ public class UpgradeCardManager : MonoBehaviour
 
         CleanupCards();
 
+        titleBox.gameObject.SetActive(true);
+
         if(Player.Instance.Health <= Player.Instance.MaxHealth)
         {
             healOptionBox.gameObject.SetActive(true);
             healOptionBox.gameObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text =
-                $"Skip Upgrade [{InputBindingManager.Instance.GetKey(InputActionType.Jump)}] and Heal for 1 health";
+                $"Skip Upgrade [<color=#FFD700>{InputBindingManager.Instance.GetKey(InputActionType.Jump)}</color>] and Heal for 1 health";
         }
         else
         {
@@ -164,12 +170,7 @@ public class UpgradeCardManager : MonoBehaviour
                 return;
             }
 
-            List<UpgradeCard> picked = PickUniqueCards(available, count);
-
-            while (picked.Count < count)
-            {
-                picked.Add(available[UnityEngine.Random.Range(0, available.Count)]);
-            }
+            List<UpgradeCard> picked = PickUnique(available, count);
 
             foreach (var card in picked)
             {
@@ -183,12 +184,8 @@ public class UpgradeCardManager : MonoBehaviour
         }
         else
         {
-            List<IntermediateEffectSO> picked = new List<IntermediateEffectSO>();
+            List<IntermediateEffectSO> picked = PickUnique(intermediateEffects, count);
 
-            while (picked.Count < count)
-            {
-                picked.Add(intermediateEffects[UnityEngine.Random.Range(0, intermediateEffects.Count)]);
-            }
 
             foreach (var card in picked)
             {
@@ -204,6 +201,29 @@ public class UpgradeCardManager : MonoBehaviour
      
         HighlightCard();
     }
+
+    public void GrantUpgradeWithUI(UpgradeCard card)
+    {
+        if (card == null || card.upgrade == null)
+            return;
+
+        var upgrade = card.upgrade as UpgradeBase;
+
+        // Apply upgrade logic
+        UpgradeManager.Instance.AddUpgrade(upgrade);
+
+        // Spawn icon UI
+        if (upgradeIconPrefab != null && upgradeIconParent != null)
+        {
+            GameObject iconObj = Instantiate(upgradeIconPrefab, upgradeIconParent);
+            var iconUI = iconObj.GetComponent<UpgradeIconUI>();
+            iconUI.Initialize(upgrade);
+        }
+
+        // Mark as selected so it won't show up again
+        MarkCardSelected(card);
+    }
+
 
 
     private void Update()
@@ -280,6 +300,7 @@ public class UpgradeCardManager : MonoBehaviour
     {
         CleanupCards();
         healOptionBox.gameObject.SetActive(false);
+        titleBox.gameObject.SetActive(false);
         Player.Instance.HealPlayer(1);
         AudioSettingsManager.PlaySelectSound();
         ScreenDimmerManager.Instance.RemoveDimSource("upgrade");
@@ -303,69 +324,6 @@ public class UpgradeCardManager : MonoBehaviour
         }
     }
 
-    /*
-    public void SelectCard(UpgradeCard card)
-    {
-        if (card == null)
-        {
-            Debug.LogError("❌ No card selected!");
-            return;
-        }
-
-        AudioSettingsManager.PlaySelectSound();
-        ScreenDimmerManager.Instance.RemoveDimSource("upgrade");
-
-        UpgradeCardUI cardUI = currentCards[selectedIndex];
-        if (cardUI == null)
-        {
-            Debug.LogError("❌ No card UI found for selected index: " + selectedIndex);
-            return;
-        }
-
-        //Debug.Log("▶ Playing select animation for card: " + card.cardName);
-        cardUI.PlaySelectAnimation(() => FinishSelectionCallback()());
-    }
-
-    
-    // ----------------------------
-    //     FINISH SELECTION
-    // ----------------------------
-    public Action FinishSelectionCallback() =>
-    () =>
-    {
-        Debug.Log("▶ Finishing upgrade selection...");
-        //var error = ValidateSelection(out UpgradeCard card);
-
-        
-        if (error != UpgradeSelectionError.None)
-        {
-            HandleSelectionError(error);
-            return;
-        }
-        
-
-        CleanupCards();
-
-        
-        descriptionBox.gameObject.SetActive(false);
-       
-
-        GameObject iconObj = Instantiate(upgradeIconPrefab, upgradeIconParent);
-        iconObj.GetComponent<UpgradeIconUI>().Initialize(card.upgrade as UpgradeBase);
-
-
-        UpgradeManager.Instance.AddUpgrade(card.upgrade as UpgradeBase);
-
-        selectedCards[card] = card.upgrade as UpgradeBase;
-
-        UpgradeSelectionComplete?.Invoke();
-
-    };
-    */
-
- 
-
-
 
     private void CleanupCards()
     {
@@ -379,5 +337,6 @@ public class UpgradeCardManager : MonoBehaviour
         currentCards.Clear();
 
         healOptionBox.gameObject.SetActive(false);
+        titleBox.gameObject.SetActive(false);
     }
 }

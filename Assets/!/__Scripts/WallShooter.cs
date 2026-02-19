@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using DG.Tweening;
+using DG.Tweening.Core.Easing;
+using UnityEngine.Rendering;
 
 public class WallShooter : MonoBehaviour
 {
@@ -41,6 +44,10 @@ public class WallShooter : MonoBehaviour
         External
     }
 
+    public Ease easeCurve = Ease.OutQuad;
+    public float startWindupDelay = 0.0f;
+    public float oscilationXSpeed = 3.0f;
+
     [SerializeField] private LifetimeMode lifetimeMode = LifetimeMode.SelfManaged;
 
 
@@ -49,6 +56,7 @@ public class WallShooter : MonoBehaviour
 
 
     [Header("References")]
+    public GameObject portalPrefab;
     public GameObject projectilePrefab;
     public GameObject linePrefab;
 
@@ -59,6 +67,7 @@ public class WallShooter : MonoBehaviour
     public FireDelayMode fireDelayMode = FireDelayMode.Randomized;
     public FirePositionMode firePositionMode = FirePositionMode.Default;
     public float unregisterDelay = 1.0f;
+    public float startDelay = 0.0f;
 
 
     [Header("Continuous Fire Settings")]
@@ -131,7 +140,7 @@ public class WallShooter : MonoBehaviour
 
     public void StartChallenge()
     {
-        StartCoroutine(ChallengeSequence());
+        StartCoroutine(OscilateProjectiles());
     }
 
 
@@ -191,7 +200,7 @@ public class WallShooter : MonoBehaviour
                     projectileSpeed, 
                     firingWindupDuration, 
                     shiftDuration,
-                    projectileFireMode == ProjectileFireMode.MoveBackForth, 
+                    false, 
                     oscillateDistance, 
                     oscillateSpeed * shiftSign);
 
@@ -210,17 +219,91 @@ public class WallShooter : MonoBehaviour
             GameObject line = Instantiate(linePrefab, basePos, Quaternion.identity);
             line.transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
 
+            if(portalPrefab != null)
+            {
+                GameObject portal = Instantiate(portalPrefab, basePos, Quaternion.identity);
+                portal.transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
+            }
+           
+
             if(projectileFireMode == ProjectileFireMode.MoveBackForth)
             {
                 line.transform.parent = obj.transform;
+                
             }
 
             spriteFade.Add(line.GetComponent<SpriteFadeInOut>());
+
+            
         }
     }
 
+    private IEnumerator OscilateProjectiles()
+    {
+        if(fireMode == FireMode.Continuous)
+        {
+            StartCoroutine(ChallengeSequence());
+            yield break;
+        }
+
+        SpawnProjectiles();
+        
+
+        int targetIndex = Mathf.Clamp(Random.Range(0, projectiles.Count-2) + 1, 0, projectiles.Count-1);
+
+        Transform target = projectiles[targetIndex].transform;
+
+        float centerX = transform.position.x;
+        float delta = centerX - target.position.x; // how far target must move
+
+        Sequence s = DOTween.Sequence();
+
+        if(projectileFireMode == ProjectileFireMode.MoveBackForth)
+        {
+            AudioHelpers.PlaySoundEffect(shiftStartSound, Camera.main.transform.position);
+
+            // Perpendicular axis to fire direction
+            Vector2 perpAxis = new Vector2(-projectileFireDirection.y, projectileFireDirection.x).normalized;
+
+            // How far target must move along that axis to align with shooter center
+            Vector3 toCenter = transform.position - target.position;
+            float deltaA = Vector3.Dot(toCenter, perpAxis);
+
+
+            for (int i = 0; i < projectiles.Count; i++)
+            {
+                Transform proj = projectiles[i].transform;
+
+                Vector3 startPos = proj.position;
+                Vector3 targetPos = startPos + (Vector3)perpAxis * deltaA;
+
+                s.Insert(0f,
+                    proj.DOMove(targetPos, oscilationXSpeed)
+                        .SetEase(easeCurve)
+                );
+            }
+
+
+            s.AppendInterval(startWindupDelay);
+
+            s.OnComplete(() =>
+            {
+                StartCoroutine(ChallengeSequence());
+            });
+
+            yield return s.WaitForCompletion();
+        }
+        else
+        {
+            StartCoroutine(ChallengeSequence());
+        }
+    }
+
+
+
     IEnumerator ChallengeSequence()
     {
+        yield return new WaitForSeconds(startDelay);
         switch(fireMode)
         {
             case FireMode.Burst:
@@ -246,19 +329,30 @@ public class WallShooter : MonoBehaviour
 
     IEnumerator FireSequence()
     {
-        SpawnProjectiles();
-
-
-        // 🔫 Fire projectiles
-
         switch (fireDelayMode)
         {
             case FireDelayMode.Immediate:
-                for(int i = 0; i < projectiles.Count; i++)
+
+                if(fireMode == FireMode.Continuous)
                 {
-                    projectiles[i].Fire();
-                    spriteFade[i].StartCoroutine(spriteFade[i].FadeSequence());
+                    SpawnProjectiles();
                 }
+                
+                for (int i = projectiles.Count - 1; i >= 0; i--)
+                {
+                    var proj = projectiles[i];
+                    var fade = spriteFade[i];
+
+                    if (proj != null)
+                        proj.StartCoroutine(proj.WindupAnim());
+
+                    if (fade != null && fade.gameObject != null)
+                        fade.StartCoroutine(fade.FadeSequence());
+
+                    projectiles.RemoveAt(i);
+                    spriteFade.RemoveAt(i);
+                }
+                
                 break;
 
             case FireDelayMode.WithSetDelay:
@@ -277,11 +371,7 @@ public class WallShooter : MonoBehaviour
                 break;
         }
 
-        if(projectileFireMode == ProjectileFireMode.MoveBackForth)
-        {
-            AudioHelpers.PlaySoundEffect(shiftStartSound, Camera.main.transform.position);
-            yield return new WaitForSeconds(shiftDuration);
-        }
+       
         
         float tickInterval = firingWindupDuration / tickCount;
 
@@ -308,7 +398,7 @@ public class WallShooter : MonoBehaviour
             fade.StartCoroutine(fade.FadeSequence());
 
         if (projectile != null)
-            projectile.Fire();
+            projectile.StartCoroutine(projectile.WindupAnim());
     }
 
 }

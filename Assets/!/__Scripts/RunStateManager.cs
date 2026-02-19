@@ -9,6 +9,8 @@ public class RunStateManager : MonoBehaviour
 
     public int ShopRerollsRemaining { get; private set; }
 
+    public SoundEffect rerollSoundEffect;
+
     private void Awake()
     {
         if (Instance != null)
@@ -40,6 +42,8 @@ public class RunStateManager : MonoBehaviour
     {
         if (ShopRerollsRemaining <= 0)
             return false;
+
+        AudioHelpers.PlaySoundEffect(rerollSoundEffect, Camera.main.transform.position);
 
         ShopRerollsRemaining--;
         OnRefreshRerollsChanged?.Invoke();

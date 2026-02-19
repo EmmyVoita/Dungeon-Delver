@@ -15,6 +15,14 @@ public class LevelEditorData : MonoBehaviour
     [Header("Current Level")]
     public TextAsset currentLevelAsset;
 
+    public float SongOffsetSeconds { get; private set; }
+
+    public void SetSongOffset(float offset)
+    {
+        SongOffsetSeconds = offset;
+    }
+
+
 
     private float bpm = 120f;
 
@@ -107,6 +115,15 @@ public class LevelEditorData : MonoBehaviour
                 }
                 break;
             }
+            if (line.StartsWith("# OFFSET", StringComparison.OrdinalIgnoreCase))
+            {
+                string[] parts = line.Split(':');
+                if (parts.Length > 1 && float.TryParse(parts[1], out float parsedOffset))
+                {
+                    SongOffsetSeconds = parsedOffset;
+                    Debug.Log($"🎵 Song offset loaded: {SongOffsetSeconds}s");
+                }
+            }
             if (line.StartsWith("# DIRECTIONS", StringComparison.OrdinalIgnoreCase))
             {
                 string[] parts = line.Split(':');
@@ -175,6 +192,7 @@ public class LevelEditorData : MonoBehaviour
 
         sw.WriteLine("# Saved by Level Editor");
         sw.WriteLine($"# BPM: {BPM}");
+        sw.WriteLine($"# OFFSET: {SongOffsetSeconds}");
         sw.WriteLine($"# DIRECTIONS: {Directions}");
         sw.WriteLine("");
 

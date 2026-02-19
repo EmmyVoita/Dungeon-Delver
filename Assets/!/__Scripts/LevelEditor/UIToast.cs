@@ -6,6 +6,7 @@ public class UIToast : MonoBehaviour
 {
     public static UIToast Instance;
 
+
     [Header("References")]
     public Transform container;
     public GameObject toastPrefab;

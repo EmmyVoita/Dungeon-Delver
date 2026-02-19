@@ -37,7 +37,7 @@ public class StartPracticeMenuOption : PracticeMenuOption
     public override void OnConfirm()
     {
         AudioSettingsManager.PlaySelectSound();
-        ObstaclePracticeSession.SelectedObstacle = ObstacleLabMenuNavigator.Instance.CurrentObstacle; 
+        GameSceneLoader.PendingConfig.PracticeObstacle = ObstacleLabMenuNavigator.Instance.CurrentObstacle; 
         SceneManager.LoadScene(SceneNames.ObstaclePractice);
     }
 }

@@ -17,12 +17,12 @@ public class Goal : MonoBehaviour
     [SerializeField] private AudioClip goalCritSound;
     [SerializeField] private ParticleSystem critCatchEffect;
     [SerializeField] private float flashDuration = 0.5f;
-    [SerializeField] private Sprite defaultGoalSprite;
-    [SerializeField] private Sprite normalCatchGoalSprite;
-    [SerializeField] private Sprite criticalCatchGoalSprite;
+    //[SerializeField] private Sprite defaultGoalSprite;
+    //[SerializeField] private Sprite normalCatchGoalSprite;
+    //[SerializeField] private Sprite criticalCatchGoalSprite;
 
     [Header("Crit Window Visuals")]
-    [SerializeField] private Sprite critWindowSprite;
+    //[SerializeField] private Sprite critWindowSprite;
 
     [Header("Shake Settings")]
     [SerializeField] private float shakeStrength = 0.05f;
@@ -58,7 +58,7 @@ public class Goal : MonoBehaviour
     void Awake()
     {
         sRend = GetComponentInChildren<SpriteRenderer>();
-        sRend.sprite = defaultGoalSprite;
+        //sRend.sprite = defaultGoalSprite;
         targetRotation = Quaternion.identity;
     }
 
@@ -99,7 +99,7 @@ public class Goal : MonoBehaviour
 
     public void ExitHarvestMode()
     {
-        sRend.sprite = defaultGoalSprite;
+        //sRend.sprite = defaultGoalSprite;
 
         //transform.DOKill();
         //transform.localScale = Vector3.one;
@@ -217,7 +217,7 @@ public class Goal : MonoBehaviour
 
     void UpdateCritArmedState()
     {
-        float critWindowModifier = UpgradeManager.Instance.ModifyCritWindow(Player.Instance.CritWindow);
+        float critWindowModifier = UpgradeManager.Instance == null ? 1f : UpgradeManager.Instance.ModifyCritWindow(Player.Instance.CritWindow);
         critWindowModifier = Mathf.Max(0.001f, critWindowModifier);
 
         float speedScale = Player.Instance.CritWindow / critWindowModifier;
@@ -250,6 +250,7 @@ public class Goal : MonoBehaviour
 
     void UpdateCritWindowVisual()
     {
+        /*
         bool critActive = IsCritWindowActive();
 
         if (critActive == isCritWindowActive)
@@ -265,6 +266,7 @@ public class Goal : MonoBehaviour
         {
             sRend.sprite = defaultGoalSprite;
         }
+        */
     }
 
 

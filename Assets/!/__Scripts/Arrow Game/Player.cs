@@ -17,12 +17,23 @@ public class Player : MonoBehaviour
     public static event System.Action<int> OnHeal;
     public static event System.Action OnMaxHealthChanged;
     public static event System.Action<int> OnPreDamageTaken;
+    public static event System.Action<PlayerControlState> OnControlStateChanged;
 
 
+
+    /*
     public enum JumpInputMode
     {
         Normal,
         Override
+    }
+    */
+
+    public enum PlayerControlState
+    {
+        Normal,
+        Shooter,
+        LockedShooter,
     }
 
 
@@ -45,6 +56,7 @@ public class Player : MonoBehaviour
 
     [Header("On Damage Settings")]
     [SerializeField] private AudioClip damageSound;
+    [SerializeField] private GameObject damageEffectPrefab;
     [SerializeField] private float invincibilityDuration = 0.5f;
     [SerializeField] private float hitShakeStrength = 0.05f;
     [SerializeField] private float hitShakeDuration = 0.15f;
@@ -73,6 +85,11 @@ public class Player : MonoBehaviour
     public float lowJumpMultiplier = 2f;   // extra gravity if jump key is released early
 
 
+    [Header("Projectile Settings")]
+    [SerializeField] private float projectileSpawnOffset = 0.5f;
+    [SerializeField] private SoundEffect controlModeSwitchSound;
+
+
 
     [Header("Set Dynamically")]
     [SerializeField] private int _health;
@@ -82,7 +99,8 @@ public class Player : MonoBehaviour
 
 
 
-    public JumpInputMode jumpInputMode { get; private set; } = JumpInputMode.Normal;
+    //public JumpInputMode jumpInputMode { get; private set; } = JumpInputMode.Normal;
+    public PlayerControlState playerControlState { get; private set; } = PlayerControlState.Normal;
 
 
     private List<UpgradeEffectBase> activeUpgrades = new List<UpgradeEffectBase>();
@@ -296,7 +314,7 @@ public class Player : MonoBehaviour
 
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.Jump) && !lockInput)
         {
-            if (jumpInputMode == JumpInputMode.Override)
+            if (playerControlState == PlayerControlState.LockedShooter)
             {
                 OnJumpInput?.Invoke();
                 if (wings != null) wings.PlayFlap();  
@@ -371,23 +389,48 @@ public class Player : MonoBehaviour
 
         DamageSelf(dEf.damage);
     }
+
+    public void ShootProjectile(PlayerProjectile projectilePrefab)
+    {
+        Vector2 snappedDir = GetSnappedDirection(lastFacingDir, _useEightDirections);
+
+        Vector3 spawnPos = transform.position + (Vector3)(snappedDir * projectileSpawnOffset);
+
+        PlayerProjectile proj = Instantiate(
+            projectilePrefab,
+            spawnPos,
+            Quaternion.identity
+        );
+
+        Vector2 normalizedDir = snappedDir.normalized;
+        float angle = Mathf.Atan2(normalizedDir.y, normalizedDir.x) * Mathf.Rad2Deg - 90f;
+        proj.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+        proj.Initialize(snappedDir);
+    }
+
     
     public void SetFullyLocked(bool value)
     {
         FullyLocked = value;
     }
 
-    public void SetJumpInputOverride(bool enabled)
+    public void SetPlayerControlState(PlayerControlState newState)
     {
-        jumpInputMode = enabled ? JumpInputMode.Override : JumpInputMode.Normal;
+        if (playerControlState == newState) return;
 
-        if (enabled)
+        playerControlState = newState;
+        OnControlStateChanged?.Invoke(playerControlState);
+
+        AudioHelpers.PlaySoundEffect(controlModeSwitchSound, this.transform.position);
+
+        if (playerControlState == PlayerControlState.LockedShooter)
         {
-
             isJumping = false;
             rb.linearVelocity = Vector2.zero;
         }
     }
+
 
     public void ResetPositionAndVelocity()
     {
@@ -617,7 +660,14 @@ public class Player : MonoBehaviour
         if (damageSound != null)
             AudioHelpers.PlayMyClipAtPoint(damageSound, AudioChannel.SFX, Camera.main.transform.position);
 
+        if(damageEffectPrefab != null)
+        {
+            Instantiate(damageEffectPrefab, transform.position, Quaternion.identity);
+        }
+
         spriteObj.GetComponent<PlayerSpriteShaker>()?.Shake(hitShakeStrength, hitShakeDuration);
+
+        Debug.Log($"❤️ Player took damage at level time {Time.time - RoundManager.Instance.RoundStartTime}s. Current health: {Health}/{MaxHealth}");
     }
 
     private Vector2 lastToCenter;

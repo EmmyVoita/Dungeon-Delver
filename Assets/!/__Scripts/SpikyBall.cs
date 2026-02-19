@@ -5,7 +5,7 @@ using DG.Tweening;
 public class SpikyBall : MonoBehaviour
 {
     [Header("Visual Effects")]
-    public ParticleSystem hitParticles;    // Assign in Inspector
+    public GameObject destroyEffectPrefab;
     public float fadeDuration = 0.2f;      // Quick fade time
 
     [Header("Audio")]
@@ -29,26 +29,6 @@ public class SpikyBall : MonoBehaviour
         if (hasBeenHit) return; // Prevent multiple triggers
         if (!other.CompareTag("Player")) return;
 
-        hasBeenHit = true;
-
-        // 🔹 Disable Collider Immediately
-        col.enabled = false;
-
-        // 🔹 Fade transparency using DOTween
-        sRend.DOFade(0f, fadeDuration)
-            .SetEase(Ease.OutQuad);
-
-        // 🔹 Play particle effect
-        if (hitParticles != null)
-        {
-            ParticleSystem ps = Instantiate(
-                hitParticles,
-                transform.position,
-                Quaternion.identity
-            );
-            ps.Play();
-        }
-
         // 🔹 Play sound (optional, if assigned)
         if (hitSound != null)
         {
@@ -66,7 +46,7 @@ public class SpikyBall : MonoBehaviour
             ring.OnPlayerHitRing();    // <- new function we will add!
         
         // 🔹 Destroy after fade & particle delay
-        Destroy(gameObject, fadeDuration + 0.1f);
+        FadeOut();
     }
 
     
@@ -81,6 +61,11 @@ public class SpikyBall : MonoBehaviour
         // 🔹 Fade transparency using DOTween
         sRend.DOFade(0f, fadeDuration)
             .SetEase(Ease.OutQuad);
+
+        if(destroyEffectPrefab != null)
+        {
+            Instantiate(destroyEffectPrefab, transform.position, transform.rotation);
+        }
 
         // 🔹 Destroy after fade
         Destroy(gameObject, fadeDuration);

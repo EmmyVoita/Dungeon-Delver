@@ -160,12 +160,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Crits   22222
-
-'
+  m_text: CRITS   22222
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 38279ce5ea27c68499c74e01219a1355, type: 2}
-  m_sharedMaterial: {fileID: -8852437591962295723, guid: 38279ce5ea27c68499c74e01219a1355, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1b115d67e31bb5c45907cc70419a3959, type: 2}
+  m_sharedMaterial: {fileID: -7492504107114395490, guid: 1b115d67e31bb5c45907cc70419a3959, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -189,14 +187,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 96
-  m_fontSizeBase: 96
+  m_fontSize: 54
+  m_fontSizeBase: 54
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0

@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4801304789887433351
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8225101029490160871}
+  - component: {fileID: 2256738976641107531}
+  m_Layer: 0
+  m_Name: FallingBreakableSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8225101029490160871
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4801304789887433351}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2256738976641107531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4801304789887433351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3da55463a36a704cbb067cc69d9ff88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
+  breakablePrefab: {fileID: 1713365301337479741, guid: ae54037439619ba49b3dcc1ee8277b55, type: 3}
+  playerProjectile: {fileID: 8576158574593582982, guid: f24b6294d1af54c40a16d0f56cee1d6e, type: 3}
+  shootSoundEffect:
+    clip: {fileID: 8300000, guid: 35f2087f655e83240b4bfa7e50a59852, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1
+    usePitchVariation: 0
+    pitchVariation: 0
+  spawnDistance: 7
+  spawnInterval: 1.5
+  spawnCount: 6
+  minFireDelay: 0.1
+  unregisterDelay: 8

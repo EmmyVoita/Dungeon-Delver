@@ -13,8 +13,6 @@ public class PracticeObstacleController : MonoBehaviour
     private void OnEnable()
     {
         ObstacleManager.OnObstacleCleared += HandleObstacleCleared;
-
-
     }
 
     private void OnDisable()
@@ -24,55 +22,56 @@ public class PracticeObstacleController : MonoBehaviour
 
     void Start()
     {
-        // 1️⃣ Create a simulated temporary obstacle
-        simulatedObstacle = new GameObject("DebugObstacle_SIMULATED");
-        ObstacleManager.Instance.RegisterObstacle(simulatedObstacle);
+        if(GameSceneLoader.PendingConfig != null && GameSceneLoader.PendingConfig.Mode == GameMode.ObstaclePractice)
+        {
+            // 1️⃣ Create a simulated temporary obstacle
+            simulatedObstacle = new GameObject("DebugObstacle_SIMULATED");
+            ObstacleManager.Instance.RegisterObstacle(simulatedObstacle);
 
-        // 2️⃣ After delay, remove simulated obstacle and spawn real one
-        StartCoroutine(InitialSpawnRoutine());
+            // 2️⃣ After delay, remove simulated obstacle and spawn real one
+            StartCoroutine(InitialSpawnRoutine());
 
-        Player.Instance.UseEightDirections = ObstaclePracticeSession.DirectionMode == JumpDirectionMode.EightWay;  
+            Player.Instance.UseEightDirections = GameSceneLoader.PendingConfig.DirectionMode == JumpDirectionMode.EightDirectional;  
+        }
     }
 
     void Update()
     {
+        /*
         if (InputBindingManager.Instance.GetKeyInput(InputActionType.Back))
         {
             SceneManager.LoadScene(SceneNames.MainMenu);
         }
+        */
     }
 
     private IEnumerator InitialSpawnRoutine()
     {
         yield return new WaitForSeconds(firstSpawnDelay);
 
-        // 3️⃣ Remove simulated obstacle to allow real spawns
-        //ObstacleManager.Instance.UnregisterObstacle(simulatedObstacle);
-        //Destroy(simulatedObstacle);
-
-        // 4️⃣ Spawn first real obstacle
         SpawnNewObstacle();
     }
 
     void SpawnNewObstacle()
     {
-        if (ObstaclePracticeSession.SelectedObstacle == null)
+        if (GameSceneLoader.PendingConfig.PracticeObstacle == null)
         {
             Debug.LogError("🚨 No obstacle selected for practice!");
             return;
         }
 
         Instantiate(
-            ObstaclePracticeSession.SelectedObstacle.obstaclePrefab,
+            GameSceneLoader.PendingConfig.PracticeObstacle.obstaclePrefab,
             Vector3.zero,
             Quaternion.identity
         );
-
-        Debug.Log($"🧪 Spawned obstacle: {ObstaclePracticeSession.SelectedObstacle.displayName}");
     }
 
     private void HandleObstacleCleared()
     {
+        if(GameSceneLoader.PendingConfig == null) return;
+        if(GameSceneLoader.PendingConfig.Mode != GameMode.ObstaclePractice) return;
+
         if (!spawnLoopActive)
             StartCoroutine(SpawnAfterDelay(respawnDelay));
     }

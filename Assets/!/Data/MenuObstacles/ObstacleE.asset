@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ObstacleE
   m_EditorClassIdentifier: 
   displayName: Rotating Bar
-  obstaclePrefab: {fileID: 3102986881326513793, guid: 7539311fe056bcd499c749c5e39ee5c1, type: 3}
+  obstaclePrefab: {fileID: 6654523266709301360, guid: a7c39c976a553dd43bf2016d7fc72ff6, type: 3}
   previewImage: {fileID: 0}
   description: A rotating bar that fires after a delay

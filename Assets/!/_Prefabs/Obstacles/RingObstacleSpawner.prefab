@@ -45,6 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ringPrefab: {fileID: 110340108235673376, guid: 6e771345172556d4688258a08799bb68, type: 3}
-  ringCount: 4
-  spawnInterval: 1.75
+  ringCount: 5
+  spawnInterval: 1.5
   centerTarget: {fileID: 0}

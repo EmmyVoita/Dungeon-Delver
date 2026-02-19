@@ -10,8 +10,11 @@ public class SpriteFadeInOut : MonoBehaviour
         MaterialColor
     }
 
+    
+
     [Header("Fade Mode")]
     [SerializeField] private FadeColorMode fadeMode = FadeColorMode.SpriteRendererColor;
+    [SerializeField] private bool playFullSequenceOnAwake = false;
 
     [Header("Material Settings")]
     [Tooltip("Used only when Fade Mode = MaterialColor")]
@@ -63,6 +66,10 @@ public class SpriteFadeInOut : MonoBehaviour
     private IEnumerator FadeIn()
     {
         yield return Fade(0f, originalColor.a, fadeInTime);
+        if (playFullSequenceOnAwake)
+        {
+            yield return StartCoroutine(FadeSequence());
+        }
     }
 
 

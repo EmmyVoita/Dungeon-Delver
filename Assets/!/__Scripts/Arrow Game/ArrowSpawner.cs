@@ -21,6 +21,12 @@ public class SpawnEvent
 
 public class ArrowSpawner : MonoBehaviour
 {
+    private enum ObstacleHandlingMode
+    {
+        PauseResume,
+        Ignore
+    }
+
     public static ArrowSpawner Instance { get; private set; }
     public static Action OnClearArrows;
 
@@ -34,8 +40,10 @@ public class ArrowSpawner : MonoBehaviour
     [SerializeField] private List<ArrowTypeDefinition> arrowTypeDefinitions;
     [SerializeField] private List<ObstacleTypeDefinition> obstacleTypeDefinitions;
 
+    [SerializeField] private ObstacleHandlingMode obstacleHandlingMode = ObstacleHandlingMode.PauseResume;
+
     // Internal
-    private List<SpawnEvent> patternEvents = new List<SpawnEvent>();
+    [SerializeField] private List<SpawnEvent> patternEvents = new List<SpawnEvent>();
     private Coroutine spawnCoroutine;
     private bool stopRequested = false; // 🔹 new flag for graceful stop
     private float bpm;
@@ -44,9 +52,13 @@ public class ArrowSpawner : MonoBehaviour
     private bool isPausedByObstacle = false;
     private int currentIndex = 0;
 
+    private double lastDSPTime;
+    private float scaledSongTime;
 
 
 
+
+    public int TotalArrowsThisRound { get; private set; }
     public float ActiveBPM => bpm;
     public List<ArrowTypeDefinition> ArrowTypeDefinitions => arrowTypeDefinitions;
     public List<ObstacleTypeDefinition> ChallengesTypeDefinitions => obstacleTypeDefinitions;
@@ -56,6 +68,19 @@ public class ArrowSpawner : MonoBehaviour
 
     private bool useEightDirections = false;
 
+    private double pauseDSP;
+    private double accumulatedPauseDSP;
+
+
+    public void OnPause()
+    {
+        pauseDSP = AudioSettings.dspTime;
+    }
+
+    public void OnResume()
+    {
+        accumulatedPauseDSP += AudioSettings.dspTime - pauseDSP;
+    }
 
 
 
@@ -73,26 +98,30 @@ public class ArrowSpawner : MonoBehaviour
     void OnEnable()
     {
         UIManager.OnGameOver += StopAllSpawning;
-        ObstacleManager.OnFirstObstacleAppeared += PauseSpawning;
-        ObstacleManager.OnAllObstaclesCleared += ResumeSpawning;
+        ObstacleManager.OnFirstObstacleAppeared += HandlePauseSpawning;
+        ObstacleManager.OnAllObstaclesCleared += HandleResumeSpawning;
     }
 
     void OnDisable()
     {
         UIManager.OnGameOver -= StopAllSpawning;
-        ObstacleManager.OnFirstObstacleAppeared -= PauseSpawning;
-        ObstacleManager.OnAllObstaclesCleared -= ResumeSpawning;
+        ObstacleManager.OnFirstObstacleAppeared -= HandlePauseSpawning;
+        ObstacleManager.OnAllObstaclesCleared -= HandleResumeSpawning;
     }
 
-    private void PauseSpawning()
+    private void HandlePauseSpawning()
     {
+        if (obstacleHandlingMode == ObstacleHandlingMode.Ignore) return;
+
         if (isPausedByObstacle) return;
 
         isPausedByObstacle = true;
     }
 
-    private void ResumeSpawning()
+    private void HandleResumeSpawning()
     {
+        if (obstacleHandlingMode == ObstacleHandlingMode.Ignore) return;
+        
         if (!isPausedByObstacle) return;
 
         isPausedByObstacle = false;
@@ -104,9 +133,15 @@ public class ArrowSpawner : MonoBehaviour
     public IEnumerator HandleSpawning(TextAsset patternAsset, float bpmModifier = 0f)
     {
         IsSpawning = true;
+
+        lastDSPTime = AudioSettings.dspTime;
+        scaledSongTime = 0f;
+
+
         if (patternAsset == null)
         {
             Debug.LogError("HandleSpawning called with null TextAsset!");
+            IsSpawning = false;
             yield break;
         }
 
@@ -139,7 +174,7 @@ public class ArrowSpawner : MonoBehaviour
     }
 
     // --------------------------------------------------
-    private void LoadPattern(TextAsset patternAsset, float bpmModifier = 0f)
+    public void LoadPattern(TextAsset patternAsset, float bpmModifier = 0f)
     {
         patternEvents.Clear();
         useEightDirections = false;
@@ -260,6 +295,14 @@ public class ArrowSpawner : MonoBehaviour
         }
 
         patternEvents.Sort((a, b) => a.time.CompareTo(b.time));
+
+        TotalArrowsThisRound = 0;
+
+        foreach (var e in patternEvents)
+        {
+            if (e.eventType == "arrow")
+                TotalArrowsThisRound++;
+        }
     }
 
     // --------------------------------------------------
@@ -276,66 +319,97 @@ public class ArrowSpawner : MonoBehaviour
     // --------------------------------------------------
     private IEnumerator SpawnFromPattern()
     {
-        float elapsed = 0f;   // virtual timeline time
         int index = 0;
-        currentIndex = index;
+
+        UIToast.Show($"🚀 SpawnFromPattern start Time {RoundManager.Instance.RoundStartTime - Time.time}");
 
         while (index < patternEvents.Count)
         {
-            // =======================
-            // STOP REQUEST
-            // =======================
-            if (stopRequested)
+            if(GameStateManager.Instance.CurrentState == GameState.Paused)
             {
-                Debug.Log("🚫 SpawnFromPattern stopped early.");
-                yield break;
-            }
-
-            // =======================
-            // PAUSE LOGIC
-            // =======================
-            if (!isPausedByObstacle)
-            {
-                // Only advance time when NOT paused
-                elapsed += Time.deltaTime;
-            }
-            else
-            {
-                // While paused, freeze virtual time
                 yield return null;
                 continue;
             }
 
-            // =======================
-            // SPAWN EVENTS DUE NOW
-            // =======================
-            while (index < patternEvents.Count &&
-                elapsed >= patternEvents[index].time)
+            if (stopRequested)
+                yield break;
+
+            if (isPausedByObstacle)
             {
-                if (stopRequested)
-                {
-                    Debug.Log("🚫 Spawn loop aborted mid-batch.");
-                    yield break;
-                }
-
-                var e = patternEvents[index];
-
-                if (e.eventType == "arrow")
-                    SpawnArrow(e.paramA, e.paramB, e.type);
-                else if (e.eventType == "obstacle")
-                    SpawnObstacle(e.paramA, e.type);
-                else if (e.eventType == "warning")
-                    TriggerWarning(e.paramA, e.type);
-
-                index++;
-                currentIndex = index;   // important for resume logic
+                yield return null;
+                continue;
             }
+
+            double currentDSP = AudioSettings.dspTime;
+            double dspDelta = currentDSP - lastDSPTime;
+
+            scaledSongTime += (float)(dspDelta * Time.timeScale);
+
+            lastDSPTime = currentDSP;
+
+            float elapsed = scaledSongTime;
+
+            /*
+            float elapsed = (float)(
+                AudioSettings.dspTime
+                - RoundManager.Instance.RoundStartDSP
+                - accumulatedPauseDSP
+            );
+            */
+
+
+            
+
+            index = SpawnReadyEvents(index, elapsed);
 
             yield return null;
         }
 
-        Debug.Log("✅ SpawnFromPattern finished normally.");
+        UIToast.Show("✅ SpawnFromPattern finished normally.");
     }
+
+    private int SpawnReadyEvents(int startIndex, float elapsed)
+    {
+        int index = startIndex;
+
+        while (index < patternEvents.Count &&
+            elapsed >= patternEvents[index].time)
+        {
+            SpawnEvent(patternEvents[index]);
+            index++;
+        }
+
+        return index;
+    }
+
+
+    private void SpawnEvent(SpawnEvent e)
+    {
+        UIToast.Show(
+            $"SpawnEvent: \n" +
+            $"Time  {Time.time - RoundManager.Instance.RoundStartTime}s \n" +
+            $"DSP Time = {AudioSettings.dspTime - RoundManager.Instance.RoundStartDSP}", 
+            3f
+        );
+
+        switch (e.eventType)
+        {
+            case "arrow":
+                SpawnArrow(e.paramA, e.paramB, e.type);
+                break;
+
+            case "obstacle":
+                SpawnObstacle(e.paramA, e.type);
+                break;
+
+            case "warning":
+                TriggerWarning(e.paramA, e.type);
+                break;
+        }
+    }
+
+
+
 
 
 
@@ -394,7 +468,9 @@ public class ArrowSpawner : MonoBehaviour
 
         ArrowEffectManager.Instance.ApplyEffectsToArrow(arrow.GetComponent<ArrowBase>());
         arrow.GetComponent<ArrowBase>().Fire(direction, speed);
-        RoundManager.Instance.arrowsSpawnedThisRound++;
+        RoundManager.Instance.stats.AddSpawned();
+
+        Debug.Log($"🎯 Spawned arrow at level time {Time.time - RoundManager.Instance.RoundStartTime}s.");
     }
 
     public void TriggerWarning(Vector2 direction, string type)

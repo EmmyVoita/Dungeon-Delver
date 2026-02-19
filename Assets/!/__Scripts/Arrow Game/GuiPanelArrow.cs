@@ -54,7 +54,7 @@ public class GuiPanelArrow : MonoBehaviour
         Player.OnHeal -= OnHeal;
     }
 
-    void Awake()
+    void Start()
     {
         RebuildHearts();
     }
@@ -95,12 +95,15 @@ public class GuiPanelArrow : MonoBehaviour
 
         hearts.Clear();
 
+        if(Player.Instance == null)
+            return;
+
         int heartCount = Mathf.CeilToInt(Player.Instance.MaxHealth / 2f);
 
         for (int i = 0; i < heartCount; i++)
         {
             GameObject heart = Instantiate(heartPrefab, heartContainer);
-            Image img = heart.GetComponent<Image>();
+            Image img = heart.GetComponentInChildren<Image>();
             hearts.Add(img);
 
             // Every heart uses the SAME material instance

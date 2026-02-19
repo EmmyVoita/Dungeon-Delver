@@ -36,6 +36,6 @@ public class ObstacleListMenuOption : PracticeMenuOption
 
     public override void OnConfirm()
     {
-        ObstaclePracticeSession.SelectedObstacle = obstacle;
+        GameSceneLoader.PendingConfig.PracticeObstacle = obstacle;
     }
 }

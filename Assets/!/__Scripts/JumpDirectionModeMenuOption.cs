@@ -34,8 +34,7 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
 
     private void ApplyMode()
     {
-        ObstaclePracticeSession.DirectionMode =
-            (selectedIndex == 0) ? JumpDirectionMode.FourWay : JumpDirectionMode.EightWay;
+        GameSceneLoader.PendingConfig.DirectionMode = (selectedIndex == 0) ? JumpDirectionMode.FourDirectional : JumpDirectionMode.EightDirectional;
     }
 
     public override void OnEnter()

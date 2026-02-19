@@ -228,7 +228,7 @@ public abstract class ArrowBase : MonoBehaviour
     {
         // Instantly die, bypassing health
         health = 0f;
-        Die(Goal.GoalType.Miss, false); // Miss type since killed externally
+        Die(Goal.GoalType.Miss, true); // Miss type since killed externally
     }
 
     protected virtual void Update()

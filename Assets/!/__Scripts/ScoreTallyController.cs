@@ -152,11 +152,33 @@ public class ScoreTallyController : MonoBehaviour
                 total = count
             });
 
-            yield return new WaitForSeconds(countDelay);
+            float scaledDelay = countDelay * ComboDelayScale(count);
+            scaledDelay = Mathf.Max(scaledDelay, 0.015f);
+
+            yield return new WaitForSeconds(scaledDelay);
         }
 
         OnTallyComplete?.Invoke(type);
         onComplete?.Invoke();
     }
+
+    float ComboDelayScale(int totalCombo)
+    {
+        const int softCap = 40;        // no speed-up below this
+        const int hardCap = 225;       // max expected combo
+        const float minScale = 0.35f;  // fastest allowed (35% of base)
+
+        if (totalCombo <= softCap)
+            return 1f;
+
+        float t = Mathf.InverseLerp(softCap, hardCap, totalCombo);
+
+        // Ease-out curve: slow at first, stronger later
+        t = Mathf.Pow(t, 2f);
+
+        return Mathf.Lerp(1f, minScale, t);
+    }
+
+
 
 }

@@ -23,7 +23,7 @@ MonoBehaviour:
   feedbackStyle: 3
   critsInARowRequired: 5
   rearmCountRequired: 20
-  goldenArrowsGranted: 3
+  goldenArrowsGranted: 5
   bonusSound:
     clip: {fileID: 8300000, guid: bda41de902222eb4ab895b9a967a6b74, type: 3}
     channel: 0

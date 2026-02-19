@@ -12,5 +12,6 @@ public enum GameState
     Transitioning,
     RoundActive,
     Paused,        // optional
-    TestMode       // optional
+    TestMode,       // optional
+    LevelIntermission
 }

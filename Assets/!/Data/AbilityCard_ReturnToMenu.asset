@@ -20,3 +20,4 @@ MonoBehaviour:
   icon: {fileID: 238605639, guid: 4f312bbd018fbc14287f1f9230b88433, type: 3}
   abilityType: 1
   cardMaterial: {fileID: 2100000, guid: 390bb009aa5f8e34987ef122035ecfad, type: 2}
+  mainImage: {fileID: 21300000, guid: a270ed3fc277cd4498b0a05c2e6a472a, type: 3}

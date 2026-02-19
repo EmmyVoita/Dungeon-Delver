@@ -1,11 +1,27 @@
 public enum JumpDirectionMode
 {
-    FourWay,
-    EightWay
+    FourDirectional,
+    EightDirectional
 }
 
-public static class ObstaclePracticeSession
+public enum GameMode
 {
-    public static ObstacleDefinition SelectedObstacle;
-    public static JumpDirectionMode DirectionMode = JumpDirectionMode.FourWay;
+    StandardRun,
+    ObstaclePractice,
+    LevelEditorTest
+}
+
+public static class GameSceneLoader
+{
+    public static GameSceneConfig PendingConfig;
+}
+
+
+public class GameSceneConfig
+{
+    public GameMode Mode = GameMode.StandardRun;
+    public ObstacleDefinition PracticeObstacle;
+    public JumpDirectionMode DirectionMode = JumpDirectionMode.FourDirectional;
+
+    public bool ShouldStartRound => Mode == GameMode.StandardRun;
 }

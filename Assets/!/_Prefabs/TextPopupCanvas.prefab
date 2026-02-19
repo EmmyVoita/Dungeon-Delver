@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2931763320063794537}
   - component: {fileID: 3182988993961710935}
   - component: {fileID: 1306950305677624383}
-  m_Layer: 12
+  m_Layer: 0
   m_Name: TextPopupCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -117,6 +117,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: {fileID: 8929713273964358908}
   canvasGroup: {fileID: 8311495697902162012}
+  baseFontSize: 36
 --- !u!1 &5825999520831217802
 GameObject:
   m_ObjectHideFlags: 0
@@ -128,7 +129,7 @@ GameObject:
   - component: {fileID: 7907806811613472318}
   - component: {fileID: 6207421348074845037}
   - component: {fileID: 8929713273964358908}
-  m_Layer: 12
+  m_Layer: 0
   m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -263,7 +264,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1509120677338721510}
   - component: {fileID: 8311495697902162012}
-  m_Layer: 12
+  m_Layer: 0
   m_Name: UIScorePopup
   m_TagString: Untagged
   m_Icon: {fileID: 0}

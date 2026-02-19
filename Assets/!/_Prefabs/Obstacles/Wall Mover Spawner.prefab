@@ -46,19 +46,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnBeep:
-    clip: {fileID: 8300000, guid: 7b5af3e0a5cb3f94c96f6a46abb56915, type: 3}
+    clip: {fileID: 8300000, guid: a11660f7baaf2904ebef61497fdfa192, type: 3}
     channel: 0
     affectedByTimeScale: 0
     volume: 1
-    pitch: 1
+    pitch: 0.8
     usePitchVariation: 0
     pitchVariation: 0
+  audioDelay: 1
   beepPitchStart: 1
   beepPitchStep: 0.1
   baseMoveSpeed: 4
-  speedMultiplier: 0
+  speedMultiplier: 0.35
   speedVariation: 0.3
   lifeDuration: 4
+  unRegisterDelay: 2.5
   wallPrefabs:
   - {fileID: 7710078017366974908, guid: d683f6379c14ef0458696a5bdb4ecb7a, type: 3}
   - {fileID: 3049347904484405761, guid: fec3f8ff7baa5ac4eb265d8851136100, type: 3}
@@ -113,8 +115,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c37f6cd9b3fddbc4dbe8c74f531bdd26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  easeCurve: 6
+  startWindupDelay: 0
+  oscilationXSpeed: 3
   lifetimeMode: 1
   activationMode: 1
+  portalPrefab: {fileID: 0}
   projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
   linePrefab: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
   fireMode: 1
@@ -122,22 +128,35 @@ MonoBehaviour:
   fireDelayMode: 0
   firePositionMode: 1
   unregisterDelay: 1
-  fireDelay: 1.5
+  startDelay: 0
+  fireDelay: 1
   continuousFireCount: 5
   oscillateDistance: 0.5
   oscillateSpeed: 2
+  shiftDuration: 0.5
+  shiftStartSound:
+    clip: {fileID: 0}
+    channel: 0
+    affectedByTimeScale: 0
+    volume: 0
+    pitch: 0
+    usePitchVariation: 0
+    pitchVariation: 0
   predefinedOffsets:
   - {x: -5.5, y: 2, z: 0}
   - {x: -5.5, y: 0, z: 0}
   - {x: -5.5, y: -2, z: 0}
   - {x: -5.5, y: -3, z: 0}
   - {x: -5.5, y: 3, z: 0}
+  - {x: -5.5, y: -1, z: 0}
+  - {x: -5.5, y: 1, z: 0}
   projectileFireDirection: {x: 1, y: 0}
   projectileCount: 1
   projectileSpacing: 0
   projectileSpeed: 15
   firingWindupDuration: 0.75
   maxRandFireDelay: 0.25
+  postWindupDelay: 0
   spawnPositionOffset: {x: -5.5, y: 0, z: 0}
   randPosOffsetX: 0
   randPosOffsetY: 0.15

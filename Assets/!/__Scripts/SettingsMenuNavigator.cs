@@ -40,6 +40,8 @@ public class SettingsMenuNavigator : BaseMenu
     {
         base.OnOpen();
 
+        ScreenDimmerManager.Instance.AddDimSource("SettingsMenu");
+
         holderObject.SetActive(true);
 
         // Start on the tabs
@@ -52,6 +54,8 @@ public class SettingsMenuNavigator : BaseMenu
     public override void OnClose()
     {
         base.OnClose();
+
+        ScreenDimmerManager.Instance.RemoveDimSource("SettingsMenu");
 
         holderObject.SetActive(false);
         selectedIndex = 0;

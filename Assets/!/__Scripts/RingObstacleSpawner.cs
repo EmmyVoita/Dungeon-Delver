@@ -26,12 +26,12 @@ public class RingObstacleSpawner : MonoBehaviour
     {
         for (int i = 0; i < ringCount; i++)
         {
-            SpawnSingleRing();
+            SpawnSingleRing(i);
             yield return new WaitForSeconds(spawnInterval);
         }
     }
 
-    private void SpawnSingleRing()
+    private void SpawnSingleRing(int i)
     {
         Vector3 spawnPos = centerTarget != null ? centerTarget.position : Vector3.zero;
 
@@ -41,6 +41,8 @@ public class RingObstacleSpawner : MonoBehaviour
             Quaternion.identity,
             this.transform // Parent rings under the spawner
         );
+
+        ring.Initialize(i);
 
         ring.owner = this;
         if (centerTarget != null)

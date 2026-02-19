@@ -11,6 +11,7 @@ public class CountdownUI : MonoBehaviour
     [SerializeField] private float interval = 1f;
     [SerializeField] private string finalText = "GO!";
     [SerializeField] private AudioClip countdownBeep;
+    [SerializeField] private SoundEffect finalBeep;
     [SerializeField] private float beepPitchIncrement = 0.1f;
 
     private Coroutine currentRoutine;
@@ -35,8 +36,28 @@ public class CountdownUI : MonoBehaviour
         currentRoutine = StartCoroutine(CountdownCoroutine(onComplete));
     }
 
+    public void KillActiveCountdown(Action onComplete = null)
+    {
+        if (!isCounting) return; // prevent overlap
+        if (currentRoutine != null) StopCoroutine(currentRoutine);
+        isCounting = false;
+        currentRoutine = null;
+        countdownText.text = "";
+        countdownText.gameObject.SetActive(false);
+        onComplete?.Invoke();
+    }
+
     private IEnumerator CountdownCoroutine(Action onComplete)
     {
+       
+        if (countdownText == null)
+        {
+            Debug.LogWarning("CountdownUI: countdownText is null. Skipping countdown.");
+            onComplete?.Invoke();
+            yield break;
+        }
+
+
         isCounting = true;
         countdownText.gameObject.SetActive(true);
 
@@ -55,6 +76,8 @@ public class CountdownUI : MonoBehaviour
         }
 
         countdownText.text = finalText;
+        AudioHelpers.PlaySoundEffect(finalBeep, Camera.main.transform.position);
+        
         yield return new WaitForSecondsRealtime(0.5f);
 
         countdownText.text = "";

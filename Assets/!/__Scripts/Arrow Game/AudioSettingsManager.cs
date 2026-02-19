@@ -31,6 +31,7 @@ public class AudioSettingsManager : MonoBehaviour
     [SerializeField] private AudioClip tallySound;
     [SerializeField] private AudioClip accentTallySound;
     [SerializeField] private AudioClip arrowHitSound;
+    [SerializeField] public AudioClip musicTrackSound;
 
     private string savePath;
 

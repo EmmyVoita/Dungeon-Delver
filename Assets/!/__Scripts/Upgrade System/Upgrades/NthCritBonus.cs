@@ -1,9 +1,13 @@
+using System;
 using UnityEngine;
 
 
 [CreateAssetMenu(menuName = "Upgrades/Nth Crit Bonus")]
 public class NthCritBonus : UpgradeBase, IActivatableUpgrade
 {
+    public static event Action<string, int, int> OnNthCritProgress;
+    // upgradeId, current, required
+
     public int critsRequired = 5;
     public int bonusScore = 250;
 
@@ -34,17 +38,19 @@ public class NthCritBonus : UpgradeBase, IActivatableUpgrade
 
     private void HandleCrit(ArrowResolvedData data)
     {
-        if(data.goalType != Goal.GoalType.Critical)
+        if (data.goalType != Goal.GoalType.Critical)
             return;
-        
+
         critCounter++;
-        Debug.Log($"Crit counter: {critCounter}/{critsRequired}");
+
+        OnNthCritProgress?.Invoke(upgradeId, critCounter, critsRequired);
 
         if (critCounter >= critsRequired)
         {
             AudioHelpers.PlaySoundEffect(bonusSound, Camera.main.transform.position);
-            
-            int finalAddedScore = ScoreManager.Instance.AddScore(bonusScore, ScoreSource.Bonus);
+
+            int finalAddedScore =
+                ScoreManager.Instance.AddScore(bonusScore, ScoreSource.Bonus);
 
             ScoreEvents.OnScorePopupRequested?.Invoke(
                 finalAddedScore,
@@ -52,6 +58,8 @@ public class NthCritBonus : UpgradeBase, IActivatableUpgrade
             );
 
             critCounter = 0;
+
+            OnNthCritProgress?.Invoke(upgradeId, 0, critsRequired);
 
             UpgradeManager.Instance.SetUpgradeActive(upgradeId, true);
         }
@@ -61,9 +69,12 @@ public class NthCritBonus : UpgradeBase, IActivatableUpgrade
         }
     }
 
+
     private void ResetCounter(int comboBreakAt, ComboBreakReason reason)
     {
         critCounter = 0;
+        OnNthCritProgress?.Invoke(upgradeId, 0, critsRequired);
         UpgradeManager.Instance.SetUpgradeActive(upgradeId, false);
     }
+
 }

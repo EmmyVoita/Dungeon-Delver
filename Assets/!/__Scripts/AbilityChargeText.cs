@@ -11,6 +11,7 @@ public class AbilityChargeText : MonoBehaviour
 
     void Update()
     {
-        abilityChargeTMP.text = $"{Player.Instance.MaxAbilityCharge}";
+        string amount = Player.Instance == null ? "" : Player.Instance.MaxAbilityCharge.ToString();
+        abilityChargeTMP.text = $"{amount}";
     }
 }

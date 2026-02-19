@@ -170,7 +170,11 @@ public class UpgradeManager : MonoBehaviour
         if (modifier is IGlobalScoreMultiplier gsm) globalScoreMultipliers.Add(gsm);
         if (modifier is IArrowScoreModifier asm) arrowScoreMods.Add(asm);
         if (modifier is IArrowStatusScoreModifier ssm)  statusScoreMods.Add(ssm);
-   
+
+         if (modifier is ICritWindowModifier cw_)
+        {
+            Debug.Log($"✅ Registered ICritWindowModifier: {modifier}");
+        }
 
 
         if (modifier is IActivatableUpgrade act)

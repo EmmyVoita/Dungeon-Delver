@@ -6,7 +6,9 @@ public class GameStateManager : MonoBehaviour
     public static GameStateManager Instance { get; private set; }
 
     [SerializeField] private GameState currentState;  
+    [SerializeField] private GameState previousState;
     public GameState CurrentState => currentState;
+    public GameState PreviousState => previousState;
 
     public static event Action<GameState, GameState> OnStateChanged;
 
@@ -26,15 +28,21 @@ public class GameStateManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void Start()
+    {
+        // Initialize to a default state if needed
+        SetState(GameState.LevelIntermission);
+    }
+
     public void SetState(GameState newState)
     {
         if (newState == CurrentState)
             return;
 
-        GameState previous = CurrentState;
+        previousState = CurrentState;
         currentState = newState;
 
-        OnStateChanged?.Invoke(previous, newState);
+        OnStateChanged?.Invoke(previousState, newState);
     }
 
     public bool Is(GameState state) => CurrentState == state;

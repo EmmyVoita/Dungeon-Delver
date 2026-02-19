@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ObstacleB
   m_EditorClassIdentifier: 
   displayName: Vertical Shooter
-  obstaclePrefab: {fileID: 8931257001343916097, guid: 48c548d7c103b1a41b02cc8edef6831e, type: 3}
+  obstaclePrefab: {fileID: 6654523266709301360, guid: 0a6ff83186c91c140b530035473b63fe, type: 3}
   previewImage: {fileID: 0}
   description: multiple vertical projectiles move across the screen

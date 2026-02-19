@@ -99,6 +99,8 @@ public class LevelEditorUIController : MonoBehaviour
             return;
         }
 
+        TestSession.levelMusic = EditorPlaybackController.Instance.LevelEditorTestMusic;
+
         // Save original
         TestSession.originalLevelAsset =
             editorData.currentLevelAsset;
@@ -113,6 +115,13 @@ public class LevelEditorUIController : MonoBehaviour
         TestSession.runSingleLevel = true;
         TestSession.returnScene =
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
+        GameSceneLoader.PendingConfig = new GameSceneConfig
+        {
+            Mode = GameMode.LevelEditorTest,
+            PracticeObstacle = null,
+            DirectionMode = JumpDirectionMode.FourDirectional
+        };
 
         Debug.Log("▶ Starting test session with in-memory level");
 

@@ -1,8 +1,11 @@
 using UnityEngine;
 using System.Collections;
+using DG.Tweening;
 
 public class WallProjectile : MonoBehaviour
 {
+    public Transform windupTransform;
+    public float windupDistance = 0.3f;
     public event System.Action<int, int> OnWindupTick;
     private Rigidbody2D rb;
     private Vector2 direction;
@@ -72,12 +75,12 @@ public class WallProjectile : MonoBehaviour
         // -------------------------
         // PHASE 2: Windup pullback
         // -------------------------
-        yield return StartCoroutine(WindupAnim());
+        //yield return StartCoroutine(WindupAnim());
 
         // -------------------------
         // PHASE 3: Fire
         // -------------------------
-        Fire();
+        //Fire();
     }
 
     private IEnumerator ShiftAnim(float shiftDistance, float shiftSpeed)
@@ -97,25 +100,24 @@ public class WallProjectile : MonoBehaviour
     }
 
 
-    private IEnumerator WindupAnim()
+    public IEnumerator WindupAnim()
     {
-        Vector3 pullPos = anchorPos - (Vector3)direction * 0.3f;
-        float t = 0f;
+        Sequence s = DOTween.Sequence();
 
-        while (t < windupDuration)
-        {
-            t += Time.deltaTime;
-            float u = Mathf.Clamp01(t / windupDuration);
+        Vector3 startPos = transform.position;
+        Vector3 direction = -transform.up; // respects rotation
 
-            transform.position = Vector3.Lerp(
-                anchorPos,
-                pullPos,
-                Mathf.SmoothStep(0f, 1f, u)
-            );
+        s.Append(
+            transform.DOMove(startPos + direction * windupDistance, windupDuration)
+                    .SetEase(Ease.OutQuad)
+        );
 
-            yield return null;
-        }
+        yield return s.WaitForCompletion();
+
+        Fire();
     }
+
+
 
     public void Fire()
     {

@@ -11,8 +11,10 @@ public struct RatingDisplayData
     [Range(0f, 1f)]
     [Tooltip("0 - 1")]
     public float accuracyThreshold;  
-    public Sprite ratingImage;
+    public string ratingText;
     public AudioClip ratingSound;
+    public Gradient gradient;
+    public bool animateGradient;
     public GameObject effect;
 }
 
@@ -36,10 +38,13 @@ public enum StatValueType
 public class RoundStatsUI : MonoBehaviour
 {
     [Header("References")]
+    [SerializeField] private UIFadeGroup continuePrompt;
     [SerializeField] private GameObject mainContainer;
+    [SerializeField] private RatingTextPresenter ratingPresenter;
+
     //[SerializeField] private TextMeshProUGUI hitsRatingText;    
     //[SerializeField] private TextMeshProUGUI critsRatingText;
-    [SerializeField] private Image ratingImage;
+    [SerializeField] private TextMeshProUGUI ratingTextObject;
     [SerializeField] private StatRowAnimator imageStatRowAnimator;
     //[SerializeField] private StatRowAnimator imageStatRowAnimator2;
     //[SerializeField] private StatRowAnimator imageStatRowAnimator3;
@@ -129,13 +134,20 @@ public class RoundStatsUI : MonoBehaviour
 
     void Awake()
     {
-        if(mainContainer != null)
-        mainContainer.SetActive(false);
+        
     }   
+
+    void Start()
+    {
+        mainContainer?.SetActive(false);
+        continuePrompt?.Hide(true);
+    }
 
     void ShowStats(GameState previousState, GameState newState)
     {
-        if(newState != GameState.RoundSummary) return;
+        if(newState != GameState.RoundSummary || 
+           previousState == GameState.Paused) 
+           return;
 
         skipRequested = false;
         StartCoroutine(DisplaySequence());
@@ -147,10 +159,15 @@ public class RoundStatsUI : MonoBehaviour
 
     void Update()
     {
+        if(GameStateManager.Instance.CurrentState != GameState.RoundSummary && 
+           GameStateManager.Instance.CurrentState != GameState.RoundSummaryEnd) 
+           return;
+
         if (!acceptInput) return;
 
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
         {
+            Debug.Log("Continue pressed on Round Summary screen." + $"Gamestate: {GameStateManager.Instance.CurrentState} ");
             // If still animating → request skip
             if (GameStateManager.Instance.CurrentState == GameState.RoundSummary)
             {
@@ -180,7 +197,7 @@ public class RoundStatsUI : MonoBehaviour
                 return new Vector2Int(ScoreManager.Instance.RoundScoreTotal, -1);
 
             case StatValueType.Hits:
-                return new Vector2Int(RoundManager.Instance.ArrowsHitThisRoundCount, RoundManager.Instance.ArrowsSpawnedThisRoundCount);
+                return new Vector2Int(RoundManager.Instance.stats.Hit, RoundManager.Instance.stats.Spawned);
 
             default:
                 return Vector2Int.zero;
@@ -233,12 +250,11 @@ public class RoundStatsUI : MonoBehaviour
 
         if (skipRequested)
         {
-            var roundAccuracy = RoundManager.Instance.RoundAccuracy;
+            var roundAccuracy = RoundManager.Instance.stats.RoundAccuracy;
             RatingDisplayData chosenImageData = GetRatingForAccuracy(roundAccuracy);
 
-            ratingImage.sprite = chosenImageData.ratingImage;
-            ratingImage.SetNativeSize();
-            ratingImage.GetComponent<Image>().enabled = true;
+            ratingTextObject.text = chosenImageData.ratingText;
+
             imageStatRowAnimator.SnapToFinal();
 
             for (int i = 0; i < breakdownRowAnimators.Count; i++)
@@ -258,10 +274,8 @@ public class RoundStatsUI : MonoBehaviour
             }
 
             // Snap rating instantly
-            var chosenData = GetRatingForAccuracy(RoundManager.Instance.RoundAccuracy);
-            ratingImage.sprite = chosenData.ratingImage;
-            ratingImage.SetNativeSize();
-            ratingImage.enabled = true;
+            var chosenData = GetRatingForAccuracy(RoundManager.Instance.stats.RoundAccuracy);
+            ratingPresenter.ShowRating(chosenData);
 
             yield break; // ← IMPORTANT
         }
@@ -271,18 +285,17 @@ public class RoundStatsUI : MonoBehaviour
 
     private IEnumerator PlayRatingImageIntro()
     {
-        var roundAccuracy = RoundManager.Instance.RoundAccuracy;
+        var roundAccuracy = RoundManager.Instance.stats.RoundAccuracy;
         RatingDisplayData chosenData = GetRatingForAccuracy(roundAccuracy);
 
-        ratingImage.sprite = chosenData.ratingImage;
-        ratingImage.SetNativeSize();
-        ratingImage.GetComponent<Image>().enabled = true;
+        ratingPresenter.ShowRating(chosenData);
+
         imageStatRowAnimator.PlayIntro();
 
         yield return new WaitForSeconds(ratingDisplayEffectsDelay);
 
         AudioHelpers.PlayMyClipAtPoint(chosenData.ratingSound, AudioChannel.UI, Camera.main.transform.position, 1.0f);
-        if (chosenData.effect != null)  Instantiate(chosenData.effect, ratingImage.transform.position, Quaternion.identity);
+        if (chosenData.effect != null)  Instantiate(chosenData.effect, ratingTextObject.transform.position, Quaternion.identity);
 
         yield return new WaitForSeconds(individualDisplayDelay);
     }
@@ -317,10 +330,15 @@ public class RoundStatsUI : MonoBehaviour
         if (!BeakdownAnimatorsExists)
         CreateBreakdownRowAnimators();
 
-        mainContainer.SetActive(true);
+        mainContainer?.SetActive(true);
 
+        
 
-        //int total = ScoreManager.Instance.GetTotalScore();
+        if (continuePrompt.TryGetComponent(out TextMeshProUGUI textComponent))
+        {
+            textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetKey(InputActionType.Confirm)}</color>] to continue";
+            continuePrompt?.Show();
+        }
 
 
         AudioHelpers.PlayMyClipAtPoint(showSound, AudioChannel.UI, Camera.main.transform.position, 1.0f);
@@ -328,61 +346,9 @@ public class RoundStatsUI : MonoBehaviour
         foreach (var ps in confettiSystems)
                 if (ps != null) ps.Play();
 
-        //hitsRatingText.text = "";
-        //critsRatingText.text = "";
-        ratingImage.GetComponent<Image>().enabled = false;
-
-        //imageStatRowAnimator2.PlayIntro();
-
-        /*
-        yield return StartCoroutine(AnimateStatText(targetText: hitsRatingText, 
-                                                    count: RoundManager.Instance.ArrowsHitThisRoundCount,
-                                                    total: RoundManager.Instance.ArrowsSpawnedThisRoundCount,
-                                                    prefix: hitsTextPrefix));
-
-        AudioHelpers.PlayMyClipAtPoint(animateStatCompleteSound, AudioChannel.UI, Camera.main.transform.position, pitch: 1.0f);
-        
-
-        yield return new WaitForSeconds(individualDisplayDelay);
-        */
-
+    
         yield return StartCoroutine(PlayBreakdownIntros());
 
-
-        //imageStatRowAnimator3.PlayIntro();
-
-         /*                                           
-        yield return StartCoroutine(AnimateStatText(targetText: critsRatingText, 
-                                                    count: RoundManager.Instance.ArrowsCritThisRoundCount,
-                                                    prefix: critsTextPrefix));
-        */
-
-        /*
-        yield return StartCoroutine(AnimateStatText(targetText: critsRatingText, 
-                                                    count: baseScore,
-                                                    prefix: critsTextPrefix));
-        */
-        //AudioHelpers.PlayMyClipAtPoint(animateStatCompleteSound, AudioChannel.UI, Camera.main.transform.position, pitch: 1.0f + animateStatPitchStep);
-        
-
-        //yield return new WaitForSeconds(individualDisplayDelay);
-
-        /*
-        var roundAccuracy = RoundManager.Instance.RoundAccuracy;
-        RatingDisplayData chosenData = GetRatingForAccuracy(roundAccuracy);
-
-        ratingImage.sprite = chosenData.ratingImage;
-        ratingImage.SetNativeSize();
-        ratingImage.GetComponent<Image>().enabled = true;
-        imageStatRowAnimator.PlayIntro();
-
-       
-
-        yield return new WaitForSeconds(ratingDisplayEffectsDelay);
-
-        AudioHelpers.PlayMyClipAtPoint(chosenData.ratingSound, AudioChannel.UI, Camera.main.transform.position, 1.0f);
-        if (chosenData.effect != null)  Instantiate(chosenData.effect, ratingImage.transform.position, Quaternion.identity);
-        */
            
         yield return new WaitForSeconds(acceptInputDelay);
 
@@ -396,17 +362,14 @@ public class RoundStatsUI : MonoBehaviour
 
         imageStatRowAnimator.PlayOutro();
         yield return new WaitForSeconds(0.3f);
-        //imageStatRowAnimator2.PlayOutro();
-        //yield return new WaitForSeconds(0.3f);
-        //imageStatRowAnimator3.PlayOutro();
-        //yield return new WaitForSeconds(0.3f);
 
         yield return StartCoroutine(PlayBreakdownRowOutroAnimations());
 
         foreach (var ps in confettiSystems)
             if (ps != null) ps.Stop();
 
-        mainContainer.SetActive(false);
+        mainContainer?.SetActive(false);
+        continuePrompt?.Hide();
 
         yield return new WaitForSeconds(0.5f);
     }

@@ -9252,7 +9252,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 458807882}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46c1d6b9d1de9cc47ab3275e7ae7366e, type: 3}
   m_Name: 
@@ -9260,6 +9260,7 @@ MonoBehaviour:
   preventAutoStart: 1
   fastForwardMultiplier: 2
   skipRoundKey: 7
+  skipStageKey: 34
   bpmBonus: 0
   tallyController: {fileID: 1327207787}
   arrowSpawner: {fileID: 473090985}
@@ -9270,16 +9271,18 @@ MonoBehaviour:
     normalLevelFiles:
     - {fileID: 4900000, guid: 4921269fe21cb734693cc51193f8d660, type: 3}
     - {fileID: 4900000, guid: 1d2aa78488805814bb0cef17c1f6fdb6, type: 3}
+    levelOrderMode: 1
     bossLevelFile: {fileID: 4900000, guid: c37dcb1db55334b4b9713fba7a50f54d, type: 3}
     bossDefinition: {fileID: 11400000, guid: d4c0c3936167db944b2a0d119c58e271, type: 2}
-    randomLevelsToPlay: 1
+    levelsToPlay: 2
     allowRepeats: 1
   - stageName: Stage B
     normalLevelFiles:
     - {fileID: 4900000, guid: 732145fb96efacc45946ae84fc7ef39f, type: 3}
+    levelOrderMode: 1
     bossLevelFile: {fileID: 4900000, guid: c37dcb1db55334b4b9713fba7a50f54d, type: 3}
     bossDefinition: {fileID: 11400000, guid: d4c0c3936167db944b2a0d119c58e271, type: 2}
-    randomLevelsToPlay: 20
+    levelsToPlay: 2
     allowRepeats: 1
   currentStageIndex: 0
   currentLevelIndex: 0
@@ -19162,6 +19165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0051b7b98ca6039469cfdadd5f4746e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  testBossEffects: 0
 --- !u!114 &1168737670
 MonoBehaviour:
   m_ObjectHideFlags: 0

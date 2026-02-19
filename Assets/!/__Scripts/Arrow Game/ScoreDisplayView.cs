@@ -95,7 +95,7 @@ public class ScoreDisplayView : MonoBehaviour
         ScoreTallyController.OnTallyTick += HandleTallyTick;
         ScoreTallyController.OnTallyStart += HandleTallyStart;
         ScoreTallyController.OnTallyComplete += HandleTallyComplete;
-        ScoreEvents.OnScorePopupRequested += SpawnScorePopup;
+        //ScoreEvents.OnScorePopupRequested += SpawnScorePopup;
     }
     private void OnDisable()
     {
@@ -104,7 +104,7 @@ public class ScoreDisplayView : MonoBehaviour
         ScoreTallyController.OnTallyTick -= HandleTallyTick;
         ScoreTallyController.OnTallyStart -= HandleTallyStart;
         ScoreTallyController.OnTallyComplete -= HandleTallyComplete;
-        ScoreEvents.OnScorePopupRequested -= SpawnScorePopup;
+        //ScoreEvents.OnScorePopupRequested -= SpawnScorePopup;
     }
 
     private void Awake()
@@ -122,6 +122,43 @@ public class ScoreDisplayView : MonoBehaviour
         textInfo = scoreText.textInfo;
         lastScoreString = scoreText.text;
     }
+
+
+    private void UpdateScoreWithRoll(int newScore)
+    {
+        //if (newScore == displayedScore)
+            //return;
+
+        string newScoreStr = FormatScore(newScore);
+
+        var changedDigits = GetChangedDigitIndices(lastScoreString, newScoreStr);
+
+        scoreText.text = newScoreStr;
+        scoreText.ForceMeshUpdate();
+        textInfo = scoreText.textInfo;
+
+        Vector3[][] cachedBaselineVerts = new Vector3[textInfo.meshInfo.Length][];
+
+        for (int j = 0; j < textInfo.meshInfo.Length; j++)
+            cachedBaselineVerts[j] =
+                (Vector3[])textInfo.meshInfo[j].vertices.Clone();
+
+        foreach (int index in changedDigits)
+        {
+            StartCoroutine(
+                AnimateDigitRoll(
+                    index,
+                    digitRollYOffset,
+                    digitRollDuration,
+                    cachedBaselineVerts
+                )
+            );
+        }
+
+        lastScoreString = newScoreStr;
+    }
+
+
 
 
 
@@ -166,39 +203,10 @@ public class ScoreDisplayView : MonoBehaviour
         //ScoreManager.Instance.AddScore(tick.addedScore, type == TallyType.Combo ? ScoreSource.Combo : ScoreSource.BaseArrow);
         displayedScore = ScoreManager.Instance.CurrentScore;
 
-        // --- Roll animation ---
-        string newScoreStr = FormatScore(displayedScore);
-        var changedDigits = GetChangedDigitIndices(lastScoreString, newScoreStr);
-
-        scoreText.text = newScoreStr;
-        scoreText.ForceMeshUpdate();
-        textInfo = scoreText.textInfo;
-
-        // ✅ Cache baseline vertices ONCE
-        Vector3[][] cachedBaselineVerts = new Vector3[textInfo.meshInfo.Length][];
-
-        for (int j = 0; j < textInfo.meshInfo.Length; j++)
-        {
-            cachedBaselineVerts[j] =
-                (Vector3[])textInfo.meshInfo[j].vertices.Clone();
-        }
-
-
-        foreach (int index in changedDigits)
-        {
-            StartCoroutine(
-                AnimateDigitRoll(
-                    index,
-                    digitRollYOffset,
-                    digitRollDuration,
-                    cachedBaselineVerts
-                )
-            );
-        }
-
+        
+        UpdateScoreWithRoll(displayedScore);
            
-        lastScoreString = newScoreStr;
-
+      
         SpawnScorePopup(tick.addedScore, ScorePopupKind.NormalHit);
 
 
@@ -273,7 +281,8 @@ public class ScoreDisplayView : MonoBehaviour
             return;
 
         displayedScore = score;
-        scoreText.text = FormatScore(displayedScore);
+        //scoreText.text = FormatScore(displayedScore);
+        UpdateScoreWithRoll(displayedScore);
     }
 
     private bool ShouldPlayAccent(int comboIndex, int totalCombo)

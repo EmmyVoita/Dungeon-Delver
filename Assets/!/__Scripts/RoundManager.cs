@@ -3,33 +3,12 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
+using Unity.VisualScripting;
 
-#region Data Structures
 
-[System.Serializable]
-public class LevelData
-{
-    public TextAsset levelFile;
-}
 
-[System.Serializable]
-public class Stage
-{
-    public string stageName;
-    public List<TextAsset> normalLevelFiles;
-    
 
-    [Header("Boss")]
-    public TextAsset bossLevelFile;
-    public BossDefinition bossDefinition;
 
-    public int randomLevelsToPlay = 2;
-
-    [Tooltip("If true, levels can repeat if there aren't enough unique ones.")]
-    public bool allowRepeats = false;
-}
-
-#endregion
 
 public class RoundManager : MonoBehaviour
 {
@@ -52,6 +31,7 @@ public class RoundManager : MonoBehaviour
 
     [Header("Input")]
     public Key skipRoundKey = Key.R;
+    public Key skipStageKey = Key.T; // 👈 new
 
     [Header("Player Upgrades")]
     public float bpmBonus = 0f;
@@ -61,6 +41,7 @@ public class RoundManager : MonoBehaviour
     [SerializeField] private ArrowSpawner arrowSpawner;
     [SerializeField] private RoundStatsUI roundStatsUI;
     [SerializeField] private float roundDelay = 2f;
+    [SerializeField] private float roundEndTimeout = 20f;
 
     // ------------------------------------------------------------
     // Events
@@ -75,7 +56,7 @@ public class RoundManager : MonoBehaviour
     // ------------------------------------------------------------
 
     [Header("Stages")]
-    public List<Stage> stages;
+    public List<StageData> stages;
 
     // ------------------------------------------------------------
     // Runtime State
@@ -84,34 +65,23 @@ public class RoundManager : MonoBehaviour
     [Header("Runtime")]
     [SerializeField] private int currentStageIndex = 0;
     [SerializeField] private int currentLevelIndex = 0;
+    [SerializeField] public RoundStatsTracker stats;
+
 
     private List<TextAsset> currentStageSequence = new();
     private Coroutine activeRoundCoroutine;
-    private bool roundActive = false;
     private bool isFastForward = false;
-
     private bool applyTempBPMBonus = false;
 
-    // ------------------------------------------------------------
-    // Round Stats
-    // ------------------------------------------------------------
 
-    public int arrowsSpawnedThisRound = 0;
-    private int arrowsHitThisRound = 0;
-    private int arrowsCritThisRound = 0;
-
-    public float RoundAccuracy =>
-        arrowsSpawnedThisRound == 0 ? 0f : (float)arrowsHitThisRound / arrowsSpawnedThisRound;
-
-    public bool PerfectRound =>
-        arrowsSpawnedThisRound > 0 && arrowsHitThisRound == arrowsSpawnedThisRound;
-
-    public int ArrowsHitThisRoundCount => arrowsHitThisRound;
-    public int ArrowsCritThisRoundCount => arrowsCritThisRound;
-    public int ArrowsSpawnedThisRoundCount => arrowsSpawnedThisRound;
+   
     public float RoundBPMMultiplier => 1 + bpmBonus;
-    public bool IsBossRound => 
-        stages[currentStageIndex].bossLevelFile == currentStageSequence[currentLevelIndex - 1];
+    public double RoundStartDSP { get; set; }
+    public float  RoundStartTime { get; private set; } // gameplay time
+
+    public float RoundCountdownStartTime { get; private set; }
+    public bool IsBossRound => stages[currentStageIndex].bossLevelFile == currentStageSequence[currentLevelIndex - 1];
+ 
 
     // ------------------------------------------------------------
     // Unity Lifecycle
@@ -119,14 +89,14 @@ public class RoundManager : MonoBehaviour
 
     private void OnEnable()
     {
-        ArrowBase.OnArrowResolved += RegisterArrowHit;
-        UpgradeCardManager.UpgradeSelectionComplete += StartNextRound;
+        ArrowBase.OnArrowResolved += stats.RegisterArrow;
+        UpgradeCardManager.UpgradeSelectionComplete += SetupAndStartRound;
     }
 
     private void OnDisable()
     {
-        ArrowBase.OnArrowResolved -= RegisterArrowHit;
-        UpgradeCardManager.UpgradeSelectionComplete -= StartNextRound;
+        ArrowBase.OnArrowResolved -= stats.RegisterArrow;
+        UpgradeCardManager.UpgradeSelectionComplete -= SetupAndStartRound;
     }
 
     private void Awake()
@@ -146,25 +116,27 @@ public class RoundManager : MonoBehaviour
             return;
 #endif
 
-        if (isTestMode)
-        {
-            Debug.Log($"▶ TEST MODE: Playing {testLevel?.name}");
-            StartCoroutine(PlayTestLevel());
-            return;
-        }
+        if(GameSceneLoader.PendingConfig == null) return;
 
-        CountdownUI.Instance.BeginCountdown(() =>
+        switch(GameSceneLoader.PendingConfig.Mode)
         {
+            case GameMode.StandardRun:
             StartStage(currentStageIndex);
-        });
+            break;
+            case GameMode.ObstaclePractice:
+            break;
+            case GameMode.LevelEditorTest:
+            StartCoroutine(PlayTestLevel());
+            break;
+        }
     }
 
-    private void Update()
+   private void Update()
     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (Keyboard.current.fKey.wasPressedThisFrame)
             ToggleFastForward();
-#endif
+    #endif
 
         if (Keyboard.current[skipRoundKey].wasPressedThisFrame)
             SkipRound();
@@ -175,6 +147,9 @@ public class RoundManager : MonoBehaviour
             UnityEngine.SceneManagement.SceneManager.LoadScene(TestSession.returnScene);
         }
     }
+
+    
+
 
     // ------------------------------------------------------------
     // Test Mode
@@ -188,19 +163,16 @@ public class RoundManager : MonoBehaviour
             yield break;
         }
 
-        ResetRoundStats();
-        roundActive = true;
+        stats.Reset();
 
-        yield return StartCoroutine(
-            ArrowSpawner.Instance.HandleSpawning(testLevel, bpmBonus)
-        );
-
-        roundActive = false;
+        CountdownUI.Instance.BeginCountdown(() =>
+        {
+            RoundStartDSP  = AudioSettings.dspTime;
+            RoundStartTime = Time.time;
+            activeRoundCoroutine = StartCoroutine(PlayRound(testLevel));
+        });
 
         Debug.Log("✔ Test level complete. Returning to editor…");
-        yield return new WaitForSeconds(10f);
-
-        UnityEngine.SceneManagement.SceneManager.LoadScene(TestSession.returnScene);
     }
 
     // ------------------------------------------------------------
@@ -211,44 +183,84 @@ public class RoundManager : MonoBehaviour
     {
         if (stageIndex >= stages.Count)
         {
-            Debug.Log("🎉 All stages complete!");
             return;
         }
 
-        Stage stage = stages[stageIndex];
+        MusicManager.Instance.mainClip = stages[stageIndex].musicClip;
+
+        StageData stage = stages[stageIndex];
         currentStageSequence.Clear();
 
-        //List<LevelData> shuffled = new(stage.normalLevelFiles);
-        List<TextAsset> shuffled = new(stage.normalLevelFiles);
-        shuffled.Shuffle();
+        List<TextAsset> sourceLevels = new(stage.normalLevelFiles);
+
+        if (sourceLevels.Count == 0)
+        {
+            Debug.LogWarning($"⚠ Stage {stage.stageName} has no normal levels.");
+        }
+
+        switch (stage.levelOrderMode)
+        {
+            case LevelOrderMode.InOrder:
+                AddSequentialLevels(stage, sourceLevels);
+                break;
+
+            case LevelOrderMode.Random:
+                AddRandomLevels(stage, sourceLevels);
+                break;
+        }
+
+        // Boss always last
+        if (stage.bossLevelFile != null)
+            currentStageSequence.Add(stage.bossLevelFile);
+
+        currentLevelIndex = 0;
+        SetupAndStartRound();
+    }
+
+    private void AddSequentialLevels(StageData stage, List<TextAsset> sourceLevels)
+    {
+        int count = Mathf.Min(stage.levelsToPlay, sourceLevels.Count);
+
+        for (int i = 0; i < count; i++)
+        {
+            currentStageSequence.Add(sourceLevels[i]);
+        }
+    }
+
+    private void AddRandomLevels(StageData stage, List<TextAsset> sourceLevels)
+    {
+        sourceLevels.Shuffle();
 
         if (stage.allowRepeats)
         {
-            for (int i = 0; i < stage.randomLevelsToPlay; i++)
-                currentStageSequence.Add(shuffled[i % shuffled.Count]);
+            for (int i = 0; i < stage.levelsToPlay; i++)
+            {
+                currentStageSequence.Add(sourceLevels[i % sourceLevels.Count]);
+            }
         }
         else
         {
-            int count = Mathf.Min(stage.randomLevelsToPlay, shuffled.Count);
+            int count = Mathf.Min(stage.levelsToPlay, sourceLevels.Count);
             for (int i = 0; i < count; i++)
-                currentStageSequence.Add(shuffled[i]);
+            {
+                currentStageSequence.Add(sourceLevels[i]);
+            }
         }
-
-        currentStageSequence.Add(stage.bossLevelFile);
-
-        currentLevelIndex = 0;
-        StartNextRound();
     }
 
-    public void StartNextRound()
+
+
+
+    public void SetupAndStartRound()
     {
-        ResetRoundStats();
+        // Reset stats for the new round
+        stats.Reset();
 
-        GameStateManager.Instance.SetState(GameState.RoundActive);
-
+        // Safety check to prevent starting a new round while one is active
         if (activeRoundCoroutine != null)
             StopCoroutine(activeRoundCoroutine);
 
+        // Check if we've completed the current stage
         if (currentLevelIndex >= currentStageSequence.Count)
         {
             currentStageIndex++;
@@ -256,36 +268,52 @@ public class RoundManager : MonoBehaviour
             return;
         }
 
+
         TextAsset levelFile = currentStageSequence[currentLevelIndex];
+        
         if (levelFile == null)
         {
             Debug.LogError("❌ LevelData has no TextAsset assigned!");
             return;
         }
 
-        activeRoundCoroutine = StartCoroutine(PlayRound(levelFile));
+       
+        RoundCountdownStartTime = Time.time;
+
+        
+        GameStateManager.Instance.SetState(GameState.LevelIntermission);
+        CountdownUI.Instance.BeginCountdown(() =>
+        {
+            RoundStartDSP  = AudioSettings.dspTime;
+            RoundStartTime = Time.time;
+            activeRoundCoroutine = StartCoroutine(PlayRound(levelFile));
+        });
+        
     }
+
 
     private IEnumerator PlayRound(TextAsset levelFile)
     {
         OnRoundStart?.Invoke();
-        roundActive = true;
 
-        Stage stage = stages[currentStageIndex];
+        StageData stage = stages[currentStageIndex];
 
-        bool isBossRound =
-            stage.bossLevelFile == levelFile &&
-            stage.bossDefinition != null;
-
-        if (isBossRound)
+        // If Boss round, trigger boss logic
+        if (stage.bossLevelFile == levelFile && stage.bossDefinition != null)
         {
             BossManager.Instance.StartBoss(stage.bossDefinition);
         }
 
         Debug.Log($"▶ Playing level: {levelFile.name}");
 
-        yield return StartCoroutine(
-            ArrowSpawner.Instance.HandleSpawning(levelFile, bpmBonus)
+        
+        Debug.Log($"⏱ Round started at {RoundStartTime} (DSP), countdown started at {RoundCountdownStartTime}.");
+
+        GameStateManager.Instance.SetState(GameState.RoundActive);
+
+
+        //ArrowSpawner.Instance.LoadPattern(levelFile, bpmBonus);
+        yield return StartCoroutine(ArrowSpawner.Instance.HandleSpawning(levelFile, bpmBonus)
         );
 
 
@@ -311,7 +339,7 @@ public class RoundManager : MonoBehaviour
             ScoreTallyController.RoundEndTallyComplete -= Handler;
         }
 
-        yield return CoroutineHelpers.WaitUntilOrTimeout(() => tallyComplete, 20.0f);
+        yield return CoroutineHelpers.WaitUntilOrTimeout(() => tallyComplete, roundEndTimeout);
 
 
         if (applyTempBPMBonus)
@@ -321,8 +349,8 @@ public class RoundManager : MonoBehaviour
         }
 
        
-        GameStateManager.Instance.SetState(GameState.ItemActivations);
-        yield return StartCoroutine(WaitForItemActivations());
+        //GameStateManager.Instance.SetState(GameState.ItemActivations);
+        //yield return StartCoroutine(WaitForItemActivations());
 
         GameStateManager.Instance.SetState(GameState.RoundSummary);
         yield return StartCoroutine(CoroutineHelpers.WaitForConfirm(GameState.RoundSummaryEnd));
@@ -334,8 +362,6 @@ public class RoundManager : MonoBehaviour
         currentLevelIndex++;
 
         UpgradeCardManager.Instance.ShowCardChoices();
-
-        
     }
 
     // ------------------------------------------------------------
@@ -346,22 +372,9 @@ public class RoundManager : MonoBehaviour
     {
         bpmBonus = bonus;
         applyTempBPMBonus = true;
-    }
+    }   
 
-    public void RegisterArrowHit(ArrowResolvedData data)
-    {
-        arrowsHitThisRound++;
-        if (data.goalType == Goal.GoalType.Critical)
-            arrowsCritThisRound++;
-    }
-
-    public void ResetRoundStats()
-    {
-        arrowsSpawnedThisRound = 0;
-        arrowsHitThisRound = 0;
-        arrowsCritThisRound = 0;
-        //ComboManager.Instance.ResetCombo();
-    }
+   
 
     private void ToggleFastForward()
     {
@@ -376,8 +389,10 @@ public class RoundManager : MonoBehaviour
 
     public void SkipRound()
     {
-        if (!roundActive)
+        if(GameStateManager.Instance.CurrentState != GameState.RoundActive)
+        {
             return;
+        }
 
         ArrowSpawner.Instance.StopAllSpawning();
 
@@ -387,9 +402,10 @@ public class RoundManager : MonoBehaviour
         foreach (var arrow in GameObject.FindGameObjectsWithTag("Arrow"))
             Destroy(arrow);
 
-        roundActive = false;
         StartCoroutine(SkipToEndSequence());
     }
+
+    
 
     private IEnumerator SkipToEndSequence()
     {
@@ -410,7 +426,7 @@ public class RoundManager : MonoBehaviour
     
 
 
-
+    /*
     private IEnumerator WaitForItemActivations()
     {
         while (ItemActivationManager.Instance == null)
@@ -419,4 +435,5 @@ public class RoundManager : MonoBehaviour
         while (ItemActivationManager.Instance.IsActive)
             yield return null;
     }
+    */
 }

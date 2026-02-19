@@ -8,6 +8,7 @@ public class ShrinkingRingObstacle : MonoBehaviour
     public Transform centerTarget;
 
     [Header("Ring Generation")]
+    public GameObject destroyEffectPrefab;
     public GameObject segmentPrefab;
     public GameObject ringHolePrefab;
     public int segmentCount = 24;     // number of pieces making the ring
@@ -18,20 +19,31 @@ public class ShrinkingRingObstacle : MonoBehaviour
     [Header("Rotation")]
     public bool autoRotate = true;
     public float rotationSpeed = 60f;
+    public float rotationSpeedCountIncrease = 10f;
 
     [Header("Cleanup")]
-    public AudioClip passThroughSound;
+    public SoundEffect passThroughSound;
+
     public AudioClip expireSound;
     public RingObstacleSpawner owner;
 
     [Header("Player Hit Settings")]
     public float hitRadius = 0.6f;   // When the ring shrinks this close, it hits
     public int damageOnFail = 1;
+    public float ringStayTime = 0.5f;
+
+    [Header("Audio")]
+    [SerializeField] private float pitchStep = 0.05f;
+    public SoundEffect failSound;
 
 
     private List<GameObject> segments = new List<GameObject>();
     private bool completed = false;
     private float currentRadius;
+    private bool shouldShrink;
+    private int ringNumber;
+    private float finalRotationSpeed;
+
 
     void OnEnable()
     {
@@ -43,9 +55,16 @@ public class ShrinkingRingObstacle : MonoBehaviour
         RingHoleTrigger.RingHolePassedThrough -= OnPassedThroughGap;
     }
 
-    void Awake()
+    public void Initialize(int ringNumber)
+    {
+        this.ringNumber = ringNumber;
+        finalRotationSpeed = rotationSpeed + (rotationSpeedCountIncrease * ringNumber);
+    }
+
+    void Start()
     {
         currentRadius = ringRadius;
+        shouldShrink = true;
 
         SpawnRing();
         RandomizeStartRotation();
@@ -54,7 +73,7 @@ public class ShrinkingRingObstacle : MonoBehaviour
     void Update()
     {
         if (autoRotate)
-            transform.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
+            transform.Rotate(Vector3.forward, finalRotationSpeed * Time.deltaTime);
 
         ShrinkTowardsCenter();
     }
@@ -93,12 +112,14 @@ public class ShrinkingRingObstacle : MonoBehaviour
 
     private bool IsInGap(int index, int gapStart)
     {
-        return index >= gapStart && index < gapStart + gapSize;
+        int distance = (index - gapStart + segmentCount) % segmentCount;
+        return distance < gapSize;
     }
+
 
     private void ShrinkTowardsCenter()
     {
-        if (completed) return;
+        if (!shouldShrink) return;
 
         currentRadius -= shrinkSpeed * Time.deltaTime;
 
@@ -121,21 +142,35 @@ public class ShrinkingRingObstacle : MonoBehaviour
         }
     }
 
+
     private void HandleFailedHit()
     {
         completed = true;
+        shouldShrink = false;
+
+        StopAllCoroutines();
 
         // Damage player
         if (Player.Instance != null)
             Player.Instance.DamageSelf(damageOnFail);
 
         // Play expire sound
-        if (expireSound != null)
-            AudioHelpers.PlayMyClipAtPoint(expireSound, AudioChannel.SFX, Camera.main.transform.position);
+        //if (expireSound != null)
+            //AudioHelpers.PlayMyClipAtPoint(expireSound, AudioChannel.SFX, Camera.main.transform.position);\
+        AudioHelpers.PlaySoundEffect(failSound, Camera.main.transform.position);
 
         // Notify owner
         owner?.OnRingResolved(this);
 
+        HandleDestroy();
+    }
+
+    private void HandleDestroy()
+    {
+        if(destroyEffectPrefab != null)
+        {
+            Instantiate(destroyEffectPrefab);
+        }
         // Destroy
         Destroy(gameObject);
     }
@@ -147,24 +182,40 @@ public class ShrinkingRingObstacle : MonoBehaviour
         if (targetRing != gameObject) return;
         completed = true;
 
-        if (passThroughSound != null)
-            AudioHelpers.PlayMyClipAtPoint(passThroughSound, AudioChannel.SFX, Camera.main.transform.position);
+        float pitchScalar = 1.0f + ringNumber * pitchStep;
+        AudioHelpers.PlaySoundEffect(passThroughSound,Camera.main.transform.position, pitchScalar);
 
+        StartCoroutine(ResolveRing());
+    }
+
+    private IEnumerator ResolveRing()
+    {
+        yield return new WaitForSeconds(ringStayTime);
+
+        if (this == null || completed == false)
+            yield break;
+
+        shouldShrink = false;
         foreach (var segment in segments)
         {
+            if (segment == null) continue;
+
             SpikyBall s = segment.GetComponent<SpikyBall>();
             if (s != null)
                 s.FadeOut();
         }
 
+
         owner?.OnRingResolved(this);
-        Destroy(gameObject, 1f);
+        HandleDestroy();
     }
 
     public void OnPlayerHitRing()
     {
         if (completed) return;
         completed = true;
+
+        StopAllCoroutines();
 
         // Fade all segments
         foreach (var segment in segments)
@@ -181,7 +232,9 @@ public class ShrinkingRingObstacle : MonoBehaviour
         // Notify Spawner
         owner?.OnRingResolved(this);
 
-        Destroy(gameObject, 0.5f);
+
+
+        HandleDestroy();
     }
 
 
@@ -201,7 +254,7 @@ public class ShrinkingRingObstacle : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, Random.Range(0f, 360f));
 
         if (autoRotate && Random.value < 0.5f)
-            rotationSpeed = -rotationSpeed;
+            finalRotationSpeed = -finalRotationSpeed;
     }
 
 }

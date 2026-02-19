@@ -9,6 +9,7 @@ public static class TestSession
 
     // Runtime-generated temp asset used for testing
     public static TextAsset tempLevelAsset;
+    public static AudioClip levelMusic;
 
     // Scene to return to after testing
     public static string returnScene = "LevelEditorScene";

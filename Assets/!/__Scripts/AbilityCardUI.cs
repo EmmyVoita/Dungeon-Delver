@@ -8,7 +8,8 @@ using System;
 public class AbilityCardUI : MonoBehaviour
 {
     [Header("UI References")]
-    public Image iconImage;    public TextMeshProUGUI nameText;
+    public Image iconImage;   
+     public TextMeshProUGUI nameText;
     public Image lockImage;
     public string descriptionText;
     public Image highlightFrame;
@@ -29,7 +30,7 @@ public class AbilityCardUI : MonoBehaviour
     [SerializeField] private float idleStartDelay = 0.25f;
 
     [Header("Background Scroll Settings")]
-    [SerializeField] private RawImage backgroundImage;
+    [SerializeField] private Image backgroundImage;
     [SerializeField] private float scrollSpeed = 0.2f;
 
     private Material backgroundMatInstance;
@@ -54,7 +55,7 @@ public class AbilityCardUI : MonoBehaviour
         if (backgroundImage != null && backgroundImage.material != null)
         {
             backgroundMatInstance = Instantiate(backgroundImage.material);
-            backgroundImage.material = backgroundMatInstance;
+            //backgroundImage.material = backgroundMatInstance;
 
             scrollDirection = UnityEngine.Random.insideUnitCircle.normalized * 20f;
             backgroundMatInstance.SetVector("_MainScrollDirection", scrollDirection);
@@ -121,7 +122,9 @@ public class AbilityCardUI : MonoBehaviour
         if (descriptionText != null)
             descriptionText = card.description;
 
-        backgroundImage.material = card.cardMaterial;
+        //backgroundImage.material = card.cardMaterial;
+        if(card.mainImage != null)
+        backgroundImage.sprite = card.mainImage;
 
         SetHighlighted(false);
     }

@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class BossObstacleEffectApplier : MonoBehaviour
 {
+    public bool testBossEffects = false;
     private void OnEnable()
     {
         BossContext.OnEffectEnabled += HandleEffectEnabled;
@@ -29,7 +30,7 @@ public class BossObstacleEffectApplier : MonoBehaviour
     // 2️⃣ New obstacle spawns → apply if effect is active
     private void HandleObstacleSpawned(GameObject obstacle)
     {
-        if (!BossContext.HasEffect(BossEffectType.ModifyObstacles))
+        if (!BossContext.HasEffect(BossEffectType.ModifyObstacles) && !testBossEffects)
             return;
 
         ApplyToObstacle(obstacle);

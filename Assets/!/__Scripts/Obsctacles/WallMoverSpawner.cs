@@ -5,6 +5,7 @@ public class WallMoverSpawner : MonoBehaviour
 {
     [Header("Audio")]
     public SoundEffect spawnBeep;
+    public float audioDelay = 1.0f;
     public float beepPitchStart = 1f;
     public float beepPitchStep = 0.1f;
     private float currentPitch;
@@ -15,6 +16,7 @@ public class WallMoverSpawner : MonoBehaviour
     public float speedMultiplier = 1f;
     public float speedVariation = 0.3f;
     public float lifeDuration = 4f;
+    public float unRegisterDelay = 0.5f;
 
     [Header("Prefab Options")]
     public GameObject[] wallPrefabs;
@@ -49,9 +51,15 @@ public class WallMoverSpawner : MonoBehaviour
             yield return new WaitForSeconds(spawnInterval);
         }
 
-        yield return new WaitForSeconds(lifeDuration);
+        yield return new WaitForSeconds(unRegisterDelay);
         ObstacleManager.Instance.UnregisterObstacle(gameObject);
         Destroy(gameObject);
+    }
+
+    private IEnumerator AudioWithDelay()
+    {
+        yield return new WaitForSeconds(audioDelay);
+        AudioHelpers.PlaySoundEffect(spawnBeep, Camera.main.transform.position, currentPitch);
     }
 
     public void SpawnRandomWall()
@@ -62,7 +70,7 @@ public class WallMoverSpawner : MonoBehaviour
             return;
         }
 
-        AudioHelpers.PlaySoundEffect(spawnBeep, Camera.main.transform.position, currentPitch);
+        StartCoroutine(AudioWithDelay());
 
         currentPitch += beepPitchStep; // increase pitch for next beep
 
@@ -92,6 +100,8 @@ public class WallMoverSpawner : MonoBehaviour
 
         Vector2 chosenDirection = (dirIndex >= 0) ? fireDirections[dirIndex] : Vector2.left;
 
+        bool flipDirection = Random.value > 0.5f;
+
         //if(ScreenShaker.Instance != null)
         //ScreenShaker.Instance.ShakeInDirection(chosenDirection);
 
@@ -102,11 +112,17 @@ public class WallMoverSpawner : MonoBehaviour
             Quaternion.identity
         );
 
+        
+
         // 🔹 Initialize movement
         MovingWall wall = obj.GetComponent<MovingWall>();
         if (wall != null)
         {
             wall.Init(chosenDirection, baseMoveSpeed, lifeDuration, speedMultiplier, speedVariation);
+            if (flipDirection)
+            {
+                obj.transform.Rotate(0f, 0f, 180f);
+            }
         }
         else
         {

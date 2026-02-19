@@ -135,8 +135,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slowTimeEffect: {fileID: 3967248374897181812}
-  slowDuration: 2
-  slowFactor: 0.5
+  slowDuration: 2.5
+  slowFactor: 0.8
   slowSound: {fileID: 8300000, guid: ed5fd421ddeebc149a27ede4450dac66, type: 3}
   spinSprite: {fileID: 736623091069038292}
   targetAlpha: 0.05

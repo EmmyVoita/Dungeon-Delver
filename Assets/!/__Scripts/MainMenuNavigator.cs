@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using System;
 using System.Collections;
 using Unity.VisualScripting;
+using System.Collections.Generic;
 
 public class MainMenuNavigator : BaseMenu
 {
@@ -18,6 +19,7 @@ public class MainMenuNavigator : BaseMenu
 
     [Header("UI Options")]
     public TextMeshProUGUI[] options;
+    public List<RectTransform> otherDepedecies;
     public Color selectedColor = Color.yellow;
     public Color defaultColor = Color.white;
     public float selectedScale = 1.2f;
@@ -73,6 +75,11 @@ public class MainMenuNavigator : BaseMenu
             opt.gameObject.SetActive(true);
         }
 
+        foreach (var dep in otherDepedecies)
+        {
+            dep.gameObject?.SetActive(true);
+        }
+
         UpdateVisuals();
     }
 
@@ -80,6 +87,11 @@ public class MainMenuNavigator : BaseMenu
     {
         foreach (var option in options)
             option.gameObject.SetActive(false);
+
+        foreach (var dep in otherDepedecies)
+        {
+            dep.gameObject?.SetActive(false);
+        }
             
         base.OnClose();
     }

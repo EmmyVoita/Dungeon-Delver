@@ -26,7 +26,7 @@ public class PerfectScoreReward : UpgradeBase, IActivatableUpgrade
 
     private void HandleGameState(GameState previous, GameState current)
     {
-        if (current == GameState.RoundEnd && previous != GameState.RoundEnd && RoundManager.Instance.PerfectRound)
+        if (current == GameState.RoundEnd && previous != GameState.RoundEnd && RoundManager.Instance.stats.PerfectRound)
         {
             AudioHelpers.PlayMyClipAtPoint(bonusSound, AudioChannel.SFX, Camera.main.transform.position);
             ScoreManager.Instance.AddScore(bonusScore, ScoreSource.Bonus);

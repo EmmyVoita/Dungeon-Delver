@@ -1,4 +1,6 @@
+
 using UnityEngine;
+using UnityEngine.UI;
 
 [CreateAssetMenu(menuName = "Ability/Card", fileName = "NewAbilityCard")]
 public class AbilityCard : ScriptableObject
@@ -11,4 +13,5 @@ public class AbilityCard : ScriptableObject
 
     [Header("Visual Settings")]
     public Material cardMaterial; // 👈 assign different materials here
+    public Sprite mainImage;
 }

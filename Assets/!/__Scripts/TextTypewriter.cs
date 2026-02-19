@@ -10,6 +10,7 @@ public class TextTypewriter : MonoBehaviour
     [SerializeField] public TMP_Text textComponent;
     [SerializeField] private string fullText = "GAME OVER";
     [SerializeField] private float typeSpeed = 0.05f;
+    [SerializeField] private bool castToUpperCase = false;
     public AudioClip typeSound;
 
     [Header("Wiggle Settings")]
@@ -37,7 +38,7 @@ public class TextTypewriter : MonoBehaviour
     // ------------------------------------------------------------
     public void StartTyping(string description, Action onComplete = null)
     {
-        fullText = description;
+        fullText = castToUpperCase ? description.ToUpper() : description;
         StopAllCoroutines();
         typingCoroutine = StartCoroutine(TypeText(onComplete));
     }
@@ -49,7 +50,7 @@ public class TextTypewriter : MonoBehaviour
     {
         StopAllCoroutines();
 
-        textComponent.text += extra;
+        textComponent.text += castToUpperCase ? extra.ToUpper() : extra;
         textComponent.ForceMeshUpdate();
         textInfo = textComponent.textInfo;
 
@@ -63,7 +64,7 @@ public class TextTypewriter : MonoBehaviour
     {
         StopAllCoroutines();
 
-        textComponent.text = newText;
+        textComponent.text = castToUpperCase ? newText.ToUpper() : newText;
         textComponent.ForceMeshUpdate();
         textInfo = textComponent.textInfo;
 
@@ -77,7 +78,7 @@ public class TextTypewriter : MonoBehaviour
     {
         StopWiggle();
 
-        textComponent.text = fullText;
+        textComponent.text = castToUpperCase ? fullText.ToUpper() : fullText;
         textComponent.maxVisibleCharacters = 0;
         textComponent.ForceMeshUpdate();
         textInfo = textComponent.textInfo;

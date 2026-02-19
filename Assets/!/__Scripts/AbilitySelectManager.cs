@@ -271,6 +271,10 @@ public class AbilitySelectManager : BaseMenu
                 else
                     descriptionTypewriter.StartTyping("High score required: " + currentCards[i].Card.scoreRequirement);
             }
+
+            var sway = currentCards[i].GetComponent<CardParallaxSway>();
+            if (sway != null)
+                sway.SetActive(isSelected);
                 
         }
 
@@ -323,6 +327,13 @@ public class AbilitySelectManager : BaseMenu
 
         // Store globally
         AbilitySelection.SelectedAbility = card.abilityType;
+
+        GameSceneLoader.PendingConfig = new GameSceneConfig
+        {
+            Mode = GameMode.StandardRun,
+            PracticeObstacle = null,
+            DirectionMode = JumpDirectionMode.FourDirectional
+        };
 
         OnAbilitySelected?.Invoke(SceneNames.ArrowGameScene);
         lockInput = true;

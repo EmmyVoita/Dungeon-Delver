@@ -210,14 +210,24 @@ public class InputBindingManager : MonoBehaviour
         return true;
     }
 
+    
     public bool GetKeyDown(InputActionType action)
     {
         if (!bindings.TryGetValue(action, out var key))
-        return false;
+            return false;
 
         if (key == Key.None || Keyboard.current == null)
             return false;
-            
+
+        // 🔥 BLOCK CONFIRM
+        if (action == InputActionType.Confirm && blockConfirmUntilRelease)
+        {
+            if (!Keyboard.current[key].isPressed)
+                blockConfirmUntilRelease = false;
+
+            return false;
+        }
+
         return Keyboard.current[key].wasPressedThisFrame;
     }
 
@@ -231,4 +241,14 @@ public class InputBindingManager : MonoBehaviour
             
         return Keyboard.current[key].isPressed;
     }
+
+   private bool blockConfirmUntilRelease = false;
+
+    public void BlockConfirmUntilRelease()
+    {
+        blockConfirmUntilRelease = true;
+    }
+
+
+
 }

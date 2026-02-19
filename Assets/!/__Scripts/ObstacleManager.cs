@@ -128,6 +128,7 @@ public class ObstacleManager : MonoBehaviour
     {
         yield return new WaitForSeconds(2f);
         GameObject obj = Instantiate(_spawnObstacle, Vector3.zero, Quaternion.identity);
+        OnObstacleSpawned?.Invoke(obj);  
     }
 
 
@@ -164,6 +165,7 @@ public class ObstacleManager : MonoBehaviour
 
         GameObject obj = Instantiate(_spawnObstacle, Vector3.zero, Quaternion.identity);
         RegisterObstacle(obj);
+        OnObstacleSpawned?.Invoke(obj);
     }
 
 

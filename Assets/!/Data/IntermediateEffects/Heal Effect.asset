@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0747b948a1039ff4ea31a8b5740d1351, type: 3}
   m_Name: Heal Effect
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: 471d6d7addd844f4f96a8e94b2b6d67d, type: 3}
+  icon: {fileID: 1981141228, guid: a6ba92b67f779124bacd62ddb483a5a1, type: 3}
   displayName: Heal
   descriptionTemplate: Heal for <color=#00E676>{HEAL_AMOUNT}</color> health.
-  healAmount: 1
+  healAmount: 2
