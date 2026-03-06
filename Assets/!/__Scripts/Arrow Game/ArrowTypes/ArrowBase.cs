@@ -187,7 +187,7 @@ public abstract class ArrowBase : MonoBehaviour
 
     void HandleRoundEnd(GameState previousState, GameState newState)
     {
-        if (newState != GameState.RoundEnd) return;
+        if (newState != GameState.RoundResultsTally) return;
         Die();
     }
 

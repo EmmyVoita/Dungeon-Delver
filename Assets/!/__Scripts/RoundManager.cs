@@ -65,7 +65,9 @@ public class RoundManager : MonoBehaviour
     [Header("Runtime")]
     [SerializeField] private int currentStageIndex = 0;
     [SerializeField] private int currentLevelIndex = 0;
-    [SerializeField] public RoundStatsTracker stats;
+    public RoundStatsTracker stats = new();
+    public RunStatsTracker runStats = new();
+  
 
 
     private List<TextAsset> currentStageSequence = new();
@@ -107,6 +109,9 @@ public class RoundManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        stats.Reset();
+        runStats.ResetRun();
     }
 
     private void Start()
@@ -116,18 +121,27 @@ public class RoundManager : MonoBehaviour
             return;
 #endif
 
-        if(GameSceneLoader.PendingConfig == null) return;
+        if(GameSceneLoader.PendingConfig == null)
+        {
+            StartStage(currentStageIndex);
+            return;
+        } 
 
         switch(GameSceneLoader.PendingConfig.Mode)
         {
             case GameMode.StandardRun:
-            StartStage(currentStageIndex);
-            break;
+                StartStage(currentStageIndex);
+                break;
             case GameMode.ObstaclePractice:
-            break;
+                break;
             case GameMode.LevelEditorTest:
-            StartCoroutine(PlayTestLevel());
-            break;
+                StartCoroutine(PlayTestLevel());
+                break;
+            case GameMode.LevelEdtiorPlayFromPosition:
+                 StartCoroutine(PlayTestLevel());
+                 break;
+            default:
+                break;
         }
     }
 
@@ -164,6 +178,7 @@ public class RoundManager : MonoBehaviour
         }
 
         stats.Reset();
+        runStats.ResetRun();
 
         CountdownUI.Instance.BeginCountdown(() =>
         {
@@ -181,6 +196,11 @@ public class RoundManager : MonoBehaviour
 
     private void StartStage(int stageIndex)
     {
+        if(stageIndex == 0)
+        {
+            runStats.ResetRun();
+        }
+
         if (stageIndex >= stages.Count)
         {
             return;
@@ -281,7 +301,7 @@ public class RoundManager : MonoBehaviour
         RoundCountdownStartTime = Time.time;
 
         
-        GameStateManager.Instance.SetState(GameState.LevelIntermission);
+        GameStateManager.Instance.SetState(GameState.PreRoundCountdown);
         CountdownUI.Instance.BeginCountdown(() =>
         {
             RoundStartDSP  = AudioSettings.dspTime;
@@ -312,9 +332,20 @@ public class RoundManager : MonoBehaviour
         GameStateManager.Instance.SetState(GameState.RoundActive);
 
 
-        //ArrowSpawner.Instance.LoadPattern(levelFile, bpmBonus);
-        yield return StartCoroutine(ArrowSpawner.Instance.HandleSpawning(levelFile, bpmBonus)
-        );
+
+        if(GameSceneLoader.PendingConfig != null && GameSceneLoader.PendingConfig.Mode == GameMode.LevelEdtiorPlayFromPosition)
+        {
+            Debug.Log($"Level editor starting play from time -> {GameSceneLoader.PendingConfig.levelEditorStartTime}");
+            yield return StartCoroutine(ArrowSpawner.Instance.PlayFromTime(levelFile, 
+                                                                           GameSceneLoader.PendingConfig.levelEditorStartTime, 
+                                                                           bpmBonus));
+        }
+        else
+        {
+            yield return StartCoroutine(ArrowSpawner.Instance.HandleSpawning(levelFile, 
+                                                                             bpmBonus));
+        }
+            
 
 
         // ✅ Wait until obstacles are cleared
@@ -325,7 +356,7 @@ public class RoundManager : MonoBehaviour
 
 
         yield return new WaitForSeconds(roundDelay);
-        GameStateManager.Instance.SetState(GameState.RoundEnd);
+  
 
 
         bool tallyComplete = false;
@@ -335,12 +366,13 @@ public class RoundManager : MonoBehaviour
         void Handler()
         {
             tallyComplete = true;
-            Debug.Log("✅ Round end tally complete.");
-            ScoreTallyController.RoundEndTallyComplete -= Handler;
         }
+
+        GameStateManager.Instance.SetState(GameState.RoundResultsTally);
 
         yield return CoroutineHelpers.WaitUntilOrTimeout(() => tallyComplete, roundEndTimeout);
 
+        ScoreTallyController.RoundEndTallyComplete -= Handler;
 
         if (applyTempBPMBonus)
         {
@@ -348,12 +380,10 @@ public class RoundManager : MonoBehaviour
             applyTempBPMBonus = false;
         }
 
-       
-        //GameStateManager.Instance.SetState(GameState.ItemActivations);
-        //yield return StartCoroutine(WaitForItemActivations());
-
-        GameStateManager.Instance.SetState(GameState.RoundSummary);
-        yield return StartCoroutine(CoroutineHelpers.WaitForConfirm(GameState.RoundSummaryEnd));
+        runStats.AddRound(stats);
+     
+        GameStateManager.Instance.SetState(GameState.RoundResults);
+        yield return StartCoroutine(CoroutineHelpers.WaitForConfirm(GameState.RoundResultsExit));
 
         yield return StartCoroutine(roundStatsUI.PlayOutroAnimations());
 
@@ -411,8 +441,8 @@ public class RoundManager : MonoBehaviour
     {
         OnRoundEnd?.Invoke();
 
-        GameStateManager.Instance.SetState(GameState.RoundSummary);
-        yield return StartCoroutine(CoroutineHelpers.WaitForConfirm(GameState.RoundSummaryEnd));
+        GameStateManager.Instance.SetState(GameState.RoundResults);
+        yield return StartCoroutine(CoroutineHelpers.WaitForConfirm(GameState.RoundResultsExit));
 
         yield return StartCoroutine(roundStatsUI.PlayOutroAnimations());
 

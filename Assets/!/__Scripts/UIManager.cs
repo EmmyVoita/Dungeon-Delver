@@ -65,8 +65,8 @@ public class UIManager : MonoBehaviour
         var kb = Keyboard.current;
         if (kb == null) return;
 
-        if (kb[toggleKey].wasPressedThisFrame && !gameOverCanvas.enabled && settingsCanvas != null)
-            TogglePause();
+        //if (kb[toggleKey].wasPressedThisFrame && !gameOverCanvas.enabled && settingsCanvas != null)
+        //    TogglePause();
     }
 
     public void TogglePause()

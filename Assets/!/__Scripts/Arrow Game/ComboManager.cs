@@ -143,7 +143,7 @@ public class ComboManager : MonoBehaviour
             RequestComboBreak(ComboBreakReason.StateChange, ComboBreakPriority.StateChange);
         }
 
-        if( newState == GameState.RoundEnd)
+        if( newState == GameState.RoundResultsTally)
         {
             ignoreNextMiss = false;
             Destroy(activeShieldObject);

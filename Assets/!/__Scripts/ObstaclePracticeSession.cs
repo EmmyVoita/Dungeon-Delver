@@ -8,7 +8,8 @@ public enum GameMode
 {
     StandardRun,
     ObstaclePractice,
-    LevelEditorTest
+    LevelEditorTest,
+    LevelEdtiorPlayFromPosition
 }
 
 public static class GameSceneLoader
@@ -20,6 +21,7 @@ public static class GameSceneLoader
 public class GameSceneConfig
 {
     public GameMode Mode = GameMode.StandardRun;
+    public float levelEditorStartTime;
     public ObstacleDefinition PracticeObstacle;
     public JumpDirectionMode DirectionMode = JumpDirectionMode.FourDirectional;
 

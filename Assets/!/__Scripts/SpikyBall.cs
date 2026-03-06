@@ -1,9 +1,10 @@
 using UnityEngine;
 using DG.Tweening;
 
-[RequireComponent(typeof(Collider2D), typeof(SpriteRenderer))]
+[RequireComponent(typeof(Collider2D))]
 public class SpikyBall : MonoBehaviour
 {
+    public bool destroyOnHit = true;
     [Header("Visual Effects")]
     public GameObject destroyEffectPrefab;
     public float fadeDuration = 0.2f;      // Quick fade time
@@ -12,7 +13,7 @@ public class SpikyBall : MonoBehaviour
     public AudioClip hitSound;             // Optional
     public float soundPitch = 1f;
 
-    private SpriteRenderer sRend;
+    [SerializeField] private SpriteRenderer sRend;
     private Collider2D col;
     private bool hasBeenHit = false;
 
@@ -20,7 +21,6 @@ public class SpikyBall : MonoBehaviour
 
     void Awake()
     {
-        sRend = GetComponent<SpriteRenderer>();
         col = GetComponent<Collider2D>();
     }
 
@@ -46,7 +46,8 @@ public class SpikyBall : MonoBehaviour
             ring.OnPlayerHitRing();    // <- new function we will add!
         
         // 🔹 Destroy after fade & particle delay
-        FadeOut();
+        if(destroyOnHit)
+            FadeOut();
     }
 
     

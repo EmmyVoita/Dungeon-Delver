@@ -2,9 +2,16 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using UnityEditor;
 
 public class ObstacleManager : MonoBehaviour
 {
+    public enum TestMode
+    {
+        Off,
+        RepeatOnStart
+    }
+
     public static ObstacleManager Instance { get; private set; }
 
     public static event Action OnFirstObstacleAppeared;
@@ -18,6 +25,7 @@ public class ObstacleManager : MonoBehaviour
     // ========================================================
     //  Main Manager Setup
     // ========================================================
+  
     public bool AnyActive => activeObstacles.Count > 0;
     public int ActiveCount => activeObstacles.Count;
     public IEnumerable<GameObject> ActiveObstacles => activeObstacles;
@@ -87,10 +95,24 @@ public class ObstacleManager : MonoBehaviour
 #if UNITY_EDITOR
 
     [Header("Dev Testing")]
+    public TestMode testMode = TestMode.Off;
     [SerializeField] private bool simulateObstacle = false;
     private GameObject _debugObstacle;
 
     [SerializeField] private GameObject _spawnObstacle;
+    [SerializeField] private BossDefinition bossDefinition;
+
+    private void Start()
+    {
+        switch(testMode)
+        {
+            case TestMode.Off:
+            break;
+            case TestMode.RepeatOnStart:
+            StartAutoLoopNow();
+            break;
+        }
+    }
 
 
     // ------------------------------------------------------
@@ -187,6 +209,11 @@ public class ObstacleManager : MonoBehaviour
     private void StartAutoLoopNow()
     {
         autoLoopObstacle = true;
+
+        if (bossDefinition != null)
+        {
+            BossManager.Instance.StartBoss(bossDefinition);
+        }
 
         Debug.Log("Auto-loop ENABLED. Spawning first obstacle…");
 

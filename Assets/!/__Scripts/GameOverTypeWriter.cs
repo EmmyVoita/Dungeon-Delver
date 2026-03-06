@@ -28,14 +28,20 @@ public class GameOverTypewriter : MonoBehaviour
             textComponent = GetComponent<TMP_Text>();
     }
 
-    private void OnEnable() => UIManager.OnGameOverUI += OnGameOver;
-    private void OnDisable() => UIManager.OnGameOverUI -= OnGameOver;
-
-    private void Update()
+    private void Start()
     {
-        // Manual test trigger
-        if (Input.GetKeyDown(KeyCode.Y))
+        //OnGameOver();
+    }
+
+    private void OnEnable() => GameStateManager.OnStateChanged += HandleStateChanged;
+    private void OnDisable() => GameStateManager.OnStateChanged -= HandleStateChanged;
+
+    private void HandleStateChanged(GameState previousState, GameState newState)
+    {
+        if(newState == GameState.GameOver && previousState != newState)
+        {
             OnGameOver();
+        }
     }
 
     private void OnGameOver()

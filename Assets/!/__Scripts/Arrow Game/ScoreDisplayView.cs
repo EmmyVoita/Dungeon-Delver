@@ -21,6 +21,7 @@ public class ScoreDisplayView : MonoBehaviour
     public float popupFlyTime = 0.8f;
     public float popupScale = 1.2f;
     public float popupRadius = 1.0f;
+    public Vector2 popUpSpawnAngle = new Vector2(180,270);
 
     [Header("Score Roll Animation")]
     public float rollDistance = 12f;
@@ -91,7 +92,7 @@ public class ScoreDisplayView : MonoBehaviour
     private void OnEnable()
     {
         ScoreManager.OnScoreUpdated += UpdateScoreInstant;
-        GameStateManager.OnStateChanged += HandleUIState;
+        GameStateManager.OnStateChanged += HandleStateChanged;
         ScoreTallyController.OnTallyTick += HandleTallyTick;
         ScoreTallyController.OnTallyStart += HandleTallyStart;
         ScoreTallyController.OnTallyComplete += HandleTallyComplete;
@@ -100,7 +101,7 @@ public class ScoreDisplayView : MonoBehaviour
     private void OnDisable()
     {
         ScoreManager.OnScoreUpdated -= UpdateScoreInstant;
-        GameStateManager.OnStateChanged -= HandleUIState;
+        GameStateManager.OnStateChanged -= HandleStateChanged;
         ScoreTallyController.OnTallyTick -= HandleTallyTick;
         ScoreTallyController.OnTallyStart -= HandleTallyStart;
         ScoreTallyController.OnTallyComplete -= HandleTallyComplete;
@@ -257,20 +258,12 @@ public class ScoreDisplayView : MonoBehaviour
     }
     
 
-    private void HandleUIState(GameState previous, GameState newState)
+    private void HandleStateChanged(GameState previous, GameState newState)
     {
-        if(showHideOnGameState)
-        {
-            if (newState == GameState.UpgradeSelection)
-            {
-                scoreText.DOColor(Color.clear, 0.3f);
-            }
-
-            if(previous == GameState.UpgradeSelection)
-            {
-                scoreText.DOColor(Color.white, 0.3f);
-            }
-        }
+        if (GameStateEffectManager.ShowScoreUI)
+            scoreText.DOColor(Color.white, 0.3f);
+        else
+            scoreText.DOColor(Color.clear, 0.3f);
     }
 
 
@@ -478,8 +471,8 @@ public class ScoreDisplayView : MonoBehaviour
 
     private Vector3 GetSemiCircleSpawnPos(Transform center, float radius)
     {
-        float angle = UnityEngine.Random.Range(200f, 340f) * Mathf.Deg2Rad;
-        Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle) * 0.5f, 0f) * radius;
+        float angle = UnityEngine.Random.Range(popUpSpawnAngle.x, popUpSpawnAngle.y) * Mathf.Deg2Rad;
+        Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * radius;
         return center.position + offset;
     }
 }

@@ -40,14 +40,16 @@ public class MusicManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        mainSource.playOnAwake = false;
-        mainSource.volume = 0f;
-        mainSource.clip = mainClip;
-
-        if(GameSceneLoader.PendingConfig.Mode == GameMode.LevelEditorTest)
+        if (GameSceneLoader.PendingConfig != null &&
+            (GameSceneLoader.PendingConfig.Mode == GameMode.LevelEditorTest ||
+            GameSceneLoader.PendingConfig.Mode == GameMode.LevelEdtiorPlayFromPosition))
         {
             mainClip = LevelEditorTestMusic;
         }
+
+        mainSource.playOnAwake = false;
+        mainSource.volume = 0f;
+        mainSource.clip = mainClip;  
     }
 
     private void OnEnable()
@@ -69,12 +71,12 @@ public class MusicManager : MonoBehaviour
     private void HandleStateChanged(GameState previous, GameState current)
     {
         if(previous == GameState.Paused || current == GameState.Paused) return;
-        if (current == GameState.RoundActive && previous != GameState.RoundActive || GameSceneLoader.PendingConfig.Mode == GameMode.LevelEditorTest)
+        if (current == GameState.RoundActive && previous != GameState.RoundActive)
         {
             Debug.Log("Round started, scheduling music.");
             StartMusicAt();
         }
-        else if (current == GameState.RoundEnd)
+        else if (current == GameState.RoundResultsTally)
         {
             Debug.Log("Round ended, fading out music.");
             FadeOutAndStop();
@@ -114,8 +116,10 @@ public class MusicManager : MonoBehaviour
         mainSource.enabled = false;
         mainSource.enabled = true;
 
+        float editorOffset = GameSceneLoader.PendingConfig != null ? GameSceneLoader.PendingConfig.levelEditorStartTime : 0;
+
         mainSource.clip = mainClip;
-        mainSource.time = mainTimeOffset;
+        mainSource.time = mainTimeOffset + editorOffset;
         mainSource.volume = 0f;
         mainSource.pitch = 1f;
 

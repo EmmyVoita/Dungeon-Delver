@@ -74,6 +74,7 @@ public class MovingBallsObstacle : MonoBehaviour
         if (registered && ObstacleManager.Instance != null)
         {
             ObstacleManager.Instance.UnregisterObstacle(gameObject);
+            Destroy(this.gameObject);
         }
     }
 

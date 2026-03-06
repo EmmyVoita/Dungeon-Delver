@@ -8,7 +8,7 @@ public class GameOverHandler : MonoBehaviour
     {
         Debug.Log("Game Over!");
         //HighScoreManager.SaveScore(finalScore);
-         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        // SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         //StartCoroutine(RestartAfterDelay());
     }
 

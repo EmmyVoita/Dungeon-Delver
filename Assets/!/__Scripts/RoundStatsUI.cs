@@ -31,6 +31,9 @@ public enum StatValueType
     ScoreSource,   // comes from ScoreManager breakdown
     TotalScore,
     Hits,
+    RunHits,
+    RunTotalScore,
+    RunHighestCombo,
 }
 
 
@@ -145,7 +148,7 @@ public class RoundStatsUI : MonoBehaviour
 
     void ShowStats(GameState previousState, GameState newState)
     {
-        if(newState != GameState.RoundSummary || 
+        if(newState != GameState.RoundResults || 
            previousState == GameState.Paused) 
            return;
 
@@ -159,8 +162,8 @@ public class RoundStatsUI : MonoBehaviour
 
     void Update()
     {
-        if(GameStateManager.Instance.CurrentState != GameState.RoundSummary && 
-           GameStateManager.Instance.CurrentState != GameState.RoundSummaryEnd) 
+        if(GameStateManager.Instance.CurrentState != GameState.RoundResults && 
+           GameStateManager.Instance.CurrentState != GameState.RoundResultsExit) 
            return;
 
         if (!acceptInput) return;
@@ -169,12 +172,12 @@ public class RoundStatsUI : MonoBehaviour
         {
             Debug.Log("Continue pressed on Round Summary screen." + $"Gamestate: {GameStateManager.Instance.CurrentState} ");
             // If still animating → request skip
-            if (GameStateManager.Instance.CurrentState == GameState.RoundSummary)
+            if (GameStateManager.Instance.CurrentState == GameState.RoundResults)
             {
                 skipRequested = true;
             }
             // If animation finished → proceed
-            else if (GameStateManager.Instance.CurrentState == GameState.RoundSummaryEnd)
+            else if (GameStateManager.Instance.CurrentState == GameState.RoundResultsExit)
             {
                 StartCoroutine(PlayOutroAnimations());
                 ScreenDimmerManager.Instance.RemoveDimSource("roundstats");
@@ -352,7 +355,7 @@ public class RoundStatsUI : MonoBehaviour
            
         yield return new WaitForSeconds(acceptInputDelay);
 
-        GameStateManager.Instance.SetState(GameState.RoundSummaryEnd);
+        GameStateManager.Instance.SetState(GameState.RoundResultsExit);
     }
 
     public IEnumerator PlayOutroAnimations()

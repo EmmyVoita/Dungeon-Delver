@@ -71,11 +71,22 @@ public class TimelineGridGraphic : MaskableGraphic
             //-----------------------------
             if (showEighthBeats)
             {
-                float eighth = secondsPerBeat * 0.5f;
-                float halfTime = beatTime + eighth;
+                float e1 = beatTime + secondsPerBeat * 0.125f;
+                float e2 = beatTime + secondsPerBeat * 0.375f;
+                float e3 = beatTime + secondsPerBeat * 0.625f;
+                float e4 = beatTime + secondsPerBeat * 0.875f;
 
-                if (halfTime <= maxTime)
-                    AddVerticalLine(vh, halfTime * pixelsPerSecond, eighthTickHeight, eighthColor);
+                if (e1 <= maxTime)
+                    AddVerticalLine(vh, e1 * pixelsPerSecond, eighthTickHeight, eighthColor);
+
+                if (e2 <= maxTime)
+                    AddVerticalLine(vh, e2 * pixelsPerSecond, eighthTickHeight, eighthColor);
+
+                if (e3 <= maxTime)
+                    AddVerticalLine(vh, e3 * pixelsPerSecond, eighthTickHeight, eighthColor);
+
+                if (e4 <= maxTime)
+                    AddVerticalLine(vh, e4 * pixelsPerSecond, eighthTickHeight, eighthColor);
             }
         }
     }

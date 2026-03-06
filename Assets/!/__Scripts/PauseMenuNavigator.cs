@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using System;
 using System.Collections;
 using Unity.VisualScripting;
+using System.Collections.Generic;
 
 public class PauseMenuNavigator : BaseMenu
 {
@@ -13,6 +14,7 @@ public class PauseMenuNavigator : BaseMenu
     public static Action OnRestart;
 
     
+    //public List<GameState> ignorePauseStates;
 
     [Header("UI Options")]
     public RectTransform pauseMenuUI;
@@ -97,7 +99,9 @@ public class PauseMenuNavigator : BaseMenu
 
     void Update()
     {
-        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Back) && !pauseMenuUI.gameObject.activeSelf)
+        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Back) 
+           && !pauseMenuUI.gameObject.activeSelf
+           && GameStateEffectManager.PauseAllowed)
         {
             OnOpen();
             pauseMenuUI.gameObject.SetActive(true);
@@ -203,7 +207,7 @@ public class PauseMenuNavigator : BaseMenu
                         StartCoroutine(ResumeSequence());
                     });
                 }
-                else if (GameStateManager.Instance.PreviousState == GameState.LevelIntermission)
+                else if (GameStateManager.Instance.PreviousState == GameState.PreRoundCountdown)
                 {
                     TimeManager.Instance.Resume();
                     RoundManager.Instance.SetupAndStartRound();

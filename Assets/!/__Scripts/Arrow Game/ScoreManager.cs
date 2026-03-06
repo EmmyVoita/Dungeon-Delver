@@ -25,6 +25,7 @@ public class ScoreManager : MonoBehaviour
     private string saveFilePath;
 
     public int RoundScoreTotal => CalculateTotalScore();
+    public int GameScoreTotal => currentScore;
 
     private void OnEnable()
     {
@@ -55,7 +56,7 @@ public class ScoreManager : MonoBehaviour
 
     private void HandleGameStateChange(GameState previous, GameState current)
     {
-        if (previous == GameState.RoundSummaryEnd && current != GameState.RoundSummaryEnd)
+        if (previous == GameState.RoundResultsExit && current != GameState.RoundResultsExit)
         {
             ResetBreakdown();
         }

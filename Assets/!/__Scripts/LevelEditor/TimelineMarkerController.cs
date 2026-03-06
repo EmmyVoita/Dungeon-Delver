@@ -25,6 +25,7 @@ public class TimelineMarkerController : MonoBehaviour
 
 
     [Header("Settings")]
+    public bool showEighthBeats = false;
     public bool showQuarterBeats = true;
     public float markerOffsetY = 75f;
     private List<TimelineMarker> markers = new();
@@ -177,6 +178,17 @@ public class TimelineMarkerController : MonoBehaviour
                 snapTimes.Add(i + 0.25f);
                 snapTimes.Add(i + 0.50f);
                 snapTimes.Add(i + 0.75f);
+            }
+        }
+
+        if(showEighthBeats)
+        {
+            for (int i = 0; i <= wholeCount; i++)
+            {
+                snapTimes.Add(i + 0.125f);
+                snapTimes.Add(i + 0.375f);
+                snapTimes.Add(i + 0.625f);
+                snapTimes.Add(i + 0.875f);
             }
         }
 

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 263579585914177324}
   - component: {fileID: 448539986581811807}
   - component: {fileID: 526128509702738997}
+  - component: {fileID: 9021624449726765114}
   m_Layer: 0
   m_Name: VE_FallingBreakableHitEffect
   m_TagString: Untagged
@@ -55,7 +56,7 @@ VisualEffect:
       - m_Value: 2.25
         m_Name: Size
         m_Overridden: 1
-      - m_Value: 0.3
+      - m_Value: 1
         m_Name: Spawn Radius
         m_Overridden: 1
       - m_Value: 0.75
@@ -205,6 +206,22 @@ VFXRenderer:
   m_SortingLayer: -1
   m_SortingOrder: -100
   m_MaskInteraction: 0
+--- !u!114 &9021624449726765114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 812096446077587059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1ac467f0417cb34986189b4098653fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfx:
+  - {fileID: 448539986581811807}
+  playEventName: OnPlay
+  safetyLifetime: 5
 --- !u!1 &5437969112031451050
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,7 +276,7 @@ VisualEffect:
       - m_Value: 2.25
         m_Name: Size
         m_Overridden: 1
-      - m_Value: 0.2
+      - m_Value: 1
         m_Name: Spawn Radius
         m_Overridden: 1
       - m_Value: 0.75

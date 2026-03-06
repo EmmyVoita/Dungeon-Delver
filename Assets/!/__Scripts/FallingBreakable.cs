@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class FallingBreakable : MonoBehaviour
 {
+    public FallingBreakableSpawner owner;
     public float moveSpeed = 1f;
     public int maxHealth = 3;
     public int projectileCount = 3;
@@ -38,6 +39,7 @@ public class FallingBreakable : MonoBehaviour
 
     private float health;
     private bool notBroken;
+    public float Health => health;
 
     void Start()
     {
@@ -116,7 +118,7 @@ public class FallingBreakable : MonoBehaviour
             yield return new WaitForSeconds(projectileInterval);
         }
 
-        Destroy(gameObject);
+        KillBreakable();
     }
 
 
@@ -142,5 +144,22 @@ public class FallingBreakable : MonoBehaviour
                 Break();
             }
         }
+
+        if(col.transform.tag == "Player")
+        {
+            KillBreakable();
+        }
+    }
+
+    public void ForceKill()
+    {
+        StopAllCoroutines();
+        KillBreakable();
+    }
+
+    private void KillBreakable()
+    {
+        owner?.NotifyBreakableDestroyed(this);
+        Destroy(gameObject);
     }
 }

@@ -20,15 +20,6 @@ public class Player : MonoBehaviour
     public static event System.Action<PlayerControlState> OnControlStateChanged;
 
 
-
-    /*
-    public enum JumpInputMode
-    {
-        Normal,
-        Override
-    }
-    */
-
     public enum PlayerControlState
     {
         Normal,
@@ -178,7 +169,7 @@ public class Player : MonoBehaviour
 
     public int MaxAbilityCharge
     {
-        get { return (int) UpgradeManager.Instance.ModifyAbilityCost(_maxAbilityCharge); }
+        get { return UpgradeManager.Instance != null ? (int) UpgradeManager.Instance.ModifyAbilityCost(_maxAbilityCharge) : 0; }
         set { _maxAbilityCharge = value; }
     }   
 
@@ -269,6 +260,8 @@ public class Player : MonoBehaviour
         if (FullyLocked)
             return;
 
+        if(!GameStateEffectManager.PlayerInputEnabled) return;
+
         if (_useEightDirections)
         {
             if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveUp)) dir += Vector2.up;
@@ -302,9 +295,10 @@ public class Player : MonoBehaviour
         // Ability usage
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.UseAbility) && 
            FullAbilityCharge
-           && !lockInput 
-           && (GameStateManager.Instance.CurrentState == GameState.RoundActive ||
-           GameStateManager.Instance.CurrentState == GameState.Tutorial))
+           && !lockInput)
+           //&& GameStateEffectManager.PlayerInputEnabled)
+           //&& (GameStateManager.Instance.CurrentState == GameState.RoundActive ||
+           //GameStateManager.Instance.CurrentState == GameState.Tutorial))
         {
             AbilityCharge -= MaxAbilityCharge;
             OnAbilityUsed?.Invoke();
@@ -341,6 +335,7 @@ public class Player : MonoBehaviour
 
     void PerformJump(Vector2 dir)
     {
+        //UIToast.Show("Performing Jump", 1);
         AudioHelpers.PlayMyClipAtPoint(boostSound, AudioChannel.SFX, Camera.main.transform.position);
 
         // Use last direction if no input
@@ -350,7 +345,9 @@ public class Player : MonoBehaviour
         jumpAxis = inputDir;  // store jump direction
         isJumping = true;
 
-        jumpElapsedTime = 0f;  // 🔹 Reset here
+        hoverActive = true;        // Hover is allowed at start
+        hoverLockedOut = false;    // Not locked yet
+        jumpElapsedTime = 0f;
 
         rb.linearVelocity = jumpAxis * jumpForce;
 
@@ -645,6 +642,9 @@ public class Player : MonoBehaviour
         if (DevCheats.Invincible)
             return;
 
+        if(!GameStateEffectManager.PlayerDamageAllowed)
+            return;
+
         OnPreDamageTaken?.Invoke(damage);
 
         int finalDamage = UpgradeManager.Instance.ModifyDamageTaken(damage);
@@ -666,12 +666,12 @@ public class Player : MonoBehaviour
         }
 
         spriteObj.GetComponent<PlayerSpriteShaker>()?.Shake(hitShakeStrength, hitShakeDuration);
-
-        Debug.Log($"❤️ Player took damage at level time {Time.time - RoundManager.Instance.RoundStartTime}s. Current health: {Health}/{MaxHealth}");
     }
 
     private Vector2 lastToCenter;
     private Vector2 lastPosition;
+    private bool hoverActive;
+    private bool hoverLockedOut;
 
     void ApplySmartGravity()
     {
@@ -685,16 +685,36 @@ public class Player : MonoBehaviour
         Vector2 toCenterDir = currentToCenter.normalized;
 
         float outwardDot = Vector2.Dot(rb.linearVelocity, -toCenterDir);
+        //bool jumpHeld = InputBindingManager.Instance.GetKeyInput(InputActionType.Jump);
+       
+
         bool jumpHeld = InputBindingManager.Instance.GetKeyInput(InputActionType.Jump);
 
-        if (jumpHeld)
+        // If they release jump while rising, permanently disable hover
+        if (!jumpHeld && hoverActive)
+        {
+            hoverLockedOut = true;
+        }
+
+        // Hover only works if:
+        // - jump is held
+        // - not locked out
+        // - within hold time
+        bool canHover = jumpHeld && !hoverLockedOut && jumpElapsedTime <= maxJumpHoldTime;
+
+        if (canHover)
+        {
             jumpElapsedTime += Time.deltaTime;
+        }
+
+         //UIToast.Show($"Jump Being Held -> {jumpHeld}", 0.05f);
 
         if (outwardDot < 0f)
         {
             rb.linearVelocity += toCenterDir * fallMultiplier * Time.deltaTime;
         }
-        else if (outwardDot > 0f && (!jumpHeld || jumpElapsedTime > maxJumpHoldTime))
+        //else if (outwardDot > 0f && (!jumpHeld || jumpElapsedTime > maxJumpHoldTime))
+        else if (outwardDot > 0f && !canHover)
         {
             rb.linearVelocity += toCenterDir * lowJumpMultiplier * Time.deltaTime;
         }
@@ -709,6 +729,8 @@ public class Player : MonoBehaviour
             rb.position = centerPosition;
             isJumping = false;
             lastToCenter = Vector2.zero;
+            hoverActive = false;
+            hoverLockedOut = false;
             return;
         }
 

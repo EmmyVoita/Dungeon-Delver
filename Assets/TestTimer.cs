@@ -46,7 +46,7 @@ public class TestTimer : MonoBehaviour
                 $"DSP start       = {startDSP}"
             );
         }
-        else if (current == GameState.RoundEnd)
+        else if (current == GameState.RoundResultsTally)
         {
             running = false;
         }

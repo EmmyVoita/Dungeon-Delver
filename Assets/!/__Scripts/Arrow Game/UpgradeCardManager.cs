@@ -139,7 +139,7 @@ public class UpgradeCardManager : MonoBehaviour
     public void ShowCardChoices(int count = 3)
     {
         Debug.Log("▶ Showing upgrade card choices...");
-        ScreenDimmerManager.Instance.AddDimSource("upgrade");
+        //ScreenDimmerManager.Instance.AddDimSource("upgrade");
         descriptionBox.gameObject.SetActive(true);
 
         CleanupCards();
@@ -267,7 +267,6 @@ public class UpgradeCardManager : MonoBehaviour
         UpgradeCardUI cardUI = currentCards[selectedIndex];
 
         AudioSettingsManager.PlaySelectSound();
-        ScreenDimmerManager.Instance.RemoveDimSource("upgrade");
 
         cardUI.PlaySelectAnimation(() =>
         {
@@ -303,7 +302,6 @@ public class UpgradeCardManager : MonoBehaviour
         titleBox.gameObject.SetActive(false);
         Player.Instance.HealPlayer(1);
         AudioSettingsManager.PlaySelectSound();
-        ScreenDimmerManager.Instance.RemoveDimSource("upgrade");
         descriptionBox.gameObject.SetActive(false);
         UpgradeSelectionComplete?.Invoke();
     }

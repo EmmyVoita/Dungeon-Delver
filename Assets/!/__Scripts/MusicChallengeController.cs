@@ -6,7 +6,7 @@ public class MusicChallengeController : MonoBehaviour
     [Header("Fade Settings")]
     [SerializeField] private float fadeOutDuration = 0.25f;
     [SerializeField] private float fadeInDuration = 0.35f;
-    [SerializeField] private float fadedVolume = 0.35f;
+    [SerializeField] private float fadedVolumeMult = 0.8f;
 
     private Tween mainTween;
 
@@ -32,7 +32,7 @@ public class MusicChallengeController : MonoBehaviour
         mainTween = DOTween.To(
             () => AudioSettingsManager.Instance.musicVolume,
             v => music.SetMainVolume(v),
-            fadedVolume,
+            fadedVolumeMult * AudioSettingsManager.Instance.musicVolume,
             fadeOutDuration
         );
     }
@@ -45,7 +45,7 @@ public class MusicChallengeController : MonoBehaviour
         mainTween?.Kill();
 
         mainTween = DOTween.To(
-            () => fadedVolume,
+            () => fadedVolumeMult * AudioSettingsManager.Instance.musicVolume,
             v => music.SetMainVolume(v),
             AudioSettingsManager.Instance.musicVolume,
             fadeInDuration

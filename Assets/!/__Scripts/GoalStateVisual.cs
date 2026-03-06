@@ -8,11 +8,21 @@ public class GoalStateVisual : MonoBehaviour
     public Sprite shooterSprite;
     public Sprite lockedShooterSprite;
 
+    [Header("Scale Per State")]
+    public Vector3 normalScale = Vector3.one;
+    public Vector3 shooterScale = Vector3.one * 1.1f;
+    public Vector3 lockedShooterScale = Vector3.one * 0.9f;
+
+    [Header("Scale Transition")]
+    public float scaleLerpSpeed = 8f;
+
     private SpriteRenderer sRend;
+    private Vector3 targetScale;
 
     void Awake()
     {
         sRend = GetComponent<SpriteRenderer>();
+        targetScale = transform.localScale;
     }
 
     void OnEnable()
@@ -27,8 +37,18 @@ public class GoalStateVisual : MonoBehaviour
 
     void Start()
     {
-        // Sync initial state
         HandleStateChanged(Player.Instance.playerControlState);
+        transform.localScale = targetScale;
+    }
+
+    void Update()
+    {
+        // Smoothly interpolate toward target scale
+        transform.localScale = Vector3.Lerp(
+            transform.localScale,
+            targetScale,
+            Time.deltaTime * scaleLerpSpeed
+        );
     }
 
     private void HandleStateChanged(Player.PlayerControlState state)
@@ -37,14 +57,17 @@ public class GoalStateVisual : MonoBehaviour
         {
             case Player.PlayerControlState.Normal:
                 sRend.sprite = normalSprite;
+                targetScale = normalScale;
                 break;
 
             case Player.PlayerControlState.Shooter:
                 sRend.sprite = shooterSprite;
+                targetScale = shooterScale;
                 break;
 
             case Player.PlayerControlState.LockedShooter:
                 sRend.sprite = lockedShooterSprite;
+                targetScale = lockedShooterScale;
                 break;
         }
     }

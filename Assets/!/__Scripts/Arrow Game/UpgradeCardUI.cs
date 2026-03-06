@@ -29,7 +29,7 @@ public class UpgradeCardUI : MonoBehaviour
     [SerializeField] private float idleStartDelay = 0.25f;
 
     [Header("Background Scroll Settings")]
-    [SerializeField] private RawImage backgroundImage;
+    [SerializeField] private Image backgroundImage;
     [SerializeField] private float scrollSpeed = 0.2f;
 
     private Material backgroundMatInstance;

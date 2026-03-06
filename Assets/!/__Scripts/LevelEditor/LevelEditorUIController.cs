@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor;
 
 public class LevelEditorUIController : MonoBehaviour
 {
@@ -10,9 +11,6 @@ public class LevelEditorUIController : MonoBehaviour
     public TMP_InputField levelFileInput;
     public Button loadLevelButton;
 
-    [Header("Editor Components")]
-    public LevelEditorData editorData;
-    public EditorPlaybackController playbackController;
 
     void Start()
     {
@@ -31,14 +29,14 @@ public class LevelEditorUIController : MonoBehaviour
             {
                 Debug.Log("🔄 Loading temp test level from memory");
 
-                editorData.LoadLevelFromText(
+                LevelEditorData.Instance.LoadLevelFromText(
                     TestSession.tempLevelAsset.text
                 );
             }
 
             if (TestSession.originalLevelAsset != null)
             {
-                editorData.currentLevelAsset =
+                LevelEditorData.Instance.currentLevelAsset =
                     TestSession.originalLevelAsset;
 
                 levelFileInput.text =
@@ -46,9 +44,9 @@ public class LevelEditorUIController : MonoBehaviour
             }
 
             LevelTimelineUI.Instance.BuildTimeline();
-            playbackController.BuildSimulatedArrows();
-            playbackController.Stop();
-            playbackController.JumpToTime(0);
+            EditorPlaybackController.Instance.BuildSimulatedArrows();
+            EditorPlaybackController.Instance.Stop();
+            EditorPlaybackController.Instance.JumpToTime(0);
 
             Debug.Log("✅ Editor restored from test session");
         }
@@ -75,13 +73,13 @@ public class LevelEditorUIController : MonoBehaviour
             return;
         }
 
-        editorData.LoadLevelFromText(level.text);
-        editorData.currentLevelAsset = level;
+        LevelEditorData.Instance.LoadLevelFromText(level.text);
+        LevelEditorData.Instance.currentLevelAsset = level;
 
         LevelTimelineUI.Instance.BuildTimeline();
-        playbackController.BuildSimulatedArrows();
-        playbackController.Stop();
-        playbackController.JumpToTime(0);
+        EditorPlaybackController.Instance.BuildSimulatedArrows();
+        EditorPlaybackController.Instance.Stop();
+        EditorPlaybackController.Instance.JumpToTime(0);
 
         if(UIToast.Instance != null) UIToast.Show($"✅ Loaded level asset: {level.name}");
         AudioSettingsManager.PlayGeneralButtonSound();
@@ -92,7 +90,7 @@ public class LevelEditorUIController : MonoBehaviour
     // ------------------------------------------------------
     public void OnClick_TestLevel()
     {
-        if (editorData.currentLevelAsset == null)
+        if (LevelEditorData.Instance.currentLevelAsset == null)
         {
             UIToast.Error("No level loaded to test");
             AudioSettingsManager.PlayNegativeUISound();
@@ -103,11 +101,11 @@ public class LevelEditorUIController : MonoBehaviour
 
         // Save original
         TestSession.originalLevelAsset =
-            editorData.currentLevelAsset;
+           LevelEditorData.Instance.currentLevelAsset;
 
         // Create a TEMP runtime TextAsset from editor state
         string serializedLevel =
-            editorData.SerializeToString();
+            LevelEditorData.Instance.SerializeToString();
 
         TestSession.tempLevelAsset =
             new TextAsset(serializedLevel);
@@ -120,6 +118,48 @@ public class LevelEditorUIController : MonoBehaviour
         {
             Mode = GameMode.LevelEditorTest,
             PracticeObstacle = null,
+            DirectionMode = JumpDirectionMode.FourDirectional
+        };
+
+        Debug.Log("▶ Starting test session with in-memory level");
+
+        UnityEngine.SceneManagement.SceneManager
+            .LoadScene("ArrowGameScene");
+    }
+
+    public void OnClick_TestLevelFromPosition()
+    {
+        if (LevelEditorData.Instance.currentLevelAsset == null)
+        {
+            UIToast.Error("No level loaded to test");
+            AudioSettingsManager.PlayNegativeUISound();
+            return;
+        }
+
+        TestSession.levelMusic = EditorPlaybackController.Instance.LevelEditorTestMusic;
+
+
+
+        // Save original
+        TestSession.originalLevelAsset =
+           LevelEditorData.Instance.currentLevelAsset;
+
+        // Create a TEMP runtime TextAsset from editor state
+        string serializedLevel =
+            LevelEditorData.Instance.SerializeToString();
+
+        TestSession.tempLevelAsset =
+            new TextAsset(serializedLevel);
+
+        TestSession.runSingleLevel = true;
+        TestSession.returnScene =
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
+        GameSceneLoader.PendingConfig = new GameSceneConfig
+        {
+            Mode = GameMode.LevelEdtiorPlayFromPosition,
+            PracticeObstacle = null,
+            levelEditorStartTime = EditorPlaybackController.Instance.CurrentTime,
             DirectionMode = JumpDirectionMode.FourDirectional
         };
 

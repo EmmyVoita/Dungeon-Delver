@@ -1,17 +1,14 @@
 public enum GameState
 {
+    None,
     Tutorial,
-    Countdown,
-    Playing,
-    WaitingForObstacles,
-    RoundEnd,
-    RoundSummary,
-    RoundSummaryEnd,
+    RoundResultsTally,
+    RoundResults,
+    RoundResultsExit,
     UpgradeSelection,
     ItemActivations,
-    Transitioning,
     RoundActive,
     Paused,        // optional
-    TestMode,       // optional
-    LevelIntermission
+    PreRoundCountdown,
+    GameOver,
 }

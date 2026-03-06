@@ -47,5 +47,15 @@ public class BossObstacleEffectApplier : MonoBehaviour
                     s.StartChallenge();
             }
         }
+
+        var fallingBreakables = obstacle.GetComponentsInChildren<FallingBreakableSpawner>();
+        if(fallingBreakables != null)
+        {
+            foreach (var fb in fallingBreakables)
+            {
+                if(fb.LifetimeSetting == FallingBreakableSpawner.LifetimeMode.External)
+                    fb.StartChallenge();
+            }
+        }
     }
 }

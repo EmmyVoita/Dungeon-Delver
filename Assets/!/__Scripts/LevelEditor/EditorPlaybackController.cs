@@ -8,7 +8,6 @@ public class EditorPlaybackController : MonoBehaviour
 
     [Header("References")]
     public ArrowSpawner arrowSpawner;     
-    public LevelEditorData editorData;   
 
 
     [Header("Playback State")]
@@ -31,13 +30,23 @@ public class EditorPlaybackController : MonoBehaviour
     public float CurrentTime => currentTime;
     public bool SuppressSimulationAudio { get; private set; }
 
-
-
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
 
 
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
+
         musicSource.clip = editorMusic;
         musicSource.playOnAwake = false;
         musicSource.loop = true;
@@ -48,13 +57,14 @@ public class EditorPlaybackController : MonoBehaviour
     // ---------------------------------------------------------
     void Update()
     {
+        Time.timeScale = 1.0f;
         if (!isPlaying)
             return;
 
         currentTime += Time.deltaTime * playSpeed;
 
         // Clamp to end of timeline
-        if (currentTime > editorData.MaxTime)
+        if (currentTime > LevelEditorData.Instance.MaxTime)
         {
             currentTime = 0f;
 
@@ -95,7 +105,7 @@ public class EditorPlaybackController : MonoBehaviour
         simulatedArrows.Clear();
 
         // Convert → simulation events
-        List<ArrowEvent> simEvents = editorData.ConvertToSimulatedEvents(SpawnDistance);
+        List<ArrowEvent> simEvents = LevelEditorData.Instance.ConvertToSimulatedEvents(SpawnDistance);
 
         foreach (var evt in simEvents)
         {
@@ -146,14 +156,17 @@ public class EditorPlaybackController : MonoBehaviour
     {
         SuppressSimulationAudio = true;
 
-        currentTime = Mathf.Clamp(t, 0f, editorData.MaxTime);
+        currentTime = Mathf.Clamp(t, 0f, LevelEditorData.Instance.MaxTime);
 
         foreach (var sim in simulatedArrows)
             sim.Simulate(currentTime);
 
-        if (musicSource != null && musicSource.clip != null)
+        Debug.Log($"Clip? {musicSource.clip}, Length: {(musicSource.clip ? musicSource.clip.length : -1)}");
+
+        if (musicSource != null && musicSource.clip != null && musicSource.clip.length > 0f)
         {
-            musicSource.time = currentTime;
+            float safeTime = Mathf.Clamp(currentTime, 0f, musicSource.clip.length - 0.01f);
+            musicSource.time = safeTime;
         }
 
         SuppressSimulationAudio = false;
@@ -180,17 +193,17 @@ public class EditorPlaybackController : MonoBehaviour
 
     public void SyncMusicToTime()
     {
-        if (musicSource == null || !musicSource.clip)
+        if (musicSource == null || musicSource.clip == null || musicSource.clip.length <= 0f)
             return;
 
         float offset = LevelEditorData.Instance.SongOffsetSeconds;
         float targetTime = Mathf.Max(0f, currentTime + offset);
-        targetTime %= musicSource.clip.length; // loop within clip length
+        targetTime %= musicSource.clip.length;
 
-        musicSource.time = Mathf.Min(
-            targetTime,
-            musicSource.clip.length
-        );
+        float safeTime = Mathf.Clamp(targetTime, 0f, musicSource.clip.length - 0.01f);
+        musicSource.time = safeTime;
+
+        UIToast.Show($"safeTime -> {safeTime}");
     }
 
 
@@ -203,7 +216,13 @@ public class EditorPlaybackController : MonoBehaviour
     public void Stop()
     {
         isPlaying = false;
-        musicSource.Stop();
-        JumpToTime(0f);
+
+        if (musicSource.isPlaying)
+            musicSource.Stop();
+
+        currentTime = 0f;
+
+        foreach (var sim in simulatedArrows)
+            sim.Simulate(currentTime);
     }
 }

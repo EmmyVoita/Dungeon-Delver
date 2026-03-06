@@ -173,6 +173,29 @@ public class ArrowSpawner : MonoBehaviour
         OnClearArrows?.Invoke();
     }
 
+    public IEnumerator PlayFromTime(TextAsset patternAsset, float startTime, float bpmModifier = 0f)
+    {
+        StopAllSpawning();
+        ClearAllArrows();
+
+       
+
+        stopRequested = false;
+
+        LoadPattern(patternAsset, bpmModifier);
+
+        lastDSPTime = AudioSettings.dspTime;
+        scaledSongTime = startTime;
+
+         IsSpawning = true;
+
+        currentIndex = FindStartingIndex(startTime);
+
+        spawnCoroutine = StartCoroutine(SpawnFromPattern(startTime));
+        yield return spawnCoroutine;
+        IsSpawning = false;
+    }
+
     // --------------------------------------------------
     public void LoadPattern(TextAsset patternAsset, float bpmModifier = 0f)
     {
@@ -317,9 +340,9 @@ public class ArrowSpawner : MonoBehaviour
 
 
     // --------------------------------------------------
-    private IEnumerator SpawnFromPattern()
+    private IEnumerator SpawnFromPattern(float startTime = 0)
     {
-        int index = 0;
+        int index = FindStartingIndex(startTime);
 
         UIToast.Show($"🚀 SpawnFromPattern start Time {RoundManager.Instance.RoundStartTime - Time.time}");
 
@@ -349,23 +372,23 @@ public class ArrowSpawner : MonoBehaviour
 
             float elapsed = scaledSongTime;
 
-            /*
-            float elapsed = (float)(
-                AudioSettings.dspTime
-                - RoundManager.Instance.RoundStartDSP
-                - accumulatedPauseDSP
-            );
-            */
-
-
-            
-
             index = SpawnReadyEvents(index, elapsed);
 
             yield return null;
         }
 
         UIToast.Show("✅ SpawnFromPattern finished normally.");
+    }
+
+    private int FindStartingIndex(float targetTime)
+    {
+        for (int i = 0; i < patternEvents.Count; i++)
+        {
+            if (patternEvents[i].time >= targetTime)
+                return i;
+        }
+
+        return patternEvents.Count;
     }
 
     private int SpawnReadyEvents(int startIndex, float elapsed)

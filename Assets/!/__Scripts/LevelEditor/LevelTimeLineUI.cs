@@ -138,6 +138,24 @@ public class LevelTimelineUI : MonoBehaviour
         }
     }
 
+    private float SnapBeats(float rawBeats)
+    {
+        switch (snapMode)
+        {
+            case SnapMode.None:
+                return rawBeats;
+
+            case SnapMode.Quarter:
+                return Mathf.Round(rawBeats);
+
+            case SnapMode.Eighth:
+                return Mathf.Round(rawBeats * 2f) / 2f;
+
+            default:
+                return rawBeats;
+        }
+    }
+
     // Building the timeline
     // ----------------------------------------------------------
 
