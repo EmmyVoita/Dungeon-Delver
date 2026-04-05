@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1834395925374464629
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 935579989460806339}
+  - component: {fileID: 1380817206229774372}
+  m_Layer: 0
+  m_Name: OrbEncounter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &935579989460806339
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1834395925374464629}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.21318, y: 1.50211, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1380817206229774372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1834395925374464629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b1fa711eea39d445af2bc8a56c15539, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CornerOrbEncounter
+  config:
+    maxLanes: 5
+    laneSpacing: 1.25
+    laneMoveDuration: 0.15
+  orbPrefab: {fileID: 7432336939494196404, guid: 93817596c17f3c2469834a27f7cc8985, type: 3}
+  spawnRadius: 7
+  useEllipse: 1
+  spawnRadiusXY: {x: 4.5, y: 4}
+  minAngleSeparation: 45
+  orbCount: 6
+  baseDelayBetweenOrbs: 2
+  delayShrinkStep: 0.15
+  destroyDelay: 2

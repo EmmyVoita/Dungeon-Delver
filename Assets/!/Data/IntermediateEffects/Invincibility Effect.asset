@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbcda18066e720946a1f8b0993057a50, type: 3}
+  m_Name: Invincibility Effect
+  m_EditorClassIdentifier: Assembly-CSharp::IntermediateInvincibilityEffect
+  icon: {fileID: 21300000, guid: f05f1e7fa18d4494b8b2dbbfc10b4971, type: 3}
+  displayName: Ability Upgrade
+  descriptionTemplate: 'When you use your ability, gain invincibilty for <color=#00E676>{INVINCIBLE_DURATION}</color>
+    seconds. '
+  invincibleDuration: 3

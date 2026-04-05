@@ -170,6 +170,8 @@ MonoBehaviour:
   shakeDuration: 0.15
   fanAngle: 70
   evenSpread: 1
+  magnitude: 0
+  duration: 0
 --- !u!61 &2437965507687820773
 BoxCollider2D:
   m_ObjectHideFlags: 0

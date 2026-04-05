@@ -16,9 +16,10 @@ public class ObstacleLabMenuNavigator : BaseMenu
 
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI descriptionText;
+    public Image backgroundImage;
 
     [Header("Left Panel (Obstacle List)")]
-    public List<ObstacleDefinition> obstacleList;
+    public List<ObstacleTypeDefinition> obstacleList;
     public GameObject optionTextPrefab;
     public Transform leftListContainer;
 
@@ -37,9 +38,9 @@ public class ObstacleLabMenuNavigator : BaseMenu
 
 
     private PracticeMenuOption currentOption;
-    private ObstacleDefinition currentObstacle;
+    private ObstacleTypeDefinition currentObstacle;
     public PracticeMenuOption CurrentOption => currentOption;
-    public ObstacleDefinition CurrentObstacle => currentObstacle;
+    public ObstacleTypeDefinition CurrentObstacle => currentObstacle;
 
 
     [Header("Scrolling")]
@@ -172,6 +173,7 @@ public class ObstacleLabMenuNavigator : BaseMenu
 
     public override void OnOpen()
     {
+        backgroundImage.enabled = true;
         base.OnOpen();
 
         BuildMenuOptions();
@@ -192,8 +194,10 @@ public class ObstacleLabMenuNavigator : BaseMenu
 
     public override void OnClose()
     {
+        backgroundImage.enabled = false;
         if (currentOption != null)
             currentOption.OnExit();
+            
 
         base.OnClose();
         
@@ -245,12 +249,13 @@ public class ObstacleLabMenuNavigator : BaseMenu
             {
                 AudioSettingsManager.PlaySelectSound();
 
-                GameSceneLoader.PendingConfig = new GameSceneConfig
-                {
-                    Mode = GameMode.ObstaclePractice,
-                    PracticeObstacle = CurrentObstacle,
-                    DirectionMode = JumpDirectionMode.FourDirectional
-                };
+
+                GameSceneLoader.PendingConfig = new GameSceneConfig(
+                    GameMode.ObstaclePractice,
+                    0,
+                    CurrentObstacle,
+                    JumpDirectionMode.FourDirectional);
+        
 
                 SceneManager.LoadScene(SceneNames.ArrowGameScene);
             }
@@ -285,7 +290,7 @@ public class ObstacleLabMenuNavigator : BaseMenu
         leftOptions.Clear();
 
         // 3. Instantiate new left-side entries
-        foreach (ObstacleDefinition obstacle in obstacleList)
+        foreach (ObstacleTypeDefinition obstacle in obstacleList)
         {
             GameObject optionObj = Instantiate(optionTextPrefab, leftListContainer);
 

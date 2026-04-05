@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d0ea479d7d39654ea6bba64ebf001d6, type: 3}
+  m_Name: Goal Size Increase
+  m_EditorClassIdentifier: Assembly-CSharp::GoalSizeIncrease
+  upgradeId: goalsizeincrease
+  displayName: Goal Size Up
+  descriptionTemplate: Increases goal size by <color=#00E676>{GOAL_SIZE_MULTIPLIER}</color>
+  baseIcon: {fileID: -911252866, guid: bf621b337dc5d3f479aae0a1e4e204d7, type: 3}
+  activeIcon: {fileID: -1652496097, guid: 42bbe21d08e2c1f409778bef6d20109f, type: 3}
+  feedbackStyle: 0
+  goalSizeMultiplier: 1.1

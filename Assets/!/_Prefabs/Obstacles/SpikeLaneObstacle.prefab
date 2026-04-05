@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2185344909914797479
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6884596578733952819}
+  - component: {fileID: 4044505729119593190}
+  m_Layer: 0
+  m_Name: SpikeLaneObstacle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6884596578733952819
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2185344909914797479}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4044505729119593190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2185344909914797479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4348cc4b6d7791740a3b1557fb7c37e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpikeLaneObstacle
+  config:
+    maxLanes: 7
+    laneSpacing: 1.25
+    laneMoveDuration: 0.15
+  spikePrefab: {fileID: 3916572667253317949, guid: 5c00257e901a1864fae685f6b026109e, type: 3}
+  rewardPrefab: {fileID: 0}
+  startWindupTime: 1
+  minWindupTime: 0.3
+  windupDecreasePerCycle: 0.05
+  activeTime: 1
+  cycles: 6
+  minOpenLanes: 2
+  maxOpenLanes: 3
+  enableSpecialLane: 0
+  windupSound:
+    clip: {fileID: 8300000, guid: 8ad575ab4602c8041978511face6ce8d, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1
+    usePitchVariation: 0
+    pitchVariation: 0
+  windupCount: 3
+  pitchStep: 0.1
+  attackSound:
+    clip: {fileID: 8300000, guid: c9ac4e926a4ff4f40b4902c35e0aedb1, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1.5
+    usePitchVariation: 1
+    pitchVariation: 0.1

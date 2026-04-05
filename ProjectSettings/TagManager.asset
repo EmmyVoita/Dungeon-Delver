@@ -8,6 +8,7 @@ TagManager:
   - Obstacle
   - OverlayVFX
   - ScreenBounds
+  - Wall
   layers:
   - Default
   - TransparentFX
@@ -23,8 +24,8 @@ TagManager:
   - UIPostFX
   - OverlayFX
   - Test
-  - 
-  - 
+  - Obstacle
+  - Player
   - 
   - 
   - 

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
+  m_Name: Obstacle_SimonSays
+  m_EditorClassIdentifier: 
+  displayName: Simon Says
+  textColor: {r: 0.9843137, g: 0.90588236, b: 0.5647059, a: 1}
+  fileName: simon
+  prefab: {fileID: 301475460126804132, guid: 99f15eae3c4d7c6429c523a31ee3fdb0, type: 3}
+  icon: {fileID: 0}
+  description: Memorize then jump to match the pattern

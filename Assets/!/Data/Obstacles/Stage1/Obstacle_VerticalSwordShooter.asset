@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
+  m_Name: Obstacle_VerticalSwordShooter
+  m_EditorClassIdentifier: 
+  displayName: Vertical Sword Shooter
+  textColor: {r: 1, g: 1, b: 1, a: 1}
+  fileName: verticalshooter
+  prefab: {fileID: 8931257001343916097, guid: 48c548d7c103b1a41b02cc8edef6831e, type: 3}
+  icon: {fileID: 0}
+  description: Vertical swords shoot that towards the player after a delay. Jump
+    through a gap to dodge it.

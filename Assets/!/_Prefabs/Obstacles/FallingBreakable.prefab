@@ -140,6 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04f4c4fc912afac48a965d52f2ee928a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakable
+  owner: {fileID: 0}
   moveSpeed: 0.5
   maxHealth: 3
   projectileCount: 3
@@ -169,6 +170,8 @@ MonoBehaviour:
   shakeDuration: 0.15
   fanAngle: 70
   evenSpread: 1
+  magnitude: 0
+  duration: 0
 --- !u!61 &2437965507687820773
 BoxCollider2D:
   m_ObjectHideFlags: 0

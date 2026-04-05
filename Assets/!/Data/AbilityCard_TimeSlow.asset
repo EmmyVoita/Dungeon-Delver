@@ -18,4 +18,4 @@ MonoBehaviour:
   icon: {fileID: 825307212, guid: e1abf1f241998db4d9f528f57633f06f, type: 3}
   abilityType: 2
   cardMaterial: {fileID: 2100000, guid: 0bfacb4534341d8448c50bede13afe6e, type: 2}
-  mainImage: {fileID: 21300000, guid: 5d0c1762601c26a43ac5f37261a313c5, type: 3}
+  mainImage: {fileID: 1316804839, guid: 4b3763202ef5ed44385c4f4c3328764e, type: 3}

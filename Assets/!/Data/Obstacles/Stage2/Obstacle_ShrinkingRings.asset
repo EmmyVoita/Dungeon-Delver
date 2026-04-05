@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
+  m_Name: Obstacle_ShrinkingRings
+  m_EditorClassIdentifier: 
+  displayName: Shrinking Rings
+  textColor: {r: 0.32156864, g: 0.96862745, b: 0.9843137, a: 1}
+  fileName: shrinkingrings
+  prefab: {fileID: 2876227516044993260, guid: 96ea9857e22397b458d2bffd3c3d58b5, type: 3}
+  icon: {fileID: 0}
+  description: Rings of damaging spikes that shrink towards the player. Jump through
+    the gaps.

@@ -77,7 +77,7 @@ public class ProjectileShieldShot : MonoBehaviour
         }
 
         ArrowBase arrow = other.GetComponent<ArrowBase>();
-        if (arrow != null && !arrow.invincible)
+        if (arrow != null && !arrow.Invincible)
         {
             if (useFreezeEffect)
             {
@@ -187,7 +187,7 @@ public class ProjectileShieldShot : MonoBehaviour
         foreach (var hit in hits)
         {
             ArrowBase arrow = hit.GetComponent<ArrowBase>();
-            if (arrow != null && !arrow.invincible)
+            if (arrow != null && !arrow.Invincible)
                 arrow.SetGolden();
         }
     }

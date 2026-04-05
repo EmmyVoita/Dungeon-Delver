@@ -3,14 +3,15 @@ using TMPro;
 
 public class ObstacleListMenuOption : PracticeMenuOption
 {
-    private ObstacleDefinition obstacle;
+    private ObstacleTypeDefinition obstacle;
     private TextMeshProUGUI text;
-    public Color exitColor = Color.white;
+    //public Color exitColor = Color.white;
 
-    public void Setup(ObstacleDefinition def)
+    public void Setup(ObstacleTypeDefinition def)
     {
         obstacle = def;
         text = GetComponent<TextMeshProUGUI>();
+        text.color = obstacle.textColor;
     }
 
     public override void OnEnter()
@@ -23,7 +24,7 @@ public class ObstacleListMenuOption : PracticeMenuOption
     public override void OnExit()
     {
         base.OnExit();
-        text.color = Color.white;
+        text.color = obstacle.textColor;
         text.transform.localScale = Vector3.one;
     }
 
@@ -36,6 +37,11 @@ public class ObstacleListMenuOption : PracticeMenuOption
 
     public override void OnConfirm()
     {
-        GameSceneLoader.PendingConfig.PracticeObstacle = obstacle;
+        GameSceneLoader.PendingConfig = new GameSceneConfig(
+            GameMode.ObstaclePractice,
+            0,
+            ObstacleLabMenuNavigator.Instance.CurrentObstacle,
+            JumpDirectionMode.FourDirectional
+        );
     }
 }

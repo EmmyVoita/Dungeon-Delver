@@ -114,18 +114,20 @@ public class LevelEditorUIController : MonoBehaviour
         TestSession.returnScene =
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 
-        GameSceneLoader.PendingConfig = new GameSceneConfig
-        {
-            Mode = GameMode.LevelEditorTest,
-            PracticeObstacle = null,
-            DirectionMode = JumpDirectionMode.FourDirectional
-        };
+        GameSceneLoader.PendingConfig = new GameSceneConfig(
+            GameMode.LevelEditorTest,
+            0,
+            null,
+            JumpDirectionMode.FourDirectional);
+   
 
         Debug.Log("▶ Starting test session with in-memory level");
 
         UnityEngine.SceneManagement.SceneManager
             .LoadScene("ArrowGameScene");
     }
+
+
 
     public void OnClick_TestLevelFromPosition()
     {
@@ -155,13 +157,12 @@ public class LevelEditorUIController : MonoBehaviour
         TestSession.returnScene =
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 
-        GameSceneLoader.PendingConfig = new GameSceneConfig
-        {
-            Mode = GameMode.LevelEdtiorPlayFromPosition,
-            PracticeObstacle = null,
-            levelEditorStartTime = EditorPlaybackController.Instance.CurrentTime,
-            DirectionMode = JumpDirectionMode.FourDirectional
-        };
+   
+        GameSceneLoader.PendingConfig = new GameSceneConfig(
+            GameMode.LevelEdtiorPlayFromPosition,
+            EditorPlaybackController.Instance.CurrentTime,
+            null,
+            JumpDirectionMode.FourDirectional);
 
         Debug.Log("▶ Starting test session with in-memory level");
 
