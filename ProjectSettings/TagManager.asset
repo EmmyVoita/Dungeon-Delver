@@ -9,6 +9,7 @@ TagManager:
   - OverlayVFX
   - ScreenBounds
   - Wall
+  - Center
   layers:
   - Default
   - TransparentFX

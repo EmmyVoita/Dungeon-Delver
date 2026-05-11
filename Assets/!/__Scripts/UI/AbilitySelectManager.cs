@@ -5,22 +5,34 @@ using System;
 using DG.Tweening;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using TMPro;
 
 public class AbilitySelectManager : BaseMenu
 {
     public static AbilitySelectManager Instance { get; private set; }
-    public static Action<SelectOption> OnAbilitySelected;
+    public static Action OnHoverChanged;
+
     public static Action OnMenuAbilitySelected;
 
+    [Header("References")]
+    [SerializeField] private StartOptionsNavigator startOptions;
+
+    [Header("Transition Settings")]
+    [SerializeField] private MenuState backState = MenuState.Main;
+    [SerializeField] private MenuState returnCardState = MenuState.Main;
+
+
     [Header("UI")]
-    public GameObject titleUI;
-    public GameObject highscoreUI;
+    //public GameObject titleUI;
+    //public GameObject highscoreUI;
     public GameObject cardUIPrefab;
     public RectTransform cardContainer; // 🌀 Scrollable parent
     public Transform cardParent;        // Optional fallback (usually same as cardContainer)
     public Transform descriptionBox;
     public BackgroundDimmerController backgroundDimmer;
     public TextTypewriter descriptionTypewriter;
+    public TextMeshProUGUI abilityNameText;
+    public TextMeshProUGUI abilityCostText;
 
     [Header("Carousel Settings")]
     public float slideSpeed = 8f;
@@ -30,12 +42,15 @@ public class AbilitySelectManager : BaseMenu
     public float unselectedAlpha = 0.6f;
 
     [Header("Available Abilities")]
-    public List<AbilityCard> allAbilities;
-    private List<AbilityCardUI> currentCards = new List<AbilityCardUI>();
-    private int selectedIndex = 0;
+    public List<AbilityData> allAbilities;
+    [SerializeField] private List<AbilityCardUI> currentCards = new List<AbilityCardUI>();
+    [SerializeField] private int selectedIndex = 0;
+
+    public AbilityType ActiveHover => currentCards[selectedIndex].Card.abilityType;
 
     // For smooth sliding
     private Vector2 targetPosition;
+    private float totalWidth;
 
     private void Awake()
     {
@@ -49,14 +64,6 @@ public class AbilitySelectManager : BaseMenu
         MenuManager.Instance.RegisterMenu(this);
     }
 
-    private void OnEnable()
-    {
-    }
-
-    private void OnDisable()
-    {
-    }
-
 
     // ----------------------------
     //      SPAWN ABILITY CARDS
@@ -64,9 +71,6 @@ public class AbilitySelectManager : BaseMenu
     public override void OnOpen()
     {
         base.OnOpen();
-
-        titleUI.SetActive(true);
-        highscoreUI.SetActive(true);
 
         if (backgroundDimmer != null)
             backgroundDimmer.FadeIn();
@@ -81,7 +85,7 @@ public class AbilitySelectManager : BaseMenu
             Destroy(child.gameObject);
         }
         currentCards.Clear();
-        selectedIndex = Mathf.Min(1, allAbilities.Count - 1);
+        selectedIndex = Mathf.Min(0, Mathf.Max(allAbilities.Count - 1,0));
 
         // Spawn all abilities
         foreach (var ability in allAbilities)
@@ -97,20 +101,24 @@ public class AbilitySelectManager : BaseMenu
         {
             RectTransform cardRect = currentCards[0].GetComponent<RectTransform>();
             float width = cardRect.rect.width;
+
             var layout = cardParent.GetComponent<HorizontalLayoutGroup>();
             float spacing = layout != null ? layout.spacing : 20f;
+
             cardSpacing = width + spacing;
         }
 
         HighlightCard(forceInstant: true);
+
+        ScreenDimmerManager.Instance.AddDimSource("PlayScreen");
+
+        OnHoverChanged?.Invoke();
     }
 
     public override void OnClose()
     {
         base.OnClose();
 
-        titleUI.SetActive(false);
-        highscoreUI.SetActive(false);
 
         if (backgroundDimmer != null)
             backgroundDimmer.FadeOut();
@@ -125,6 +133,8 @@ public class AbilitySelectManager : BaseMenu
             Destroy(child.gameObject);
         }
         currentCards.Clear();
+
+        ScreenDimmerManager.Instance.RemoveDimSource("PlayScreen");
     }
 
     // ----------------------------
@@ -132,17 +142,19 @@ public class AbilitySelectManager : BaseMenu
     // ----------------------------
     private void Update()
     {
-        if (lockInput || currentCards.Count == 0) return;
+        if (lockInput || currentCards.Count == 0 || !isActive) return;
 
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveLeft))
         {
             selectedIndex = (selectedIndex - 1 + currentCards.Count) % currentCards.Count;
+            OnHoverChanged?.Invoke();
             HighlightCard();
             AudioSettingsManager.PlayNavigateSound();
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveRight))
         {
             selectedIndex = (selectedIndex + 1) % currentCards.Count;
+            OnHoverChanged?.Invoke();
             HighlightCard();
             AudioSettingsManager.PlayNavigateSound();
         }
@@ -155,7 +167,7 @@ public class AbilitySelectManager : BaseMenu
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.Back))
         {
-            MenuManager.Instance.TransitionToMenu(StartMenuWindows.MainMenu, 0.2f);
+            MenuManager.Instance.RequestMenuTransition(backState);
             AudioSettingsManager.PlayBackSound();
             OnMenuAbilitySelected?.Invoke();
         }
@@ -267,10 +279,27 @@ public class AbilitySelectManager : BaseMenu
             if (isSelected && descriptionTypewriter != null)
             {
                 if (ScoreManager.Instance.HighScore >= currentCards[i].Card.scoreRequirement)
-                    descriptionTypewriter.StartTyping(currentCards[i].GetDescription());
+                {
+                    string description = currentCards[i].Card != null ? currentCards[i].Card.description : "No card description found";
+                    descriptionTypewriter.StartTyping(description);
+                } 
                 else
+                {
                     descriptionTypewriter.StartTyping("High score required: " + currentCards[i].Card.scoreRequirement);
+                }   
             }
+
+            if(isSelected && abilityNameText != null)
+            {
+                abilityNameText.text = currentCards[i].Card.abilityName.ToUpper();
+            }
+
+            if(isSelected && abilityCostText != null)
+            {
+                abilityCostText.text = currentCards[i].Card.baseCost.ToString();
+            }
+
+            
 
             var sway = currentCards[i].GetComponent<CardParallaxSway>();
             if (sway != null)
@@ -279,13 +308,17 @@ public class AbilitySelectManager : BaseMenu
         }
 
         // Center selected card in view
+        //float totalWidth = (currentCards.Count - 1) * cardSpacing;
+        //float totalWidth = (currentCards.Count - 1) * cardSpacing;
+        //cardSpacing = width + spacing;
         float totalWidth = (currentCards.Count - 1) * cardSpacing;
-        float offset = (totalWidth / 2f) - (selectedIndex * cardSpacing);
+        float offset = (-selectedIndex * cardSpacing) + 0.5f * cardSpacing;
         targetPosition = new Vector2(offset, 0);
+        Debug.DrawLine(Vector3.zero, Vector3.up * 5, Color.red);
 
     }
 
-    private void SelectAbility(AbilityCard card)
+    private void SelectAbility(AbilityData card)
     {
         if (card == null)
         {
@@ -308,7 +341,7 @@ public class AbilitySelectManager : BaseMenu
         cardUI.PlaySelectAnimation(() => FinishSelection(card));
     }
 
-    private void FinishSelection(AbilityCard card)
+    private void FinishSelection(AbilityData card)
     {
         if (card == null)
         {
@@ -319,7 +352,7 @@ public class AbilitySelectManager : BaseMenu
         // 🟣 Return-to-menu handling
         if (card.abilityType == AbilityType.ReturnToMenu)
         {
-            MenuManager.Instance.TransitionToMenu(StartMenuWindows.MainMenu, 0.2f);
+            MenuManager.Instance.RequestMenuTransition(returnCardState);
             return;
         }
 
@@ -332,12 +365,11 @@ public class AbilitySelectManager : BaseMenu
         GameSceneLoader.PendingConfig = new GameSceneConfig(
             GameMode.StandardRun,
             0,
-            null,
-            JumpDirectionMode.FourDirectional);
+            null);
 
         
 
-        OnAbilitySelected?.Invoke(SelectOption.MainGame);
+        startOptions.Open(GameMode.StandardRun, SceneNames.ArrowGameScene);
         lockInput = true;
     }
 }

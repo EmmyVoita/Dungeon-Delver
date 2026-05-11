@@ -78,12 +78,13 @@ public class DisguisedDurableArrow : ArrowBase
     // Fire / Disguise Init
     // =====================================================
 
-    public override void Fire(Vector2 direction, float speed)
+    /*public override void Fire(Vector2 direction, float speed)
     {
-        base.Fire(direction, speed);
+        //base.Fire(direction, speed);
 
         TryApplyDisguise();
     }
+    */
 
     private void TryApplyDisguise()
     {

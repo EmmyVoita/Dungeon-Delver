@@ -11,7 +11,7 @@ public class Player : MonoBehaviour
     public static event System.Action<Vector2> OnJumped;
     public static event System.Action OnAbilityFilled;
     public static event System.Action<int, int, int> OnAbilityChargeChanged;
-    public static event System.Action OnMaxAbilityChargeChanged;
+    //public static event System.Action OnMaxAbilityChargeChanged;
     public static event System.Action OnAbilityUsed;
     public static event System.Action<int> OnDamageTaken;
     public static event System.Action<int> OnHeal;
@@ -23,6 +23,7 @@ public class Player : MonoBehaviour
     public enum PlayerControlState
     {
         Normal,
+        BasicJump,
         Shooter,
         LockedShooter,
         LaneDodger
@@ -79,6 +80,8 @@ public class Player : MonoBehaviour
 
     [Header("Lande Dodger Control State")]
     [SerializeField] private LaneVisualizer laneVisualizer;
+    [SerializeField] private SoundEffect moveLaneSoundEffect;
+    [SerializeField] private float lanePitchStep = 0.05f;
 
 
     [Header("Projectile Settings")]
@@ -99,7 +102,7 @@ public class Player : MonoBehaviour
 
     //public JumpInputMode jumpInputMode { get; private set; } = JumpInputMode.Normal;
     public PlayerControlState playerControlState { get; private set; } = PlayerControlState.Normal;
-
+    public string LastDamageSource { get; private set; } = "Unknown";
 
     private List<UpgradeEffectBase> activeUpgrades = new List<UpgradeEffectBase>();
     private int dirHeld = -1;
@@ -113,7 +116,7 @@ public class Player : MonoBehaviour
     private float _rotateStartTime;
     private Tween activeShakeTween;
     private Vector3 baseLocalPos;
-    private bool canJump = false;
+    //private bool canJump = false;
     private bool obstaclesActive = false;
     public bool lockInput = false;
     private Quaternion targetRotation;
@@ -142,6 +145,7 @@ public class Player : MonoBehaviour
     public int CurrentLane => currentLane;
 
     public bool FullyLocked { get; private set; } = false;
+    public bool CanJump => playerControlState == PlayerControlState.Shooter || playerControlState ==  PlayerControlState.BasicJump;
 
     private bool _invincible;
     public bool Invincible
@@ -243,8 +247,8 @@ public class Player : MonoBehaviour
         GameStateManager.OnStateChanged += HandleStateChanged;
 
         // ✅ Subscribe to ObstacleManager events
-        ObstacleManager.OnFirstObstacleAppeared += EnableJumping;
-        ObstacleManager.OnAllObstaclesCleared += DisableJumping;
+        //ObstacleManager.OnFirstObstacleAppeared += EnableJumping;
+        //ObstacleManager.OnAllObstaclesCleared += DisableJumping;
     }
 
     void OnDisable()
@@ -255,8 +259,8 @@ public class Player : MonoBehaviour
         GameStateManager.OnStateChanged -= HandleStateChanged;
 
         // ✅ Unsubscribe safely
-        ObstacleManager.OnFirstObstacleAppeared -= EnableJumping;
-        ObstacleManager.OnAllObstaclesCleared -= DisableJumping;
+        //ObstacleManager.OnFirstObstacleAppeared -= EnableJumping;
+        //ObstacleManager.OnAllObstaclesCleared -= DisableJumping;
     }
 
     void HandleStateChanged(GameState previousState, GameState newState)
@@ -265,6 +269,23 @@ public class Player : MonoBehaviour
         {
             Health = MaxHealth;
         }
+
+        if(GameStateEffectManager.ShowPlayer)
+            Show();
+        else
+            Hide();
+    }
+
+    void Show()
+    {
+        goal.SetActive(true);
+        spriteObj.SetActive(true);
+    }
+
+    void Hide()
+    {
+        goal.SetActive(false);
+        spriteObj.SetActive(false);
     }
 
     void OnDestroy()
@@ -371,8 +392,8 @@ public class Player : MonoBehaviour
             // Normal jump path
             if (!isBoosting &&
                 !boostOnCooldown &&
-                canJump &&
-                obstaclesActive &&
+                CanJump &&
+                //obstaclesActive &&
                 !isJumping)
             {
                 PerformJump(dir);
@@ -447,15 +468,9 @@ public class Player : MonoBehaviour
         
 
         DamageEffect dEf = coll.GetComponent<DamageEffect>();
-        if (dEf == null)
-        {
-            Debug.LogWarning("Player hit something without DamageEffect: " + coll.name);
-            return;
-        }
-
         
-    
-        DamageSelf(dEf.damage, arrow);
+        if(dEf && dEf.enabled == true)
+            DamageSelf(dEf.damage, dEf.sourceName, arrow);
     }
 
     public void ShootProjectile(PlayerProjectile projectilePrefab)
@@ -494,7 +509,11 @@ public class Player : MonoBehaviour
             laneVisualizer?.Clear();
         }
 
+        Debug.Log($"Control State Changed -> old {playerControlState} : new {newState}");
+
         playerControlState = newState;
+
+        
 
 
         // Reset / clear previous state data
@@ -505,17 +524,23 @@ public class Player : MonoBehaviour
             case PlayerControlState.LaneDodger:
                 currentLaneConfig = config as LaneDodgerConfig;
                 InitializeLaneDodger();
+                wings.ShowWings();
                 break;
-
+            case PlayerControlState.Shooter:
+                wings.ShowWings();
+                break;
             case PlayerControlState.LockedShooter:
-                isJumping = false;
                 rb.linearVelocity = Vector2.zero;
+                wings.HideWings();
                 break;
-
             case PlayerControlState.Normal:
                 transform.position = Vector3.zero;
+                wings.HideWings();
                 break;
-
+            case PlayerControlState.BasicJump:
+                transform.position = Vector3.zero;
+                wings.ShowWings();
+                break;
             default:
                 break;
         }
@@ -570,16 +595,18 @@ public class Player : MonoBehaviour
 
     private void EnableJumping()
     {
+        SetPlayerControlState(PlayerControlState.BasicJump);
         obstaclesActive = true;
-        canJump = true;
+        //canJump = true;
         wings.ShowWings();
         Debug.Log("🟡 Jumping enabled — obstacle present");
     }
 
     private void DisableJumping()
     {
+        SetPlayerControlState(PlayerControlState.Normal);
         obstaclesActive = false;
-        canJump = false;
+        //canJump = false;
         wings.HideWings();
         Debug.Log("⚫ Jumping disabled — no obstacles");
     }
@@ -588,13 +615,13 @@ public class Player : MonoBehaviour
 
     private void HandleRoundEnd()
     {
-        canJump = false;
+        //canJump = false;
         lockInput = true;
     }
 
     private void HandleRoundStart()
     {
-        canJump = true;
+        //canJump = true;
         lockInput = false;
     }
 
@@ -738,8 +765,10 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void DamageSelf(int damage, ArrowBase arrow = null)
+    public void DamageSelf(int damage, string sourceName = null, ArrowBase arrow = null)
     {
+        LastDamageSource = sourceName;
+
         // If we hit an arrow, we kill the arrow
         if (arrow != null) arrow.KillArrow();
 
@@ -756,7 +785,7 @@ public class Player : MonoBehaviour
         Debug.Log($"💥 Player taking {finalDamage} damage (base {damage})");
         Health -= finalDamage;
 
-        OnDamageTaken?.Invoke(Health);
+        OnDamageTaken?.Invoke(finalDamage);
 
         if (Health <= 0 && GameStateEffectManager.PlayerDeathAllowed)
         {
@@ -849,7 +878,6 @@ public class Player : MonoBehaviour
 
     void HandleLaneMovement()
     {
-        Debug.Log("HandlingLaneMovement");
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
             SetLane(currentLane + 1);
@@ -862,11 +890,13 @@ public class Player : MonoBehaviour
 
     void SetLane(int newLane)
     {
-        Debug.Log("Set lane ->" + newLane);
-
         newLane = Mathf.Clamp(newLane, 0, currentLaneConfig.maxLanes - 1);
 
         if (newLane == currentLane) return;
+
+        wings.PlayFlap();
+
+        AudioHelpers.PlaySoundEffect(moveLaneSoundEffect, transform.position, 1.0f + newLane * lanePitchStep);
 
         currentLane = newLane;
 

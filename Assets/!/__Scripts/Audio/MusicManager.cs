@@ -1,6 +1,7 @@
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MusicManager : MonoBehaviour
 {
@@ -11,7 +12,6 @@ public class MusicManager : MonoBehaviour
     [Header("Music Source")]
     [SerializeField] private AudioSource mainSource;
     [SerializeField] public AudioClip mainClip;
-    [SerializeField] private float mainTimeOffset = 0f;
 
     [Header("Fade Settings")]
     [SerializeField] private float fadeOutDuration = 0.25f;
@@ -19,11 +19,16 @@ public class MusicManager : MonoBehaviour
 
     public bool IsMainPlaying => mainSource != null && mainSource.isPlaying;
     public float MainVolume => mainSource != null ? mainSource.volume : 0f;
+    public double RawDSPTime => AudioSettings.dspTime - RoundManager.Instance.RoundStartDSP;
+    public double ScaledElapsedTime => _scaledTime;
+
+    private double _scaledTime;
+    private double _lastDSPTime;
 
     private Tween fadeTween;
     private Coroutine startRoutine;
+
     private bool isPaused = false;
-    private double pauseDSPTime;
 
     // ----------------------------------------------------
     // Unity Lifecycle
@@ -41,49 +46,66 @@ public class MusicManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         if (GameSessionBootstrap.Config != null &&
-            GameSessionBootstrap.Config.Mode == GameMode.LevelEditorTest ||
-            GameSessionBootstrap.Config.Mode == GameMode.LevelEdtiorPlayFromPosition)
+            GameSessionBootstrap.Config.Mode == GameMode.LevelEditorTest)
         {
             mainClip = LevelEditorTestMusic;
         }
 
         mainSource.playOnAwake = false;
         mainSource.volume = 0f;
-        mainSource.clip = mainClip;  
+        mainSource.clip = mainClip;
     }
 
     private void OnEnable()
     {
         GameStateManager.OnStateChanged += HandleStateChanged;
         TimeManager.OnTimeScaleChanged += HandleTimeScaleChanged;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
     }
 
     private void OnDisable()
     {
         GameStateManager.OnStateChanged -= HandleStateChanged;
         TimeManager.OnTimeScaleChanged -= HandleTimeScaleChanged;
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ResetTiming();
     }
 
     // ----------------------------------------------------
     // State Handling
     // ----------------------------------------------------
 
-    private void HandleStateChanged(GameState previous, GameState current)
+    private void HandleStateChanged(GameState previous, GameState newState)
     {
-        if(previous == GameState.Paused || current == GameState.Paused) return;
-        if (current == GameState.RoundActive && previous != GameState.RoundActive)
+        if (newState == GameState.Paused)
         {
-            Debug.Log("Round started, scheduling music.");
-            StartMusicAt();
+            PauseMusic();
+            return;
         }
-        else if (current == GameState.RoundResultsTally)
+
+        if (previous == GameState.Paused)
         {
-            Debug.Log("Round ended, fading out music.");
+            ResumeMusic();
+            return;
+        }
+
+        if (newState == GameState.RoundActive)
+        {
+            if (startRoutine != null)
+                StopCoroutine(startRoutine);
+
+            startRoutine = StartCoroutine(StartMusicRoutine());
+        }
+        else if (newState == GameState.RoundResultsTally)
+        {
             FadeOutAndStop();
         }
         else
         {
-            Debug.Log($"State changed to {current}, stopping music.");
             StopImmediate();
         }
     }
@@ -94,24 +116,39 @@ public class MusicManager : MonoBehaviour
             mainSource.pitch = scale;
     }
 
+    void Update()
+    {
+        double currentDSP = AudioSettings.dspTime;
+
+        // 🔒 Prevent large jumps when paused
+        if (isPaused)
+        {
+            _lastDSPTime = currentDSP;
+            return;
+        }
+
+        double dspDelta = currentDSP - _lastDSPTime;
+        _lastDSPTime = currentDSP;
+
+        float scale = TimeManager.Instance.GetCurrentScale();
+
+        // 🎯 THIS is the important line
+        _scaledTime += dspDelta * scale;
+    }
+
     // ----------------------------------------------------
     // Deterministic DSP Start
     // ----------------------------------------------------
 
-    public void StartMusicAt()
-    {
-        if (startRoutine != null)
-            StopCoroutine(startRoutine);
-
-        startRoutine = StartCoroutine(StartMusicRoutine());
-    }
-
     private IEnumerator StartMusicRoutine()
     {
+        ResetTiming();
+
+        _lastDSPTime = AudioSettings.dspTime;
+        _scaledTime = 0;
+
         fadeTween?.Kill();
 
-        // ---- HARD VOICE RESET (frame 0) ----
-        AudioSettings.Reset(AudioSettings.GetConfiguration());
         mainSource.Stop();
         mainSource.enabled = false;
         mainSource.enabled = true;
@@ -119,51 +156,21 @@ public class MusicManager : MonoBehaviour
         float editorOffset = GameSessionBootstrap.Config.LevelEditorStartTime;
 
         mainSource.clip = mainClip;
-        mainSource.time = mainTimeOffset + editorOffset;
+        mainSource.time = editorOffset;
         mainSource.volume = 0f;
         mainSource.pitch = 1f;
 
-        // ---- WAIT ONE FRAME (critical) ----
         yield return null;
 
-        // ---- SCHEDULE (frame 1) ----
-        UIToast.Show($"Scheduling music at DSP time {RoundManager.Instance.RoundStartDSP:F6}");
         mainSource.PlayScheduled(RoundManager.Instance.RoundStartDSP);
-         // slight delay to ensure scheduling works
-        //mainSource.Play();
-        //StartCoroutine(CaptureTrueAudioStart());
 
-
-        // ---- FADE IN ----
         fadeTween = DOTween.To(
             () => mainSource.volume,
             v => mainSource.volume = v,
             AudioSettingsManager.Instance.musicVolume,
             fadeInDuration
         );
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        StartCoroutine(DebugVerifyStart(RoundManager.Instance.RoundStartDSP));
-#endif
     }
-
-    private IEnumerator CaptureTrueAudioStart()
-    {
-        // Wait until Unity reports the source is playing AND has advanced samples
-        int startSamples = mainSource.timeSamples;
-
-        while (!mainSource.isPlaying || mainSource.timeSamples == startSamples)
-            yield return null;
-
-        RoundManager.Instance.RoundStartDSP = AudioSettings.dspTime;
-
-        Debug.Log(
-            $"🎯 TRUE audio start\n" +
-            $"DSP = {AudioSettings.dspTime}\n" +
-            $"samples = {mainSource.timeSamples}"
-        );
-    }
-
 
     private void FadeOutAndStop()
     {
@@ -183,6 +190,7 @@ public class MusicManager : MonoBehaviour
     private void StopImmediate()
     {
         fadeTween?.Kill();
+
         if (startRoutine != null)
             StopCoroutine(startRoutine);
 
@@ -196,56 +204,23 @@ public class MusicManager : MonoBehaviour
             return;
 
         isPaused = true;
-        pauseDSPTime = AudioSettings.dspTime;
-
         mainSource.Pause();
     }
-
 
     public void ResumeMusic()
     {
         if (!isPaused)
             return;
 
-        double resumeDSP = AudioSettings.dspTime;
-        double pausedDuration = resumeDSP - pauseDSPTime;
-
-        RoundManager.Instance.RoundStartDSP += pausedDuration;
-
         isPaused = false;
         mainSource.UnPause();
-
-        Debug.Log($"Resuming music. Adjusted RoundStartDSP by {pausedDuration:F6} seconds.");
-
-        // 🔑 RESTORE VOLUME
-        //fadeTween?.Kill();
-        //mainSource.volume = AudioSettingsManager.Instance.musicVolume;
     }
 
-
-
-    // ----------------------------------------------------
-    // Debug (optional)
-    // ----------------------------------------------------
-
-    private IEnumerator DebugVerifyStart(double scheduledDSP)
+    public void ResetTiming()
     {
-        while (AudioSettings.dspTime < scheduledDSP)
-            yield return null;
-
-        yield return null;
-
-        int samples = mainSource.timeSamples;
-        float seconds = samples / (float)mainSource.clip.frequency;
-
-        UIToast.Show(
-            $"🎵 MUSIC START\n" +
-            $"DSP Now: {AudioSettings.dspTime:F6}\n" +
-            $"Scheduled: {scheduledDSP:F6}\n" +
-            $"Samples: {samples}\n" +
-            $"Seconds: {seconds:F4}",
-            5f
-        );
+        _scaledTime = 0;
+        _lastDSPTime = AudioSettings.dspTime;
+        isPaused = false;
     }
 
 
@@ -255,3 +230,4 @@ public class MusicManager : MonoBehaviour
             mainSource.volume = volume;
     }
 }
+

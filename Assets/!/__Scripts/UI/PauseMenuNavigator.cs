@@ -239,7 +239,7 @@ public class PauseMenuNavigator : BaseMenu
         var resumeState = GameStateManager.Instance.PreviousState;
         yield return new WaitForSecondsRealtime(0.1f);
         GameStateManager.Instance.SetState(resumeState);
-        MusicManager.Instance.ResumeMusic();
+        //MusicManager.Instance.ResumeMusic();
 
         yield return null;
 

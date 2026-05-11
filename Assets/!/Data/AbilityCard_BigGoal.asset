@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f6a0e3cd052a94787e24cf68a5e06f, type: 3}
   m_Name: AbilityCard_BigGoal
   m_EditorClassIdentifier: 
-  scoreRequirement: 0
-  abilityName: Big Goal
-  description: 'Temporarily Increases the size of your goal '
-  icon: {fileID: 825307212, guid: e1abf1f241998db4d9f528f57633f06f, type: 3}
   abilityType: 9
-  cardMaterial: {fileID: 2100000, guid: 0bfacb4534341d8448c50bede13afe6e, type: 2}
-  mainImage: {fileID: 919172400, guid: 4b3763202ef5ed44385c4f4c3328764e, type: 3}
+  baseCost: 20
+  scoreRequirement: 1000000
+  abilityName: Bloom Shroom
+  description: 'Temporarily increases the size of your goal '
+  iconData: {fileID: 11400000, guid: 74bd620a6ca6a0e4095b17e0ae5b0541, type: 2}
+  cardBackground: {fileID: 0}
+  iconScale: 2.25
+  abilityPrefab: {fileID: 4942007064134541510, guid: f812d426350ca3b48889f29d0044ef3b, type: 3}

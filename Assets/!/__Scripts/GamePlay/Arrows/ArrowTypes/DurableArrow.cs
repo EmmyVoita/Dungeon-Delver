@@ -23,12 +23,82 @@ public class DurableArrow : ArrowBase
 
     private Coroutine bounceRoutine;
 
+    private float bounceStartTime;
+    private float bounceEndTime;
+    private Vector2 bounceStartPos;
+    private float bounceDistance;
+    private bool isBouncing = false;
 
-    void Update()
+
+
+    protected override void Update()
     {
         if (invincible && Time.time > invincibleDone)
             invincible = false;
+
+        if (_isDead) return;
+
+        float elapsed = (float)MusicManager.Instance.ScaledElapsedTime;
+
+        // --- BOUNCE PHASE ---
+        if (isBouncing)
+        {
+            float t = Mathf.InverseLerp(bounceStartTime, bounceEndTime, elapsed);
+            t = Mathf.Clamp01(t);
+
+            float h = 4f * t * (1f - t); // parabola
+
+            Vector2 awayDir = direction.normalized;
+
+            Vector2 targetPos = bounceStartPos + awayDir * (h * bounceDistance);
+
+            SmoothTranslate(targetPos);
+
+            if (elapsed >= bounceEndTime)
+            {
+                isBouncing = false;
+
+                // IMPORTANT: shift arrow timeline forward
+                float delay = bounceEndTime - bounceStartTime;
+                spawnTime += delay;
+                arrivalTime += delay;
+            }
+
+            return;
+        }
+
+        // --- NORMAL MOVEMENT ---
+        base.Update();
     }
+
+
+    public override void Init(Vector2 direction, float speed, float spawnTime, float arrivalTime, Vector3 startPos, Vector3 endPos)
+    {
+        base.Init(direction, speed, spawnTime, arrivalTime, startPos, endPos);
+        
+        float secondsPerBeat = 60f / ArrowSpawner.Instance.ActiveBPM;
+        float duration = bounceTimeBeats * secondsPerBeat;
+
+        float secondArrivalTime = arrivalTime + duration;
+        /*
+        float totalDistance = Vector2.Distance(startPos, endPos);
+
+        float clampedStopDistance = Mathf.Min(totalDistance - stopDistance, totalDistance);
+        float stopRatio = clampedStopDistance / totalDistance;
+
+        stopTime = Mathf.Lerp(spawnTime, arrivalTime, stopRatio);
+
+        float secondsPerBeat = 60f / ArrowSpawner.Instance.ActiveBPM;
+        float delayDuration = delayBeats * secondsPerBeat;
+
+        resumeTime = stopTime + delayDuration;
+        this.arrivalTime = delayDuration + arrivalTime;
+
+        // ✅ Correct stop position
+        stopPos = Vector2.Lerp(startPos, endPos, stopRatio);
+        */
+    }
+
 
     public override void OnArrowHit(float damage = 1f,
                                     Goal.GoalType goalType = Goal.GoalType.Normal,
@@ -44,18 +114,35 @@ public class DurableArrow : ArrowBase
         }
         else
         {
+
             invincible = true;
             invincibleDone = Time.time + invincibilityDuration;
 
             base.PlayAudio(goalType);
 
-            if (bounceRoutine != null)
-                StopCoroutine(bounceRoutine);
+            //if (bounceRoutine != null)
+               // StopCoroutine(bounceRoutine);
 
-            bounceRoutine = StartCoroutine(BounceParabola());
+            //bounceRoutine = StartCoroutine(BounceParabola());
+
+            float secondsPerBeat = 60f / ArrowSpawner.Instance.ActiveBPM;
+            float duration = bounceTimeBeats * secondsPerBeat;
+
+            bounceStartTime = (float)MusicManager.Instance.ScaledElapsedTime;
+            bounceEndTime = bounceStartTime + duration;
+
+            bounceStartPos = transform.position;
+
+            bounceDistance = maxBounceDistance > 0f
+                ? maxBounceDistance
+                : speed * (duration * 0.5f);
+
+            isBouncing = true;
+
         }
     }
 
+    /*
     private IEnumerator BounceParabola()
     {
         // --- 1. Setup timing from BPM ---
@@ -109,4 +196,5 @@ public class DurableArrow : ArrowBase
 
         bounceRoutine = null;
     }
+    */
 }

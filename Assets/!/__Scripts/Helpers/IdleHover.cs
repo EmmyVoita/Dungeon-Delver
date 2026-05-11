@@ -40,6 +40,11 @@ public class IdleHover : MonoBehaviour
     public float jumpScaleAmount = 1.4f;
     public Transform jumpTargetTransform;
 
+    [Header("Randomization")]
+    public float randomStartDelayMax = 0.5f;
+    public float durationVariance = 0.3f;
+    public float amplitudeVariance = 2f;
+
     // Baselines
     private Vector3 originalPos;
     private Quaternion originalRot;
@@ -47,7 +52,7 @@ public class IdleHover : MonoBehaviour
 
     // Tweens
     private Tween hoverTween;
-    private Sequence swaySeq;
+    private Tween swayTween;
     private Tween jumpTween;
     private Tween scaleTween;
     private Tween shakeTween;
@@ -101,14 +106,14 @@ public class IdleHover : MonoBehaviour
         if (enableHover && hoverTween == null)
             StartIdleHover();
 
-        if (enableSway && swaySeq == null)
+        if (enableSway && swayTween == null)
             StartIdleSway();
     }
 
     public void StopAllBehaviors()
     {
         hoverTween?.Kill();
-        swaySeq?.Kill();
+        swayTween?.Kill();
         jumpTween?.Kill();
         scaleTween?.Kill();
         shakeTween?.Kill();
@@ -120,7 +125,7 @@ public class IdleHover : MonoBehaviour
             jumpTargetTransform.localPosition = jumpBaseLocalPos;
 
         hoverTween = null;
-        swaySeq = null;
+        swayTween = null;
     }
 
     // ----------------------------------------------------
@@ -129,12 +134,18 @@ public class IdleHover : MonoBehaviour
 
     private void StartIdleHover()
     {
+        float randomDelay = UnityEngine.Random.Range(0f, randomStartDelayMax);
+
+        float duration = hoverDuration + UnityEngine.Random.Range(-durationVariance, durationVariance);
+        float amplitude = hoverAmplitude + UnityEngine.Random.Range(-amplitudeVariance, amplitudeVariance);
+
         hoverTween = transform.DOLocalMoveY(
-            originalPos.y + hoverAmplitude,
-            hoverDuration
+            originalPos.y + amplitude,
+            duration
         )
         .SetEase(Ease.InOutSine)
-        .SetLoops(-1, LoopType.Yoyo);
+        .SetLoops(-1, LoopType.Yoyo)
+        .SetDelay(randomDelay);
     }
 
     // ----------------------------------------------------
@@ -143,42 +154,55 @@ public class IdleHover : MonoBehaviour
 
     private void StartIdleSway()
     {
-        swaySeq?.Kill();
+        swayTween?.Kill();
 
-        swaySeq = DOTween.Sequence();
+        float randomDelay = UnityEngine.Random.Range(0f, randomStartDelayMax);
 
-        Vector3 startRot = originalRot.eulerAngles;
-        Vector3 targetRot = startRot;
+        Vector3 baseRot = originalRot.eulerAngles;
+
+        Vector3 posRot = baseRot;
+        Vector3 negRot = baseRot;
+
+        // Randomize angle slightly
+        float angleX = swayAngleX + UnityEngine.Random.Range(-2f, 2f);
+        float angleY = swayAngleY + UnityEngine.Random.Range(-2f, 2f);
+        float angleZ = swayAngleZ + UnityEngine.Random.Range(-2f, 2f);
 
         if (swayX)
-            targetRot.x += swayAngleX;
+        {
+            posRot.x += angleX;
+            negRot.x -= angleX;
+        }
 
         if (swayY)
-            targetRot.y += swayAngleY;
+        {
+            posRot.y += angleY;
+            negRot.y -= angleY;
+        }
 
         if (swayZ)
-            targetRot.z += swayAngleZ;
+        {
+            posRot.z += angleZ;
+            negRot.z -= angleZ;
+        }
 
         float duration = Mathf.Max(
             swayDurationX,
             Mathf.Max(swayDurationY, swayDurationZ)
         );
 
-        swaySeq.Append(
-            transform.DOLocalRotate(
-                targetRot,
-                duration
-            ).SetEase(Ease.InOutSine)
-        );
+        duration += UnityEngine.Random.Range(-durationVariance, durationVariance);
 
-        swaySeq.Append(
-            transform.DOLocalRotate(
-                startRot,
-                duration
-            ).SetEase(Ease.InOutSine)
-        );
+        // Random starting side (feels better than always starting negative)
+        bool startPositive = UnityEngine.Random.value > 0.5f;
+        transform.localRotation = Quaternion.Euler(startPositive ? posRot : negRot);
 
-        swaySeq.SetLoops(-1);
+        // Direct tween (no Sequence needed)
+        swayTween = transform
+            .DOLocalRotate(startPositive ? negRot : posRot, duration)
+            .SetEase(Ease.InOutSine)
+            .SetDelay(randomDelay)
+            .SetLoops(-1, LoopType.Yoyo);
     }
 
     // ----------------------------------------------------
@@ -259,5 +283,14 @@ public class IdleHover : MonoBehaviour
         {
             jumpTargetTransform.localPosition = jumpBaseLocalPos;
         });
+    }
+
+    private void OnDestroy()
+    {
+        hoverTween?.Kill();
+        swayTween?.Kill();
+        jumpTween?.Kill();
+        scaleTween?.Kill();
+        shakeTween?.Kill();
     }
 }

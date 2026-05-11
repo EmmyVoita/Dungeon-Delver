@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f6a0e3cd052a94787e24cf68a5e06f, type: 3}
   m_Name: AbilityCard_GoldenHarvest
   m_EditorClassIdentifier: 
+  abilityType: 6
+  baseCost: 0
   scoreRequirement: 0
   abilityName: Collect Gold
   description: collect arrows for a short duration, then spawn an equal number of
     golden arrows
-  icon: {fileID: -1033766676993296678, guid: 1306ef63e3bb1d646b5c3e67aacbc94c, type: 3}
-  abilityType: 6
-  cardMaterial: {fileID: 2100000, guid: 0bfacb4534341d8448c50bede13afe6e, type: 2}
+  cardIcon: {fileID: 21300000, guid: 04a08359b34b2364db6388fa738d68e2, type: 3}
+  cardBackground: {fileID: 0}
+  iconScale: 1
+  abilityPrefab: {fileID: 0}

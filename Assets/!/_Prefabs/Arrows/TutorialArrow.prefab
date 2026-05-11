@@ -38,6 +38,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7231421227361774951
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -56,6 +57,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -77,9 +80,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: -193658917, guid: 2643ceeec1f901e48b35b170c4e84480, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -89,7 +94,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!50 &3241688908284352293
 Rigidbody2D:
@@ -177,7 +181,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 0
-  knockback: 0
+  sourceName: Tutorial Arrow
 --- !u!114 &1372070942466369641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,21 +194,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4698d87b9d79d98448faeeeca9d6f0b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreValue: 100
   health: 1
-  invincible: 0
+  catchRule: 0
   flip180: 1
-  useVariablePitch: 0
-  destroySound: {fileID: 8300000, guid: a8720048ac6722f4ea7e14495cef0642, type: 3}
-  criticalDestroySound: {fileID: 8300000, guid: a8720048ac6722f4ea7e14495cef0642, type: 3}
-  hitEffect: {fileID: 0}
-  destroyEffect: {fileID: 4032063115854461723, guid: 72f6472f9d72fa542b942c97a8c31560, type: 3}
-  criticalPitchIncrease: 0.2
-  arrowPitchVariation: 0
+  arrowHitSound: {fileID: 0}
+  normalHitPitch: 1
   criticalHitPitch: 1.2
-  isEmpowered: 0
-  isFrozen: 0
-  empowerEffect: {fileID: 3576346765979952481, guid: 03b302b66a97f7e40a2f19a1ddf124b8, type: 3}
-  freezeEffect: {fileID: 1962662059076443606, guid: c42345ef68ff8c74e92cd342f6f1fb4c, type: 3}
-  freezeDestroySound: {fileID: 8300000, guid: e2e566b8f6ca5c34983e19a0d5bcd41e, type: 3}
-  freezeEffectSound: {fileID: 8300000, guid: 7eaf4e4005c474747bd6e3af6e0c1688, type: 3}
+  directionalPitchFactor: 1
+  directionalEQStrength: 0.5
+  hpfNeutral: 20
+  lpfNeutral: 22000
+  midNeutral: 0
+  invincible: 0
+  status: 0

@@ -23,7 +23,7 @@ public class EditorSimulatedArrow : MonoBehaviour
         dir.Normalize();
 
         startPos = dir * spawnDistance;
-        endPos = Vector2.zero;
+        endPos = dir * ArrowSpawner.Instance.GoalRadius;
 
         arrivalSoundPlayed = false;
         isActive = true;

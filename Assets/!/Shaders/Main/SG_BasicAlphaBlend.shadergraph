@@ -1409,7 +1409,7 @@
         "m_Guid": ""
     },
     "isMainTexture": true,
-    "useTilingAndOffset": true,
+    "useTilingAndOffset": false,
     "useTexelSize": true,
     "m_Modifiable": true,
     "m_DefaultType": 0

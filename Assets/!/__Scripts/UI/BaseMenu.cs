@@ -2,7 +2,7 @@ using UnityEngine;
 
 public abstract class BaseMenu : MonoBehaviour
 {
-    public StartMenuWindows menuType;
+    public MenuState menuType;
     protected bool isActive;
     protected bool lockInput;
 
@@ -13,17 +13,13 @@ public abstract class BaseMenu : MonoBehaviour
         lockDepth = 0;
         lockInput = false;
         isActive = true;
-        //gameObject.SetActive(true);
-        Debug.Log($"[Menu] Opened {menuType}");
     }
 
     public virtual void OnClose()
     {
         lockInput = true;
         isActive = false;
-        //gameObject.SetActive(false);
         lockDepth = 0;
-        Debug.Log($"[Menu] Closed {menuType}");
     }
 
     // 🔹 Optional hooks for animation or fades

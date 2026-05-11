@@ -65,7 +65,7 @@
 54.5,arrow,up,6,normalarrow
 54.75,arrow,up,6,normalarrow
 55.5,obstacle,0,0,horizontalbeam
-62,obstacle,0,0,verticalbeam
+61,obstacle,0,0,verticalbeam
 70,arrow,left,6,normalarrow
 70.5,arrow,left,6,normalarrow
 71,arrow,up,6,normalarrow
@@ -111,8 +111,10 @@
 96,arrow,right,6,normalarrow
 97,arrow,down,15,normalmagicarrow
 98,obstacle,0,0,verticalbeam
-105,obstacle,0,0,rotatingbar
-112,obstacle,0,0,horizontalbeam
+103,obstacle,0,0,rotatingbar
+109,obstacle,0,0,horizontalbeam
+118,arrow,up,6,normalarrow
+119,arrow,up,6,normalarrow
 120,arrow,up,6,normalarrow
 121,arrow,left,6,normalarrow
 121.5,arrow,left,6,normalarrow

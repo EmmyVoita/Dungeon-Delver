@@ -16,5 +16,7 @@ public enum GameState
     Practice,
     Editor,
     RunLoad,
-    RunIntro
+    RunIntro,
+    WorldMapView,
+    WorldMapViewEnd
 }

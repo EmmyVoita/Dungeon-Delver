@@ -1,10 +1,14 @@
+using System;
 using TMPro;
 using UnityEngine;
 
 public class JumpDirectionModeMenuOption : PracticeMenuOption
 {
+    public static event Action<int, int> MenuOptionIndexChanged;
+
     [SerializeField] private int selectedIndex = 0;
     [SerializeField] private int optionCount = 2; // 4-way, 8-way. Expandable later.
+
 
     public TextMeshProUGUI[] modeTexts; // Assign 4-way, 8-way in Inspector
     public Color selectedColor = Color.yellow;
@@ -21,11 +25,13 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
         {
             AudioSettingsManager.PlaySelectSound();
             selectedIndex = (selectedIndex + 1) % optionCount;  // wrap forward
+            MenuOptionIndexChanged?.Invoke(selectedIndex,optionCount);
         }
         else if (input == Vector2.left)
         {
             AudioSettingsManager.PlaySelectSound();
             selectedIndex = (selectedIndex - 1 + optionCount) % optionCount; //
+            MenuOptionIndexChanged?.Invoke(selectedIndex,optionCount);
         }
             
         ApplyMode();
@@ -40,6 +46,7 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
     public override void OnEnter()
     {
         UpdateVisuals();
+        MenuOptionIndexChanged?.Invoke(selectedIndex,optionCount);
 
         Debug.Log("Entering JumpDirectionModeMenuOption");
     }
@@ -73,6 +80,8 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
                 modeTexts[i].transform.localScale = Vector3.one;
             }
         }
+
+
     }
 
 }

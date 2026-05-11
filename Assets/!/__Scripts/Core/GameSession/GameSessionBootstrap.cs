@@ -19,26 +19,27 @@ public class GameSessionBootstrap : MonoBehaviour
 
     private void ApplySessionConfig()
     {
+
         switch (Config.Mode)
         {
             case GameMode.StandardRun:
-                GameStateManager.Instance.SetState(GameState.RunIntro);
+                GameStateManager.Instance.SetStateForceUpdate(GameState.RunIntro);
                 break;
 
             case GameMode.ObstaclePractice:
-                GameStateManager.Instance.SetState(GameState.Practice);
+                GameStateManager.Instance.SetStateForceUpdate(GameState.Practice);
+                break;
+
+            case GameMode.ObstaclePracticeBoss:
+                GameStateManager.Instance.SetStateForceUpdate(GameState.Practice);
                 break;
 
             case GameMode.LevelEditorTest:
-                GameStateManager.Instance.SetState(GameState.Editor);
-                break;
-
-            case GameMode.LevelEdtiorPlayFromPosition:
-                GameStateManager.Instance.SetState(GameState.Editor);
+                GameStateManager.Instance.SetStateForceUpdate(GameState.Editor);
                 break;
 
             case GameMode.Tutorial:
-                GameStateManager.Instance.SetState(GameState.Tutorial);
+                GameStateManager.Instance.SetStateForceUpdate(GameState.Tutorial);
                 break;
         }
     }

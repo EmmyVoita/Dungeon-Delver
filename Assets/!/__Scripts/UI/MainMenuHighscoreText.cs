@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
@@ -7,14 +8,37 @@ public class MainMenuHighscoreText : MonoBehaviour
     [SerializeField] private string prefix;
     [SerializeField] private TextMeshProUGUI highscoreText;
 
-
-    void UpdateHighscoreText(int newHighscore)
+    private void OnEnable()
     {
-        int highscore = ScoreManager.Instance.HighScore;
-        highscoreText.text = prefix + highscore.ToString("N0");
+        AbilitySelectManager.OnHoverChanged += UpdateHighscoreText;
+    }
+
+    private void OnDisable()
+    {
+        AbilitySelectManager.OnHoverChanged -= UpdateHighscoreText;
     }
 
 
+    void UpdateHighscoreText()
+    {
+        // Read from ScoreManager save data and build 
+        SaveData saveData = ScoreManager.Instance.SaveData;
+        AbilityType targetType = AbilitySelectManager.Instance.ActiveHover;
+
+        if(targetType == AbilityType.ReturnToMenu || targetType == AbilityType.None)
+        {
+            highscoreText.text = prefix + "0";
+            return;
+        }
+
+        List<RunRecord> topRuns = LeaderBoardUIManager.GetTopRunsForAbility(targetType, saveData, 1);
+        
+        int highscore = topRuns[0].score;
+
+        highscoreText.text = prefix + highscore.ToString("N0");
+    }
+
+    /*
     void Start()
     {
         if (ScoreManager.Instance != null)
@@ -35,4 +59,5 @@ public class MainMenuHighscoreText : MonoBehaviour
             UpdateHighscoreText(ScoreManager.Instance.HighScore);
         }
     }
+    */
 }

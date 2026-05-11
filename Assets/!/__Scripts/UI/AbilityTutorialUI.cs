@@ -134,8 +134,25 @@ public class AbilityTutorialUI : MonoBehaviour
             if (arrowTimer >= spawnInterval)
             {
                 arrowTimer = 0f;
-                ArrowSpawner.Instance.SpawnArrow(Vector2.up, demoArrowSpeed, normalArrowType.displayName, damageOverride: 0);
-                Player.Instance.goal.GetComponentInChildren<Goal>().SetGoalDirection(Vector2.up);
+
+                float currentTime = (float)MusicManager.Instance.ScaledElapsedTime;
+
+                float travelTime = ArrowSpawner.Instance.SpawnDistance / demoArrowSpeed;
+
+                float spawnTime = currentTime;
+                float arrivalTime = currentTime + travelTime;
+
+                ArrowSpawner.Instance.SpawnArrow(
+                    Vector2.up,
+                    demoArrowSpeed,
+                    spawnTime,
+                    arrivalTime,
+                    normalArrowType.displayName,
+                    damageOverride: 0
+                );
+
+                Player.Instance.goal.GetComponentInChildren<Goal>()
+                    .SetGoalDirection(Vector2.up);
             }
 
             if (!hintShown && elapsed >= minWaitTime)
@@ -182,12 +199,28 @@ public class AbilityTutorialUI : MonoBehaviour
             if (arrowTimer >= spawnInterval)
             {
                 arrowTimer = 0f;
-                ArrowSpawner.Instance.SpawnArrow(Vector2.up, demoArrowSpeed, normalArrowType.displayName, damageOverride: 0);
+
+                float currentTime = (float)MusicManager.Instance.ScaledElapsedTime;
+
+                float travelTime = ArrowSpawner.Instance.SpawnDistance / demoArrowSpeed;
+
+                float spawnTime = currentTime;
+                float arrivalTime = currentTime + travelTime;
+
+                ArrowSpawner.Instance.SpawnArrow(
+                    Vector2.up,
+                    demoArrowSpeed,
+                    spawnTime,
+                    arrivalTime,
+                    normalArrowType.displayName,
+                    damageOverride: 0
+                );
 
                 if (criticalCatchDemoCoroutine != null)
                     StopCoroutine(criticalCatchDemoCoroutine);
                 criticalCatchDemoCoroutine = StartCoroutine(SimulateCriticalCatch());
             }
+
 
             if (!hintShown && elapsed >= minWaitTime)
             {
@@ -282,8 +315,22 @@ public class AbilityTutorialUI : MonoBehaviour
             int dir = Random.Range(0, 4);
             Vector2 direction = spawnDirections[dir];
 
-            ArrowSpawner.Instance.SpawnArrow(direction, arrowSpeed, normalArrowType.displayName, damageOverride: 0);
+            float currentTime = (float)MusicManager.Instance.ScaledElapsedTime;
 
+            float travelTime = ArrowSpawner.Instance.SpawnDistance / demoArrowSpeed;
+
+            float spawnTime = currentTime;
+            float arrivalTime = currentTime + travelTime;
+
+            ArrowSpawner.Instance.SpawnArrow(
+                direction,
+                demoArrowSpeed,
+                spawnTime,
+                arrivalTime,
+                normalArrowType.displayName,
+                damageOverride: 0
+            );
+        
             if (spawnSound)
                 audioSource.PlayOneShot(spawnSound);
 

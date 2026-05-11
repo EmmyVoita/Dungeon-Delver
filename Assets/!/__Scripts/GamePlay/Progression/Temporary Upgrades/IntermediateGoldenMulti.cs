@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/Golden Value Multiplier")]
-public class IntermediateGoldenMulti : IntermediateEffectSO
+public class IntermediateGoldenMulti : UpgradeBase
 {
     public float goldenValueMultiplier = 2.0f;
 

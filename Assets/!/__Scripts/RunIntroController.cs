@@ -4,7 +4,7 @@ using DG.Tweening;
 
 public class RunIntroController : MonoBehaviour
 {
-
+    [SerializeField] private bool stop = false;
     [Header("References")]
     [SerializeField] private GuiPanelArrow healthVisuals;
     [SerializeField] private Transform playerContainer;
@@ -41,7 +41,7 @@ public class RunIntroController : MonoBehaviour
 
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
-        if(ObstacleManager.Instance.testMode == ObstacleManager.TestMode.RepeatOnStart) return;
+        if(ObstacleManager.Instance.TestOn || stop) return;
         if(newState == GameState.RunIntro && previousState != newState)
         {
             introCoroutine = StartCoroutine(IntroSequence());

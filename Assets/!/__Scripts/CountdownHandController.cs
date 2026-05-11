@@ -4,6 +4,7 @@ using DG.Tweening;
 
 public class CountdownHandController : MonoBehaviour
 {
+    public float startDelay = 1.0f;
     [Header("References")]
     [SerializeField] private SpriteRenderer handRenderer;
     [SerializeField] private Transform handTransform;
@@ -63,6 +64,7 @@ public class CountdownHandController : MonoBehaviour
 
     private IEnumerator CountdownRoutine()
     {
+        yield return new WaitForSeconds(startDelay);
         handTransform.gameObject.SetActive(true);
 
         counter = 0;

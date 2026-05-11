@@ -5,15 +5,19 @@ using System.Collections.Generic;
 
 public class ScoreManager : MonoBehaviour
 {
+    
     public static ScoreManager Instance { get; private set; }
 
+    public static event Action<int> OnScoreAdded;
     public static event Action<int> OnScoreUpdated;
     public static event Action<Color> OnScoreFlashColor;
     public static event Action<int> OnHighScoreUpdated;
 
+    
     [SerializeField] private int currentScore;
     [SerializeField] private int highScore;
     [SerializeField] private int totalScore;
+    [SerializeField] private RunStatsTracker runStats;
     public float abilityChargeScorePerUnit = 500f;
 
     private Dictionary<ScoreSource, int> breakdown = new();
@@ -26,6 +30,7 @@ public class ScoreManager : MonoBehaviour
 
     public int RoundScoreTotal => CalculateTotalScore();
     public int GameScoreTotal => currentScore;
+    public SaveData SaveData => saveData;
 
     private void OnEnable()
     {
@@ -54,16 +59,21 @@ public class ScoreManager : MonoBehaviour
         LoadData();
     }
 
-    private void HandleGameStateChange(GameState previous, GameState current)
+    private void HandleGameStateChange(GameState previous, GameState newState)
     {
-        if(current == GameState.RunLoad)
+        if(newState == GameState.RunLoad)
         {
             ResetScore();
         }
 
-        if (previous == GameState.RoundResultsExit && current != GameState.RoundResultsExit)
+        if (previous == GameState.RoundResultsExit && newState != GameState.RoundResultsExit)
         {
             ResetBreakdown();
+        }
+
+        if(newState == GameState.GameOverResults)
+        {
+            SaveRunRecord();
         }
     }
 
@@ -90,6 +100,9 @@ public class ScoreManager : MonoBehaviour
 
         currentScore += Mathf.RoundToInt(adjustedAmount);
         OnScoreUpdated?.Invoke(currentScore);
+
+        OnScoreAdded?.Invoke(adjustedAmount);
+
 
         if (!breakdown.ContainsKey(source))
             breakdown[source] = 0;
@@ -187,4 +200,68 @@ public class ScoreManager : MonoBehaviour
         File.WriteAllText(saveFilePath, json);
         Debug.Log($"Saved High Score to {saveFilePath}");
     }
+
+    private List<UpgradeRecord> ConvertUpgrades(Dictionary<UpgradeBase, int> chosenCards)
+    {
+        List<UpgradeRecord> records = new();
+
+        foreach(var kvp in chosenCards)
+        {
+            var key = kvp.Key;
+            var val = kvp.Value;
+
+            records.Add(new UpgradeRecord
+            {
+                upgradeId = key.upgradeId,
+                upgradeName = key.displayName,
+                count = val
+            });
+        }
+
+        return records;
+    }
+
+    
+    public void SaveRunRecord()
+    {
+        if(runStats == null)
+        {
+           runStats = FindAnyObjectByType<RunStatsTracker>();
+        }
+
+        RunRecord record = new RunRecord
+        {
+            score = currentScore,
+            abilityUsed = AbilitySelection.SelectedAbility,
+            upgrades = ConvertUpgrades(UpgradeCardManager.Instance.AllChosenCards),
+            damageTaken = runStats.TotalDamageTaken,
+            highestCombo = runStats.HighestCombo,
+            accuracy = runStats.RunAccuracy,
+            critAccuracy = runStats.RunCritRate,
+            noDamageRun = runStats.TotalDamageTaken == 0,
+            timestamp = DateTime.Now.ToString("o") 
+        };
+
+        Debug.Log(record.ToString());
+
+        saveData.leaderboard.Add(record);
+
+        // update derived stats 
+        saveData.timesPlayed++;
+
+        saveData.totalScore += record.score;
+
+        if (record.score > saveData.highScore)
+            saveData.highScore = record.score;
+
+        SaveDataToFile();
+    }
+
+    public SaveData GetSaveData()
+    {
+        string json = File.ReadAllText(saveFilePath);
+        saveData = JsonUtility.FromJson<SaveData>(json);
+        return saveData;
+    }
+    
 }

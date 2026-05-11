@@ -98,8 +98,7 @@ public static class AudioHelpers
         if (sound.affectedByTimeScale)
             pitch *= GetPitchOffsetForTimeScale();
 
-        if (sound.usePitchVariation)
-            pitch += Random.Range(-sound.pitchVariation, sound.pitchVariation);
+        pitch += Random.Range(-sound.pitchVariation, sound.pitchVariation);
 
         source.pitch = Mathf.Max(pitch, 0.01f);
         source.Play();

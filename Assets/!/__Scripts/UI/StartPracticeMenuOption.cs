@@ -41,9 +41,7 @@ public class StartPracticeMenuOption : PracticeMenuOption
         GameSceneLoader.PendingConfig = new GameSceneConfig(
             GameMode.ObstaclePractice,
             0,
-            ObstacleLabMenuNavigator.Instance.CurrentObstacle,
-            JumpDirectionMode.FourDirectional
-        );
+            ObstacleLabMenuNavigator.Instance.CurrentObstacle);
 
         SceneManager.LoadScene(SceneNames.ObstaclePractice);
     }

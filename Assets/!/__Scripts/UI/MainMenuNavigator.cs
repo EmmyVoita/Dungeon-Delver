@@ -1,96 +1,94 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.SceneManagement;
 using System;
-using System.Collections;
-using Unity.VisualScripting;
 using System.Collections.Generic;
-using DG.Tweening;
 
 public class MainMenuNavigator : BaseMenu
 {
-
-    public static Action OnReturnToMenu;
-    public static Action OnPlaySelected;
-    public static Action<SelectOption> OnTutorialSelected;
-    public static Action OnSettingsSelected;
-    public static Action OnExitSelected;
-
     public static Action<int> OnSelectionChanged;
 
-    
+    [Header("References")]
+    [SerializeField] private StartOptionsNavigator startOptions;
 
-    [Header("Arrow Indicator")]
-    public RectTransform arrowIndicator;
-    public float arrowFollowSpeed = 12f;
-    public float arrowLag = 0.08f;
-    public float arrowXOffset = -40f;
-
-    private Vector3 arrowVelocity;
+    [Header("MenuOptions")]
+    [SerializeField] private List<MenuState> menuOptionTransitions = new();
 
     [Header("UI Options")]
-    public TextMeshProUGUI[] options;
-    public List<RectTransform> otherDepedecies;
-    public Color selectedColor = Color.yellow;
-    public Color defaultColor = Color.white;
-    public float selectedScale = 1.2f;
-    public float transitionSpeed = 8f;
+    [SerializeField] private TextMeshProUGUI[] options;
+    [SerializeField] private Color selectedColor = Color.yellow;
+    [SerializeField] private Color defaultColor = Color.white;
+    [SerializeField] private float selectedScale = 1.2f;
+    [SerializeField] private float transitionSpeed = 8f;
 
-    [SerializeField] private int selectedIndex = 0;
 
-    private void OnEnable()
+    [Header("Dynamic")]
+    [SerializeField] private int _selectedIndex = 0;
+
+
+
+    public int SelectedIndex
     {
-    }
-
-    private void OnDisable()
-    {
-    }
-
-    void Awake()
-    {
-        MenuManager.Instance.RegisterMenu(this);
-        MenuManager.Instance.OpenMenu(StartMenuWindows.MainMenu);
-    }
-
-    void Start()
-    {
-        if (SceneReturnHandler.ReturnToAbilitySelect)
+        get => _selectedIndex;
+        set
         {
-           MenuManager.Instance.TransitionToMenu(StartMenuWindows.PlayMenu, 0.2f);
+            if (_selectedIndex == value) return;
+            _selectedIndex = value;
+            OnSelectionChanged?.Invoke(_selectedIndex);
         }
-        selectedIndex = 0;
-        OnSelectionChanged?.Invoke(selectedIndex);
     }
 
-    void UpdateArrowIndicator()
+    #if UNITY_EDITOR
+    private void OnValidate()
     {
-        if (arrowIndicator == null || options.Length == 0)
+        if (options == null || menuOptionTransitions == null)
             return;
 
-        RectTransform target = options[selectedIndex].rectTransform;
+        int optionCount = options.Length;
+        int transitionCount = menuOptionTransitions.Count;
 
-        Vector3 targetPos = new Vector3(arrowIndicator.position.x,target.position.y,arrowIndicator.position.z);
-        //targetPos.x += arrowXOffset;
+        // If transitions list is too small → expand it
+        if (transitionCount < optionCount)
+        {
+            int toAdd = optionCount - transitionCount;
+            for (int i = 0; i < toAdd; i++)
+            {
+                menuOptionTransitions.Add(MenuState.None);
+            }
 
-        arrowIndicator.position = Vector3.SmoothDamp(
-            arrowIndicator.position,
-            targetPos,
-            ref arrowVelocity,
-            arrowLag,
-            arrowFollowSpeed
-        );
+            Debug.LogWarning($"{name}: Expanded menuOptionTransitions to match options length.");
+        }
+        // If transitions list is too big → trim it
+        else if (transitionCount > optionCount)
+        {
+            menuOptionTransitions.RemoveRange(optionCount, transitionCount - optionCount);
+
+            Debug.LogWarning($"{name}: Trimmed menuOptionTransitions to match options length.");
+        }
+    }
+    #endif
+
+    private void Start()
+    {
+        MenuManager.Instance.RegisterMenu(this);
+        MenuManager.Instance.OpenMenu(MenuState.Main);
+        SelectedIndex = 0;
     }
 
-    // -------------------------------------------------------
-    // MENU OPEN LOGIC
-    // -------------------------------------------------------
+    private void Update()
+    {
+        if (lockInput) return;
+
+        HandleInput();
+        AnimateSelection();
+    }
+
+
 
     public override void OnOpen()
     {
         base.OnOpen();
 
-        selectedIndex = 0;
-        OnSelectionChanged?.Invoke(selectedIndex);
+        SelectedIndex = 0;
 
         if (options == null || options.Length == 0)
         {
@@ -98,69 +96,28 @@ public class MainMenuNavigator : BaseMenu
             return;
         }
 
-        foreach (var opt in options)
-        {
-            if (opt == null)
-            {
-                Debug.LogError("MainMenuNavigator: Null option found in array.");
-                continue;
-            }
-            opt.gameObject.SetActive(true);
-        }
-
-        foreach (var dep in otherDepedecies)
-        {
-            dep.gameObject?.SetActive(true);
-        }
-
         UpdateVisuals();
-        arrowIndicator.DOPunchScale(Vector3.one * 0.15f, 0.15f, 5, 0.6f);
-        //ScreenDimmerManager.Instance.AddDimSource(gameObject.name);
     }
 
     public override void OnClose()
     {
-        foreach (var option in options)
-            option.gameObject.SetActive(false);
-
-        foreach (var dep in otherDepedecies)
-        {
-            dep.gameObject?.SetActive(false);
-        }
-
-        //ScreenDimmerManager.Instance.RemoveDimSource(gameObject.name);
-            
+        SelectedIndex = -1;
         base.OnClose();
-    }
-
-    // -------------------------------------------------------
-    // INPUT + ANIMATION
-    // -------------------------------------------------------
-
-    void Update()
-    {
-        if (lockInput) return;
-
-        HandleInput();
-        AnimateSelection();
-        UpdateArrowIndicator();
     }
 
     void HandleInput()
     {
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
         {
-            selectedIndex = (selectedIndex + 1) % options.Length;
+            SelectedIndex = (SelectedIndex + 1) % options.Length;
             AudioSettingsManager.PlayNavigateSound();
             UpdateVisuals();
-            OnSelectionChanged?.Invoke(selectedIndex);
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
-            selectedIndex = (selectedIndex - 1 + options.Length) % options.Length;
+            _selectedIndex = (_selectedIndex - 1 + options.Length) % options.Length;
             AudioSettingsManager.PlayNavigateSound();
             UpdateVisuals();
-            OnSelectionChanged?.Invoke(selectedIndex);
         }
 
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
@@ -174,7 +131,7 @@ public class MainMenuNavigator : BaseMenu
     {
         for (int i = 0; i < options.Length; i++)
         {
-            options[i].color = (i == selectedIndex) ? selectedColor : defaultColor;
+            options[i].color = (i == SelectedIndex) ? selectedColor : defaultColor;
         }
     }
 
@@ -182,7 +139,7 @@ public class MainMenuNavigator : BaseMenu
     {
         for (int i = 0; i < options.Length; i++)
         {
-            float targetScale = (i == selectedIndex) ? selectedScale : 1f;
+            float targetScale = (i == SelectedIndex) ? selectedScale : 1f;
             options[i].transform.localScale = Vector3.Lerp(
                 options[i].transform.localScale,
                 Vector3.one * targetScale,
@@ -191,31 +148,40 @@ public class MainMenuNavigator : BaseMenu
         }
     }
 
-    // -------------------------------------------------------
-    // SELECTION
-    // -------------------------------------------------------
 
+
+    private MenuState GetTargetState(int targetIndex)
+    {
+        if (targetIndex < 0 || targetIndex >= menuOptionTransitions.Count)
+            return MenuState.None;
+
+        return menuOptionTransitions[targetIndex];
+    }
 
     void ActivateOption()
     {
-        string optionName = options[selectedIndex].text.ToLower();
+        MenuState targetState = GetTargetState(SelectedIndex);
 
-        switch (selectedIndex)
+        switch (targetState)
         {
-            case 0:
-                MenuManager.Instance.TransitionToMenu(StartMenuWindows.PlayMenu, 0.2f);
+            case MenuState.None:
                 break;
-            case 1:
-                OnTutorialSelected?.Invoke(SelectOption.Tutorial);
+            case MenuState.Play:
+                MenuManager.Instance.RequestMenuTransition(MenuState.Play);
                 break;
-            case 2:
-                MenuManager.Instance.TransitionToMenu(StartMenuWindows.ObstacleLabMenu, 0.2f);
+            case MenuState.Tutorial:
+                startOptions.Open(GameMode.Tutorial, SceneNames.TutorialScene);
                 break;
-            case 3:
-                MenuManager.Instance.TransitionToMenu(StartMenuWindows.SettingsMenu, 0.2f);
+            case MenuState.Settings:
+                MenuManager.Instance.RequestMenuTransition(MenuState.Settings);
                 break;
-            case 4:
-                OnExitSelected?.Invoke();
+            case MenuState.LeaderBoard:
+                MenuManager.Instance.RequestMenuTransition(MenuState.LeaderBoard);
+                break;
+            case MenuState.Practice:
+                MenuManager.Instance.RequestMenuTransition(MenuState.Practice);
+                break;
+            case MenuState.Exit:
                 Application.Quit();
 #if UNITY_EDITOR
                 UnityEditor.EditorApplication.isPlaying = false;
@@ -223,11 +189,8 @@ public class MainMenuNavigator : BaseMenu
                 break;
 
             default:
-                Debug.Log("No action assigned to " + optionName);
+                Debug.Log("No action assigned to " + options[SelectedIndex].text.ToLower());
                 break;
         }
-
-        selectedIndex = -1;
-        OnSelectionChanged?.Invoke(selectedIndex);
     }
 }

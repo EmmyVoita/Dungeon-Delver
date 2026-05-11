@@ -1,10 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System;
-using System.Timers;
-using NUnit.Framework;
 
 /// <summary>
 /// Handles spawning arrows and obstacles from text pattern files.
@@ -12,11 +9,12 @@ using NUnit.Framework;
 [System.Serializable]
 public class SpawnEvent
 {
-    public float time;
-    public string eventType;   // "arrow" or "obstacle"
-    public Vector2 paramA;     // direction or position
-    public float paramB;       // speed or unused
-    public string type;      // prefab index
+    public float time;        // spawn time (seconds)
+    public float arrivalTime; // 👈 ADD THIS
+    public string eventType;
+    public Vector2 paramA;
+    public float paramB;      // speed
+    public string type;
 }
 
 public class ArrowSpawner : MonoBehaviour
@@ -34,6 +32,7 @@ public class ArrowSpawner : MonoBehaviour
     [SerializeField] private DirectionalWarningController directionalWarningController;
     
     [SerializeField] private float spawnDistance = 10f;
+    [SerializeField] private float goalRadius = 1f;
 
     [Header("Prefabs")]
 
@@ -52,8 +51,8 @@ public class ArrowSpawner : MonoBehaviour
     private bool isPausedByObstacle = false;
     private int currentIndex = 0;
 
-    private double lastDSPTime;
-    private float scaledSongTime;
+    //private double lastDSPTime;
+    //private double scaledSongTime;
 
 
 
@@ -63,25 +62,15 @@ public class ArrowSpawner : MonoBehaviour
     public List<ArrowTypeDefinition> ArrowTypeDefinitions => arrowTypeDefinitions;
     public List<ObstacleTypeDefinition> ChallengesTypeDefinitions => obstacleTypeDefinitions;
     public float SpawnDistance => spawnDistance;
+    public float GoalRadius => goalRadius;
+    public float ArrowTravelDistance => Mathf.Max(spawnDistance - goalRadius,0f);
     public bool IsSpawning { get; private set; }
 
 
     private bool useEightDirections = false;
 
-    private double pauseDSP;
-    private double accumulatedPauseDSP;
-
-
-    public void OnPause()
-    {
-        pauseDSP = AudioSettings.dspTime;
-    }
-
-    public void OnResume()
-    {
-        accumulatedPauseDSP += AudioSettings.dspTime - pauseDSP;
-    }
-
+    //private double pauseDSP;
+  
 
 
     // --------------------------------------------------
@@ -97,14 +86,14 @@ public class ArrowSpawner : MonoBehaviour
 
     void OnEnable()
     {
-        UIManager.OnGameOver += StopAllSpawning;
+        GameStateManager.OnStateChanged += HandleStateChanged;
         ObstacleManager.OnFirstObstacleAppeared += HandlePauseSpawning;
         ObstacleManager.OnAllObstaclesCleared += HandleResumeSpawning;
     }
 
     void OnDisable()
     {
-        UIManager.OnGameOver -= StopAllSpawning;
+        GameStateManager.OnStateChanged -= HandleStateChanged;
         ObstacleManager.OnFirstObstacleAppeared -= HandlePauseSpawning;
         ObstacleManager.OnAllObstaclesCleared -= HandleResumeSpawning;
     }
@@ -134,8 +123,8 @@ public class ArrowSpawner : MonoBehaviour
     {
         IsSpawning = true;
 
-        lastDSPTime = AudioSettings.dspTime;
-        scaledSongTime = 0f;
+        //lastDSPTime = AudioSettings.dspTime;
+        //scaledSongTime = 0f;
 
 
         if (patternAsset == null)
@@ -151,14 +140,21 @@ public class ArrowSpawner : MonoBehaviour
         Player.Instance.UseEightDirections = useEightDirections;
         spawnCoroutine = StartCoroutine(SpawnFromPattern());
         yield return spawnCoroutine;
+        yield return null;
         IsSpawning = false;
     }
 
 
+    public void HandleStateChanged(GameState previousState, GameState newState)
+    {
+        if(newState == GameState.GameOverTally || newState == GameState.DeathSequence)
+        {
+           StopAllSpawning();
+        }
+    }
+
     public void StopAllSpawning()
     {
-        Debug.Log("🛑 ArrowSpawner.StopAllSpawning called");
-
         stopRequested = true;
 
         if (spawnCoroutine != null)
@@ -170,6 +166,8 @@ public class ArrowSpawner : MonoBehaviour
 
     public void ClearAllArrows()
     {
+        foreach (var arrow in GameObject.FindGameObjectsWithTag("Arrow"))
+            Destroy(arrow);
         OnClearArrows?.Invoke();
     }
 
@@ -184,8 +182,8 @@ public class ArrowSpawner : MonoBehaviour
 
         LoadPattern(patternAsset, bpmModifier);
 
-        lastDSPTime = AudioSettings.dspTime;
-        scaledSongTime = startTime;
+        //lastDSPTime = AudioSettings.dspTime;
+        //scaledSongTime = startTime;
 
          IsSpawning = true;
 
@@ -281,6 +279,7 @@ public class ArrowSpawner : MonoBehaviour
                 ArrowTypeDefinition arrowTypeDef =  arrowTypeDefinitions.Find(def => def.displayName.ToLower() == type.ToLower());
                        
                 float spawnTime = CalculateSpawnTime(time, speed);
+                float arrivalTime = CalculateArrivalTime(time);
 
                 // 🔹 Add warning BEFORE arrow if needed
                 if (arrowTypeDef != null && arrowTypeDef.requiresWarning)
@@ -297,6 +296,7 @@ public class ArrowSpawner : MonoBehaviour
                 patternEvents.Add(new SpawnEvent
                 {
                     time = spawnTime,
+                    arrivalTime = arrivalTime,
                     eventType = "arrow",
                     paramA = dir,
                     paramB = speed,
@@ -333,9 +333,29 @@ public class ArrowSpawner : MonoBehaviour
     {
         float secondsPerBeat = 60f / bpm;
         float arrivalTime = beat * secondsPerBeat;
-        float travelTime = spawnDistance / speed;
-        float spawnTime = Mathf.Max(0, arrivalTime - travelTime);
-        return spawnTime;
+
+        float adjustedDistance = Mathf.Max(0f, spawnDistance - goalRadius);
+        float travelTime = adjustedDistance / speed;
+
+        return Mathf.Max(0f, arrivalTime - travelTime);
+    }
+
+    private float CalculateArrivalTime(float beat)
+    {
+        float secondsPerBeat = 60f / bpm;
+        float arrivalTime = beat * secondsPerBeat;
+
+        return arrivalTime;
+    }
+
+
+
+    private bool IsGameplayActive()
+    {
+        var state = GameStateManager.Instance.CurrentState;
+
+        return state == GameState.RoundActive ||
+            state == GameState.PreRoundCountdown;
     }
 
 
@@ -344,40 +364,46 @@ public class ArrowSpawner : MonoBehaviour
     {
         int index = FindStartingIndex(startTime);
 
-        UIToast.Show($"🚀 SpawnFromPattern start Time {RoundManager.Instance.RoundStartTime - Time.time}");
+        //lastDSPTime = AudioSettings.dspTime;
 
         while (index < patternEvents.Count)
         {
-            if(GameStateManager.Instance.CurrentState == GameState.Paused)
+            if (GameStateManager.Instance.CurrentState == GameState.Paused)
             {
-                yield return null;
+                yield return null; 
                 continue;
             }
 
-            if (stopRequested)
+            if (stopRequested || !IsGameplayActive())
                 yield break;
 
-            if (isPausedByObstacle)
-            {
-                yield return null;
-                continue;
-            }
+            var evt = patternEvents[index];
 
-            double currentDSP = AudioSettings.dspTime;
-            double dspDelta = currentDSP - lastDSPTime;
+            // 👇 wait until it's time to spawn this event
+            yield return WaitUntilEventTime(evt.time);
 
-            scaledSongTime += (float)(dspDelta * Time.timeScale);
-
-            lastDSPTime = currentDSP;
-
-            float elapsed = scaledSongTime;
-
-            index = SpawnReadyEvents(index, elapsed);
-
-            yield return null;
+            SpawnEvent(evt);
+            index++;
         }
 
         UIToast.Show("✅ SpawnFromPattern finished normally.");
+    }
+
+
+    private IEnumerator WaitUntilEventTime(double targetTime)
+    {
+        while (true)
+        {
+            if (stopRequested || !IsGameplayActive())
+                yield break;
+
+            double elapsed = MusicManager.Instance.ScaledElapsedTime;
+
+            if (elapsed >= targetTime)
+                yield break;
+
+            yield return null;
+        }
     }
 
     private int FindStartingIndex(float targetTime)
@@ -389,20 +415,6 @@ public class ArrowSpawner : MonoBehaviour
         }
 
         return patternEvents.Count;
-    }
-
-    private int SpawnReadyEvents(int startIndex, float elapsed)
-    {
-        int index = startIndex;
-
-        while (index < patternEvents.Count &&
-            elapsed >= patternEvents[index].time)
-        {
-            SpawnEvent(patternEvents[index]);
-            index++;
-        }
-
-        return index;
     }
 
 
@@ -418,7 +430,7 @@ public class ArrowSpawner : MonoBehaviour
         switch (e.eventType)
         {
             case "arrow":
-                SpawnArrow(e.paramA, e.paramB, e.type);
+                SpawnArrow(e.paramA, e.paramB, e.time, e.arrivalTime, e.type);
                 break;
 
             case "obstacle":
@@ -462,7 +474,7 @@ public class ArrowSpawner : MonoBehaviour
     }
 
     // --------------------------------------------------
-    public void SpawnArrow(Vector2 direction, float speed, string type, Color colorOverride = default, int damageOverride = -1)
+    public void SpawnArrow(Vector2 direction, float speed, float spawnTime, float arrivalTime, string type, Color colorOverride = default, int damageOverride = -1)
     {
         ArrowTypeDefinition arrowTypeDef = arrowTypeDefinitions.Find(def => def.displayName.ToLower() == type.ToLower());
 
@@ -474,6 +486,7 @@ public class ArrowSpawner : MonoBehaviour
         }
 
         Vector2 spawnPos = (Vector2)transform.position + direction * spawnDistance;
+        Vector2 endPos = (Vector2)transform.position + direction * goalRadius;
 
         GameObject arrow = Instantiate(arrowPrefab, spawnPos, Quaternion.identity);
         arrow.tag = "Arrow";
@@ -490,10 +503,17 @@ public class ArrowSpawner : MonoBehaviour
         }
 
         ArrowEffectManager.Instance.ApplyEffectsToArrow(arrow.GetComponent<ArrowBase>());
-        arrow.GetComponent<ArrowBase>().Fire(direction, speed);
-        RoundManager.Instance.stats.AddSpawned();
 
-        Debug.Log($"🎯 Spawned arrow at level time {Time.time - RoundManager.Instance.RoundStartTime}s.");
+        Debug.Log($"Arrow Spawned At => {spawnTime}, Arrival Time => {arrivalTime}");
+        
+        arrow.GetComponent<ArrowBase>().Init(direction, 
+                                             speed,
+                                             spawnTime,
+                                             arrivalTime,
+                                             spawnPos,
+                                             endPos);
+        
+        RoundManager.Instance.stats.AddSpawned();
     }
 
     public void TriggerWarning(Vector2 direction, string type)

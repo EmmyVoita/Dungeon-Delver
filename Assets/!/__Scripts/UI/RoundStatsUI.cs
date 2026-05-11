@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 [Serializable]
 public struct RatingDisplayData
@@ -18,23 +20,6 @@ public struct RatingDisplayData
     public GameObject effect;
 }
 
-[Serializable]
-public struct StatRowData
-{
-    public string prefixLabel;
-    public StatValueType statValueType;
-    public ScoreSource scoreSource;
-}
-
-public enum StatValueType
-{
-    ScoreSource,   // comes from ScoreManager breakdown
-    TotalScore,
-    Hits,
-    RunHits,
-    RunTotalScore,
-    RunHighestCombo,
-}
 
 
 
@@ -190,12 +175,6 @@ public class RoundStatsUI : MonoBehaviour
     {
         switch (data.statValueType)
         {
-            case StatValueType.ScoreSource:
-                int count = ScoreManager.Instance
-                    .GetBreakdown()
-                    .GetValueOrDefault(data.scoreSource);
-                return new Vector2Int(count, -1);
-
             case StatValueType.TotalScore:
                 return new Vector2Int(ScoreManager.Instance.RoundScoreTotal, -1);
 
@@ -217,7 +196,6 @@ public class RoundStatsUI : MonoBehaviour
             StatRowAnimator rowAnimator = rowObj.GetComponentInChildren<StatRowAnimator>();   
  
             breakdownRowAnimators.Add(rowAnimator);
-            scoreSources.Add(breakdownRowDataList[i].scoreSource);
             prefixTexts.Add(breakdownRowDataList[i].prefixLabel);
         }
     }

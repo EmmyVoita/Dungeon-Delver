@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +22,20 @@ public class UIImageCyclerPerFrameTime : MonoBehaviour
     private void Reset()
     {
         image = GetComponent<Image>();
+    }
+
+    public void Initalize(Image targetImage, List<Sprite> frames, float frameDuration = 0.1f, bool loop = true)
+    {
+        image = targetImage;
+        this.frames = frames.ToArray();
+        OnValidate();
+
+        stopAtLastFrame = loop ? false : true;
+
+        for(int i = 0; i < frameDurations.Length; i++)
+        {
+            frameDurations[i] = frameDuration;
+        }
     }
 
     private void OnValidate()

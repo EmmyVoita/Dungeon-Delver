@@ -68,6 +68,8 @@ public abstract class ArrowBase : MonoBehaviour
     // --- Freeze state ---
     private float freezeTimer = 0f;
     private float frozenSpeed = 0f;
+    protected bool _isDead = false;
+    float _expectedArrivalTime;
 
     public bool IsGolden => status.HasFlag(ArrowStatus.Golden);
     public bool IsRecoveryArrow => status.HasFlag(ArrowStatus.Recovery);
@@ -76,7 +78,12 @@ public abstract class ArrowBase : MonoBehaviour
     public bool IsInverse => catchRule == ArrowCatchRule.Avoid;
     public Vector2 Direction => direction;
 
-    
+    protected float spawnTime;
+    protected float arrivalTime;
+    protected Vector2 startPos;
+    protected Vector2 endPos;
+    private float testStartTime;
+
 
 
     public void SetRecoveryArrow()
@@ -115,7 +122,7 @@ public abstract class ArrowBase : MonoBehaviour
         frozenSpeed = speed;
 
         // Stop movement
-        rb.linearVelocity = Vector2.zero;
+        //rb.linearVelocity = Vector2.zero;
 
         //AudioHelpers.PlayMyClipAtPoint(freezeEffectSound, AudioChannel.SFX, transform.position);
 
@@ -138,7 +145,7 @@ public abstract class ArrowBase : MonoBehaviour
         if (!HasStatus(ArrowStatus.Frozen)) return;
 
         RemoveStatus(ArrowStatus.Frozen);
-        rb.linearVelocity = -direction * frozenSpeed;
+        //rb.linearVelocity = -direction * frozenSpeed;
 
         // Reset tint
         var rend = GetComponentInChildren<SpriteRenderer>();
@@ -198,11 +205,18 @@ public abstract class ArrowBase : MonoBehaviour
     }
 
     // Initialize arrow direction and movement
-    public virtual void Fire(Vector2 direction, float speed)
+    public virtual void Init(Vector2 direction, float speed, float spawnTime, float arrivalTime, Vector3 startPos, Vector3 endPos)
     {
         this.direction = direction.normalized;
         this.speed = speed;
-        rb.linearVelocity = -direction * speed;
+        this.spawnTime = spawnTime;
+        this.arrivalTime = arrivalTime;
+        this.startPos = startPos;
+        this.endPos = endPos;
+
+        testStartTime = Time.time - spawnTime;
+
+        //rb.linearVelocity = -direction * speed;
         OrientArrow(direction);
     }
 
@@ -238,14 +252,34 @@ public abstract class ArrowBase : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (HasStatus(ArrowStatus.Frozen))
-        {
-            freezeTimer -= Time.deltaTime;
-            if (freezeTimer <= 0f)
-                Unfreeze();
+        if (_isDead) return;
 
-            return; // skip any per-frame updates while frozen
+        float rawTime = (float)MusicManager.Instance.ScaledElapsedTime;
+        float scaledTime = rawTime * TimeManager.Instance.GetCurrentScale();
+
+        float elapsed = (float)MusicManager.Instance.ScaledElapsedTime;
+
+        Vector2 targetPos;
+
+        if (elapsed <= arrivalTime)
+        {
+            // Normal movement to goal
+            float t = Mathf.InverseLerp(spawnTime, arrivalTime, elapsed);
+            targetPos = Vector2.Lerp(startPos, endPos, t);
         }
+        else
+        {
+            // AFTER goal → continue to center
+            float extraTime = elapsed - arrivalTime;
+
+            float postTravelDuration = 0.2f; // tweak this
+
+            float t = Mathf.Clamp01(extraTime / postTravelDuration);
+
+            targetPos = Vector2.Lerp(endPos, Vector2.zero, t);
+        }
+
+        SmoothTranslate(targetPos);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -258,6 +292,16 @@ public abstract class ArrowBase : MonoBehaviour
             // 💥 Shatter both arrows
             ShatterFrozenPair(incoming);
         }
+    }
+
+    protected void SmoothTranslate(Vector3 targetPos)
+    {
+        // 👇 Smooth movement toward correct DSP position
+        transform.position = Vector2.Lerp(
+            transform.position,
+            targetPos,
+            1f - Mathf.Exp(-20f * Time.deltaTime)
+        );
     }
 
     private void ShatterFrozenPair(ArrowBase other)
@@ -285,10 +329,9 @@ public abstract class ArrowBase : MonoBehaviour
     // 🔹 Centralized death handler
     protected virtual void Die(Goal.GoalType goalType = Goal.GoalType.Normal, bool invokeDeathEvent = true, Vector2 hitDirection = default)
     {   
-        /*
-        if(destroyEffect != null)
-            Instantiate(destroyEffect, transform.position, transform.rotation);
-        */
+        if(_isDead) return;
+
+        _isDead = true;
 
         if (invokeDeathEvent)
         {
@@ -300,6 +343,8 @@ public abstract class ArrowBase : MonoBehaviour
             
             OnArrowResolved?.Invoke(data);  
         }
+
+        //AudioSettingsManager.Instance.PlayArrowHitSound();
 
         PlayAudio(goalType);
 
@@ -316,13 +361,6 @@ public abstract class ArrowBase : MonoBehaviour
                 : normalHitPitch;
 
         pitch += directionPitch;
-
-        /*
-        AudioClip clip =
-            goalType == Goal.GoalType.Critical
-                ? criticalDestroySound
-                : ArrowHitSound;
-        */
 
         PlayArrowHit(
             arrowHitSound,

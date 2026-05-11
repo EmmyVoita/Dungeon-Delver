@@ -9,7 +9,7 @@ public class StartupUpgradeInjector : MonoBehaviour
 
     [Header("Upgrades to Grant on Spawn")]
     public List<UpgradeCard> startingUpgradeCards;
-    public List<IntermediateEffectSO> startingIntermediateEffects;
+    public List<UpgradeBase> startingIntermediateEffects;
 
     private void Start()
     {
@@ -49,7 +49,7 @@ public class StartupUpgradeInjector : MonoBehaviour
 
             Debug.Log($"[StartupUpgradeInjector] Granting upgrade + UI: {card.name}");
 
-            cardManager.GrantUpgradeWithUI(card);
+            //cardManager.GrantUpgradeWithUI(card);
         }
 
         // --- Intermediate effects (usually no UI icons) ---

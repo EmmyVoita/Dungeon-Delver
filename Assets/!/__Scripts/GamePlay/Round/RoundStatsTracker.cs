@@ -2,10 +2,13 @@ using UnityEngine;
 
 public class RoundStatsTracker : MonoBehaviour
 {
+    public int Score { get; private set; }
     public int Spawned { get; private set; }
     public int Hit { get; private set; }
     public int Missed { get; private set; }
     public int Crit { get; private set; }
+    public int DamageTaken { get; private set; }
+    public int HighestCombo { get; private set; }
 
     public float RoundAccuracy => Spawned == 0 ? 0f : (float)Hit / Spawned;
     public bool PerfectRound => Spawned > 0 && Hit == Spawned;
@@ -33,6 +36,36 @@ public class RoundStatsTracker : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        ArrowBase.OnArrowResolved += RegisterArrow;
+        Player.OnDamageTaken += HandleDamageTaken;
+        ComboManager.OnComboBreak += HandleComboBreak;
+        ScoreManager.OnScoreAdded += AddScore;
+    }
+
+    void OnDisable()
+    {
+        ArrowBase.OnArrowResolved -= RegisterArrow;
+        Player.OnDamageTaken -= HandleDamageTaken;
+        ComboManager.OnComboBreak -= HandleComboBreak;
+        ScoreManager.OnScoreAdded -= AddScore;
+    }
+
+    private void HandleComboBreak(int comboCount, ComboBreakReason reason)
+    {
+        HighestCombo = Mathf.Max(HighestCombo, comboCount);
+    }
+
+    public void HandleDamageTaken(int damage)
+    {
+        DamageTaken += damage;
+    }
+
+    public void AddScore(int amount)
+    {
+        Score += amount;
+    }
 
     public void RegisterArrow(ArrowResolvedData data)
     {
@@ -49,10 +82,13 @@ public class RoundStatsTracker : MonoBehaviour
 
     public void Reset()
     {
+        Score = 0;
         Spawned = 0;
         Hit = 0;
         Crit = 0;
         Missed = 0;
+        DamageTaken = 0;
+        HighestCombo = 0;
     }
 
     public void AddSpawned(int count = 1)

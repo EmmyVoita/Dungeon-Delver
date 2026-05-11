@@ -11187,15 +11187,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46c1d6b9d1de9cc47ab3275e7ae7366e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  postRoundNextState: 17
+  deathState: 10
   preventAutoStart: 1
   fastForwardMultiplier: 0.5
   skipRoundKey: 31
   skipStageKey: 34
-  bpmBonus: 0
   tallyController: {fileID: 0}
   arrowSpawner: {fileID: 473090985}
   roundStatsUI: {fileID: 0}
-  roundDelay: 2
+  roundEndDelay: 2
   roundEndTimeout: 20
   stages:
   - stageName: Tut
@@ -11216,8 +11217,6 @@ MonoBehaviour:
     bossDefinition: {fileID: 0}
     levelsToPlay: 2
     allowRepeats: 1
-  currentStageIndex: 0
-  currentLevelIndex: 0
   stats: {fileID: 0}
   runStats: {fileID: 0}
 --- !u!1 &464533577
@@ -11424,6 +11423,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   directionalWarningController: {fileID: 0}
   spawnDistance: 10
+  goalRadius: 0.7
   arrowTypeDefinitions:
   - {fileID: 11400000, guid: a82e6e64a12138446af61863cafc2089, type: 2}
   - {fileID: 11400000, guid: 698b8ff8c1dfe2645a2e52c4987d361d, type: 2}
@@ -18213,7 +18213,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 0
     pitch: 0
-    usePitchVariation: 0
     pitchVariation: 0
   ignoreMissVFXPrefab: {fileID: 0}
   shieldPrefab: {fileID: 0}
@@ -18365,6 +18364,9 @@ MonoBehaviour:
   jumpDuration: 0.25
   jumpScaleAmount: 1.4
   jumpTargetTransform: {fileID: 934393312}
+  randomStartDelayMax: 0.5
+  durationVariance: 0.3
+  amplitudeVariance: 2
 --- !u!1 &704586825
 GameObject:
   m_ObjectHideFlags: 0
@@ -18756,61 +18758,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelFileInput: {fileID: 1484841772}
   loadLevelButton: {fileID: 1558780294}
---- !u!1 &709582452
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 709582453}
-  - component: {fileID: 709582454}
-  m_Layer: 0
-  m_Name: GameAbilityManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &709582453
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 709582452}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1472410457}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &709582454
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 709582452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 890764830c69078468b4754d562f7e28, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerContainerTransform: {fileID: 1098585486}
-  slowTimePrefab: {fileID: 2183329598545661104, guid: b28a2ea1892825d47acdd00761c6bd4b, type: 3}
-  orbitingShieldPrefab: {fileID: 7105905276254062027, guid: be6c714cf251a1b4b8e5c1f309ed43aa, type: 3}
-  placeShieldPrefab: {fileID: 6434597854245669904, guid: 4736abd9e3c3c7543b1e848bbf222818, type: 3}
-  projectileBurstPrefab: {fileID: 6378782497478370218, guid: 1dcf11783aa7f264e83484106cb2789d, type: 3}
-  randomQuestionPrefab: {fileID: 575627355034452027, guid: 63756c3c772e6534292d4cf287b8eca0, type: 3}
-  goldenHarvestPrefab: {fileID: 6434597854245669904, guid: b16bfd7316706414399889ef2a44b04d, type: 3}
-  ignoreMissPrefab: {fileID: 0}
-  bigGoalPrefab: {fileID: 0}
-  defaultPrefab: {fileID: 0}
-  currentAbility: {fileID: 0}
 --- !u!1 &724788685
 GameObject:
   m_ObjectHideFlags: 0
@@ -19840,7 +19787,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 0
     pitch: 0
-    usePitchVariation: 0
     pitchVariation: 0
   rowOutroSoundEffect:
     clip: {fileID: 0}
@@ -19848,7 +19794,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 0
     pitch: 0
-    usePitchVariation: 0
     pitchVariation: 0
 --- !u!1 &790238085
 GameObject:
@@ -27613,7 +27558,6 @@ Transform:
   - {fileID: 833425569}
   - {fileID: 71420324}
   - {fileID: 133422463}
-  - {fileID: 709582453}
   - {fileID: 15836230}
   - {fileID: 2133515196}
   - {fileID: 1299996365}
@@ -31323,7 +31267,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 0
     pitch: 0
-    usePitchVariation: 0
     pitchVariation: 0
   beepPitchIncrement: 0.1
   handController: {fileID: 0}
@@ -35482,12 +35425,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7060b67181d06941ac05546f89f9fb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testMode: 0
-  simulateObstacle: 1
-  _spawnObstacle: {fileID: 5164989714472668202, guid: 7f88c55d301a44c468eb76d4427695dc, type: 3}
-  bossDefinition: {fileID: 0}
-  autoLoopObstacle: 0
-  autoLoopDelay: 1
+  practiceController: {fileID: 0}
 --- !u!1 &1000012158189599
 GameObject:
   m_ObjectHideFlags: 0

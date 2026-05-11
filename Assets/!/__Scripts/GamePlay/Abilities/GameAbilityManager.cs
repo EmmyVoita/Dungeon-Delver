@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameAbilityManager : MonoBehaviour
@@ -15,13 +17,29 @@ public class GameAbilityManager : MonoBehaviour
     public GameObject defaultPrefab;
     public AbilityBase currentAbility;
 
+    [SerializeField] private List<AbilityData> abilities;
+
+    [SerializeField] private AbilityData defaultAbility;
+
+
+    private AbilityData GetAbilityData(AbilityType targetType)
+    {
+        AbilityData data = abilities.FirstOrDefault(a => a.abilityType == targetType);
+        return data == null ? defaultAbility : data;
+    }
+
     private void Start()
     {
         // Read the selection from the static class
         AbilityType selected = AbilitySelection.SelectedAbility;
 
+        AbilityData data = GetAbilityData(selected);
+
+        currentAbility = Instantiate(data.abilityPrefab, transform.position, Quaternion.identity).GetComponent<AbilityBase>();
+
         Debug.Log("🎯 Loaded ability: " + selected);
 
+            /*
         // Instantiate or activate the chosen ability
         switch (selected)
         {
@@ -63,6 +81,7 @@ public class GameAbilityManager : MonoBehaviour
                 Debug.LogWarning("⚠️ No ability selected!");
                 break;
         }
+        */
 
         currentAbility.transform.parent = playerContainerTransform;
 

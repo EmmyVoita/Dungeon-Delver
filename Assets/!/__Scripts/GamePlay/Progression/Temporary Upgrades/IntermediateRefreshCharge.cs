@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/Refresh Charge")]
-public class IntermediateRefreshCharge : IntermediateEffectSO
+public class IntermediateRefreshCharge : UpgradeBase
 {
     public int refreshAmount = 1;
 

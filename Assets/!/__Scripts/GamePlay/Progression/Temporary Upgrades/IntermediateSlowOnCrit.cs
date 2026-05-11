@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/Slow On Crit")]
-public class IntermediateSlowOnCrit : IntermediateEffectSO
+public class IntermediateSlowOnCrit : UpgradeBase
 {
     public float normalArrowMultiplier = 0.25f;
     public float slowMultiplier = 0.85f;

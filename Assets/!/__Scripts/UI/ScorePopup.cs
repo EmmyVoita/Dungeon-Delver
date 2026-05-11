@@ -28,15 +28,22 @@ public class ScorePopup : MonoBehaviour
 
         transform.localScale = Vector3.one * finalScale;
 
-        transform.DOMove(targetPosition, style.flyTime).SetEase(style.moveEase);
-        canvasGroup.DOFade(0f, style.flyTime).SetEase(style.fadeEase);
-
         if (style.punchScale)
         {
             transform.DOPunchScale(Vector3.one * style.punchStrength, 0.2f, 6, 0.6f);
         }
 
-        Destroy(gameObject, style.flyTime);
+        canvasGroup.DOFade(0f, style.flyTime)
+            .SetEase(style.fadeEase)
+            .SetLink(gameObject);
+
+        transform.DOMove(targetPosition, style.flyTime)
+            .SetEase(style.moveEase)
+            .SetLink(gameObject)
+            .OnComplete(() =>
+            {
+                Destroy(gameObject);
+            });
     }
 
 }

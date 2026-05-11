@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/InvincibilityEffect")]
-public class IntermediateInvincibilityEffect : IntermediateEffectSO
+public class IntermediateInvincibilityEffect : UpgradeBase
 {
     public float invincibleDuration = 3f;
     

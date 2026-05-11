@@ -67,7 +67,7 @@
 47.5,arrow,up,6,normalarrow
 49,obstacle,0,0,horizontalbeam
 54,obstacle,0,0,verticalbeam
-60,obstacle,0,0,rotatingbar
+59,obstacle,0,0,rotatingbar
 69,arrow,down,6,normalarrow
 70,arrow,left,6,normalarrow
 70.5,arrow,up,6,normalarrow

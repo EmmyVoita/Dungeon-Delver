@@ -12,7 +12,7 @@ public class UpgradeCardOption : ICardOption
     }
 
     public UpgradeBase UpgradeData => upgrade;
-    public Sprite Icon => upgrade.baseIcon;
+    public Sprite Icon => upgrade.icon;
     public string DisplayName => upgrade.displayName;
     public string Description => upgrade.GetDescription();
 
@@ -20,6 +20,7 @@ public class UpgradeCardOption : ICardOption
     {
         UpgradeManager.Instance.AddUpgrade(upgrade);
 
+        /*
         if (UpgradeCardManager.Instance.upgradeIconPrefab == null ||
             UpgradeCardManager.Instance.upgradeIconParent == null)
         {
@@ -31,10 +32,11 @@ public class UpgradeCardOption : ICardOption
             UpgradeCardManager.Instance.upgradeIconPrefab,
             UpgradeCardManager.Instance.upgradeIconParent
         );
+        
 
         iconObj.GetComponent<UpgradeIconUI>().Initialize(upgrade);
+        */
 
-
-        UpgradeCardManager.Instance.MarkCardSelected(card);
+        UpgradeCardManager.Instance.MarkCardSelected(upgrade);
     }
 }

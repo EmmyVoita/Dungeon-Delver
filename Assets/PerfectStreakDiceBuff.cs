@@ -51,7 +51,7 @@ public class PerfectStreakBuff : UpgradeEffectBase
 
         Debug.Log($"⏱️ Applying temporary time modifier: {timeModifier} for {duration} seconds.");
 
-        TimeManager.Instance.SetModifier(timeModifier, 0.25f); // smoothly apply modifier
+        //TimeManager.Instance.SetModifier(timeModifier, 0.25f); // smoothly apply modifier
 
         float elapsed = 0f;
         while (elapsed < duration)
@@ -92,7 +92,7 @@ public class PerfectStreakBuff : UpgradeEffectBase
         Player.OnDamageTaken -= OnPlayerDamaged;
         base.Remove();
 
-        TimeManager.Instance.SetModifier(1f, 0.5f); // smoothly revert to normal
+        //TimeManager.Instance.SetModifier(1f, 0.5f); // smoothly revert to normal
 
         if (failed)
         {

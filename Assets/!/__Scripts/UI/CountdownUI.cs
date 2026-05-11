@@ -8,9 +8,10 @@ public class CountdownUI : MonoBehaviour
     public static CountdownUI Instance { get; private set; }
 
     [SerializeField] private TextMeshProUGUI countdownText;
+    [SerializeField] private float startDelay = 2f;
     [SerializeField] private float interval = 1f;
     [SerializeField] private string finalText = "GO!";
-    [SerializeField] private AudioClip countdownBeep;
+    [SerializeField] private SoundEffect countdownBeep;
     [SerializeField] private SoundEffect finalBeep;
     [SerializeField] private float beepPitchIncrement = 0.1f;
     [SerializeField] private CountdownHandController handController;
@@ -61,7 +62,16 @@ public class CountdownUI : MonoBehaviour
         countdownText.gameObject.SetActive(false); // optional: no text
 
         // 🔥 HAND DRIVES EVERYTHING NOW
-        yield return StartCoroutine(handController.PlayCountdownRoutine());
+        //yield return StartCoroutine(handController.PlayCountdownRoutine());
+
+        yield return new WaitForSecondsRealtime(startDelay);
+
+        for(int i = 0; i < 3; i++)
+        {
+            float pitchMult = 1.0f + i * beepPitchIncrement;
+            AudioHelpers.PlaySoundEffect(countdownBeep,transform.position,pitchMult);
+            yield return new WaitForSecondsRealtime(0.5f);
+        }
 
         isCounting = false;
         currentRoutine = null;

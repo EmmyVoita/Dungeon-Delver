@@ -12,6 +12,7 @@ public struct GameStateSetting
     public bool allowPause;
     public bool showScoreUI;
     public bool allowPlayerDeath;
+    public bool showPlayer;
 }
     
 
@@ -22,6 +23,7 @@ public class GameStateEffectManager : MonoBehaviour
     public static bool PauseAllowed { get; private set; }
     public static bool ShowScoreUI { get; private set; }
     public static bool PlayerDeathAllowed { get; private set; }
+    public static bool ShowPlayer { get; private set; }
 
     [SerializeField] private List<GameStateSetting> gameStateSettings;
 
@@ -67,6 +69,7 @@ public class GameStateEffectManager : MonoBehaviour
         PauseAllowed = setting.allowPause;
         ShowScoreUI = setting.showScoreUI;
         PlayerDeathAllowed = setting.allowPlayerDeath;
+        ShowPlayer = setting.showPlayer;
 
         // Add the new states screen dim source if we should dim the screen
         if (setting.dimScreen)

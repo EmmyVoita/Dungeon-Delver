@@ -15,4 +15,7 @@ MonoBehaviour:
   bossName: doom bomb
   bossPortrait: {fileID: 0}
   bossVisualPrefab: {fileID: 5151146782695357633, guid: ec12bd88c197d7f43b6a0e33e1ba3d19, type: 3}
-  supportedEffects: []
+  supportedEffects:
+  - effectType: 16
+    startBeat: 0
+    durationBeats: 1000

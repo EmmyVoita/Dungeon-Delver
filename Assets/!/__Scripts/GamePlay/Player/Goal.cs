@@ -203,7 +203,7 @@ public class Goal : MonoBehaviour
 
     private void ResolveInverseArrowCaught(ArrowBase arrow, DamageEffect damageEffect)
     {
-        Player.Instance.DamageSelf(damageEffect.damage, arrow);
+        Player.Instance.DamageSelf(damageEffect.damage, null, arrow);
     }
 
 

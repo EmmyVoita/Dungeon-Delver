@@ -36,7 +36,7 @@ public class RandomQuestionAbility : AbilityBase
     
     private IEnumerator WaitAndActivate()
     {
-        TimeManager.Instance.SetBaseScale(0f, 0.1f); // pause
+        //TimeManager.Instance.SetBaseScale(0f, 0.1f); // pause
         questionActive = true;
 
         AudioHelpers.PlayMyClipAtPoint(questionAppearSound, AudioChannel.SFX, Camera.main.transform.position);
@@ -48,7 +48,7 @@ public class RandomQuestionAbility : AbilityBase
         if (activeUI == null)
         {
             Debug.LogError("❌ Missing RandomQuestionUI component on prefab!");
-            TimeManager.Instance.ResetAll(0.5f);
+            //TimeManager.Instance.ResetAll(0.5f);
         }
         else
         {
@@ -71,7 +71,7 @@ public class RandomQuestionAbility : AbilityBase
             StartCoroutine(WaitAndResume(1.0f, () =>
             {
                 AudioHelpers.PlayMyClipAtPoint(wrongSound, AudioChannel.SFX, Camera.main.transform.position);
-                Player.Instance.DamageSelf(healthPenalty);
+                //Player.Instance.DamageSelf(healthPenalty);
             }));
         }
     }
@@ -105,7 +105,7 @@ public class RandomQuestionAbility : AbilityBase
         yield return new WaitForSecondsRealtime(waitTime);
         
         //ScreenDimmerManager.Instance.UndimWholeGameScreen();
-        TimeManager.Instance.SetBaseScale(1f, 1f); // smoothly resume normal time
+        //TimeManager.Instance.SetBaseScale(1f, 1f); // smoothly resume normal time
         questionActive = false;
         onComplete?.Invoke();
     }

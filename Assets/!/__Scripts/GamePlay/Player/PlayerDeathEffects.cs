@@ -59,6 +59,7 @@ public class PlayerDeathEffects : MonoBehaviour
     {
         if (newState == GameState.DeathSequence && previousState != newState)
         {
+            ObstacleManager.Instance.ForceClearAll();
             PlayDeathAnimation();
             StartCoroutine(HandleAudio());
         }

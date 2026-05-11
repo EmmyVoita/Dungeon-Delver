@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System;
 using UnityEngine.VFX;
+using DG.Tweening;
 
 public class SlowTimeAbilityObject : MonoBehaviour
 {
@@ -32,6 +33,7 @@ public class SlowTimeAbilityObject : MonoBehaviour
 
     private Coroutine spinRoutine;
     private int arrowsCaught = 0;
+    private TimeScaleModifier _slowTimeModifier;
 
     
     void OnEnable()
@@ -76,12 +78,30 @@ public class SlowTimeAbilityObject : MonoBehaviour
         }
     }
 
+
+
     void Update()
     {
-        if (slowTime && Time.time >= slowTimeDone)
+        if (slowTime && Time.unscaledTime >= slowTimeDone)
         {
-            TimeManager.Instance.SetModifier(1, 0.1f);
             slowTime = false;
+
+            if (_slowTimeModifier != null)
+            {
+                DOTween.To(
+                    () => _slowTimeModifier.Value,
+                    x => _slowTimeModifier.SetValue(x),
+                    1f,
+                    0.1f
+                )
+                .SetEase(Ease.InOutSine)
+                .SetUpdate(true)
+                .OnComplete(() =>
+                {
+                    TimeManager.Instance.RemoveModifier(_slowTimeModifier.Id);
+                    _slowTimeModifier = null;
+                });
+            }
 
             OnSlowTimeEnded?.Invoke(this);
 
@@ -98,13 +118,29 @@ public class SlowTimeAbilityObject : MonoBehaviour
         if (slowTimeEffect != null)
             slowTimeEffect.SendEvent("OnPlay");
 
-        TimeManager.Instance.SetModifier(slowFactor, 0.1f);
+        if (_slowTimeModifier != null)
+        {
+            TimeManager.Instance.RemoveModifier(_slowTimeModifier.Id);
+            _slowTimeModifier = null;
+        }
+
+        _slowTimeModifier = new TimeScaleModifier("SlowTimeAbility", 1f);
+        TimeManager.Instance.AddModifier(_slowTimeModifier);
+
+        DOTween.To(
+            () => _slowTimeModifier.Value,
+            x => _slowTimeModifier.SetValue(x),
+            slowFactor,
+            0.1f
+        )
+        .SetEase(Ease.InOutSine)
+        .SetUpdate(true);
 
         OnSlowTimeStarted?.Invoke(this);
-        
-        Time.timeScale = slowFactor;
+
         Debug.Log("Time slowed down due to crit combo!");
-        slowTimeDone = Time.time + slowDuration;
+
+        slowTimeDone = Time.unscaledTime + slowDuration;
         slowTime = true;
 
         AudioHelpers.PlayMyClipAtPoint(slowSound, AudioChannel.SFX, Camera.main.transform.position, 1f);
@@ -112,11 +148,10 @@ public class SlowTimeAbilityObject : MonoBehaviour
         if (spinRoutine != null)
             StopCoroutine(spinRoutine);
 
-        // 🪄 Detach the spin sprite so it stays in world-space
         if (spinSprite != null)
         {
-            spinSprite.transform.SetParent(null); // Detach from player
-            spinSprite.transform.position = UnityEngine.Vector3.zero;
+            spinSprite.transform.SetParent(null);
+            spinSprite.transform.position = Vector3.zero;
         }
 
         spinRoutine = StartCoroutine(SpinAndFadeIn());

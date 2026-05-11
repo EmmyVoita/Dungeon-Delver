@@ -23,7 +23,7 @@ public class BossObstacleEffectApplier : MonoBehaviour
 
         foreach (var obstacle in ObstacleManager.Instance.ActiveObstacles)
         {
-            ApplyToObstacle(obstacle);
+            ApplyToObstacle(obstacle.gameObject);
         }
     }
 
@@ -38,13 +38,14 @@ public class BossObstacleEffectApplier : MonoBehaviour
 
     private void ApplyToObstacle(GameObject obstacle)
     {
+        
         var shooter = obstacle.GetComponentsInChildren<WallShooter>();
         if (shooter != null)
         {
             foreach (var s in shooter)
             {
                 if(s.LifetimeSetting != WallShooter.LifetimeMode.SelfManaged)
-                    s.StartChallenge();
+                    s.Begin();
             }
         }
 
@@ -54,7 +55,7 @@ public class BossObstacleEffectApplier : MonoBehaviour
             foreach (var fb in fallingBreakables)
             {
                 if(fb.LifetimeSetting == FallingBreakableSpawner.LifetimeMode.External)
-                    fb.StartChallenge();
+                    fb.Begin();
             }
         }
     }

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/Heal")]
-public class IntermediateHealEffectSO : IntermediateEffectSO
+public class IntermediateHealEffectSO : UpgradeBase
 {
     public int immediateHealAmount = 1;
     public int finishHealAmount = 2;

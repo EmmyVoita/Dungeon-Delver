@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/Ability Cost Mult")]
-public class IntermediateMultiAbilityCost : IntermediateEffectSO
+public class IntermediateMultiAbilityCost : UpgradeBase
 {
     public float tempAbilityCostMult = 0.95f;
 

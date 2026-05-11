@@ -47,12 +47,14 @@ public class GuiScoreAdd : MonoBehaviour
     public static string FormatScore(int value)
     {
         return "+ " + value.ToString();
+        /*
         if (value >= 1000000)
             return (value / 1000000f).ToString("0.#") + "M";
         else if (value >= 1000)
             return (value / 1000f).ToString("0.#") + "K";
         else
             return value.ToString();
+            */
     }
 
 

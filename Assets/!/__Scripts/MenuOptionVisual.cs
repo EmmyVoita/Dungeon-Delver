@@ -19,7 +19,11 @@ public class MenuOptionVisual : MonoBehaviour
     void Awake()
     {
         foreach(GameObject visualObject in visualObjects)
-            visualObject.SetActive(false);
+        {
+            if(visualObject)
+                visualObject.SetActive(false);
+        }
+            
     }
 
     void HandleSelectionChanged(int selectedIndex)
@@ -27,6 +31,10 @@ public class MenuOptionVisual : MonoBehaviour
         bool active = selectedIndex == optionIndex;
 
         foreach(GameObject visualObject in visualObjects)
-            visualObject.SetActive(active);
+        {
+            if(visualObject)
+                visualObject.SetActive(active);
+        }
+            
     }
 }

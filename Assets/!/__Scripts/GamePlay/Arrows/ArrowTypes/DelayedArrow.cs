@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class DelayedArrow : ArrowBase
 {
@@ -15,45 +16,68 @@ public class DelayedArrow : ArrowBase
 
     private bool hasStopped = false;
     private Coroutine delayRoutine;
+    private float stopTime;
+private float resumeTime;
+private Vector2 stopPos;
 
-    void Update()
+
+
+    public override void Init(Vector2 direction, float speed, float spawnTime, float arrivalTime, Vector3 startPos, Vector3 endPos)
     {
-        if (hasStopped) return;
+        base.Init(direction, speed, spawnTime, arrivalTime, startPos, endPos);
 
-        float distanceToCenter = Vector2.Distance(transform.position, Vector2.zero);
+        float totalDistance = Vector2.Distance(startPos, endPos);
 
-        if (distanceToCenter <= stopDistance)
-        {
-            StartDelay();
-        }
-    }
+        float clampedStopDistance = Mathf.Min(totalDistance - stopDistance, totalDistance);
+        float stopRatio = clampedStopDistance / totalDistance;
 
-    private void StartDelay()
-    {
-        hasStopped = true;
+        stopTime = Mathf.Lerp(spawnTime, arrivalTime, stopRatio);
 
-        // Stop movement
-        rb.linearVelocity = Vector2.zero;
-
-        if (delayRoutine != null)
-            StopCoroutine(delayRoutine);
-
-        delayRoutine = StartCoroutine(DelayThenResume());
-    }
-
-    private IEnumerator DelayThenResume()
-    {
-        // --- BPM timing ---
-        float bpm = (ArrowSpawner.Instance != null) ? ArrowSpawner.Instance.ActiveBPM : 120f;
-        float secondsPerBeat = 60f / bpm;
+        float secondsPerBeat = 60f / ArrowSpawner.Instance.ActiveBPM;
         float delayDuration = delayBeats * secondsPerBeat;
 
-        if (delayDuration <= 0f)
-            delayDuration = 0.1f;
+        resumeTime = stopTime + delayDuration;
+        this.arrivalTime = delayDuration + arrivalTime;
 
-        yield return new WaitForSeconds(delayDuration);
+        // ✅ Correct stop position
+        stopPos = Vector2.Lerp(startPos, endPos, stopRatio);
+    }
 
-        // Resume movement toward player
-        rb.linearVelocity = -direction * speed;
+    protected override void Update()
+    {
+        if (_isDead) return;
+
+        float elapsed = (float)MusicManager.Instance.ScaledElapsedTime;
+
+        Vector2 targetPos = Vector2.zero;
+
+        if (elapsed < stopTime)
+        {
+            float t = Mathf.InverseLerp(spawnTime, stopTime, elapsed);
+            targetPos = Vector2.Lerp(startPos, stopPos, t);
+        }
+        else if (elapsed < resumeTime)
+        {
+            Debug.Log($"Stop Time => {stopTime}, Resume Time => {resumeTime}, Elapsed => {elapsed}");
+            targetPos = stopPos;
+        }
+        else if(elapsed <= arrivalTime)
+        {
+            float t = Mathf.InverseLerp(resumeTime, arrivalTime, elapsed);
+            targetPos = Vector2.Lerp(stopPos, endPos, t);
+        }
+        else
+        {
+            // AFTER goal → continue to center
+            float extraTime = elapsed - arrivalTime;
+
+            float postTravelDuration = 0.2f; // tweak this
+
+            float t = Mathf.Clamp01(extraTime / postTravelDuration);
+
+            targetPos = Vector2.Lerp(endPos, Vector2.zero, t);
+        }
+
+        SmoothTranslate(targetPos);
     }
 }

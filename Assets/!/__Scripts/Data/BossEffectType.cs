@@ -8,4 +8,5 @@ public enum BossEffectType
     ModifyObstacles     = 1 << 1,
     SignatureMechanic   = 1 << 2,
     VisualPressure      = 1 << 3,
+    ReverseChallenge    = 1 << 4,
 }

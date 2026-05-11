@@ -8,17 +8,21 @@ public class BigGoalAbility : AbilityBase, ICritWindowModifier, IGoalSizeModifie
     public float duration = 5f;
     public SoundEffect deactivateSound;
     public float critWindowMultiplier;
+    private GoalFormController _formController;
 
 
     public override void Activate(Quaternion rotation)
     {
-        UpgradeManager.Instance.AddTemporaryModifier(this);
+        //UpgradeManager.Instance.AddTemporaryModifier(this);
 
         /*
         Player.Instance.goal
             .GetComponentInChildren<Goal>()
             .ModifyScale(goalScaleModifier, duration);
         */
+        _formController = Player.Instance.goal.GetComponent<GoalFormController>();
+
+        _formController.Activate();
 
         StartCoroutine(DurationRoutine());
     }
@@ -31,7 +35,9 @@ public class BigGoalAbility : AbilityBase, ICritWindowModifier, IGoalSizeModifie
 
         AudioHelpers.PlaySoundEffect(deactivateSound, Player.Instance.transform.position);
 
-        UpgradeManager.Instance.RemoveTemporaryModifier(this);
+        _formController.Deactivate();
+
+        //UpgradeManager.Instance.RemoveTemporaryModifier(this);
     }
 
     public float ModifyCritWindow(float current)

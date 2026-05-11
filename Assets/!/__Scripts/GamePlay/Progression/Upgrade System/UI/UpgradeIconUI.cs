@@ -27,9 +27,9 @@ public class UpgradeIconUI : MonoBehaviour
     {
         upgradeId = upgrade.upgradeId;
         upgradeData = upgrade;
-        feedbackStyle = upgrade.feedbackStyle;
+        //feedbackStyle = upgrade.feedbackStyle;
 
-        iconImage.sprite = upgrade.baseIcon;
+        //iconImage.sprite = upgrade.baseIcon;
 
         // Idle hover defaults OFF
         idleHover.enableHover = false;
@@ -39,7 +39,7 @@ public class UpgradeIconUI : MonoBehaviour
 
         // Recharge fill defaults
         fillImage.fillAmount = 0f;
-        fillImage.sprite = upgrade.baseIcon;
+        //fillImage.sprite = upgrade.baseIcon;
         fillImage.color = Color.white;
 
         UpgradeManager.OnUpgradeStateChanged += HandleStateChanged;
@@ -114,7 +114,7 @@ public class UpgradeIconUI : MonoBehaviour
                     .SetLoops(-1, LoopType.Yoyo)
                     .SetEase(Ease.InOutSine);
 
-                iconImage.sprite = upgradeData.activeIcon;
+                //iconImage.sprite = upgradeData.activeIcon;
                 break;
 
             case IconFeedbackStyle.Jump:
@@ -143,12 +143,12 @@ public class UpgradeIconUI : MonoBehaviour
 
                 glowTween?.Kill();
                 iconImage.transform.localScale = Vector3.one;
-                iconImage.sprite = upgradeData.baseIcon;
+                //iconImage.sprite = upgradeData.baseIcon;
                 break;
 
             case IconFeedbackStyle.Jump:
                 // Jump visuals reset themselves — nothing to do
-                iconImage.sprite = upgradeData.baseIcon;
+                //iconImage.sprite = upgradeData.baseIcon;
                 break;
 
             case IconFeedbackStyle.ActiveInactiveColor:
@@ -169,7 +169,7 @@ public class UpgradeIconUI : MonoBehaviour
         {
             // Restore base state AFTER jump finishes
             idleHover.enableScoreJump = false;
-            iconImage.sprite = upgradeData.baseIcon;
+            //iconImage.sprite = upgradeData.baseIcon;
             fillImage.color = Color.white;
         });
     }

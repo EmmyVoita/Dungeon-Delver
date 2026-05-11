@@ -9,7 +9,7 @@ public class BossDefinition : ScriptableObject
     public Sprite bossPortrait;
     public GameObject bossVisualPrefab;
 
-    [Header("Supported Effects")]
-    public List<BossEffect> supportedEffects;
+    //[Header("Supported Effects")]
+    //public List<BossEffect> supportedEffects;
 }
 

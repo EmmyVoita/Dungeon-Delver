@@ -117,8 +117,7 @@ public class LevelEditorUIController : MonoBehaviour
         GameSceneLoader.PendingConfig = new GameSceneConfig(
             GameMode.LevelEditorTest,
             0,
-            null,
-            JumpDirectionMode.FourDirectional);
+            null);
    
 
         Debug.Log("▶ Starting test session with in-memory level");
@@ -159,10 +158,9 @@ public class LevelEditorUIController : MonoBehaviour
 
    
         GameSceneLoader.PendingConfig = new GameSceneConfig(
-            GameMode.LevelEdtiorPlayFromPosition,
+            GameMode.LevelEditorTest,
             EditorPlaybackController.Instance.CurrentTime,
-            null,
-            JumpDirectionMode.FourDirectional);
+            null);
 
         Debug.Log("▶ Starting test session with in-memory level");
 

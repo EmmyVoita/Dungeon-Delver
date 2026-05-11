@@ -16,7 +16,6 @@ public struct SoundEffect
 
     [Header("Pitch Settings")]
     public float pitch;
-    public bool usePitchVariation;
     public float pitchVariation;
 
     public bool IsValid => clip != null;

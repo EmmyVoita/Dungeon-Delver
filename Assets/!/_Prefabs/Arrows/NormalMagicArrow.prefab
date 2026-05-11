@@ -104,7 +104,7 @@ GameObject:
   - component: {fileID: 3241688908284352293}
   - component: {fileID: 5892528185532056661}
   - component: {fileID: 7488991445482098621}
-  - component: {fileID: 1372070942466369641}
+  - component: {fileID: 5755594465958058858}
   m_Layer: 0
   m_Name: NormalMagicArrow
   m_TagString: Untagged
@@ -274,8 +274,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
-  knockback: 0
---- !u!114 &1372070942466369641
+  sourceName: Magic Arrow
+--- !u!114 &5755594465958058858
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -284,22 +284,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 5575773763797762119}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4698d87b9d79d98448faeeeca9d6f0b8, type: 3}
+  m_Script: {fileID: 11500000, guid: 878c72476a3d5224bac36dbedca57ce8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::ArrowWithVFX
   health: 1
   catchRule: 0
   flip180: 1
-  arrowHitSound: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
+  arrowHitSound: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
   normalHitPitch: 1
   criticalHitPitch: 1
   directionalPitchFactor: 0
-  directionalEQStrength: 0.1
-  hpfNeutral: 20
-  lpfNeutral: 22000
-  midNeutral: 1
+  directionalEQStrength: 0.5
+  hpfNeutral: 300
+  lpfNeutral: 20000
+  midNeutral: 0.5
   invincible: 0
   status: 0
+  destroyEffect: {fileID: 812096446077587059, guid: 39cfcc1d74ff7ff4eae49039225c3877, type: 3}
 --- !u!1001 &9112137364864987663
 PrefabInstance:
   m_ObjectHideFlags: 0

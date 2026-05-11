@@ -6,40 +6,49 @@ using DG.Tweening;
 
 public class UpgradeCardManager : MonoBehaviour
 {
-    public enum UpgradeSelectionError
-    {
-        None,
-        InvalidIndex,
-        MissingCard,
-        MissingUpgrade,
-        MissingIconPrefab,
-        MissingIconParent
-    }
-
-
     public static UpgradeCardManager Instance { get; private set; }
 
     public static event Action UpgradeSelectionComplete;
 
-    [Header("UI")]
-    public GameObject cardUIPrefab;
-    public GameObject upgradeIconPrefab;
-    public Transform upgradeIconParent;
-    public Transform cardParent;
-    public Transform descriptionBox;
-    public Transform healOptionBox;
-    public Transform titleBox;
-    public BackgroundDimmerController backgroundDimmer;
-    public TextTypewriter descriptionTypewriter;
+
+    [Header("References")]
+    [SerializeField] private GameObject cardUIPrefab;
+    [SerializeField] private GameObject upgradeIconPrefab;
+    [SerializeField] private Transform upgradeIconParent;
+    [SerializeField] private Transform cardParent;
+    [SerializeField] private TextTypewriter descriptionTypewriter;
+    [SerializeField] private DescriptionPanelController descriptionPanel;
+    [SerializeField] private List<GameObject> dependentObjects;
+
 
     [Header("Available Upgrades")]
-    public List<IntermediateEffectSO> intermediateEffects;
-    public List<UpgradeCard> allCards;
-    private Dictionary<UpgradeCard, UpgradeBase> selectedCards = new Dictionary<UpgradeCard, UpgradeBase>();
+    [SerializeField] private List<UpgradeBase> cards;
 
+
+
+    private List<UpgradeBase> selectedCards = new ();
     private List<UpgradeCardUI> currentCards = new();
+    private Dictionary<UpgradeBase, int> cardHistory = new();
+    public Dictionary<UpgradeBase, int> AllChosenCards => cardHistory;
     private int selectedIndex = 0;
-    public List<ICardOptionSource> allCardSources;
+
+    private void OnEnable()
+    {
+        GameStateManager.OnStateChanged += HandleStateChanged;
+    }
+
+    private void OnDisable()
+    {
+        GameStateManager.OnStateChanged -= HandleStateChanged;
+    }
+
+    private void HandleStateChanged(GameState previousState, GameState newState)
+    {
+        if(newState == GameState.UpgradeSelection)
+        {
+            ShowCardChoices();
+        }
+    }
 
     private void Awake()
     {
@@ -48,6 +57,7 @@ public class UpgradeCardManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
 
         #if UNITY_EDITOR
@@ -63,137 +73,48 @@ public class UpgradeCardManager : MonoBehaviour
         #endif
     }
 
-    private List<T> PickUnique<T>(List<T> source, int count)
+
+
+
+    public void MarkCardSelected(UpgradeBase card)
     {
-        List<T> result = new();
-
-        if (source.Count == 0)
-            return result;
-
-        if (source.Count <= count)
-        {
-            result.AddRange(source);
-            return result;
-        }
-
-        List<T> pool = new(source);
-
-        for (int i = 0; i < count; i++)
-        {
-            int index = UnityEngine.Random.Range(0, pool.Count);
-            result.Add(pool[index]);
-            pool.RemoveAt(index);
-        }
-
-        return result;
-    }
-
-
-    public void MarkCardSelected(UpgradeCard card)
-    {
-        if (card == null || card.upgrade == null)
+        if (card == null)
             return;
 
-        selectedCards[card] = card.upgrade as UpgradeBase;
+        selectedCards.Add(card);
     }
 
 
-
-    private List<UpgradeCard> GetAvailableUpgrades()
-    {
-        List<UpgradeCard> available = new List<UpgradeCard>();
-
-        // Add global upgrades first
-        foreach (var card in allCards)
-        {
-            if (card == null) continue;
-
-            ScriptableObject selectedEffect = selectedCards.ContainsKey(card) ? selectedCards[card] : null;
-
-            if (selectedEffect != null && card.canStack)
-                available.Add(card);
-            else if (selectedEffect == null)
-                available.Add(card);
-        }
-
-        // Add ability-specific upgrades
-        var ability = Player.Instance.CurrentAbility;
-        if (ability != null && ability.abilitySpecificUpgrades != null)
-        {
-            foreach (var abilityCard in ability.abilitySpecificUpgrades)
-            {
-                if (abilityCard == null) continue;
-
-                // Only add if not already selected
-                if (!selectedCards.ContainsKey(abilityCard))
-                    available.Add(abilityCard);
-            }
-        }
-
-        return available;
-    }
-
-
-    // ----------------------------
-    //     SPAWN CARD CHOICES
-    // ----------------------------
     public void ShowCardChoices(int count = 3)
     {
-        Debug.Log("▶ Showing upgrade card choices...");
-
-        descriptionBox.gameObject.SetActive(true);
-        CleanupCards();
-        titleBox.gameObject.SetActive(true);
-
-        // Heal option
-        if (Player.Instance.Health < Player.Instance.MaxHealth)
-        {
-            healOptionBox.gameObject.SetActive(true);
-            healOptionBox.GetComponentInChildren<TMPro.TextMeshProUGUI>().text =
-                $"Skip [<color=#FFD700>{InputBindingManager.Instance.GetKey(InputActionType.Jump)}</color>] and Heal for 1 health";
-        }
-        else
-        {
-            healOptionBox.gameObject.SetActive(false);
-        }
-
         selectedIndex = 0;
 
-        // ----------------------------
-        // BUILD UNIFIED POOL
-        // ----------------------------
-        List<ICardOption> pool = new();
+        Cleanup();
 
-        foreach (var card in allCards)
+        foreach(GameObject obj in dependentObjects)
         {
-            if (card == null || card.upgrade == null)
-                continue;
-
-            pool.Add(new UpgradeCardOption(card));
+            obj.SetActive(true);
         }
+        
 
-        foreach (var effect in intermediateEffects)
+        List<UpgradeOption> pool = new();
+
+        foreach (var effect in cards)
         {
             if (effect == null)
                 continue;
 
-            pool.Add(new IntermediateEffectOption(effect));
+            pool.Add(new UpgradeOption(effect));
         }
 
-        // ----------------------------
-        // SAFETY CHECK
-        // ----------------------------
         if (pool.Count == 0)
         {
-            Debug.LogWarning("No available cards to show!");
+            Debug.LogWarning("UpgradeCardManager => No available cards to show!.");
             SkipUpgradeAndHeal();
             return;
         }
 
-        // ----------------------------
-        // PICK CARDS
-        // ----------------------------
-        List<ICardOption> picked = PickUnique(pool, count);
+        List<UpgradeOption> picked = pool.PickUnique(count); 
 
         foreach (var option in picked)
         {
@@ -206,28 +127,6 @@ public class UpgradeCardManager : MonoBehaviour
         HighlightCard();
     }
 
-    public void GrantUpgradeWithUI(UpgradeCard card)
-    {
-        if (card == null || card.upgrade == null)
-            return;
-
-        var upgrade = card.upgrade as UpgradeBase;
-
-        // Apply upgrade logic
-        UpgradeManager.Instance.AddTemporaryModifier(upgrade); // ✅
-
-        // Spawn icon UI
-        if (upgradeIconPrefab != null && upgradeIconParent != null)
-        {
-            GameObject iconObj = Instantiate(upgradeIconPrefab, upgradeIconParent);
-            var iconUI = iconObj.GetComponent<UpgradeIconUI>();
-            iconUI.Initialize(upgrade);
-        }
-
-        // Mark as selected so it won't show up again
-        MarkCardSelected(card);
-    }
-
 
 
     private void Update()
@@ -235,7 +134,6 @@ public class UpgradeCardManager : MonoBehaviour
         if (currentCards.Count == 0 || GameStateManager.Instance.CurrentState != GameState.UpgradeSelection) return;
 
         if(InputBindingManager.Instance.GetKeyDown(InputActionType.Interact) && RunStateManager.Instance.CanRerollShop)
-        //if(Input.GetKeyDown(KeyCode.R) && RunStateManager.Instance.CanRerollShop)
         {
             bool goThroughWithReroll = RunStateManager.Instance.ConsumeShopReroll();
             if(goThroughWithReroll) ShowCardChoices(3);
@@ -272,27 +170,36 @@ public class UpgradeCardManager : MonoBehaviour
 
         AudioSettingsManager.PlaySelectSound();
 
+        
+        if (cardHistory.ContainsKey(cardUI.Option.Base))
+        {
+            cardHistory[cardUI.Option.Base]++;
+        }
+        else
+        {
+            cardHistory[cardUI.Option.Base] = 1;
+        }
+        
+
         cardUI.PlaySelectAnimation(() =>
         {
             FinishSelection(cardUI.Option);
         });
     }
 
-    private void FinishSelection(ICardOption option)
+    private void FinishSelection(UpgradeOption option)
     {
         if (option == null)
         {
-            Debug.LogError("❌ Selected option was null.");
-            CleanupCards();
+            Debug.LogError("UpgradeCardManager => Selected UpgradeOption was null in FinishSelection().");
+            Cleanup();
             UpgradeSelectionComplete?.Invoke();
             return;
         }
 
-        CleanupCards();
-        descriptionBox.gameObject.SetActive(false);
-
+        Cleanup();
       
-        option.OnSelected();   // 🔑 THIS IS THE KEY LINE
+        option.OnSelected();   
 
         UpgradeSelectionComplete?.Invoke();
     }
@@ -301,12 +208,9 @@ public class UpgradeCardManager : MonoBehaviour
 
     private void SkipUpgradeAndHeal()
     {
-        CleanupCards();
-        healOptionBox.gameObject.SetActive(false);
-        titleBox.gameObject.SetActive(false);
+        Cleanup();
         Player.Instance.HealPlayer(1);
         AudioSettingsManager.PlaySelectSound();
-        descriptionBox.gameObject.SetActive(false);
         UpgradeSelectionComplete?.Invoke();
     }
 
@@ -321,13 +225,14 @@ public class UpgradeCardManager : MonoBehaviour
             if (i == selectedIndex)
             {
                 string description = currentCards[i].GetDescription();
-                descriptionTypewriter.StartTyping(currentCards[i].GetDescription());
+                //descriptionTypewriter.StartTyping(currentCards[i].GetDescription());
+                descriptionPanel.Show(currentCards[i].GetDescription());
             }
         }
     }
 
 
-    private void CleanupCards()
+    private void Cleanup()
     {
         // --- Cleanup UI cards safely ---
         foreach (Transform child in cardParent)
@@ -338,7 +243,9 @@ public class UpgradeCardManager : MonoBehaviour
 
         currentCards.Clear();
 
-        healOptionBox.gameObject.SetActive(false);
-        titleBox.gameObject.SetActive(false);
+        foreach(GameObject obj in dependentObjects)
+        {
+            obj.SetActive(false);
+        }
     }
 }

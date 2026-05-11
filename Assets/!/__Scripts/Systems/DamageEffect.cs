@@ -2,7 +2,9 @@ using UnityEngine;
 
 public class DamageEffect : MonoBehaviour
 {
-    [Header("Set in Inspector")]
+    [Header("Damage")]
     public int damage = 1;
-    public bool knockback = true;
+
+    [Header("Death Info")]
+    public string sourceName = "Unknown";
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/Arrow Value Swap")]
-public class IntermediateArrowValueSwap: IntermediateEffectSO
+public class IntermediateArrowValueSwap: UpgradeBase
 {
     public float normalArrowMultiplier = 0.9f;
     public float critArrowMultiplier = 1.1f;

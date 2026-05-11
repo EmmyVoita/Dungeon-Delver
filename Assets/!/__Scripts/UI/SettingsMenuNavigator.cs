@@ -87,7 +87,7 @@ public class SettingsMenuNavigator : BaseMenu
 
     void Update()
     {
-        if (lockInput) return;
+        if (lockInput || !isActive) return;
 
         if (currentOptions.Count == 0)
             return;
@@ -101,7 +101,7 @@ public class SettingsMenuNavigator : BaseMenu
         {
             AudioSettingsManager.PlayBackSound();
             SettingsMenuClosed?.Invoke();
-            MenuManager.Instance.TransitionToMenu(StartMenuWindows.MainMenu, 0.2f);
+            MenuManager.Instance.RequestMenuTransition(MenuState.Main);
             return;
         }
 

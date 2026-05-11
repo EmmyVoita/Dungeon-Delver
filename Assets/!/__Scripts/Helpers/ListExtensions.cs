@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public static class ListExtensions
 {
@@ -13,5 +14,41 @@ public static class ListExtensions
             int k = rng.Next(n + 1);
             (list[n], list[k]) = (list[k], list[n]);
         }
+    }
+
+    public static List<T> PickUnique<T>(this List<T> source, int count)
+    {
+        List<T> result = new();
+
+        if (source == null || source.Count == 0)
+            return result;
+
+        if (source.Count <= count)
+        {
+            result.AddRange(source);
+            return result;
+        }
+
+        List<T> pool = new(source);
+
+        for (int i = 0; i < count; i++)
+        {
+            int index = Random.Range(0, pool.Count);
+            result.Add(pool[index]);
+            pool.RemoveAt(index);
+        }
+
+        return result;
+    }
+
+    public static T GetRandom<T>(this IList<T> list)
+    {
+        if (list == null || list.Count == 0)
+        {
+            Debug.LogWarning("Tried to get random element from empty list.");
+            return default;
+        }
+
+        return list[Random.Range(0, list.Count)];
     }
 }

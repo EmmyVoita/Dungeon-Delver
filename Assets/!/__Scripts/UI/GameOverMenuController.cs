@@ -35,12 +35,20 @@ public class GameOverMenuController : MonoBehaviour
     {
         //UIManager.OnGameOverUI += ActivateMenu;
         GameStateManager.OnStateChanged += HandleStateChanged;
+        GameStatsUI.OnStatsTallyComplete += HandleTallyComplete;
     }
 
     private void OnDisable()
     {
         //UIManager.OnGameOverUI -= ActivateMenu;
         GameStateManager.OnStateChanged -= HandleStateChanged;
+        GameStatsUI.OnStatsTallyComplete -= HandleTallyComplete;
+    }
+
+    private void HandleTallyComplete()
+    {
+        if(GameStateManager.Instance.CurrentState == GameState.GameOverTally)
+            GameStateManager.Instance.SetState(GameState.GameOverResults);
     }
 
     private void Awake()

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/Add Temp Score Mult")]
-public class IntermediateAddTempScoreMult : IntermediateEffectSO
+public class IntermediateAddTempScoreMult : UpgradeBase
 {
     public float tempScoreMultAmount = 0.05f;
     public float goldenValueMultiplier = 2.0f;

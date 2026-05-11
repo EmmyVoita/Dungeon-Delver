@@ -45,5 +45,18 @@ public class GameStateManager : MonoBehaviour
         OnStateChanged?.Invoke(previousState, newState);
     }
 
+    public void SetStateForceUpdate(GameState newState)
+    {
+        previousState = CurrentState;
+        currentState = newState;
+
+        OnStateChanged?.Invoke(previousState, newState);
+    }
+
+    public void RequestStateChange(GameState newState)
+    {
+        TransitionManager.Instance.PlayTransition(CurrentState, newState);
+    }
+
     public bool Is(GameState state) => CurrentState == state;
 }

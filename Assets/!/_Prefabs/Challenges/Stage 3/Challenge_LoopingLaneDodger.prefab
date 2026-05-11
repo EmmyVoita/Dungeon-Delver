@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4641581749460450171
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8467836500069972800}
+  - component: {fileID: 4254232850170002245}
+  m_Layer: 0
+  m_Name: Challenge_LoopingLaneDodger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8467836500069972800
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4641581749460450171}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4254232850170002245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4641581749460450171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dccb91422507f17428fe5c1801d1ed55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LoopingLaneDodger
+  priority: 0
+  controlMode: 4
+  config:
+    maxLanes: 7
+    laneSpacing: 1
+    laneMoveDuration: 0.15
+  spawnPrefabs:
+  - {fileID: 2209782324246233958, guid: 4f5aa79f35a74c94990e3f363c4ae8ed, type: 3}
+  projectileMinCount: 3
+  projectileMaxCount: 4
+  baseSpawnInterval: 1.4
+  spawnIntervalStep: 0.125
+  minSpawnInterval: 0.65
+  obstacleActiveTime: 18
+  spawnX: 7
+  reverseAtTime: 10
+  reverseSound:
+    clip: {fileID: 8300000, guid: 26d5a4bc6e09ecb4ca444cd3b3da43f6, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 0.8
+    pitchVariation: 0
+  impulseData:
+    slowMultiplier: 0.25
+    inDuration: 0.25
+    holdDuration: 0.75
+    outDuration: 0.75

@@ -8,6 +8,7 @@ public class BossManager : MonoBehaviour
 
     [SerializeField]private BossDefinition activeBoss;
     private Coroutine bossRoutine;
+    [SerializeField] private bool _practiceBoss = false;
 
     void Awake()
     {
@@ -21,11 +22,17 @@ public class BossManager : MonoBehaviour
 
 
 
-    public bool IsBossActive => activeBoss != null;
+    public bool IsBossActive => activeBoss != null || _practiceBoss;
 
     // --------------------------------------------------
     // Entry / Exit
     // --------------------------------------------------
+
+    private void Start()
+    {
+        //if(GameSceneLoader.PendingConfig == null) return;
+        _practiceBoss = GameSessionBootstrap.Config.Mode == GameMode.ObstaclePracticeBoss;
+    }
 
     public void StartBoss(BossDefinition bossDef)
     {
@@ -68,16 +75,19 @@ public class BossManager : MonoBehaviour
     {
         BossContext.StartBoss();
 
-        float bpm = ArrowSpawner.Instance.ActiveBPM;
-        float secondsPerBeat = 60f / bpm;
+        yield return new WaitUntil(() => !BossContext.IsBossActive);
 
-        float elapsedBeats = 0f;
+        //float bpm = ArrowSpawner.Instance.ActiveBPM;
+        //float secondsPerBeat = 60f / bpm;
+
+        //float elapsedBeats = 0f;
 
         // Track active effects
-        HashSet<BossEffect> active = new();
+        //HashSet<BossEffect> active = new();
 
-        while (BossContext.IsBossActive)
-        {
+        //while (BossContext.IsBossActive)
+        //{   
+            /*
             elapsedBeats += Time.deltaTime / secondsPerBeat;
 
             foreach (var effect in boss.supportedEffects)
@@ -99,9 +109,10 @@ public class BossManager : MonoBehaviour
                     active.Remove(effect);
                 }
             }
+            */
 
-            yield return null;
-        }
+            //yield return null;
+        //}
 
         BossContext.EndBoss();
     }

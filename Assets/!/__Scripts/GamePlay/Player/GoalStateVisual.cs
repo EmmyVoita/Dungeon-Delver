@@ -6,19 +6,29 @@ public class GoalStateVisual : MonoBehaviour
 {
     [Header("Sprites")]
     public Sprite normalSprite;
+    public Sprite basicJumpSprite;
     public Sprite shooterSprite;
     public Sprite lockedShooterSprite;
+    public Sprite laneDodgerSprite;
 
     [Header("Scale Per State")]
     public Vector3 normalScale = Vector3.one;
+    public Vector3 basicJumpScale = Vector3.one;
     public Vector3 shooterScale = Vector3.one * 1.1f;
     public Vector3 lockedShooterScale = Vector3.one * 0.9f;
+    public Vector3 laneDodgerScale = Vector3.one;
 
     [Header("Scale Transition")]
     public float scaleLerpSpeed = 8f;
 
     private SpriteRenderer sRend;
     private Vector3 targetScale;
+    private bool isOverridden = false;
+
+    public void SetOverride(bool active)
+    {
+        isOverridden = active;
+    }
 
     void Awake()
     {
@@ -44,6 +54,11 @@ public class GoalStateVisual : MonoBehaviour
         transform.localScale = targetScale;
     }
 
+    public void RefreshVisual()
+    {
+        HandleStateChanged(Player.Instance.playerControlState);
+    }
+
     void Update()
     {
         // Smoothly interpolate toward target scale
@@ -63,6 +78,11 @@ public class GoalStateVisual : MonoBehaviour
                 targetScale = normalScale;
                 break;
 
+            case Player.PlayerControlState.BasicJump:
+                sRend.sprite = basicJumpSprite;
+                targetScale = basicJumpScale;
+                break;
+
             case Player.PlayerControlState.Shooter:
                 sRend.sprite = shooterSprite;
                 targetScale = shooterScale;
@@ -72,11 +92,23 @@ public class GoalStateVisual : MonoBehaviour
                 sRend.sprite = lockedShooterSprite;
                 targetScale = lockedShooterScale;
                 break;
+
+            case Player.PlayerControlState.LaneDodger:
+                sRend.sprite = laneDodgerSprite;
+                targetScale = laneDodgerScale;
+                break;
+
+            default:
+                sRend.sprite = null;
+                targetScale = Vector3.one;
+            break;
         }
     }
 
     private void HandleGameStateChanged(GameState previousState, GameState newState)
     {
+        if (isOverridden) return;
+
         if(newState == GameState.DeathSequence && previousState != newState)
         {
             sRend.DOColor(Color.clear,0.3f);

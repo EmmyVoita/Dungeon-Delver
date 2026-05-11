@@ -102,7 +102,11 @@ public class DevTimeManager : MonoBehaviour, IDevPanel
     private void SetTimeScale(float value)
     {
         currentScale = Mathf.Clamp(value, minScale, maxScale);
-        Time.timeScale = currentScale;
+
+        TimeManager.Instance?.RemoveModifier("DevTimeManager");
+        var mod = new TimeScaleModifier("DevTimeManager", currentScale);
+        TimeManager.Instance?.AddModifier(mod);
+
         UpdateUI();
     }
 
@@ -114,7 +118,8 @@ public class DevTimeManager : MonoBehaviour, IDevPanel
 
     private void OnDisable()
     {
-        Time.timeScale = 1f;
+        TimeManager.Instance?.RemoveModifier("DevTimeManager");
+
         DevPanelFocusManager.ClearFocus(this);
     }
 }

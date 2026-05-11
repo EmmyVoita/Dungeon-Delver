@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cf69fba1ffdaf94d9a4dd128a5e149d, type: 3}
+  m_Name: TimeSlowIcon
+  m_EditorClassIdentifier: Assembly-CSharp::IconData
+  frames:
+  - {fileID: 1180298756, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
+  - {fileID: 1279397912, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
+  - {fileID: -1293106731, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
+  - {fileID: -1420164527, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
+  - {fileID: 658488341, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
+  animated: 1
+  frameDuration: 0.1
+  loop: 1

@@ -47,7 +47,6 @@ public class UIToast : MonoBehaviour
     {
         if (Instance == null)
         {
-            Debug.LogWarning("UIToast not present in scene");
             return;
         }
 

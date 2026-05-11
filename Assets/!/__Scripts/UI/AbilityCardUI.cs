@@ -8,11 +8,11 @@ using System;
 public class AbilityCardUI : MonoBehaviour
 {
     [Header("UI References")]
-    public Image iconImage;   
-     public TextMeshProUGUI nameText;
+    public Image icon;   
+    public Image background;  
     public Image lockImage;
-    public string descriptionText;
     public Image highlightFrame;
+    public Color lockColor = Color.grey;
 
     [Header("Animation Settings")]
     [SerializeField] private float hoverScale = 1.1f;
@@ -30,7 +30,6 @@ public class AbilityCardUI : MonoBehaviour
     [SerializeField] private float idleStartDelay = 0.25f;
 
     [Header("Background Scroll Settings")]
-    [SerializeField] private Image backgroundImage;
     [SerializeField] private float scrollSpeed = 0.2f;
 
     private Material backgroundMatInstance;
@@ -43,7 +42,7 @@ public class AbilityCardUI : MonoBehaviour
     private Tween currentTween;
     private Tween idleWobbleTween;
 
-    public AbilityCard Card { get; private set; }
+    public AbilityData Card { get; private set; }
 
     // -------------------------
     void Awake()
@@ -52,9 +51,9 @@ public class AbilityCardUI : MonoBehaviour
         originalScale = rect.localScale;
 
         // Create unique material instance if applicable
-        if (backgroundImage != null && backgroundImage.material != null)
+        if (background != null && background.material != null)
         {
-            backgroundMatInstance = Instantiate(backgroundImage.material);
+            backgroundMatInstance = Instantiate(background.material);
             //backgroundImage.material = backgroundMatInstance;
 
             scrollDirection = UnityEngine.Random.insideUnitCircle.normalized * 20f;
@@ -103,28 +102,35 @@ public class AbilityCardUI : MonoBehaviour
     }
 
     // -------------------------
-    public string GetDescription() => descriptionText != null ? descriptionText : "No Description";
 
-    public void Setup(AbilityCard card)
+    public void Setup(AbilityData card)
     {
         Card = card;
 
+        // Animated
+        if(card.iconData.frames.Count > 1 && card.iconData.animated)
+        {
+           UIImageCyclerPerFrameTime imageAnimator = icon.rectTransform.gameObject.AddComponent<UIImageCyclerPerFrameTime>();
+           imageAnimator.Initalize(icon,card.iconData.frames,card.iconData.frameDuration, card.iconData.loop);
+        }
+        else
+        {
+            icon.sprite = card.iconData.frames[0];
+        }
 
-        if (lockImage != null) 
+
+        if (lockImage != null)
+        {
             lockImage.gameObject.SetActive(!(ScoreManager.Instance.HighScore >= card.scoreRequirement));
+            icon.color = ScoreManager.Instance.HighScore >= card.scoreRequirement ? Color.white : lockColor;
+        }
+           
+        icon.rectTransform.localScale = card.iconScale * Vector3.one;
 
-        if (iconImage != null)
-            iconImage.sprite = card.icon;
-
-        if (nameText != null)
-            nameText.text = card.abilityName;
-
-        if (descriptionText != null)
-            descriptionText = card.description;
 
         //backgroundImage.material = card.cardMaterial;
-        if(card.mainImage != null)
-        backgroundImage.sprite = card.mainImage;
+        if(card.cardBackground != null)
+            background.sprite = card.cardBackground;
 
         SetHighlighted(false);
     }

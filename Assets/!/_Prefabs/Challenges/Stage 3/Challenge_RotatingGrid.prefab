@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6116212681190784971
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 825110530493505053}
+  - component: {fileID: 4322053533554448281}
+  m_Layer: 0
+  m_Name: Challenge_RotatingGrid
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &825110530493505053
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6116212681190784971}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4322053533554448281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6116212681190784971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dee909c07ef881f4e86e61862a63a9e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RotatingLinesLaneDodger
+  controlMode: 4
+  config:
+    maxLanes: 7
+    laneSpacing: 0.8
+    laneMoveDuration: 0.1
+  startDelay: 1
+  obstacleActiveTime: 12
+  spawnObject: {fileID: 2209782324246233958, guid: 027ec86afabc18e4cba3fe2592269cb5, type: 3}
+  rowCount: 5
+  rowSpacing: 2.5
+  perRowObjectCount: 8
+  horizontalObjectSpacing: 2.5
+  ellipseCenter: {x: 0, y: 0}
+  semiMajorAxis: 6
+  semiMinorAxis: 4
+  rotationSpeed: 0.8
+  rampRotationSpeedDuration: 3.5

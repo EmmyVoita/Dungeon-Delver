@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class SlowOnCritListener
 {
+    [SerializeField] private TimeSlowImpulseData impulseData;
     private float slowMult;
     private float inTime;
     private float holdTime;
@@ -26,12 +27,11 @@ public class SlowOnCritListener
         if (data.goalType != Goal.GoalType.Critical)
             return;
         
+        /*
         TimeManager.Instance.PlayImpulseSlow(
-            slowMult,
-            inTime,
-            holdTime,
-            outTime
+            impulseData
         );
+        */
     }
 
     public void Cleanup()

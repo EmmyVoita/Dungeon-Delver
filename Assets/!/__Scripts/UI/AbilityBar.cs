@@ -59,7 +59,7 @@ public class AbilityBar : MonoBehaviour
     // Instead of immediately updating, enqueue the target fill
     void EnqueueUpdate(int previousCharge, int attemptedDelta, int appliedDelta)
     {
-        Debug.Log($"AbilityCharge {Player.Instance.AbilityCharge} / {Player.Instance.MaxAbilityCharge}");
+        //Debug.Log($"AbilityCharge {Player.Instance.AbilityCharge} / {Player.Instance.MaxAbilityCharge}");
         float targetFill = Player.Instance.AbilityCharge / (float)Player.Instance.MaxAbilityCharge;
         pendingFills.Enqueue(targetFill);
 

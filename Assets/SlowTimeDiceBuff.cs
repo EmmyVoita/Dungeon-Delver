@@ -11,14 +11,14 @@ public class SlowTimeDiceBuff : UpgradeEffectBase
         base.Apply(target);
         Debug.Log("🌀 Slow-Time Dice Buff Active!");
 
-        TimeManager.Instance.SetModifier(slowAmount, lerpDuration);
+        //TimeManager.Instance.SetModifier(slowAmount, lerpDuration);
     }
 
 
     public override void Remove()
     {
         Debug.Log("💔 Slow-Time Dice Buff Expired!");
-        TimeManager.Instance.SetModifier(1.0f,0.3f);
+        //TimeManager.Instance.SetModifier(1.0f,0.3f);
         base.Remove();
     }
 }

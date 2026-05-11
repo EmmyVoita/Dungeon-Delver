@@ -45,7 +45,7 @@ public class UpgradeCardUI : MonoBehaviour
 
     private string descriptionText;
 
-    public ICardOption Option { get; private set; }
+    public UpgradeOption Option { get; private set; }
 
     // -------------------------
     void Awake()
@@ -67,6 +67,8 @@ public class UpgradeCardUI : MonoBehaviour
     // -------------------------
     void OnDestroy()
     {
+        idleWobbleTween?.Kill();
+        currentTween?.Kill();
         // Ensure DOTween doesn't keep references to destroyed objects
         DOTween.Kill(rect);
         DOTween.Kill(this);
@@ -87,7 +89,7 @@ public class UpgradeCardUI : MonoBehaviour
     // -------------------------
     public string GetDescription() => descriptionText != null ? descriptionText : "";
 
-    public void Setup(ICardOption option)
+    public void Setup(UpgradeOption option)
     {
         if (iconImage != null)
             iconImage.sprite = option.Icon;

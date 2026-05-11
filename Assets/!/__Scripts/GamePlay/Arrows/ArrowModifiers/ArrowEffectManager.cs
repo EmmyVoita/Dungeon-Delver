@@ -16,7 +16,6 @@ public class ArrowEffectManager : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     private void OnEnable()

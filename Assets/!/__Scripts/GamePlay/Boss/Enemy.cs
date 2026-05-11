@@ -73,6 +73,7 @@ public class Enemy : MonoBehaviour
         invincible = true; // Make this invincible
         invincibleDone = Time.time + invincibleDuration;
 
+        /*
         if (dEf.knockback)
         {
             // Determine the direction of knockback
@@ -99,6 +100,7 @@ public class Enemy : MonoBehaviour
             knockbackDone = Time.time + knockbackDuration;
             anim.speed = 0;
         }
+        */
     }
 
     void Die()

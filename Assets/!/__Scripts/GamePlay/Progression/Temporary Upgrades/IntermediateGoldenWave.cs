@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/Golden Value Wave")]
-public class IntermediateGoldenWave : IntermediateEffectSO
+public class IntermediateGoldenWave : UpgradeBase
 {
     public override string GetDescription()
     {

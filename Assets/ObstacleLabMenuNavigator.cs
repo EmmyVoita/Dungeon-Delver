@@ -13,6 +13,8 @@ public class ObstacleLabMenuNavigator : BaseMenu
         Left,
         Right
     }
+    
+    [SerializeField] private MenuState returnState;
 
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI descriptionText;
@@ -65,8 +67,24 @@ public class ObstacleLabMenuNavigator : BaseMenu
     [SerializeField] private float scrollTweenDuration = 0.25f;
 
     private Tween scrollTween;
+    private bool _useBoss;
 
+    private void OnEnable()
+    {
+        PracticeMenuOption.OnNavigateToOption += HandleNavigationRequest;
+        JumpDirectionModeMenuOption.MenuOptionIndexChanged += HandleMenuOptionChanged;
+    }
 
+    private void OnDisable()
+    {
+        PracticeMenuOption.OnNavigateToOption -= HandleNavigationRequest;
+        JumpDirectionModeMenuOption.MenuOptionIndexChanged -= HandleMenuOptionChanged;
+    }
+
+    private void HandleMenuOptionChanged(int index, int count)
+    {
+        _useBoss = index == 1 ? true : false;
+    }
 
     private void ScrollToSelected(PracticeMenuOption option)
     {
@@ -158,18 +176,9 @@ public class ObstacleLabMenuNavigator : BaseMenu
         foreach (Transform child in rightListContainer)
             child.gameObject.SetActive(false);
 
-        seperatorLine.gameObject.SetActive(false);
+        //seperatorLine.gameObject.SetActive(false);
     }
 
-    private void OnEnable()
-    {
-        PracticeMenuOption.OnNavigateToOption += HandleNavigationRequest;
-    }
-
-    private void OnDisable()
-    {
-        PracticeMenuOption.OnNavigateToOption -= HandleNavigationRequest;
-    }
 
     public override void OnOpen()
     {
@@ -187,7 +196,7 @@ public class ObstacleLabMenuNavigator : BaseMenu
         foreach (Transform child in rightListContainer)
             child.gameObject.SetActive(true);
 
-        seperatorLine.gameObject.SetActive(true);
+        //seperatorLine.gameObject.SetActive(true);
 
         leftScrollRect.transform.gameObject.SetActive(true);
     }
@@ -207,14 +216,14 @@ public class ObstacleLabMenuNavigator : BaseMenu
         foreach (Transform child in rightListContainer)
             child.gameObject.SetActive(false);
 
-        seperatorLine.gameObject.SetActive(false);
+        //seperatorLine.gameObject.SetActive(false);
 
         leftScrollRect.transform.gameObject.SetActive(false);
     }
 
     private void Update()
     {
-        if (lockInput || currentOption == null) 
+        if (lockInput || currentOption == null || !isActive) 
             return;
 
         // GLOBAL ESCAPE — always returns to left panel
@@ -230,7 +239,7 @@ public class ObstacleLabMenuNavigator : BaseMenu
             else if (currentPanel == PanelSide.Left)
             {
                 AudioSettingsManager.PlayBackSound();
-                MenuManager.Instance.TransitionToMenu(StartMenuWindows.MainMenu, 0.2f);
+                MenuManager.Instance.RequestMenuTransition(returnState);
                 return;
             }
         }
@@ -249,12 +258,12 @@ public class ObstacleLabMenuNavigator : BaseMenu
             {
                 AudioSettingsManager.PlaySelectSound();
 
+                GameMode targetGameMode = _useBoss ? GameMode.ObstaclePracticeBoss : GameMode.ObstaclePractice;
 
                 GameSceneLoader.PendingConfig = new GameSceneConfig(
-                    GameMode.ObstaclePractice,
+                    targetGameMode,
                     0,
-                    CurrentObstacle,
-                    JumpDirectionMode.FourDirectional);
+                    CurrentObstacle);
         
 
                 SceneManager.LoadScene(SceneNames.ArrowGameScene);
@@ -323,7 +332,7 @@ public class ObstacleLabMenuNavigator : BaseMenu
             if (index != -1 && index < obstacleList.Count)
             {
                 descriptionText.text = obstacleList[index].description;
-                nameText.text = obstacleList[index].displayName;
+                nameText.text = obstacleList[index].displayName.ToUpper();
                 currentObstacle = obstacleList[index];
             }
         }

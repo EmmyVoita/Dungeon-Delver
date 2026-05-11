@@ -2,8 +2,8 @@ public enum GameMode
 {
     StandardRun,
     ObstaclePractice,
+    ObstaclePracticeBoss,
     LevelEditorTest,
-    LevelEdtiorPlayFromPosition,
     Tutorial
 }
 
