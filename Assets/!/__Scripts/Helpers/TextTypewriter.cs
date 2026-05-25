@@ -21,11 +21,15 @@ public class TextTypewriter : MonoBehaviour
     [SerializeField] private float volume = 0.5f;
     [SerializeField] private float basePitch = 1.0f;
 
+    [Header("Behaviour")]
+    [SerializeField] private bool stopOnPause = false;
+
     private bool isTyping = false;
     private bool isWiggling = false;
     private Coroutine typingCoroutine;
 
     private TMP_TextInfo textInfo;
+    private bool _paused;
 
     private void Awake()
     {
@@ -33,14 +37,44 @@ public class TextTypewriter : MonoBehaviour
             textComponent = GetComponent<TMP_Text>();
     }
 
+
+    
+
+    private void OnEnable()
+    {
+        OverlayManager.OnOverlayChanged += HandleOverlayChanged;
+    }
+
+    private void OnDisable()
+    {
+        OverlayManager.OnOverlayChanged -= HandleOverlayChanged;
+    }
+
+    private void HandleOverlayChanged(OverlayState previousState, OverlayState newState)
+    {
+        if(!stopOnPause) return;
+
+        if(newState == OverlayState.Pause)
+        {
+            _paused = true;
+            return;
+        }
+           
+        if(newState != OverlayState.Pause && previousState == OverlayState.Pause)
+            _paused = false;
+    }
+
+
     // ------------------------------------------------------------
     // Start typing new text
     // ------------------------------------------------------------
+
     public void StartTyping(string description, Action onComplete = null)
     {
         fullText = castToUpperCase ? description.ToUpper() : description;
         StopAllCoroutines();
         typingCoroutine = StartCoroutine(TypeText(onComplete));
+        _paused = false;
     }
 
     // ------------------------------------------------------------
@@ -89,12 +123,17 @@ public class TextTypewriter : MonoBehaviour
         float lastSoundTime = -999f;
         int totalVisibleChars = textInfo.characterCount;
 
-        for (int i = 0; i <= totalVisibleChars; i++)
+        int i = 0;
+
+        while( i <= totalVisibleChars)
         {
+            yield return new WaitUntil(() => !_paused);
+
             textComponent.maxVisibleCharacters = i;
 
             if (typeSound != null && Time.unscaledTime - lastSoundTime >= minSoundDelay)
             {
+                /*
                 AudioHelpers.PlayClipWithVariation(
                     typeSound,
                     AudioChannel.UI,
@@ -103,8 +142,13 @@ public class TextTypewriter : MonoBehaviour
                     0.05f,
                     volume
                 );
+                */
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.typewriterBlip, transform.position);
+
                 lastSoundTime = Time.unscaledTime;
             }
+
+            i++;
 
             yield return new WaitForSecondsRealtime(typeSpeed);
         }

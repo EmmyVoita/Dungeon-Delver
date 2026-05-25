@@ -1,9 +1,11 @@
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
 public class HealOptionUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI healOptionText;
+    [SerializeField] private GameState showState = GameState.UpgradeSelection;
 
     private void OnEnable()
     {
@@ -17,11 +19,11 @@ public class HealOptionUI : MonoBehaviour
 
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
-        if(newState == GameState.UpgradeSelection)
+        if(newState == showState)
         {
             if (Player.Instance.Health < Player.Instance.MaxHealth)
             {
-                healOptionText.text = $"Skip [<color=#FFD700>{InputBindingManager.Instance.GetKey(InputActionType.Jump)}</color>] and Heal for 1 health";
+                healOptionText.text = $"Skip [<color=#FFD700>{InputBindingManager.Instance.GetKeyName(InputActionType.Jump)}</color>] and Heal for 1 health";
             }
             else
             {

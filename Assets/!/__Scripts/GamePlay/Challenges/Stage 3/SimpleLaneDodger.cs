@@ -18,6 +18,7 @@ public class SimpleLaneDodger : ChallengeBase
 
 
     [Header("IBossReactive")]
+    [SerializeField] private bool reverse = false;
     [SerializeField] private float reverseAtTime = -1f;
     [SerializeField] private SoundEffect reverseSound;
     [SerializeField] private TimeSlowImpulseData impulseData;
@@ -25,7 +26,7 @@ public class SimpleLaneDodger : ChallengeBase
 
     private int ballsAlive = 0;
     //private bool registered = false;
-    private List<SpikyBall> balls = new List<SpikyBall>();
+    private List<BasicProjectile> balls = new List<BasicProjectile>();
 
     private float _elapsed = 0f;
     private bool _hasReversed = false;
@@ -35,7 +36,7 @@ public class SimpleLaneDodger : ChallengeBase
 
     void Start()
     {
-        balls = new List<SpikyBall>();
+        balls = new List<BasicProjectile>();
         ballsAlive = ballCount;
 
         Begin();
@@ -44,7 +45,7 @@ public class SimpleLaneDodger : ChallengeBase
     
     void Update()
     {
-        if(!BossManager.Instance.IsBossActive) return;
+        if(!BossManager.Instance.IsBossActive || !reverse) return;
 
         if (!IsActive) return;
 
@@ -169,7 +170,7 @@ public class SimpleLaneDodger : ChallengeBase
             mover.Initialize(direction);
             _reversibleObjects.Add(mover);
         }
-        SpikyBall sb = ball.GetComponent<SpikyBall>();
+        BasicProjectile sb = ball.GetComponent<BasicProjectile>();
         if (sb != null)
         {
             balls.Add(sb);
@@ -180,7 +181,7 @@ public class SimpleLaneDodger : ChallengeBase
 
     protected override void CleanUp()
     {
-        foreach (SpikyBall spikyBall in balls)
+        foreach (BasicProjectile spikyBall in balls)
         {
             if (spikyBall != null)
                 Destroy(spikyBall);

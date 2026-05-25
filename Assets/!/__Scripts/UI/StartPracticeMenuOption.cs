@@ -36,7 +36,7 @@ public class StartPracticeMenuOption : PracticeMenuOption
     }
     public override void OnConfirm()
     {
-        AudioSettingsManager.PlaySelectSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
 
         GameSceneLoader.PendingConfig = new GameSceneConfig(
             GameMode.ObstaclePractice,

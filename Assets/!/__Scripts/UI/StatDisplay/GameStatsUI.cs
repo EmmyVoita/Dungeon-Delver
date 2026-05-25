@@ -65,6 +65,8 @@ public class GameStatsUI : MonoBehaviour
 
     void HandleStateChanged(GameState previousState, GameState newState)
     {
+        if(newState == GameState.Paused || previousState == GameState.Paused) return;
+        
         bool wasActive = activeStates.Contains(previousState);
         bool isActive = activeStates.Contains(newState);
 
@@ -228,7 +230,7 @@ public class GameStatsUI : MonoBehaviour
 
     public IEnumerator PlayOutroAnimations()
     {
-        AudioSettingsManager.PlaySelectSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
         OnContinuePressed?.Invoke();
 
 

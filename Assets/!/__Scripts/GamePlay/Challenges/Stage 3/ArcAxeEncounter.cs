@@ -33,6 +33,7 @@ public class ArcAxeEncounter : ChallengeBase
     private bool _spawnProjectiles = true;
 
     [Header("IBossReactive")]
+    [SerializeField] private bool reverse = false;
     [SerializeField] private float reverseAtTime = -1f;
     [SerializeField] private SoundEffect reverseSound;
     [SerializeField] private TimeSlowImpulseData impulseData;
@@ -48,7 +49,7 @@ public class ArcAxeEncounter : ChallengeBase
 
     void Update()
     {
-        if(!BossManager.Instance.IsBossActive) return;
+        if(!BossManager.Instance.IsBossActive || !reverse) return;
 
         if (!IsActive) return;
 

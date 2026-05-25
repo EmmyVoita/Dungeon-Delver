@@ -62,7 +62,11 @@ public class ScoreTallyController : MonoBehaviour
 
     public IEnumerator StartRoundEndTally()
     {
-        if( ComboManager.Instance.GetCurrentComboCount <= 0)
+        //RoundEndTallyComplete?.Invoke();
+        //yield break;
+
+        // If we dont need to do anything, break
+        if( ComboManager.Instance.GetCurrentComboCount <= 0 && Player.Instance.AbilityCharge == 0)
         {
             RoundEndTallyComplete?.Invoke();
             yield break;
@@ -70,27 +74,37 @@ public class ScoreTallyController : MonoBehaviour
 
         bool finished = false;
 
+        // Animate the existing combo if it is great than 0
         AnimateComboAdd(() => finished = true);
 
-        
+        // Wait for that to finish
         yield return CoroutineHelpers.WaitUntilOrTimeout(
+            "AnimateComboAdd",
             () => finished,
-            10.0f
+            15.0f
         );
         
-
+        // Then we want to enqueue the players ability charge
+        // so we set finished to false once again
         finished = false;
 
-        tallyQueue.Enqueue(new TallyRequest(
-            Player.Instance.AbilityCharge,
-            TallyType.AbilityCharge,
-            () => finished = true
-        ));
-
+        // Ability Charge tally request
+        if(Player.Instance.AbilityCharge >= 0)
+        {
+             tallyQueue.Enqueue(new TallyRequest(
+                Player.Instance.AbilityCharge,
+                TallyType.AbilityCharge,
+                () => finished = true
+            ));
+        }
+       
+        // Grab the top of the queue and start the tally
         if (!isTallying) EnsureTallyProcessor();
             
 
+        // Wait for that to finish
         yield return  CoroutineHelpers.WaitUntilOrTimeout(
+            "AnimateAbilityChargeAdd",
             () => finished,
             10.0f
         );

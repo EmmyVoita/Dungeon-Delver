@@ -1,20 +1,6 @@
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using UnityEngine;
 
-[System.Serializable]
-public struct GameStateSetting
-{
-    public GameState state;
-    public bool dimScreen;
-    public bool allowPlayerInput;
-    public bool enableDamage;
-    public bool allowPause;
-    public bool showScoreUI;
-    public bool allowPlayerDeath;
-    public bool showPlayer;
-}
-    
 
 public class GameStateEffectManager : MonoBehaviour
 {
@@ -24,23 +10,35 @@ public class GameStateEffectManager : MonoBehaviour
     public static bool ShowScoreUI { get; private set; }
     public static bool PlayerDeathAllowed { get; private set; }
     public static bool ShowPlayer { get; private set; }
+    public static bool AllowMouseInput { get; private set; }
 
-    [SerializeField] private List<GameStateSetting> gameStateSettings;
+
+    [SerializeField] private GameStateDatabase database;
 
 
     [Tooltip("What should happen to player input if the current GameState is not defined in the GameStateSettings list.")]
-    [SerializeField] private GameStateSetting defaultSetting;
+    [SerializeField] private GameStateSettingData defaultSettingData;
 
-    private Dictionary<GameState, GameStateSetting> stateLookup;
+    private Dictionary<GameState, GameStateSettingData> stateLookup;
 
     void Awake()
     {
-        stateLookup = new Dictionary<GameState, GameStateSetting>(gameStateSettings.Count);
+        stateLookup = new Dictionary<GameState, GameStateSettingData>();
 
-        foreach (var setting in gameStateSettings)
+        foreach (var setting in database.data)
         {
-            stateLookup[setting.state] = setting;
+            if(setting == null)
+            {
+                Debug.LogError("Null setting in database");
+                continue;
+            }
+
+            stateLookup.Add(setting.state, setting);
+
+            Debug.Log($"Added: {setting.state}");
         }
+
+        Debug.Log($"Dictionary Count: {stateLookup.Count}");
     }
 
     void OnEnable()
@@ -57,30 +55,37 @@ public class GameStateEffectManager : MonoBehaviour
     {
         if(previousState == newState) return;
 
-        GameStateSetting setting =
+        GameStateSettingData setting =
             stateLookup.TryGetValue(newState, out var s)
             ? s
-            : defaultSetting;
+            : defaultSettingData;
 
-         // Decided whether we should enable or disable the player input
-         // and whether they can take damage,etc.
         PlayerInputEnabled = setting.allowPlayerInput;
         PlayerDamageAllowed = setting.enableDamage;
         PauseAllowed = setting.allowPause;
         ShowScoreUI = setting.showScoreUI;
         PlayerDeathAllowed = setting.allowPlayerDeath;
         ShowPlayer = setting.showPlayer;
+        AllowMouseInput = setting.allowMouseInput;
 
-        // Add the new states screen dim source if we should dim the screen
-        if (setting.dimScreen)
+   
+
+        // Remove previous dim first
+        GameStateSettingData prevSetting =
+            stateLookup.TryGetValue(previousState, out var prev)
+            ? prev
+            : defaultSettingData;
+
+        Debug.Log(
+            $"Previous Setting => \n{prevSetting}\n\n" +
+            $"New Setting => \n{setting}\n"
+        );
+
+        if(prevSetting.dimScreen)
+            ScreenDimmerManager.Instance.RemoveDimSource(previousState.ToString());
+
+        // Add new dim
+        if(setting.dimScreen)
             ScreenDimmerManager.Instance.AddDimSource(newState.ToString());
-            
-
-        if(stateLookup.TryGetValue(previousState, out GameStateSetting prevSetting))
-        {
-            // Try and remove the previousState's dim screen source if it exists.
-            if(prevSetting.dimScreen)
-                ScreenDimmerManager.Instance.RemoveDimSource(previousState.ToString());
-        }           
     }
 }

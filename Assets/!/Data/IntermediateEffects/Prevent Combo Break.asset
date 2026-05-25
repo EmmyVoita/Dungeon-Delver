@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 849a206a4d3e00e46b64bab3deace790, type: 3}
   m_Name: Prevent Combo Break
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: 7421b9ea5151cec4193cce722a7acae3, type: 3}
-  displayName: Prevent Combo Break
+  upgradeId: 
+  icon: {fileID: 21300000, guid: 1565539a0b0731049b321141ee84ec88, type: 3}
+  iconMaterial: {fileID: 2100000, guid: 8b3fb34896e326c4a8fb58bd5ad01864, type: 2}
+  displayName: Combo Saver
   descriptionTemplate: The next combo break is ignored.

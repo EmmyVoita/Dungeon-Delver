@@ -14,6 +14,8 @@ public class PlayVFXAndDestroy : MonoBehaviour
     [Tooltip("Fallback lifetime if the VFX never reports completion")]
     public float safetyLifetime = 5f;
 
+    
+
     private void Awake()
     {
         if (vfx == null || vfx.Count == 0)
@@ -23,6 +25,22 @@ public class PlayVFXAndDestroy : MonoBehaviour
     private void OnEnable()
     {
         Play();
+    }
+
+    [ContextMenu("Play VFX")]
+    public void PlayOneShot()
+    {
+        if (vfx == null)
+        {
+            Debug.LogWarning("PlayVFXAndDestroy: No VisualEffect found.");
+            Destroy(gameObject);
+            return;
+        }
+
+        foreach (var effect in vfx)
+        {
+            effect.SendEvent(playEventName);
+        }
     }
 
     public void Play()

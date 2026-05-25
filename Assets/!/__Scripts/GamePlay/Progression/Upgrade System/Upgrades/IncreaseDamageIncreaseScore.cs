@@ -14,14 +14,11 @@ public class IncreaseDamageIncreaseScore : UpgradeBase, IDamageModifier, IGlobal
             .Replace("{GLOBAL_VALUE_MULTIPLIER}", (globalValueMultiplier - 1).ToString("P0"));
     }
 
-    public void Activate()
+    public override void Apply()
     {
+        UpgradeManager.Instance.AddTemporaryModifier(this);
     }
 
-    public void Deactivate()
-    {
-       
-    }
     public int ModifyDamageTaken(int baseDamage)
     {
         return baseDamage + additionalDamage;

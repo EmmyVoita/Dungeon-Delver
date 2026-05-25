@@ -1,10 +1,12 @@
 using System.Collections;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.VFX;
 
 public class PlayerWings : MonoBehaviour
 {
     [SerializeField] private ParticleSystem activatePS;
+    [SerializeField] private VisualEffect activateVE;
 
     [Header("Wing Sprites")]
     [SerializeField] private SpriteRenderer wingRenderer;
@@ -37,6 +39,9 @@ public class PlayerWings : MonoBehaviour
 
         if (activatePS != null)
             activatePS.Play();
+
+        if(activateVE != null)
+            activateVE.Play();
     }
 
     public void HideWings()

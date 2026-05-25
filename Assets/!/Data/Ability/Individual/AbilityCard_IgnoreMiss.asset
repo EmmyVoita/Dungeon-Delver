@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3f6a0e3cd052a94787e24cf68a5e06f, type: 3}
+  m_Name: AbilityCard_IgnoreMiss
+  m_EditorClassIdentifier: 
+  abilityType: 8
+  baseCost: 30
+  scoreRequirement: 50000
+  abilityName: Flow Shield
+  description: 'A temporary shield that keeps your combo from being broken. '
+  iconData: {fileID: 11400000, guid: c819d2b6785df874896ae5a1d1715b47, type: 2}
+  cardBackground: {fileID: 0}
+  iconScale: 2
+  abilityPrefab: {fileID: 9097667531175756686, guid: 3c98cddad26251d4b882b30ac898b3c5, type: 3}

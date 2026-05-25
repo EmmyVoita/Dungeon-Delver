@@ -5,6 +5,7 @@ public class GameSceneConfig
     public GameMode Mode { get; }
     public float LevelEditorStartTime { get; }
     public ObstacleTypeDefinition PracticeObstacle { get; }
+    public MenuState ReturnTarget { get; }
 
     // Default = Standard Run
     public GameSceneConfig() : this(GameMode.StandardRun) { }
@@ -12,11 +13,13 @@ public class GameSceneConfig
     public GameSceneConfig(
         GameMode mode,
         float startTime = 0,
-        ObstacleTypeDefinition practiceObstacle = null)
+        ObstacleTypeDefinition practiceObstacle = null,
+        MenuState returnTarget = MenuState.Main)
     {
         Mode = mode;
         LevelEditorStartTime = startTime;
         PracticeObstacle = practiceObstacle;
+        ReturnTarget = returnTarget;
     }
 
     // Convenience helpers

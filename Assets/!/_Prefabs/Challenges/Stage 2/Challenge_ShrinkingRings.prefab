@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3245715716055697512}
   - component: {fileID: 2998119105056975120}
   - component: {fileID: 1012348571470133320}
+  - component: {fileID: 1921055247604749397}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -119,6 +120,34 @@ MonoBehaviour:
   exitFrames: []
   exitFrameRate: 0.1
   disableOnExitComplete: 0
+--- !u!114 &1921055247604749397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1467760457709878120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29f76d3945a30f4081bc117fbd0cc3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverAndSway
+  enableHover: 1
+  enableSway: 0
+  hoverAmplitude: 0.1
+  hoverDuration: 1
+  swayX: 0
+  swayY: 0
+  swayZ: 0
+  swayAngleX: 6
+  swayAngleY: 6
+  swayAngleZ: 6
+  swayDurationX: 2.5
+  swayDurationY: 2.5
+  swayDurationZ: 2.5
+  randomStartDelayMax: 0
+  durationVariance: 0
+  amplitudeVariance: 0
 --- !u!1 &1750841472216070797
 GameObject:
   m_ObjectHideFlags: 0
@@ -163,8 +192,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3da55463a36a704cbb067cc69d9ff88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
+  registerWithManager: 1
   priority: 1
   controlMode: 2
+  listenForBossActive: 1
   lifetimeMode: 2
   switchPlayerState: 1
   completionCondition: 1
@@ -176,7 +207,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 1
     pitch: 1
-    usePitchVariation: 0
     pitchVariation: 0
   spawnDistance: 7
   spawnInterval: 1.5
@@ -234,6 +264,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a383c00dd81306418ffbc65a8a5449a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  registerWithManager: 1
   priority: 0
   controlMode: 1
   ringPrefab: {fileID: 110340108235673376, guid: 6e771345172556d4688258a08799bb68, type: 3}

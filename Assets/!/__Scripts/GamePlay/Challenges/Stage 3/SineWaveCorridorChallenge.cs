@@ -11,6 +11,9 @@ public class SineWaveCorridorChallenge : ChallengeBase
     [Header("Wave Settings")]
     [SerializeField] private int waveCount = 2;
     [SerializeField] private float amplitude = 2f;
+    [SerializeField] private float startAmplitudeMultiplier = 0.2f;
+    [SerializeField] private float amplitudeGrowDuration = 1.0f;
+
     [SerializeField] private float frequency = 1.5f;
     [SerializeField] private float waveSpeed = 1f;
     [SerializeField] private float verticalSpacing = 1.5f;
@@ -53,6 +56,9 @@ public class SineWaveCorridorChallenge : ChallengeBase
     private List<GameObject> _spawnedObjs = new List<GameObject>();
     private float _spacingLerpTime = 0f;
     private bool _isLerpingSpacing = false;
+    private float _currentAmplitude;
+    private float _amplitudeLerpTime;
+    private bool _isGrowingAmplitude;
 
     private void Start()
     {
@@ -67,6 +73,8 @@ public class SineWaveCorridorChallenge : ChallengeBase
         _direction = 1f;
         _hasReversed = false;
 
+        _currentAmplitude = amplitude * startAmplitudeMultiplier;
+
         StartCoroutine(SpawnRoutine());
     }
 
@@ -80,6 +88,9 @@ public class SineWaveCorridorChallenge : ChallengeBase
 
         _spacingLerpTime = 0f;
         _isLerpingSpacing = true;
+
+        _amplitudeLerpTime = 0f;
+        _isGrowingAmplitude = true;
 
         yield return new WaitForSeconds(activeTime);
 
@@ -131,17 +142,58 @@ public class SineWaveCorridorChallenge : ChallengeBase
 
     private void Update()
     {
-        if (!IsActive) return;
+        if (!IsActive)
+            return;
 
         _time += Time.deltaTime;
 
-        if (!_hasReversed && reverseAtTime >= 0f && _time >= reverseAtTime)
+        if (!_hasReversed &&
+            reverseAtTime >= 0f &&
+            _time >= reverseAtTime)
         {
             ReverseAllProjectiles();
             _hasReversed = true;
         }
 
-        UpdateWaveSpacing();
+        UpdateWaveAmplitude();
+        //UpdateWaveSpacing();
+    }
+
+    private void UpdateWaveAmplitude()
+    {
+        if (!_isGrowingAmplitude)
+            return;
+
+        _amplitudeLerpTime += Time.deltaTime;
+
+        float t = Mathf.Clamp01(
+            _amplitudeLerpTime / amplitudeGrowDuration
+        );
+
+        // Ease so it starts slow then expands
+        t = EaseOutCubic(t);
+
+        _currentAmplitude = Mathf.Lerp(
+            amplitude * startAmplitudeMultiplier,
+            amplitude,
+            t
+        );
+
+        for (int i = _reversibleObjects.Count - 1; i >= 0; i--)
+        {
+            if (_reversibleObjects[i] is SineWaveMover mover)
+            {
+                mover.SetAmplitude(_currentAmplitude);
+            }
+        }
+
+        if (t >= 1f)
+            _isGrowingAmplitude = false;
+    }
+
+    private float EaseOutCubic(float t)
+    {
+        return 1f - Mathf.Pow(1f - t, 3f);
     }
 
     private void UpdateWaveSpacing()
@@ -153,7 +205,7 @@ public class SineWaveCorridorChallenge : ChallengeBase
         float t = Mathf.Clamp01(_spacingLerpTime / spacingLerpDuration);
 
         float startSpacing = verticalSpacing * startSpacingMultiplier;
-        float currentSpacing = Mathf.Lerp(startSpacing, verticalSpacing, t);
+        float currentSpacing = verticalSpacing;//Mathf.Lerp(startSpacing, verticalSpacing, t);
 
         for (int i = 0; i < _parentObjs.Count; i++)
         {
@@ -175,8 +227,8 @@ public class SineWaveCorridorChallenge : ChallengeBase
             GameObject parentObj = new GameObject($"WaveParent_{i}");
             parentObj.transform.SetParent(transform, false);
 
-            float startSpacing = verticalSpacing * startSpacingMultiplier;
-            float baseOffset = (i - (waveCount - 1) * 0.5f) * startSpacing;
+            //float startSpacing = verticalSpacing * startSpacingMultiplier;
+            float baseOffset = (i - (waveCount - 1) * 0.5f) * verticalSpacing;
 
             parentObj.transform.localPosition = new Vector3(0f, baseOffset, 0f);
 
@@ -194,6 +246,7 @@ public class SineWaveCorridorChallenge : ChallengeBase
             }
         }
 
+
         AudioHelpers.PlaySoundEffect(spawnSound, transform.position);
     }
 
@@ -210,7 +263,7 @@ public class SineWaveCorridorChallenge : ChallengeBase
             float waveDir = (i % 2 == 0) ? 1f : -1f;
 
             mover.Initialize(
-                amplitude,
+                _currentAmplitude,
                 frequency,
                 waveDir: waveDir,
                 x,

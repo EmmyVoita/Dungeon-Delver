@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class FullscreenManager : MonoBehaviour
 {
+    public bool IsFullscreen => Screen.fullScreen;
     private const string PREF_KEY = "fullscreen_mode"; // 1 = fullscreen, 0 = windowed
 
     void Start()
@@ -14,9 +15,21 @@ public class FullscreenManager : MonoBehaviour
 
     public void ToggleFullscreen(bool fullscreen)
     {
-        Screen.fullScreen = fullscreen;
+        if (fullscreen)
+        {
+            Resolution res = Screen.currentResolution;
 
-        // Save preference
+            Screen.SetResolution(
+                res.width,
+                res.height,
+                true
+            );
+        }
+        else
+        {
+            Screen.SetResolution(1280, 720, false); // your default windowed size
+        }
+
         PlayerPrefs.SetInt(PREF_KEY, fullscreen ? 1 : 0);
         PlayerPrefs.Save();
     }

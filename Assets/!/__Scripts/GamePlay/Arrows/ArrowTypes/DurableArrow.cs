@@ -48,7 +48,7 @@ public class DurableArrow : ArrowBase
 
             float h = 4f * t * (1f - t); // parabola
 
-            Vector2 awayDir = direction.normalized;
+            Vector2 awayDir = _direction.normalized;
 
             Vector2 targetPos = bounceStartPos + awayDir * (h * bounceDistance);
 
@@ -60,8 +60,8 @@ public class DurableArrow : ArrowBase
 
                 // IMPORTANT: shift arrow timeline forward
                 float delay = bounceEndTime - bounceStartTime;
-                spawnTime += delay;
-                arrivalTime += delay;
+                _spawnTime += delay;
+                _arrivalTime += delay;
             }
 
             return;
@@ -135,7 +135,7 @@ public class DurableArrow : ArrowBase
 
             bounceDistance = maxBounceDistance > 0f
                 ? maxBounceDistance
-                : speed * (duration * 0.5f);
+                : _speed * (duration * 0.5f);
 
             isBouncing = true;
 

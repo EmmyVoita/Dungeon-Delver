@@ -30,6 +30,25 @@ public class SettingsTabManager : MonoBehaviour
     private int currentTab = 0;
     private bool inTabFocus = false;
 
+    void OnEnable()
+    {
+        TabOptionMouseHandler.OnTabOptionClicked += HandleTabOptionClicked;
+    }
+
+    void OnDisable()
+    {
+        TabOptionMouseHandler.OnTabOptionClicked -= HandleTabOptionClicked;
+    }
+
+    private void HandleTabOptionClicked(int index)
+    {
+        if (index != currentTab)
+        {
+            currentTab = index;
+            ActivateTab(currentTab);
+        }
+    }
+
     void Start()
     {
         ActivateTab(currentTab, false);
@@ -49,7 +68,7 @@ public class SettingsTabManager : MonoBehaviour
     /// </summary>
     public void MoveTab(int dir)
     {
-        AudioSettingsManager.PlayNavigateSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
         
         int newTab = Mathf.Clamp(currentTab + dir, 0, tabs.Count - 1);
         if (newTab != currentTab)

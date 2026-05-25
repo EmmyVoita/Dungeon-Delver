@@ -11,13 +11,11 @@ public abstract class BaseMenu : MonoBehaviour
     public virtual void OnOpen()
     {
         lockDepth = 0;
-        lockInput = false;
         isActive = true;
     }
 
     public virtual void OnClose()
     {
-        lockInput = true;
         isActive = false;
         lockDepth = 0;
     }

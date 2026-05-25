@@ -28,6 +28,7 @@ public class SpiralObject : MonoBehaviour
     private float spawnTime;
     private float currentAlpha = 0f;
     private bool fadingOut = false;
+    private Gradient originalGradient;
 
     public event Action OnConsumed;
 
@@ -54,10 +55,12 @@ public class SpiralObject : MonoBehaviour
         {
             line.positionCount = lineResolution;
             line.useWorldSpace = true;
-            SetLineAlpha(0f);
+            originalGradient = line.colorGradient;
+            //SetLineAlpha(0f);
         }
  
         spawnTime = Time.time;
+        
         
     }
 
@@ -85,37 +88,17 @@ public class SpiralObject : MonoBehaviour
      
     }
 
-    void HandleLineFade()
+   void HandleLineFade()
     {
         float timeSinceSpawn = Time.time - spawnTime;
 
-        // Fade In
-        if (!fadingOut)
-        {
-            if (timeSinceSpawn > fadeInDelay)
-            {
-                float t = Mathf.InverseLerp(
-                    fadeInDelay,
-                    fadeInDelay + fadeInDuration,
-                    timeSinceSpawn
-                );
+        float t = Mathf.InverseLerp(
+            fadeInDelay,
+            fadeInDelay + fadeInDuration,
+            timeSinceSpawn
+        );
 
-                currentAlpha = Mathf.Clamp01(t);
-            }
-
-            // Trigger fade-out near center
-            if (radius <= fadeOutRadius)
-            {
-                fadingOut = true;
-            }
-        }
-
-        // Fade Out
-        if (fadingOut)
-        {
-            currentAlpha -= Time.deltaTime / fadeOutDuration;
-            currentAlpha = Mathf.Clamp01(currentAlpha);
-        }
+        currentAlpha = Mathf.Clamp01(t);
 
         SetLineAlpha(currentAlpha);
     }
@@ -143,22 +126,24 @@ public class SpiralObject : MonoBehaviour
         }
     }
 
-    void SetLineAlpha(float alpha)
+    void SetLineAlpha(float alphaMultiplier)
     {
         Gradient gradient = new Gradient();
 
-        gradient.SetKeys(
-            new GradientColorKey[]
-            {
-                new GradientColorKey(Color.white, 0f),
-                new GradientColorKey(Color.white, 1f),
-            },
-            new GradientAlphaKey[]
-            {
-                new GradientAlphaKey(alpha, 0f),
-                new GradientAlphaKey(alpha * 0.4f, 1f) // fade toward center
-            }
-        );
+        GradientColorKey[] colorKeys = originalGradient.colorKeys;
+
+        GradientAlphaKey[] oldAlphaKeys = originalGradient.alphaKeys;
+        GradientAlphaKey[] newAlphaKeys = new GradientAlphaKey[oldAlphaKeys.Length];
+
+        for (int i = 0; i < oldAlphaKeys.Length; i++)
+        {
+            newAlphaKeys[i] = new GradientAlphaKey(
+                oldAlphaKeys[i].alpha * alphaMultiplier,
+                oldAlphaKeys[i].time
+            );
+        }
+
+        gradient.SetKeys(colorKeys, newAlphaKeys);
 
         line.colorGradient = gradient;
     }

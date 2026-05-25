@@ -6,6 +6,7 @@ public class ContinuePromptUI : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private UIFadeGroup continuePrompt;
+    [SerializeField] private TextMeshProUGUI textComponent;
 
     [Header("State Management")]
     public GameState showState = GameState.WorldMapView;
@@ -32,11 +33,8 @@ public class ContinuePromptUI : MonoBehaviour
     {
         if(newState == showState)
         {
-            if (continuePrompt.TryGetComponent(out TextMeshProUGUI textComponent))
-            {
-                textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetKey(InputActionType.Confirm)}</color>] to continue";
-                continuePrompt?.Show();
-            }
+            textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetKeyName(InputActionType.Confirm)}</color>] to continue";
+            continuePrompt?.Show();
         }
         else if(newState == hideState)
         {

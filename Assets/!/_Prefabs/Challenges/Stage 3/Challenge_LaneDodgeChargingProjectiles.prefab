@@ -29,7 +29,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 7292099256052815929}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1230826733214402091
@@ -44,11 +45,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 609d07e98f0fdcc408340124d6e39735, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaneDodgerCharger
+  registerWithManager: 1
+  priority: 0
   controlMode: 4
   config:
     maxLanes: 5
     laneSpacing: 1
     laneMoveDuration: 0.15
+    laneWidthScale: 1
   chargerPrefab: {fileID: 1244039913777332974, guid: f5d10f96df1afff428f42b566edd923e, type: 3}
   obstacleEndTime: 2
   spawnInterval: 1.2
@@ -56,3 +60,80 @@ MonoBehaviour:
   randomizeSpawnIntervalAmount: 0
   spawnCount: 15
   spawnX: 5
+--- !u!1 &2602182989849470984
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7292099256052815929}
+  - component: {fileID: 8100220381011969126}
+  - component: {fileID: 6785284260912316044}
+  m_Layer: 0
+  m_Name: Boss
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7292099256052815929
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2602182989849470984}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5104883648423994985}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8100220381011969126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2602182989849470984}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ab8821f62409034da4b837180a5ff21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossSafeLaneChallenge
+  registerWithManager: 1
+  priority: 0
+  controlMode: 4
+  config:
+    maxLanes: 5
+    laneSpacing: 1
+    laneMoveDuration: 0.15
+    laneWidthScale: 1
+  spawnPrefabs:
+  - {fileID: 2209782324246233958, guid: cb3d57ff39828094c8a78df7a4362069, type: 3}
+  safeLaneInterval: 3
+  safeLaneWarningDuration: 1
+  obstacleActiveTime: 10
+  spawnX: 7
+--- !u!114 &6785284260912316044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2602182989849470984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcd40125a00ce6342812c641eaf24a21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossLaneCollapseChallenge
+  registerWithManager: 1
+  priority: 0
+  controlMode: 1
+  collapseInterval: 4
+  warningTime: 1
+  collapseDuration: 4

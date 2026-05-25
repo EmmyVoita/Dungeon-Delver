@@ -2,6 +2,7 @@ Shader "ScanLines"
 {
     Properties
     {
+        _Influence ("Influence", Range(0,1)) = 1
         _ScanlineLowerBound ("Scanline LowerBound", Range(0,1)) = 0.9
         _ScanlineFrequency ("Scanline Frequency", Range(1,1000)) = 500
         _Speed ("Scanline Speed", Range(0,10)) = 0.05
@@ -24,6 +25,7 @@ Shader "ScanLines"
            float _ScanlineLowerBound;
            float _ScanlineFrequency;
            float _Speed;
+           float _Influence;
 
 
               
@@ -51,11 +53,7 @@ Shader "ScanLines"
                 float remappedWave = RemapFloat(scan,0,1,_ScanlineLowerBound, 1);
 
 
-                color *= remappedWave;
-                return color;
-               
-               // Modify the sampled color
-               return half4(0, 1, 0, 1) * color;
+                return lerp(color, color * remappedWave, _Influence);
            }
 
         

@@ -153,7 +153,7 @@ public class RoundStatsUI : MonoBehaviour
 
         if (!acceptInput) return;
 
-        if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
+        if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm) && !OverlayManager.Instance.IsPaused)
         {
             Debug.Log("Continue pressed on Round Summary screen." + $"Gamestate: {GameStateManager.Instance.CurrentState} ");
             // If still animating → request skip
@@ -317,7 +317,7 @@ public class RoundStatsUI : MonoBehaviour
 
         if (continuePrompt.TryGetComponent(out TextMeshProUGUI textComponent))
         {
-            textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetKey(InputActionType.Confirm)}</color>] to continue";
+            textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetKeyName(InputActionType.Confirm)}</color>] to continue";
             continuePrompt?.Show();
         }
 
@@ -338,7 +338,7 @@ public class RoundStatsUI : MonoBehaviour
 
     public IEnumerator PlayOutroAnimations()
     {
-        AudioSettingsManager.PlaySelectSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
         OnContinuePressed?.Invoke();
 
         imageStatRowAnimator.PlayOutro();
@@ -436,7 +436,10 @@ public class RoundStatsUI : MonoBehaviour
                 if (animateTickSound != null &&
                     Time.time - lastTickTime >= animateTickMinInterval)
                 {
-                    AudioSettingsManager.PlayTallySound(currentPitch, 1f);
+                    SoundEffect soundEffect = AudioLibrary.Instance.Database.tallyBase;
+                    soundEffect.pitch = currentPitch;
+
+                    AudioHelpers.PlaySoundEffect(soundEffect, transform.position);
 
                     currentPitch += animateTickPitchIncrease;
                     lastTickTime = Time.time;

@@ -8,7 +8,7 @@ public class UpgradeIconUI : MonoBehaviour
     public Image iconImage;
     public Image fillImage;
     public Color fillBackgroundColor = Color.white;
-    public IdleHover idleHover;
+    public HoverAndSway idleHover;
 
     [Header("Settings")]
     public float activeScale = 1.1f;
@@ -32,9 +32,9 @@ public class UpgradeIconUI : MonoBehaviour
         //iconImage.sprite = upgrade.baseIcon;
 
         // Idle hover defaults OFF
-        idleHover.enableHover = false;
-        idleHover.enableSway = false;
-        idleHover.enableScoreJump = false;
+        //idleHover.enableHover = false;
+        //idleHover.enableSway = false;
+        //idleHover.enableScoreJump = false;
         idleHover.ApplyState();
 
         // Recharge fill defaults
@@ -82,13 +82,13 @@ public class UpgradeIconUI : MonoBehaviour
         if (fillImage.fillAmount >= 1f)
         {
             fillImage.color = Color.clear;
-            PlayJumpImpulse();
+            //PlayJumpImpulse();
         }
 
         // Just used → shake
         if (fillImage.fillAmount == 0f)
         {
-            idleHover.ShakeJumpTarget();
+            //idleHover.ShakeJumpTarget();
         }
     }
 
@@ -104,8 +104,8 @@ public class UpgradeIconUI : MonoBehaviour
                 break;
 
             case IconFeedbackStyle.SwayAndHover:
-                idleHover.enableHover = true;
-                idleHover.enableSway = true;
+                //idleHover.enableHover = true;
+                //idleHover.enableSway = true;
                 idleHover.UpdateState();
 
                 glowTween?.Kill();
@@ -119,7 +119,7 @@ public class UpgradeIconUI : MonoBehaviour
 
             case IconFeedbackStyle.Jump:
                 // Jump-only upgrades do NOT stay active
-                PlayJumpImpulse();
+                //PlayJumpImpulse();
                 break;
 
             case IconFeedbackStyle.ActiveInactiveColor:
@@ -137,8 +137,8 @@ public class UpgradeIconUI : MonoBehaviour
                 break;
 
             case IconFeedbackStyle.SwayAndHover:
-                idleHover.enableHover = false;
-                idleHover.enableSway = false;
+                //idleHover.enableHover = false;
+                //idleHover.enableSway = false;
                 idleHover.ApplyState();
 
                 glowTween?.Kill();
@@ -161,6 +161,7 @@ public class UpgradeIconUI : MonoBehaviour
     // ONE-SHOT JUMP IMPULSE (IMPORTANT)
     // ----------------------------------------------------
 
+    /*
     private void PlayJumpImpulse()
     {
         idleHover.enableScoreJump = true;
@@ -173,4 +174,5 @@ public class UpgradeIconUI : MonoBehaviour
             fillImage.color = Color.white;
         });
     }
+    */
 }

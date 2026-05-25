@@ -42,7 +42,7 @@ public class DisguiseAxe : ChallengeBase
     [SerializeField] private SoundEffect reverseSound;
     [SerializeField] private TimeSlowImpulseData impulseData;
 
-    private readonly List<SpikyBall> _balls = new();
+    private readonly List<BasicProjectile> _balls = new();
     private readonly List<GameObject> _memoryAxes = new();
     private readonly List<GameObject> _hazardAxes = new();
     private readonly List<IReversible> _reversibleObjects = new();
@@ -236,7 +236,7 @@ public class DisguiseAxe : ChallengeBase
             _reversibleObjects.Add(mover);
         }
 
-        SpikyBall sb = ball.GetComponent<SpikyBall>();
+        BasicProjectile sb = ball.GetComponent<BasicProjectile>();
         if (sb != null)
             _balls.Add(sb);
     }
@@ -342,7 +342,7 @@ public class DisguiseAxe : ChallengeBase
             _fireballRoutine = null;
         }
 
-        foreach (SpikyBall ball in _balls)
+        foreach (BasicProjectile ball in _balls)
         {
             if (ball != null)
                 Destroy(ball.gameObject);

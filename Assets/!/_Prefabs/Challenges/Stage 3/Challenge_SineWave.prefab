@@ -47,18 +47,21 @@ MonoBehaviour:
   priority: 0
   controlMode: 4
   config:
-    maxLanes: 5
+    maxLanes: 3
     laneSpacing: 0.65
     laneMoveDuration: 0.15
+    laneWidthScale: 0.5
   fireballPrefab: {fileID: 2209782324246233958, guid: 3344d7e2452595d4f9762e1210a0ef23, type: 3}
   waveCount: 2
   amplitude: 0.8
+  startAmplitudeMultiplier: 0
+  amplitudeGrowDuration: 5
   frequency: 1.25
   waveSpeed: 20
   verticalSpacing: 2.55
   spawnDelay: 1
-  spawnWidth: 7
-  samplePoints: 30
+  spawnWidth: 6
+  samplePoints: 22
   projectileSpeed: 3
   activeTime: 12
   moveStartDelay: 15
@@ -78,12 +81,12 @@ MonoBehaviour:
     inDuration: 0.25
     holdDuration: 0.75
     outDuration: 0.75
-  startSpacingMultiplier: 2
-  spacingLerpDuration: 2
+  startSpacingMultiplier: 0
+  spacingLerpDuration: 0
   spawnSound:
-    clip: {fileID: 8300000, guid: e19eb227df997ac49a4d9f7a1c4ace2f, type: 3}
+    clip: {fileID: 8300000, guid: 5d3221e6416802a489a2278b70768906, type: 3}
     channel: 2
     affectedByTimeScale: 0
-    volume: 0.1
-    pitch: 2
+    volume: 0.8
+    pitch: 1.25
     pitchVariation: 0.1

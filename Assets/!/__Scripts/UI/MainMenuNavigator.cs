@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 
 public class MainMenuNavigator : BaseMenu
 {
@@ -67,16 +68,30 @@ public class MainMenuNavigator : BaseMenu
     }
     #endif
 
+    private void OnEnable()
+    {
+        MainMenuOption.OnMainMenuOptionClicked += HandleOptionClicked;
+    }
+
+    private void OnDisable()
+    {
+        MainMenuOption.OnMainMenuOptionClicked -= HandleOptionClicked;
+    }
+
+    private void HandleOptionClicked(int index)
+    {
+        SelectedIndex = index;
+        ActivateOption();
+    }
+
     private void Start()
     {
-        MenuManager.Instance.RegisterMenu(this);
-        MenuManager.Instance.OpenMenu(MenuState.Main);
         SelectedIndex = 0;
     }
 
     private void Update()
     {
-        if (lockInput) return;
+        if (lockInput || !isActive) return;
 
         HandleInput();
         AnimateSelection();
@@ -88,6 +103,7 @@ public class MainMenuNavigator : BaseMenu
     {
         base.OnOpen();
 
+        lockInput = false;
         SelectedIndex = 0;
 
         if (options == null || options.Length == 0)
@@ -101,6 +117,7 @@ public class MainMenuNavigator : BaseMenu
 
     public override void OnClose()
     {
+
         SelectedIndex = -1;
         base.OnClose();
     }
@@ -110,19 +127,19 @@ public class MainMenuNavigator : BaseMenu
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
         {
             SelectedIndex = (SelectedIndex + 1) % options.Length;
-            AudioSettingsManager.PlayNavigateSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             UpdateVisuals();
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
             _selectedIndex = (_selectedIndex - 1 + options.Length) % options.Length;
-            AudioSettingsManager.PlayNavigateSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             UpdateVisuals();
         }
 
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
         {
-            AudioSettingsManager.PlaySelectSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
             ActivateOption();
         }
     }
@@ -161,6 +178,8 @@ public class MainMenuNavigator : BaseMenu
     void ActivateOption()
     {
         MenuState targetState = GetTargetState(SelectedIndex);
+
+        lockInput = true;
 
         switch (targetState)
         {

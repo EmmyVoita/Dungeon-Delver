@@ -5,6 +5,7 @@ public abstract class ChallengeBase : MonoBehaviour
     private object _config;
     public object Config => _config;
 
+    [SerializeField] private bool registerWithManager = true;
     [SerializeField] private int priority = 0;
     [SerializeField] private Player.PlayerControlState controlMode = Player.PlayerControlState.BasicJump;
 
@@ -19,7 +20,8 @@ public abstract class ChallengeBase : MonoBehaviour
         IsActive = true;
         _config = config;
 
-        ObstacleManager.Instance?.RegisterObstacle(gameObject);
+        if(registerWithManager)
+            ObstacleManager.Instance?.RegisterObstacle(gameObject);
     }
 
     public virtual void End()

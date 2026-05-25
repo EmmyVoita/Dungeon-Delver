@@ -31,7 +31,7 @@ public class GameStateManager : MonoBehaviour
     private void Start()
     {
         // Initialize to a default state if needed
-        SetState(GameState.None);
+        //SetState(GameState.None);
     }
 
     public void SetState(GameState newState)

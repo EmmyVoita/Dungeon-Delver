@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System;
 using DG.Tweening;
+using TMPro;
+using System.Collections;
 
 public class UpgradeCardManager : MonoBehaviour
 {
@@ -10,15 +12,21 @@ public class UpgradeCardManager : MonoBehaviour
 
     public static event Action UpgradeSelectionComplete;
 
+    [SerializeField] private float cardWidth = 350f;
+    [SerializeField] private float cardFlipDelay = 0.5f;
+    [SerializeField] private float cardFlipDuration = 0.3f;
+    [SerializeField] private SoundEffect flipSound;
+
 
     [Header("References")]
     [SerializeField] private GameObject cardUIPrefab;
     [SerializeField] private GameObject upgradeIconPrefab;
-    [SerializeField] private Transform upgradeIconParent;
     [SerializeField] private Transform cardParent;
-    [SerializeField] private TextTypewriter descriptionTypewriter;
+    [SerializeField] private TextMeshProUGUI cardName;
     [SerializeField] private DescriptionPanelController descriptionPanel;
     [SerializeField] private List<GameObject> dependentObjects;
+
+    [SerializeField] private List<RectTransform> cardContainers;
 
 
     [Header("Available Upgrades")]
@@ -28,9 +36,11 @@ public class UpgradeCardManager : MonoBehaviour
 
     private List<UpgradeBase> selectedCards = new ();
     private List<UpgradeCardUI> currentCards = new();
+    private List<UpgradeCardUI> nextCards = new();
     private Dictionary<UpgradeBase, int> cardHistory = new();
     public Dictionary<UpgradeBase, int> AllChosenCards => cardHistory;
     private int selectedIndex = 0;
+    private bool _rerollLock;
 
     private void OnEnable()
     {
@@ -44,6 +54,8 @@ public class UpgradeCardManager : MonoBehaviour
 
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
+        if(previousState == GameState.Paused || newState == GameState.Paused) return;
+
         if(newState == GameState.UpgradeSelection)
         {
             ShowCardChoices();
@@ -66,10 +78,6 @@ public class UpgradeCardManager : MonoBehaviour
                 $"{nameof(UpgradeCardManager)}: upgradeIconPrefab is not assigned"
             );
 
-            UnityEngine.Assertions.Assert.IsNotNull(
-                upgradeIconParent,
-                $"{nameof(UpgradeCardManager)}: upgradeIconParent is not assigned"
-            );
         #endif
     }
 
@@ -114,29 +122,101 @@ public class UpgradeCardManager : MonoBehaviour
             return;
         }
 
-        List<UpgradeOption> picked = pool.PickUnique(count); 
+        List<UpgradeOption> picked = pool.PickUnique(count * 2); 
 
-        foreach (var option in picked)
+        for(int i = 0; i < count; i++)
         {
-            GameObject uiObj = Instantiate(cardUIPrefab, cardParent);
-            UpgradeCardUI ui = uiObj.GetComponent<UpgradeCardUI>();
-            ui.Setup(option);
-            currentCards.Add(ui);
+            GameObject cardContainer = new GameObject(name: $"CardParent_{i}");
+            cardContainer.transform.parent = cardParent;
+
+            RectTransform rectT = cardContainer.AddComponent<RectTransform>();
+
+            rectT.SetParent(cardParent, false);
+            rectT.localScale = Vector3.one;
+            
+
+            rectT.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Horizontal,
+                cardWidth
+            );
+
+            for(int j = 0; j < 2; j++)
+            {
+                GameObject uiObj = Instantiate(cardUIPrefab, parent: cardContainer.transform);
+                RectTransform rectT_ = cardContainer.GetComponent<RectTransform>();
+
+                uiObj.SetActive(j == 0);
+
+                rectT_.transform.position = new Vector3(rectT_.transform.position.x,rectT_.transform.position.y);
+
+                UpgradeCardUI ui = uiObj.GetComponent<UpgradeCardUI>();
+                ui.Setup(picked[i * 2 + j]);
+
+                if(j == 0)
+                    currentCards.Add(ui);
+                else
+                {
+                    nextCards.Add(ui);
+                }
+            }
+
+            cardContainers.Add(rectT);
         }
 
         HighlightCard();
+    }
+
+    private void DrawNextCards()
+    {
+        nextCards.Clear();
+
+        List<UpgradeOption> pool = new();
+
+        foreach(var effect in cards)
+        {
+            if(effect == null)
+                continue;
+
+            pool.Add(new UpgradeOption(effect));
+        }
+
+        List<UpgradeOption> picked =
+            pool.PickUnique(currentCards.Count);
+
+        for(int i = 0; i < currentCards.Count; i++)
+        {
+            GameObject uiObj = Instantiate(
+                cardUIPrefab,
+                cardContainers[i]
+            );
+
+            uiObj.SetActive(false);
+
+            UpgradeCardUI ui =
+                uiObj.GetComponent<UpgradeCardUI>();
+
+            ui.Setup(picked[i]);
+
+            nextCards.Add(ui);
+        }
     }
 
 
 
     private void Update()
     {
+        if (OverlayManager.Instance.IsPaused)
+            return;
+            
         if (currentCards.Count == 0 || GameStateManager.Instance.CurrentState != GameState.UpgradeSelection) return;
 
-        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Interact) && RunStateManager.Instance.CanRerollShop)
+        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Interact) && RunStateManager.Instance.CanRerollShop && !_rerollLock)
         {
             bool goThroughWithReroll = RunStateManager.Instance.ConsumeShopReroll();
-            if(goThroughWithReroll) ShowCardChoices(3);
+            if(goThroughWithReroll)
+            {
+                StartCoroutine(RerollSequence());
+            } 
         }
 
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveLeft))
@@ -155,11 +235,57 @@ public class UpgradeCardManager : MonoBehaviour
             SelectCurrentOption();
         }
 
-        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Jump))
+        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Jump) && Player.Instance.Health < Player.Instance.MaxHealth)
         {
             SkipUpgradeAndHeal();
         }
     }
+
+    private IEnumerator RerollSequence()
+    {
+        _rerollLock = true;
+        for(int i = 0; i < cardContainers.Count; i++)
+        {
+            AudioHelpers.PlaySoundEffect(flipSound, transform.position);
+
+            yield return cardContainers[i]
+                .DOLocalRotate(
+                    new Vector3(0,90,0),
+                    cardFlipDuration/2f
+                )
+                .WaitForCompletion();
+
+            Destroy(currentCards[i].gameObject);
+
+            currentCards[i] = nextCards[i];
+
+            currentCards[i].gameObject.SetActive(true);
+
+            yield return cardContainers[i]
+                .DOLocalRotate(
+                    Vector3.zero,
+                    cardFlipDuration/2f
+                )
+                .WaitForCompletion();
+
+            yield return new WaitForSeconds(
+                cardFlipDelay
+            );
+        }
+
+        // Create the next hidden cards
+        DrawNextCards();
+
+        HighlightCard();
+
+        yield return new WaitForSeconds(
+                0.5f
+        );
+
+        _rerollLock = false;
+    }
+
+    
 
     private void SelectCurrentOption()
     {
@@ -168,7 +294,7 @@ public class UpgradeCardManager : MonoBehaviour
 
         UpgradeCardUI cardUI = currentCards[selectedIndex];
 
-        AudioSettingsManager.PlaySelectSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
 
         
         if (cardHistory.ContainsKey(cardUI.Option.Base))
@@ -210,22 +336,23 @@ public class UpgradeCardManager : MonoBehaviour
     {
         Cleanup();
         Player.Instance.HealPlayer(1);
-        AudioSettingsManager.PlaySelectSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
         UpgradeSelectionComplete?.Invoke();
     }
 
 
     private void HighlightCard()
     {
-        AudioSettingsManager.PlayNavigateSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
         
         for (int i = 0; i < currentCards.Count; i++)
         {
             currentCards[i].SetHighlighted(i == selectedIndex);
+            nextCards[i].SetHighlighted(i == selectedIndex);
+
             if (i == selectedIndex)
             {
-                string description = currentCards[i].GetDescription();
-                //descriptionTypewriter.StartTyping(currentCards[i].GetDescription());
+                cardName.text = currentCards[i].Option.DisplayName.ToUpper();
                 descriptionPanel.Show(currentCards[i].GetDescription());
             }
         }
@@ -247,5 +374,8 @@ public class UpgradeCardManager : MonoBehaviour
         {
             obj.SetActive(false);
         }
+
+        nextCards.Clear();
+        cardContainers.Clear();
     }
 }

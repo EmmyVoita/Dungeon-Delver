@@ -5,6 +5,7 @@ using UnityEngine;
 public static class CoroutineHelpers
 {
     public static IEnumerator WaitUntilOrTimeout(
+        string name,
         Func<bool> condition,
         float timeout,
         Action onTimeout = null
@@ -16,6 +17,7 @@ public static class CoroutineHelpers
         {
             if (Time.time - startTime > timeout)
             {
+                Debug.LogError($"Wait condition timed out after {timeout} seconds. Name => {name}");
                 onTimeout?.Invoke();
                 yield break;
             }

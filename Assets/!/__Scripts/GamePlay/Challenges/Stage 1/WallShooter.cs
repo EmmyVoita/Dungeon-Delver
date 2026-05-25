@@ -52,6 +52,7 @@ public class WallShooter : ChallengeBase
 
 
     [Header("Activation")]
+    [SerializeField] private bool listenForBossActive = false;
     [SerializeField] private ActivationMode activationMode = ActivationMode.AutoOnStart;
 
 
@@ -129,6 +130,9 @@ public class WallShooter : ChallengeBase
 
     void Start()
     {
+        if(listenForBossActive && BossManager.Instance.IsBossActive)
+            Begin();
+
         if (activationMode == ActivationMode.AutoOnStart)
         {
             Begin();

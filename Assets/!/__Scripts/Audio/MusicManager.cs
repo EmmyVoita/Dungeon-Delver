@@ -61,6 +61,7 @@ public class MusicManager : MonoBehaviour
         GameStateManager.OnStateChanged += HandleStateChanged;
         TimeManager.OnTimeScaleChanged += HandleTimeScaleChanged;
         SceneManager.sceneLoaded += HandleSceneLoaded;
+        OverlayManager.OnOverlayChanged += HandleOverlayChanged;
     }
 
     private void OnDisable()
@@ -68,11 +69,27 @@ public class MusicManager : MonoBehaviour
         GameStateManager.OnStateChanged -= HandleStateChanged;
         TimeManager.OnTimeScaleChanged -= HandleTimeScaleChanged;
         SceneManager.sceneLoaded -= HandleSceneLoaded;
+        OverlayManager.OnOverlayChanged -= HandleOverlayChanged;
     }
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         ResetTiming();
+    }
+
+    private void HandleOverlayChanged(OverlayState previousState, OverlayState newState)
+    {
+        if (newState ==  OverlayState.Pause)
+        {
+            PauseMusic();
+            return;
+        }
+
+        if (previousState == OverlayState.Pause)
+        {
+            ResumeMusic();
+            return;
+        }
     }
 
     // ----------------------------------------------------
@@ -81,17 +98,7 @@ public class MusicManager : MonoBehaviour
 
     private void HandleStateChanged(GameState previous, GameState newState)
     {
-        if (newState == GameState.Paused)
-        {
-            PauseMusic();
-            return;
-        }
-
-        if (previous == GameState.Paused)
-        {
-            ResumeMusic();
-            return;
-        }
+        
 
         if (newState == GameState.RoundActive)
         {
@@ -145,22 +152,29 @@ public class MusicManager : MonoBehaviour
         ResetTiming();
 
         _lastDSPTime = AudioSettings.dspTime;
-        _scaledTime = 0;
+        
 
         fadeTween?.Kill();
 
         mainSource.Stop();
-        mainSource.enabled = false;
-        mainSource.enabled = true;
+        //mainSource.enabled = false;
+        //mainSource.enabled = true;
 
         float editorOffset = GameSessionBootstrap.Config.LevelEditorStartTime;
+
+        _scaledTime = editorOffset;
 
         mainSource.clip = mainClip;
         mainSource.time = editorOffset;
         mainSource.volume = 0f;
-        mainSource.pitch = 1f;
+        mainSource.pitch = TimeManager.Instance.GetCurrentScale();
 
-        yield return null;
+        mainClip.LoadAudioData();
+
+        while (mainClip.loadState != AudioDataLoadState.Loaded)
+        {
+            yield return null;
+        }
 
         mainSource.PlayScheduled(RoundManager.Instance.RoundStartDSP);
 

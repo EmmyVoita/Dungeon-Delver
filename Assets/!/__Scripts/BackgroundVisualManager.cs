@@ -1,7 +1,11 @@
+using System;
+using DG.Tweening;
 using UnityEngine;
 
 public class BackgroundVisualManager : MonoBehaviour
 {
+    public static event Action OnFlareBottomRequested;
+
     [Header("Textures")]
     public Texture2D defaultBackground;
     public Texture2D worldMapBackground;
@@ -15,6 +19,10 @@ public class BackgroundVisualManager : MonoBehaviour
     public Material mat;
     public string texturePropertyName = "_MainTexture";
     public string colorPropertyName = "_Color";
+    public string bottomGradientName = "_GradientEdge2";
+    public float defaultGradientEdge = 0.23f;
+    public float flaredGradientEdge = 0.3f;
+    public float flareDuration = 0.5f;
 
     private void OnEnable()
     {
@@ -22,11 +30,52 @@ public class BackgroundVisualManager : MonoBehaviour
         SetColor(defaultColor);
         
         GameStateManager.OnStateChanged += HandleStateChanged;
+        OnFlareBottomRequested += HandleFlareBottom;
     }
 
     private void OnDisable()
     {
         GameStateManager.OnStateChanged -= HandleStateChanged;
+        OnFlareBottomRequested -= HandleFlareBottom;
+    }
+
+    public static void FlareBottom()
+    {
+        OnFlareBottomRequested?.Invoke();
+    }
+
+    private void HandleFlareBottom()
+    {
+        mat.DOKill();
+
+        float value = defaultGradientEdge;
+
+
+        DOTween.To(
+            () => value,
+            x =>
+            {
+                value = x;
+                mat.SetFloat(bottomGradientName, value);
+            },
+            flaredGradientEdge,
+            flareDuration
+        )
+        .SetEase(Ease.OutQuad)
+        .OnComplete(() =>
+        {
+            DOTween.To(
+                () => value,
+                x =>
+                {
+                    value = x;
+                    mat.SetFloat(bottomGradientName, value);
+                },
+                defaultGradientEdge,
+                flareDuration * 1.5f
+            )
+            .SetEase(Ease.OutBack);
+        });
     }
 
     private void HandleStateChanged(GameState previousState, GameState newState)

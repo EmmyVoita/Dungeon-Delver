@@ -55,6 +55,8 @@ public class WorldMapController : MonoBehaviour
 
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
+        if(newState == GameState.Paused) return;
+
         if(newState != GameState.WorldMapView && newState != GameState.WorldMapViewEnd)
         {
             mapView.Clear();
@@ -63,7 +65,7 @@ public class WorldMapController : MonoBehaviour
 
         
 
-        if (newState == GameState.WorldMapView)
+        if (newState == GameState.WorldMapView && previousState != GameState.Paused)
         {
             mapView.Build();
 

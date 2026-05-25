@@ -37,7 +37,7 @@ private Vector2 stopPos;
         float delayDuration = delayBeats * secondsPerBeat;
 
         resumeTime = stopTime + delayDuration;
-        this.arrivalTime = delayDuration + arrivalTime;
+        this._arrivalTime = delayDuration + arrivalTime;
 
         // ✅ Correct stop position
         stopPos = Vector2.Lerp(startPos, endPos, stopRatio);
@@ -53,29 +53,29 @@ private Vector2 stopPos;
 
         if (elapsed < stopTime)
         {
-            float t = Mathf.InverseLerp(spawnTime, stopTime, elapsed);
-            targetPos = Vector2.Lerp(startPos, stopPos, t);
+            float t = Mathf.InverseLerp(_spawnTime, stopTime, elapsed);
+            targetPos = Vector2.Lerp(_startPos, stopPos, t);
         }
         else if (elapsed < resumeTime)
         {
             Debug.Log($"Stop Time => {stopTime}, Resume Time => {resumeTime}, Elapsed => {elapsed}");
             targetPos = stopPos;
         }
-        else if(elapsed <= arrivalTime)
+        else if(elapsed <= _arrivalTime)
         {
-            float t = Mathf.InverseLerp(resumeTime, arrivalTime, elapsed);
-            targetPos = Vector2.Lerp(stopPos, endPos, t);
+            float t = Mathf.InverseLerp(resumeTime, _arrivalTime, elapsed);
+            targetPos = Vector2.Lerp(stopPos, _endPos, t);
         }
         else
         {
             // AFTER goal → continue to center
-            float extraTime = elapsed - arrivalTime;
+            float extraTime = elapsed - _arrivalTime;
 
             float postTravelDuration = 0.2f; // tweak this
 
             float t = Mathf.Clamp01(extraTime / postTravelDuration);
 
-            targetPos = Vector2.Lerp(endPos, Vector2.zero, t);
+            targetPos = Vector2.Lerp(_endPos, Vector2.zero, t);
         }
 
         SmoothTranslate(targetPos);

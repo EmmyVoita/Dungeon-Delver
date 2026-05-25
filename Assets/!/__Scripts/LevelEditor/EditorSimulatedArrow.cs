@@ -82,7 +82,8 @@ public class EditorSimulatedArrow : MonoBehaviour
             if (crossedArrivalThisFrame && !EditorPlaybackController.Instance.SuppressSimulationAudio)
             {
                 arrivalSoundPlayed = true;
-                AudioSettingsManager.Instance.PlayArrowHitSound();
+                
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.arrowHit, transform.position);
             }
 
             return;

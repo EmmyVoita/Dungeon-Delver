@@ -1,0 +1,230 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &486448581886666637
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8794575090569858895}
+  - component: {fileID: 2706586007936795205}
+  m_Layer: 0
+  m_Name: Boss
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8794575090569858895
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 486448581886666637}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7878779774327217699}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2706586007936795205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 486448581886666637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcd40125a00ce6342812c641eaf24a21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossLaneCollapseChallenge
+  registerWithManager: 1
+  priority: 0
+  controlMode: 1
+  collapseInterval: 4
+  warningTime: 1
+  collapseDuration: 4
+--- !u!1 &6769059283685959404
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7878779774327217699}
+  - component: {fileID: 5321987335942696601}
+  - component: {fileID: 6767726359417174798}
+  m_Layer: 0
+  m_Name: Challenge_LaneDodgeHard
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7878779774327217699
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6769059283685959404}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8794575090569858895}
+  - {fileID: 6033410113189675950}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5321987335942696601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6769059283685959404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79c1cb71436b5a943909b1d1c4126056, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SimpleLaneDodger
+  registerWithManager: 1
+  priority: 0
+  controlMode: 4
+  config:
+    maxLanes: 7
+    laneSpacing: 1.15
+    laneMoveDuration: 0.15
+    laneWidthScale: 1
+  spawnPrefabs:
+  - {fileID: 2209782324246233958, guid: 4f5aa79f35a74c94990e3f363c4ae8ed, type: 3}
+  - {fileID: 2209782324246233958, guid: 9e512e7b0199ff747b6ba66f7818bda4, type: 3}
+  ballCount: 28
+  spawnInterval: 0.8
+  randomizeSpawnIntervalAmount: 0
+  obstacleActiveTime: 2
+  spawnPosition: {x: -6, y: 0, z: 0}
+  reverse: 0
+  reverseAtTime: 10
+  reverseSound:
+    clip: {fileID: 8300000, guid: 26d5a4bc6e09ecb4ca444cd3b3da43f6, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 0.8
+    pitchVariation: 0
+  impulseData:
+    slowMultiplier: 0.25
+    inDuration: 0.25
+    holdDuration: 0.75
+    outDuration: 0.75
+--- !u!114 &6767726359417174798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6769059283685959404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da272cf7875102a4585bc8fc87e032f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnableAfterDelay
+  objects:
+  - obj: {fileID: 8518718956214149489}
+    delay: 3
+  - obj: {fileID: 486448581886666637}
+    delay: 10
+--- !u!1 &8518718956214149489
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6033410113189675950}
+  - component: {fileID: 4301227253546196499}
+  m_Layer: 0
+  m_Name: ArcProjectiles
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6033410113189675950
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8518718956214149489}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7878779774327217699}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4301227253546196499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8518718956214149489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6a9b1d1c6d35cc4c8400b88c0a5fcb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ArcAxeEncounter
+  registerWithManager: 0
+  priority: 1
+  controlMode: 4
+  config:
+    maxLanes: 5
+    laneSpacing: 1.25
+    laneMoveDuration: 0.15
+    laneWidthScale: 1
+  axePrefab: {fileID: 5864311340696347630, guid: d1781050636f6264d81f3b1c320969c5, type: 3}
+  spawnSound:
+    clip: {fileID: 8300000, guid: 5d3221e6416802a489a2278b70768906, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 0.5
+    pitch: 1.25
+    pitchVariation: 0.1
+  spawnX: {x: 7, y: 8}
+  minY: -9
+  maxY: 0
+  arcHeight: 5
+  arcYOffset: 0
+  travelDuration: 2
+  baseInterval: 2
+  intervalStep: 0.15
+  minInterval: 0.65
+  activeTime: 25
+  reverse: 0
+  reverseAtTime: 12
+  reverseSound:
+    clip: {fileID: 8300000, guid: 26d5a4bc6e09ecb4ca444cd3b3da43f6, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 0.8
+    pitchVariation: 0
+  impulseData:
+    slowMultiplier: 0.25
+    inDuration: 0.25
+    holdDuration: 0.75
+    outDuration: 0.75

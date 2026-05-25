@@ -37,7 +37,7 @@ public class PracticeObstacleController : MonoBehaviour
 
         if (testBossDefintion != null)
         {
-            BossManager.Instance.StartBoss(testBossDefintion);
+            BossManager.Instance.StartBoss();//testBossDefintion);
         }
     }
 

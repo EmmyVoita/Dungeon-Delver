@@ -92,7 +92,7 @@ public class InputBindingManager : MonoBehaviour
         bindings[InputActionType.MoveDown] = Key.S;
         bindings[InputActionType.MoveLeft] = Key.A;
         bindings[InputActionType.MoveRight] = Key.D;
-        bindings[InputActionType.UseAbility] = Key.Enter;
+        bindings[InputActionType.UseAbility] = Key.E;
         bindings[InputActionType.Jump] = Key.Space;
         bindings[InputActionType.Confirm] = Key.Enter;
         bindings[InputActionType.Back] = Key.Escape;
@@ -157,7 +157,7 @@ public class InputBindingManager : MonoBehaviour
     // ------------------------------------------------------------
     // Public API
     // ------------------------------------------------------------
-    public Key GetKey(InputActionType action)
+    public Key GetKeyName(InputActionType action)
     {
         return bindings.ContainsKey(action) ? bindings[action] : Key.None;
     }
@@ -228,7 +228,25 @@ public class InputBindingManager : MonoBehaviour
             return false;
         }
 
-        return Keyboard.current[key].wasPressedThisFrame;
+        bool fallBackKeyDown = false;
+
+        switch (action)
+        {
+            case InputActionType.MoveUp:
+                fallBackKeyDown = Keyboard.current[Key.UpArrow].wasPressedThisFrame;
+                break;
+            case InputActionType.MoveDown:
+                fallBackKeyDown = Keyboard.current[Key.DownArrow].wasPressedThisFrame;
+                break;
+            case InputActionType.MoveLeft:
+                fallBackKeyDown = Keyboard.current[Key.LeftArrow].wasPressedThisFrame;
+                break;
+            case InputActionType.MoveRight:
+                fallBackKeyDown = Keyboard.current[Key.RightArrow].wasPressedThisFrame;
+                break;
+        }
+
+        return Keyboard.current[key].wasPressedThisFrame || fallBackKeyDown;
     }
 
     public bool GetKeyInput(InputActionType action)

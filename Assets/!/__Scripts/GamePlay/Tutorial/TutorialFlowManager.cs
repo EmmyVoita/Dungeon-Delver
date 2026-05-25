@@ -20,7 +20,8 @@ public class TutorialFlowManager : MonoBehaviour
     public float fadeDuration = 0.5f;
 
     [Header("Audio")]
-    public AudioClip transitionSound;
+    public SoundEffect transitionSound;
+    public float transitionStartDelay = 0.75f;
     private AudioSource audioSource;
 
     private void OnEnable()
@@ -81,9 +82,10 @@ public class TutorialFlowManager : MonoBehaviour
     // ----------------------------------------
     private IEnumerator PlayTransition(string message)
     {
+        yield return new WaitForSeconds(transitionStartDelay);
+
         // Optionally play a sound between steps
-        if (transitionSound != null)
-            audioSource.PlayOneShot(transitionSound);
+        AudioHelpers.PlaySoundEffect(transitionSound, transform.position);
 
         yield return new WaitForSeconds(transitionDelay);
     }

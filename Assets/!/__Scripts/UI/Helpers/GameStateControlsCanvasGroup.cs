@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -5,10 +6,12 @@ using UnityEngine;
 public class GameStateControlsCanvasGroup : MonoBehaviour
 {
     [Header("References")]
+    [SerializeField] private List<GameState> showStates;
     [SerializeField] private CanvasGroup canvasGroup;
 
     [Header("Timing")]
     [SerializeField] private float fadeDuration = 0.35f;
+    [SerializeField] private float fadeInDelay = 0.0f;
 
     private void OnEnable()
     {
@@ -22,7 +25,7 @@ public class GameStateControlsCanvasGroup : MonoBehaviour
 
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
-        if(GameStateEffectManager.ShowScoreUI)
+        if(showStates.Contains(newState))
             FadeIn();
         else
             FadeOut();
@@ -30,11 +33,16 @@ public class GameStateControlsCanvasGroup : MonoBehaviour
 
     private void FadeIn()
     {
-        canvasGroup.DOFade(1f, 0.35f);
+        canvasGroup.DOKill();
+
+        canvasGroup.DOFade(1f, fadeDuration)
+            .SetDelay(fadeInDelay);
     }
 
     private void FadeOut()
     {
-        canvasGroup.DOFade(0f, 0.35f);
+        canvasGroup.DOKill();
+
+        canvasGroup.DOFade(0f, fadeDuration);
     }
 }

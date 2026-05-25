@@ -1,10 +1,13 @@
 using UnityEngine;
 using System.IO;
 using UnityEngine.Audio;
+using System;
 
 public class AudioSettingsManager : MonoBehaviour
 {
     public static AudioSettingsManager Instance { get; private set; }
+
+    public static event Action OnVolumeUpdated;
 
     public AudioMixer mixer;
 
@@ -22,16 +25,7 @@ public class AudioSettingsManager : MonoBehaviour
     [Range(0f, 1f)] public float uiVolume = 1f;
     [Range(0f, 1f)] public float ambienceVolume = 1f;
 
-    [Header("UI Sounds")]
-    [SerializeField] private AudioClip navigateSound;
-    [SerializeField] private AudioClip selectSound;
-    [SerializeField] private AudioClip backSound;
-    [SerializeField] private AudioClip buttonSound;
-    [SerializeField] private AudioClip negativeUISound;
-    [SerializeField] private AudioClip tallySound;
-    [SerializeField] private AudioClip accentTallySound;
-    [SerializeField] private AudioClip arrowHitSound;
-    [SerializeField] public AudioClip musicTrackSound;
+
 
     private string savePath;
 
@@ -78,28 +72,30 @@ public class AudioSettingsManager : MonoBehaviour
     // ---------------------------
     // Volume Controls
     // ---------------------------
-    public void SetVolume(AudioChannel channel, float volume)
+    public void SetVolume(AudioControl channel, float volume)
     {
         volume = Mathf.Clamp01(volume);
 
         switch (channel)
         {
-            case AudioChannel.Master:
+            case AudioControl.Master:
                 masterVolume = volume;
                 break;
-            case AudioChannel.Music:
+            case AudioControl.Music:
                 musicVolume = volume;
                 break;
-            case AudioChannel.SFX:
+            case AudioControl.SFX:
                 sfxVolume = volume;
                 break;
-            case AudioChannel.UI:
+            case AudioControl.UI:
                 uiVolume = volume;
                 break;
-            case AudioChannel.Ambience:
+            case AudioControl.Ambience:
                 ambienceVolume = volume;
                 break;
         }
+
+        OnVolumeUpdated?.Invoke();
 
         SaveSettings(); // auto-save when changed
     }
@@ -120,80 +116,8 @@ public class AudioSettingsManager : MonoBehaviour
         return Instance.masterVolume * channelVolume;
     }
 
-    // ---------------------------
-    // Audio Feedback
-    // ---------------------------
-    public static void PlayNavigateSound(float pitch = 1f)
-    {
-        if (Instance && Instance.navigateSound)
-            AudioHelpers.PlayMyClipAtPoint(
-                Instance.navigateSound, AudioChannel.UI,
-                Camera.main.transform.position, 1.0f, pitch
-            );
-    }
 
-    public static void PlaySelectSound(float pitch = 1f)
-    {
-        if (Instance && Instance.selectSound)
-            AudioHelpers.PlayMyClipAtPoint(
-                Instance.selectSound, AudioChannel.UI,
-                Camera.main.transform.position, 1.0f, pitch
-            );
-    }
 
-    public static void PlayBackSound(float pitch = 1f)
-    {
-        if (Instance && Instance.backSound)
-            AudioHelpers.PlayMyClipAtPoint(
-                Instance.backSound, AudioChannel.UI,
-                Camera.main.transform.position, 1.0f, pitch
-            );
-    }
-
-    public static void PlayGeneralButtonSound(float pitch = 1f)
-    {
-        if (Instance && Instance.buttonSound)
-            AudioHelpers.PlayMyClipAtPoint(
-                Instance.buttonSound, AudioChannel.UI,
-                Camera.main.transform.position, 1.0f, pitch
-            );
-    }
-
-    public static void PlayNegativeUISound(float pitch = 1f)
-    {
-        if (Instance && Instance.negativeUISound)
-            AudioHelpers.PlayMyClipAtPoint(
-                Instance.negativeUISound, AudioChannel.UI,
-                Camera.main.transform.position, 1.0f, pitch
-            );
-    }
-
-    public static void PlayTallySound(float pitch = 1f, float volume = 1f)
-    {
-        if (Instance && Instance.tallySound)
-            AudioHelpers.PlayMyClipAtPoint(
-                Instance.tallySound, AudioChannel.UI,
-                Camera.main.transform.position, volume, pitch
-            );
-    }
-
-    public static void PlayAccentTallySound(float pitch = 1f, float volume = 1f)
-    {
-        if (Instance && Instance.accentTallySound)
-            AudioHelpers.PlayMyClipAtPoint(
-                Instance.accentTallySound, AudioChannel.UI,
-                Camera.main.transform.position, volume, pitch
-            );
-    }
-
-    public void PlayArrowHitSound(float pitch = 1f)
-    {
-        if (arrowHitSound)
-            AudioHelpers.PlayMyClipAtPoint(
-                arrowHitSound, AudioChannel.SFX,
-                Camera.main.transform.position, 1.0f, pitch
-            );
-    }
 
     // ---------------------------
     // Save / Load

@@ -44,6 +44,8 @@ public class ScreenDimmerManager : MonoBehaviour
     // --------------------------------------------------
     public void AddDimSource(string key, float? customAlpha = null)
     {
+        Debug.Log($"Dim Manager Add: {key}");
+        
         if (dimSources.Add(key))
         {
             float alpha = customAlpha ?? baseDimAlpha;
@@ -53,7 +55,12 @@ public class ScreenDimmerManager : MonoBehaviour
 
     public void RemoveDimSource(string key)
     {
+        Debug.Log($"Dim Manager Remove: {key} \n" +
+                  $"Dim Manager contains key ? => {dimSources.Contains(key)}"
+        );
+
         if (!dimSources.Contains(key)) return;
+        
 
         dimSources.Remove(key);
 

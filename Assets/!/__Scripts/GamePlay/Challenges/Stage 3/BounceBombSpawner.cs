@@ -16,7 +16,6 @@ public class BounceBombSpawner : ChallengeBase
     public string playEventName = "OnPlay";
     
     private GameObject _bombObj;
-    [SerializeField] private List<VisualEffect> confettiEffects;
     [SerializeField] private SoundEffect congratsSoundEffect;
 
 
@@ -55,11 +54,7 @@ public class BounceBombSpawner : ChallengeBase
 
     void HandleBombCleared()
     {
-        foreach(VisualEffect effect in confettiEffects)
-        {
-            effect.SendEvent(playEventName);
-        }
-
+        ConfettiEffect.TriggerConfetti();
         AudioHelpers.PlaySoundEffect(congratsSoundEffect,transform.position);
     }
 

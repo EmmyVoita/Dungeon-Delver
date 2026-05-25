@@ -40,12 +40,7 @@ public class RingObstacleSpawner : ChallengeBase
             this.transform // Parent rings under the spawner
         );
 
-        ring.Initialize(i);
-
-        ring.owner = this;
-        if (centerTarget != null)
-            ring.centerTarget = centerTarget;
-
+        ring.Initialize(i,this,centerTarget);
     }
 
     public void OnRingResolved(ShrinkingRingObstacle ring)

@@ -1,22 +1,6 @@
 using UnityEngine;
 using System;
 using System.Collections;
-using UnityEngine.Audio;
-
-
-
-public struct ArrowResolvedData
-{
-    public Goal.GoalType goalType;
-    public ArrowStatus status;
-}
-
-public enum ArrowCatchRule
-{
-    Catch,
-    Avoid
-}
-
 
 public abstract class ArrowBase : MonoBehaviour
 {
@@ -25,8 +9,10 @@ public abstract class ArrowBase : MonoBehaviour
     [Header("Arrow Stats")]
     [SerializeField] private float health = 1f;
 
+
     [Header("Type Settings")]
     [SerializeField] private ArrowCatchRule catchRule = ArrowCatchRule.Catch;
+
 
     [Header("Sprite")]
     [SerializeField] private bool flip180 = false;
@@ -37,120 +23,213 @@ public abstract class ArrowBase : MonoBehaviour
     [SerializeField] private float normalHitPitch = 1.0f;
     [SerializeField] private float criticalHitPitch = 1.2f;
     [Range(0f, 1f),SerializeField] private float directionalPitchFactor = 1f;
-
-
-    [Header("Audio EQ Settings")]
     [Range(0f, 1f)] public float directionalEQStrength = 0.5f;
-    [SerializeField] private float hpfNeutral = 20f;
-    [SerializeField] private float lpfNeutral = 22000f;
-    [SerializeField] private float midNeutral = 0f;
 
-
-    [Header("Movement")]
-    protected Vector2 direction;
-    protected float speed;
-    protected Rigidbody2D rb;
-
-
-    //[Header("State Effects")]
-    //public GameObject empowerEffect;
-    //public AudioClip empowerSound;
-    //public AudioClip empowerDestroySound;
-
-    //public GameObject freezeEffect;
-    //public AudioClip freezeDestroySound;
-    //public AudioClip freezeEffectSound;
 
     [Header("Dynamic")]
     [SerializeField] protected bool invincible = false;
-    public ArrowStatus status;
+    [SerializeField] private ArrowStatus status;
 
-    // --- Freeze state ---
-    private float freezeTimer = 0f;
-    private float frozenSpeed = 0f;
+
+
+    protected Vector2 _direction;
+    protected float _speed;
+    protected Rigidbody2D _rb;
     protected bool _isDead = false;
-    float _expectedArrivalTime;
+    protected float _spawnTime;
+    protected float _arrivalTime;
+    protected Vector2 _startPos;
+    protected Vector2 _endPos;
+    private ArrowType _arrowType = ArrowType.Normal;
+
 
     public bool IsGolden => status.HasFlag(ArrowStatus.Golden);
     public bool IsRecoveryArrow => status.HasFlag(ArrowStatus.Recovery);
     public bool Invincible => invincible;
     public ArrowCatchRule CatchRule => catchRule;
     public bool IsInverse => catchRule == ArrowCatchRule.Avoid;
-    public Vector2 Direction => direction;
-
-    protected float spawnTime;
-    protected float arrivalTime;
-    protected Vector2 startPos;
-    protected Vector2 endPos;
-    private float testStartTime;
+    public Vector2 Direction => _direction;
 
 
-
-    public void SetRecoveryArrow()
+    void OnEnable()
     {
-        AddStatus(ArrowStatus.Recovery);
-
-        var sRend = GetComponentInChildren<SpriteRenderer>();
-        sRend.color = new Color(0.8f, 1f, 0.8f, 1f); // light green tint   
+        ArrowSpawner.OnClearArrows += GameOverEffect;   
+        UIManager.OnGameOver += GameOverEffect;
+        GameStateManager.OnStateChanged += HandleRoundEnd;
+    }
+    
+    void OnDisable()
+    {
+        ArrowSpawner.OnClearArrows -= GameOverEffect;
+        UIManager.OnGameOver -= GameOverEffect;
+        GameStateManager.OnStateChanged -= HandleRoundEnd;
     }
 
-    public void SetGolden()
+    protected virtual void Awake()
     {
-        AddStatus(ArrowStatus.Golden);
-        
-        var sRend = GetComponentInChildren<SpriteRenderer>();
-        sRend.color = new Color(1f, 1f, 0f, 1f);
+        _rb = GetComponent<Rigidbody2D>();
+        ArrowManager.Instance.RegisterArrow(this);
+    }
 
-        /*
-        //scoreValue = Mathf.RoundToInt(scoreValue * multiplier);
-        if (empowerEffect != null)
+    protected virtual void Update()
+    {
+        // We dont want to set the position here if this is an editor arrow. 
+        // We manually calculate the arrow position in a seperate script for editor arrows.
+        // We include the _isDead here to make sure we dont continue to run movement logic 
+        // for arrows marked for death.
+        if(_arrowType == ArrowType.Editor || _isDead) return;
+
+        float elapsed = (float)MusicManager.Instance.ScaledElapsedTime;
+
+        Vector2 targetPos;
+
+        if (elapsed <= _arrivalTime)
         {
-            GameObject effect = Instantiate(empowerEffect, transform.position, Quaternion.identity);
-            effect.transform.SetParent(this.transform);
+            // Normal movement to goal
+            float t = Mathf.InverseLerp(_spawnTime, _arrivalTime, elapsed);
+            targetPos = Vector2.Lerp(_startPos, _endPos, t);
+        }
+        else
+        {
+            // AFTER goal → continue to center
+            float extraTime = elapsed - _arrivalTime;
+
+            float postTravelDuration = 0.2f; // tweak this
+
+            float t = Mathf.Clamp01(extraTime / postTravelDuration);
+
+            targetPos = Vector2.Lerp(_endPos, Vector2.zero, t);
         }
 
-        AudioHelpers.PlayMyClipAtPoint(empowerSound, AudioChannel.SFX, transform.position);
-        */
+        SmoothTranslate(targetPos);
     }
 
-    public void Freeze(float duration)
+    protected virtual void OnDestroy()
     {
-        if (HasStatus(ArrowStatus.Frozen)) return;
+        ArrowManager.Instance.UnregisterArrow(this);
+    }
 
-        AddStatus(ArrowStatus.Frozen);
-        freezeTimer = duration;
-        frozenSpeed = speed;
+    // Public
+    // ----------------------------------------------------------------------------------------
 
-        // Stop movement
-        //rb.linearVelocity = Vector2.zero;
+    // Initialize arrow direction and movement
+    public virtual void Init(Vector2 direction, float speed, float spawnTime, float arrivalTime, Vector3 startPos, Vector3 endPos)
+    {
+        _direction = direction.normalized;
+        _speed = speed;
+        _spawnTime = spawnTime;
+        _arrivalTime = arrivalTime;
+        _startPos = startPos;
+        _endPos = endPos;
 
-        //AudioHelpers.PlayMyClipAtPoint(freezeEffectSound, AudioChannel.SFX, transform.position);
+        OrientArrow(direction);
+    }
 
-        /*
-        // Spawn freeze VFX
-        if (freezeEffect != null)
+    // Called when something hits the arrow (not necessarily killing it)
+    public virtual void OnArrowHit(float damage = 1f, Goal.GoalType goalType = Goal.GoalType.Normal, Vector2 hitDirection = default)
+    {
+        if (invincible) return;
+
+        health -= damage;
+
+        if (health <= 0f)
+            Die(goalType, hitDirection: hitDirection);
+    }
+
+    public virtual void KillArrow()
+    {
+        // Instantly die, bypassing health
+        health = 0f;
+        // Miss type since killed externally
+        Die(Goal.GoalType.Miss, true); 
+    }
+
+    public virtual void OrientArrow(Vector2 direction)
+    {
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        float offset = flip180 ? 90f : -90f;
+        transform.rotation = Quaternion.Euler(0, 0, angle + offset);
+    }
+
+
+
+    // Core Internal
+    // ----------------------------------------------------------------------------------------
+
+    protected virtual void Die(Goal.GoalType goalType = Goal.GoalType.Normal, bool invokeDeathEvent = true, Vector2 hitDirection = default)
+    {   
+        if(_isDead) return;
+
+        _isDead = true;
+
+        if (invokeDeathEvent)
         {
-            GameObject fx = Instantiate(freezeEffect, transform.position, Quaternion.identity, transform);
+            ArrowResolvedData data = new ArrowResolvedData
+            {
+                goalType = goalType,
+                status = this.status
+            };
+            
+            OnArrowResolved?.Invoke(data);  
         }
-        */
 
-        // Tint sprite for feedback
-        var rend = GetComponentInChildren<SpriteRenderer>();
-        if (rend != null)
-            rend.color = new Color(0.6f, 0.9f, 1f, 1f); // soft cyan tint
+
+        PlayAudio(goalType);
+
+        Destroy(gameObject);
     }
 
-    public void Unfreeze()
+    protected void SmoothTranslate(Vector3 targetPos)
     {
-        if (!HasStatus(ArrowStatus.Frozen)) return;
+        // Smooth movement toward correct DSP position
+        transform.position = Vector2.Lerp(
+            transform.position,
+            targetPos,
+            1f - Mathf.Exp(-20f * Time.deltaTime)
+        );
+    }
 
-        RemoveStatus(ArrowStatus.Frozen);
-        //rb.linearVelocity = -direction * frozenSpeed;
+    void HandleRoundEnd(GameState previousState, GameState newState)
+    {
+        if (newState != GameState.RoundResultsTally) return;
+        Die();
+    }
 
-        // Reset tint
-        var rend = GetComponentInChildren<SpriteRenderer>();
-        if (rend != null)
-            rend.color = Color.white;
+    protected virtual void GameOverEffect()
+    {
+        StartCoroutine(GameOverEffectCoroutine());
+    }
+
+    private IEnumerator GameOverEffectCoroutine()
+    {
+        float randomDestroyDelay = UnityEngine.Random.Range(0f, 0.5f);
+        yield return new WaitForSeconds(randomDestroyDelay);
+        Destroy(gameObject);
+    }
+
+
+    // Audio
+    // ----------------------------------------------------------------------------------------
+
+    public void PlayAudio(Goal.GoalType goalType)
+    {
+        float directionPitch = GetDirectionPitch(_direction) * directionalPitchFactor;
+
+        float pitch =
+            goalType == Goal.GoalType.Critical
+                ? criticalHitPitch
+                : normalHitPitch;
+
+        pitch += directionPitch;
+
+        AudioHelpers.PlayDirectionalArrowHit(
+            arrowHitSound,
+            transform.position,
+            _direction,
+            pitch,
+            1f,
+            directionalEQStrength
+        );
     }
 
     protected float GetDirectionPitch(Vector2 dir)
@@ -170,284 +249,28 @@ public abstract class ArrowBase : MonoBehaviour
     }
 
 
+    // Setting Status / State
+    // ----------------------------------------------------------------------------------------
 
-    void OnEnable()
+    public void SetToEditorArrow()
     {
-        ArrowSpawner.OnClearArrows += GameOverEffect;   
-        UIManager.OnGameOver += GameOverEffect;
-        GameStateManager.OnStateChanged += HandleRoundEnd;
-    }
-    
-
-
-    void OnDisable()
-    {
-        ArrowSpawner.OnClearArrows -= GameOverEffect;
-        UIManager.OnGameOver -= GameOverEffect;
-        GameStateManager.OnStateChanged -= HandleRoundEnd;
+        _arrowType = ArrowType.Editor;
     }
 
-    protected virtual void Awake()
+    public void SetRecoveryArrow()
     {
-        rb = GetComponent<Rigidbody2D>();
-        ArrowManager.Instance.RegisterArrow(this);
+        AddStatus(ArrowStatus.Recovery);
+
+        var sRend = GetComponentInChildren<SpriteRenderer>();
+        sRend.color = new Color(0.8f, 1f, 0.8f, 1f); // light green tint   
     }
 
-    protected virtual void OnDestroy()
+    public void SetGolden()
     {
-        ArrowManager.Instance.UnregisterArrow(this);
-    }
-
-    void HandleRoundEnd(GameState previousState, GameState newState)
-    {
-        if (newState != GameState.RoundResultsTally) return;
-        Die();
-    }
-
-    // Initialize arrow direction and movement
-    public virtual void Init(Vector2 direction, float speed, float spawnTime, float arrivalTime, Vector3 startPos, Vector3 endPos)
-    {
-        this.direction = direction.normalized;
-        this.speed = speed;
-        this.spawnTime = spawnTime;
-        this.arrivalTime = arrivalTime;
-        this.startPos = startPos;
-        this.endPos = endPos;
-
-        testStartTime = Time.time - spawnTime;
-
-        //rb.linearVelocity = -direction * speed;
-        OrientArrow(direction);
-    }
-
-    public virtual void OrientArrow(Vector2 direction)
-    {
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        float offset = flip180 ? 90f : -90f;
-        transform.rotation = Quaternion.Euler(0, 0, angle + offset);
-    }
-
-    // 🔹 Called when something hits the arrow (not necessarily killing it)
-    public virtual void OnArrowHit(float damage = 1f, Goal.GoalType goalType = Goal.GoalType.Normal, Vector2 hitDirection = default)
-    {
-        if (invincible) return;
-
-        health -= damage;
-        /*
-        // Optional: spawn a small impact VFX
-        if (hitEffect != null)
-            Instantiate(hitEffect, transform.position, transform.rotation);
-        */
-
-        if (health <= 0f)
-            Die(goalType, hitDirection: hitDirection);
-    }
-
-    public virtual void KillArrow()
-    {
-        // Instantly die, bypassing health
-        health = 0f;
-        Die(Goal.GoalType.Miss, true); // Miss type since killed externally
-    }
-
-    protected virtual void Update()
-    {
-        if (_isDead) return;
-
-        float rawTime = (float)MusicManager.Instance.ScaledElapsedTime;
-        float scaledTime = rawTime * TimeManager.Instance.GetCurrentScale();
-
-        float elapsed = (float)MusicManager.Instance.ScaledElapsedTime;
-
-        Vector2 targetPos;
-
-        if (elapsed <= arrivalTime)
-        {
-            // Normal movement to goal
-            float t = Mathf.InverseLerp(spawnTime, arrivalTime, elapsed);
-            targetPos = Vector2.Lerp(startPos, endPos, t);
-        }
-        else
-        {
-            // AFTER goal → continue to center
-            float extraTime = elapsed - arrivalTime;
-
-            float postTravelDuration = 0.2f; // tweak this
-
-            float t = Mathf.Clamp01(extraTime / postTravelDuration);
-
-            targetPos = Vector2.Lerp(endPos, Vector2.zero, t);
-        }
-
-        SmoothTranslate(targetPos);
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (!HasStatus(ArrowStatus.Frozen)) return;
-
-        ArrowBase incoming = other.GetComponent<ArrowBase>();
-        if (incoming != null && !incoming.HasStatus(ArrowStatus.Frozen) && HasStatus(ArrowStatus.Frozen))
-        {
-            // 💥 Shatter both arrows
-            ShatterFrozenPair(incoming);
-        }
-    }
-
-    protected void SmoothTranslate(Vector3 targetPos)
-    {
-        // 👇 Smooth movement toward correct DSP position
-        transform.position = Vector2.Lerp(
-            transform.position,
-            targetPos,
-            1f - Mathf.Exp(-20f * Time.deltaTime)
-        );
-    }
-
-    private void ShatterFrozenPair(ArrowBase other)
-    {
-        // Optional effect: play icy explosion
-        //if (destroyEffect != null)
-            //Instantiate(destroyEffect, transform.position, Quaternion.identity);
-        /*
-        AudioHelpers.PlayMyClipAtPoint(freezeDestroySound, AudioChannel.SFX, transform.position);
-
-        if (freezeEffect != null)
-            Instantiate(freezeEffect, transform.position, Quaternion.identity);
-
-        // Give player a small reward (optional)
-        //ScoreManager.Instance.AddScore(scoreValue / 2);
-        */
-
-        other.Die(Goal.GoalType.Normal);
-        Die(Goal.GoalType.Normal);  
-    }
-
-
-
-
-    // 🔹 Centralized death handler
-    protected virtual void Die(Goal.GoalType goalType = Goal.GoalType.Normal, bool invokeDeathEvent = true, Vector2 hitDirection = default)
-    {   
-        if(_isDead) return;
-
-        _isDead = true;
-
-        if (invokeDeathEvent)
-        {
-            ArrowResolvedData data = new ArrowResolvedData
-            {
-                goalType = goalType,
-                status = this.status
-            };
-            
-            OnArrowResolved?.Invoke(data);  
-        }
-
-        //AudioSettingsManager.Instance.PlayArrowHitSound();
-
-        PlayAudio(goalType);
-
-        Destroy(gameObject);
-    }
-
-    public void PlayAudio(Goal.GoalType goalType)
-    {
-        float directionPitch = GetDirectionPitch(direction) * directionalPitchFactor;
-
-        float pitch =
-            goalType == Goal.GoalType.Critical
-                ? criticalHitPitch
-                : normalHitPitch;
-
-        pitch += directionPitch;
-
-        PlayArrowHit(
-            arrowHitSound,
-            transform.position,
-            volume: 1f,
-            pitch: pitch
-        );
-    }
-
-    public void PlayArrowHit(
-        AudioClip clip,
-        Vector3 position,
-        float volume = 1f,
-        float pitch = 1f)
-    {
-        if(AudioSettingsManager.Instance.mixer == null)
-            return;
-
-        float strength = directionalEQStrength;
-
-        // Target values (full effect)
-        float hpfTarget = hpfNeutral;
-        float lpfTarget = lpfNeutral;
-        float midTarget = midNeutral;
-
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-        // UP – bright / airy
-        if (angle > 45f && angle < 135f)
-        {
-            hpfTarget = 400f;
-            midTarget = +1.5f;
-        }
-        // DOWN – heavy / warm
-        else if (angle < -45f && angle > -135f)
-        {
-            lpfTarget = 3000f;
-        }
-        // RIGHT – punchy / present
-        else if (Mathf.Abs(angle) <= 45f)
-        {
-            midTarget = +2.0f;
-        }
-        // LEFT – hollow / scooped
-        else
-        {
-            midTarget = -3.0f;
-        }
-
-        // Blend neutral → target
-        float hpf = Mathf.Lerp(hpfNeutral, hpfTarget, strength);
-        float lpf = Mathf.Lerp(lpfNeutral, lpfTarget, strength);
-        float midGain = Mathf.Lerp(midNeutral, midTarget, strength);
-
-        float midVolume = Mathf.Pow(10f, midGain / 20f);
-
-        AudioHelpers.PlayArrowAudio(
-            clip,
-            position,
-            pitch,
-            volume * midVolume,
-            hpf,
-            lpf
-        );
-    }
-
-
-
-
-    protected virtual void GameOverEffect()
-    {
-        StartCoroutine(GameOverEffectCoroutine());
-    }
-
-    private IEnumerator GameOverEffectCoroutine()
-    {
-        //rb.linearVelocity = Vector2.zero;
-
-        float randomDestroyDelay = UnityEngine.Random.Range(0f, 0.5f);
-        yield return new WaitForSeconds(randomDestroyDelay);
-        // Optional: play a different effect on game over
-        /*
-        if (destroyEffect != null)
-            Instantiate(destroyEffect, transform.position, transform.rotation);
-        */
-
-        Destroy(gameObject);
+        AddStatus(ArrowStatus.Golden);
+        
+        var sRend = GetComponentInChildren<SpriteRenderer>();
+        sRend.color = new Color(1f, 1f, 0f, 1f);
     }
 
 

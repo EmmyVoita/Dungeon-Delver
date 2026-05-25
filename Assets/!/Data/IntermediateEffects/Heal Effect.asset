@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0747b948a1039ff4ea31a8b5740d1351, type: 3}
   m_Name: Heal Effect
   m_EditorClassIdentifier: 
-  icon: {fileID: -1180896370, guid: 0a2e2e4a22f3e004a804ceadac48a967, type: 3}
-  displayName: Heal
+  upgradeId: 
+  icon: {fileID: -508912285, guid: ce1151053f20b25439d7ddbde310ebe2, type: 3}
+  iconMaterial: {fileID: 2100000, guid: 8b3fb34896e326c4a8fb58bd5ad01864, type: 2}
+  displayName: 'Delayed Heal '
   descriptionTemplate: Heal for <color=#00E676>{HEAL_AMOUNT}</color> health now,
     then heal for <color=#00E676>{FINISH_HEAL_AMOUNT}</color> at the end of this
     next level.

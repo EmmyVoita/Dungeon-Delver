@@ -23,16 +23,13 @@ public class CollapsingRing : MonoBehaviour
     
 
     private List<GameObject> segments = new List<GameObject>();
-    private Vector3 centerPos;
     private float currentRadius;
     private Action onCompleteCallback;
 
     public void Init(Transform center, Action onComplete = null)
     {
-        centerPos = center.position;
         onCompleteCallback = onComplete;
-        //transform.position = centerPos;
-
+        
         SpawnRing();
         currentRadius = startRadius;
 
@@ -86,9 +83,7 @@ public class CollapsingRing : MonoBehaviour
         {
             if (s == null) continue;
 
-            s.GetComponent<SpikyBall>().FadeOut();
-
-
+            s.GetComponent<BasicProjectile>().DestroyProjectile();
         }
 
         Destroy(gameObject, fadeOutTime + 0.1f);

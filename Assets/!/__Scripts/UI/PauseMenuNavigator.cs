@@ -101,7 +101,8 @@ public class PauseMenuNavigator : BaseMenu
     {
         if(InputBindingManager.Instance.GetKeyDown(InputActionType.Back) 
            && !pauseMenuUI.gameObject.activeSelf
-           && GameStateEffectManager.PauseAllowed)
+           && GameStateEffectManager.PauseAllowed
+           && !TransitionManager.Instance.IsPlayingTransition)
         {
             OnOpen();
             pauseMenuUI.gameObject.SetActive(true);
@@ -112,12 +113,16 @@ public class PauseMenuNavigator : BaseMenu
             MusicManager.Instance.PauseMusic();
             lockInput = false;
 
-            GameStateManager.Instance.SetState(GameState.Paused);
+            //GameStateManager.Instance.SetState(GameState.Paused);
+
+            OverlayManager.Instance.ShowOverlay(
+                OverlayState.Pause
+            );
             
-            CountdownUI.Instance.KillActiveCountdown(() =>
-            {
-                
-            });
+           
+            /*
+           
+            */
         }
 
     
@@ -141,21 +146,28 @@ public class PauseMenuNavigator : BaseMenu
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
         {
             selectedIndex = (selectedIndex + 1) % options.Length;
-            AudioSettingsManager.PlayNavigateSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             UpdateVisuals();
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
             selectedIndex = (selectedIndex - 1 + options.Length) % options.Length;
-            AudioSettingsManager.PlayNavigateSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             UpdateVisuals();
         }
 
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
         {
-            AudioSettingsManager.PlaySelectSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
             ActivateOption();
         }
+    }
+
+    public void SetIndex(int index)
+    {
+        selectedIndex = index;
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
+        ActivateOption();
     }
 
     void UpdateVisuals()
@@ -198,25 +210,24 @@ public class PauseMenuNavigator : BaseMenu
             case 0:
                 pauseMenuUI.gameObject.SetActive(false);
                 lockInput = true;
-        
+                
+                if (GameStateManager.Instance.CurrentState == GameState.RoundActive)
+                {
+                    OverlayManager.Instance.CloseOverlay();
 
-                if(GameStateManager.Instance.PreviousState == GameState.RoundActive)
-                {
-                    CountdownUI.Instance.BeginCountdown(() =>
+                    CountdownUI.Instance.KillActiveCountdown(() =>
                     {
-                        StartCoroutine(ResumeSequence());
+                        CountdownUI.Instance.BeginCountdown(() =>
+                        {
+                            StartCoroutine(ResumeSequence());
+                        });
                     });
-                }
-                else if (GameStateManager.Instance.PreviousState == GameState.PreRoundCountdown)
-                {
-                    TimeManager.Instance.Resume();
-                    RoundManager.Instance.SetupAndStartRound();
                 }
                 else
                 {
                     StartCoroutine(ResumeSequence());
                 }
-               
+
                 break;
             case 1:
                 StartCoroutine(RestartSequence());
@@ -225,21 +236,18 @@ public class PauseMenuNavigator : BaseMenu
                 StartCoroutine(QuitSequence());
                 break;
             default:
-                Debug.Log("No action assigned to " + optionName);
+                Debug.LogError("No action assigned to " + optionName);
                 break;
         }
-        //OnClose();
     }
 
     private IEnumerator ResumeSequence()
     {
         InputBindingManager.Instance.BlockConfirmUntilRelease();
 
-        Debug.Log("Resuming game from pause menu...");
-        var resumeState = GameStateManager.Instance.PreviousState;
         yield return new WaitForSecondsRealtime(0.1f);
-        GameStateManager.Instance.SetState(resumeState);
-        //MusicManager.Instance.ResumeMusic();
+
+        OverlayManager.Instance.CloseOverlay();
 
         yield return null;
 

@@ -31,7 +31,6 @@ public class RoundManager : MonoBehaviour
 
     [Header("Dev Controls")]
     [SerializeField] private bool preventAutoStart = false;
-    [SerializeField] private float fastForwardMultiplier = 2f;
 
     [Header("Input")]
     public Key skipRoundKey = Key.R;
@@ -140,9 +139,6 @@ public class RoundManager : MonoBehaviour
     {
 
     #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (Keyboard.current.fKey.wasPressedThisFrame)
-            ToggleFastForward();
-
         if (Keyboard.current[skipRoundKey].wasPressedThisFrame)
             SkipRound();
     #endif
@@ -161,12 +157,6 @@ public class RoundManager : MonoBehaviour
         _applyTempBPMBonus = true;
     }   
 
-    private void ToggleFastForward()
-    {
-        _isFastForward = !_isFastForward;
-        Time.timeScale = _isFastForward ? fastForwardMultiplier : 1f;
-    }
-
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
         #if UNITY_EDITOR
@@ -180,6 +170,7 @@ public class RoundManager : MonoBehaviour
         }
         else if(newState == GameState.Editor)
         {
+            Player.Instance.HealPlayer(10);
             StartCoroutine(PlayTestLevel());
         }
         
@@ -358,11 +349,10 @@ public class RoundManager : MonoBehaviour
         StageData stage = stages[_currentStageIndex];
 
         // If Boss round, trigger boss logic
-        if (stage.bossLevelFile == levelFile && stage.bossDefinition != null)
+        if (stage.bossLevelFile == levelFile)
         {
-            BossManager.Instance.StartBoss(stage.bossDefinition);
+            BossManager.Instance.StartBoss();
         }
-
 
         GameStateManager.Instance.SetState(GameState.RoundActive);
 
@@ -383,13 +373,11 @@ public class RoundManager : MonoBehaviour
             
         
 
-        // ✅ Wait until obstacles are cleared
+        // Wait until obstacles are cleared
         yield return new WaitUntil(() =>
             !ArrowSpawner.Instance.IsSpawning &&
             !ObstacleManager.Instance.AnyActive
         );
-
-        Debug.LogError("Arrows done spawning");
 
 
         yield return new WaitForSeconds(roundEndDelay);
@@ -397,21 +385,22 @@ public class RoundManager : MonoBehaviour
 
         bool tallyComplete = false;
 
-        if(ComboManager.Instance.GetCurrentComboCount > 0)
+        
+        ScoreTallyController.RoundEndTallyComplete += Handler;
+
+        void Handler()
         {
-            ScoreTallyController.RoundEndTallyComplete += Handler;
-
-            void Handler()
-            {
-                tallyComplete = true;
-            }
-
-            GameStateManager.Instance.SetState(GameState.RoundResultsTally);
-
-            yield return CoroutineHelpers.WaitUntilOrTimeout(() => tallyComplete, roundEndTimeout);
-
-            ScoreTallyController.RoundEndTallyComplete -= Handler;
+            tallyComplete = true;
         }
+
+        GameStateManager.Instance.SetState(GameState.RoundResultsTally);
+
+        yield return CoroutineHelpers.WaitUntilOrTimeout("Waiting for round results tally to complete", 
+                                                          () => tallyComplete, 
+                                                          roundEndTimeout);
+
+        ScoreTallyController.RoundEndTallyComplete -= Handler;
+    
 
        
 
@@ -463,6 +452,5 @@ public class RoundManager : MonoBehaviour
         yield return StartCoroutine(CoroutineHelpers.WaitForConfirm(GameState.WorldMapViewEnd));
         
         GameStateManager.Instance.RequestStateChange(GameState.UpgradeSelection);
-        //GameStateManager.Instance.SetState(GameState.UpgradeSelection);
     }
 }

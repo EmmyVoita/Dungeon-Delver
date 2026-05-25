@@ -6,6 +6,7 @@ public abstract class UpgradeBase : ScriptableObject
 
     [Header("Card UI")]
     public Sprite icon;
+    public Material iconMaterial;
     public string displayName;
 
     [TextArea]

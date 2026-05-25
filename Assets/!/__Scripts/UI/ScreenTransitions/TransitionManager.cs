@@ -25,7 +25,7 @@ public class TransitionManager : MonoBehaviour
         private bool isPlaying;
 
 
-
+    public bool IsPlayingTransition => isPlaying;
 
     private Dictionary<(GameState, GameState), GameStateTransitionSequence> sequenceLookup;
 

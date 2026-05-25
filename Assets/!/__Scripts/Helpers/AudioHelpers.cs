@@ -3,14 +3,11 @@ using UnityEngine.Audio;
 
 public static class AudioHelpers
 {
-    /// <summary>
-    /// Play an audio clip at a given position with random pitch variation.
-    /// </summary>
-    /// <param name="clip">The AudioClip to play.</param>
-    /// <param name="position">World position to play sound at.</param>
-    /// <param name="basePitch">The center pitch (1 = normal).</param>
-    /// <param name="pitchRange">The random offset from base pitch (e.g., 0.1 = ±10%).</param>
-    /// <param name="volume">Volume level (default = 1).</param>
+
+    public const float hpfNeutral = 300;
+    public const float lpfNeutral = 20000f;
+    public const float midNeutral = 0.5f;
+
     public static void PlayClipWithVariation(AudioClip clip, AudioChannel audioChannel, Vector3 position, float basePitch = 1f, float pitchRange = 0.1f, float volume = 1f)
     {
         if (!Application.isPlaying) return;
@@ -101,9 +98,12 @@ public static class AudioHelpers
         pitch += Random.Range(-sound.pitchVariation, sound.pitchVariation);
 
         source.pitch = Mathf.Max(pitch, 0.01f);
+
+        source.spatialBlend = 0.3f;
+
         source.Play();
 
-        Object.Destroy(obj, sound.clip.length / source.pitch);
+        Object.Destroy(obj, (sound.clip.length / source.pitch) + 0.1f);
     }
 
 
@@ -111,6 +111,76 @@ public static class AudioHelpers
     {
         float t = Mathf.Clamp01(Time.timeScale);
         return Mathf.Lerp(0.8f, 1.0f, t); // pitch from 0.5 (slow) to 1.0 (normal)
+    }
+
+
+
+    public static void PlayDirectionalArrowHit(
+        AudioClip clip,
+        Vector3 position,
+        Vector2 direction,
+        float pitch = 1f,
+        float volume = 1f,
+        float directionalStrength = .5f)
+    {
+        float hpfTarget = hpfNeutral;
+        float lpfTarget = lpfNeutral;
+        float midTarget = midNeutral;
+
+        float angle =
+            Mathf.Atan2(
+                direction.y,
+                direction.x
+            ) * Mathf.Rad2Deg;
+
+        if (angle > 45f && angle < 135f)
+        {
+            hpfTarget = 400f;
+            midTarget = 1.5f;
+        }
+        else if (angle < -45f && angle > -135f)
+        {
+            lpfTarget = 3000f;
+        }
+        else if (Mathf.Abs(angle) <= 45f)
+        {
+            midTarget = 2f;
+        }
+        else
+        {
+            midTarget = -3f;
+        }
+
+        float hpf = Mathf.Lerp(
+            hpfNeutral,
+            hpfTarget,
+            directionalStrength
+        );
+
+        float lpf = Mathf.Lerp(
+            lpfNeutral,
+            lpfTarget,
+            directionalStrength
+        );
+
+        float midVolume =
+            Mathf.Pow(
+                10f,
+                Mathf.Lerp(
+                    midNeutral,
+                    midTarget,
+                    directionalStrength
+                ) / 20f
+            );
+
+        PlayArrowAudio(
+            clip,
+            position,
+            pitch,
+            volume * midVolume,
+            hpf,
+            lpf
+        );
     }
 
     public static void PlayArrowAudio(

@@ -18,5 +18,6 @@ public enum GameState
     RunLoad,
     RunIntro,
     WorldMapView,
-    WorldMapViewEnd
+    WorldMapViewEnd,
+    MainMenu
 }

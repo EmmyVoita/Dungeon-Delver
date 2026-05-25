@@ -6,6 +6,7 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
 {
     public static event Action<int, int> MenuOptionIndexChanged;
 
+    [SerializeField] private ObstacleLabMenuNavigator manager;
     [SerializeField] private int selectedIndex = 0;
     [SerializeField] private int optionCount = 2; // 4-way, 8-way. Expandable later.
 
@@ -23,13 +24,13 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
 
         else if (input == Vector2.right) // go to settings panel
         {
-            AudioSettingsManager.PlaySelectSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
             selectedIndex = (selectedIndex + 1) % optionCount;  // wrap forward
             MenuOptionIndexChanged?.Invoke(selectedIndex,optionCount);
         }
         else if (input == Vector2.left)
         {
-            AudioSettingsManager.PlaySelectSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
             selectedIndex = (selectedIndex - 1 + optionCount) % optionCount; //
             MenuOptionIndexChanged?.Invoke(selectedIndex,optionCount);
         }
@@ -55,6 +56,33 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
     {
         Debug.Log("Exiting JumpDirectionModeMenuOption");
         UpdateVisuals(isExiting: true); // 🔹 force exit visuals
+    }
+
+    public void SetIndex(int index)
+    {
+        //if (selectedIndex == index)
+            //return;
+
+        selectedIndex = Mathf.Clamp(
+            index,
+            0,
+            optionCount - 1
+        );
+
+        AudioHelpers.PlaySoundEffect(
+            AudioLibrary.Instance.Database.select,
+            transform.position
+        );
+
+        MenuOptionIndexChanged?.Invoke(
+            selectedIndex,
+            optionCount
+        );
+
+        ApplyMode();
+        UpdateVisuals();
+
+        manager.OnBossPromptConfirm();
     }
 
     private void UpdateVisuals(bool isExiting = false)

@@ -38,6 +38,14 @@ public class ObstacleLabMenuNavigator : BaseMenu
     public int startingRightOptionIndex = 0;
     private PanelSide currentPanel = PanelSide.Left;
 
+    [Header("Input Repeat")]
+    [SerializeField] private float repeatDelay = 0.35f;
+    [SerializeField] private float repeatRate = 0.08f;
+
+    private Vector2 lastHeldDirection;
+    private float nextRepeatTime;
+    private bool waitingForRepeat;
+
 
     private PracticeMenuOption currentOption;
     private ObstacleTypeDefinition currentObstacle;
@@ -73,12 +81,22 @@ public class ObstacleLabMenuNavigator : BaseMenu
     {
         PracticeMenuOption.OnNavigateToOption += HandleNavigationRequest;
         JumpDirectionModeMenuOption.MenuOptionIndexChanged += HandleMenuOptionChanged;
+        ObstacleListMenuOption.OnObstacleListOptionClick += HandleChallengeClickEvent;
     }
 
     private void OnDisable()
     {
         PracticeMenuOption.OnNavigateToOption -= HandleNavigationRequest;
         JumpDirectionModeMenuOption.MenuOptionIndexChanged -= HandleMenuOptionChanged;
+        ObstacleListMenuOption.OnObstacleListOptionClick -= HandleChallengeClickEvent;
+    }
+
+    private void HandleChallengeClickEvent(PracticeMenuOption option)
+    {
+        ScrollToSelected(option);
+
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
+        SwitchTo(option, true);
     }
 
     private void HandleMenuOptionChanged(int index, int count)
@@ -171,7 +189,6 @@ public class ObstacleLabMenuNavigator : BaseMenu
 
         Instance = this;
 
-        MenuManager.Instance.RegisterMenu(this);
 
         foreach (Transform child in rightListContainer)
             child.gameObject.SetActive(false);
@@ -231,14 +248,14 @@ public class ObstacleLabMenuNavigator : BaseMenu
         {
             if (currentPanel == PanelSide.Right)
             {
-                AudioSettingsManager.PlayBackSound();
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.back, transform.position);
                 SwitchTo(leftOptions[startingLeftOptionIndex]);
                 currentPanel = PanelSide.Left;
                 return;
             }
             else if (currentPanel == PanelSide.Left)
             {
-                AudioSettingsManager.PlayBackSound();
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.back, transform.position);
                 MenuManager.Instance.RequestMenuTransition(returnState);
                 return;
             }
@@ -249,24 +266,14 @@ public class ObstacleLabMenuNavigator : BaseMenu
         {
             if (currentPanel == PanelSide.Left)
             {
-                AudioSettingsManager.PlaySelectSound();
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
                 currentPanel = PanelSide.Right;
                 SwitchTo(rightOptions[startingRightOptionIndex]);
                 return;
             }
             else if (currentPanel == PanelSide.Right)
             {
-                AudioSettingsManager.PlaySelectSound();
-
-                GameMode targetGameMode = _useBoss ? GameMode.ObstaclePracticeBoss : GameMode.ObstaclePractice;
-
-                GameSceneLoader.PendingConfig = new GameSceneConfig(
-                    targetGameMode,
-                    0,
-                    CurrentObstacle);
-        
-
-                SceneManager.LoadScene(SceneNames.ArrowGameScene);
+                OnBossPromptConfirm();
             }
         }
 
@@ -288,6 +295,22 @@ public class ObstacleLabMenuNavigator : BaseMenu
         {
             currentOption.OnConfirm();
         }
+    }
+
+    public void OnBossPromptConfirm()
+    {
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
+
+        GameMode targetGameMode = _useBoss ? GameMode.ObstaclePracticeBoss : GameMode.ObstaclePractice;
+
+        GameSceneLoader.PendingConfig = new GameSceneConfig(
+            targetGameMode,
+            0,
+            CurrentObstacle,
+            MenuState.Practice);
+
+
+        SceneManager.LoadScene(SceneNames.ArrowGameScene);
     }
 
     void BuildMenuOptions()
@@ -337,7 +360,7 @@ public class ObstacleLabMenuNavigator : BaseMenu
             }
         }
 
-        AudioSettingsManager.PlayNavigateSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
 
         if (currentOption != null)
             currentOption.OnExit();
@@ -359,15 +382,28 @@ public class ObstacleLabMenuNavigator : BaseMenu
             if (index == -1) return;
 
             if (direction == Vector2.down)
-                SwitchTo(leftOptions[Mathf.Min(leftOptions.Count - 1, index + 1)], true);
+            {
+                // Already at bottom
+                if (index == leftOptions.Count - 1)
+                    return;
+
+                SwitchTo(leftOptions[index + 1], true);
+            }
             else if (direction == Vector2.up)
-                SwitchTo(leftOptions[Mathf.Max(0, index - 1)], true);
+            {
+                // Already at top
+                if (index == 0)
+                    return;
+
+                SwitchTo(leftOptions[index - 1], true);
+            }
             else if (direction == Vector2.right && rightOptions.Count > 0)
             {
                 currentPanel = PanelSide.Right;
                 SwitchTo(rightOptions[startingRightOptionIndex]);
             }
         }
+
         // RIGHT PANEL NAVIGATION
         else if (currentPanel == PanelSide.Right)
         {
@@ -375,9 +411,21 @@ public class ObstacleLabMenuNavigator : BaseMenu
             if (index == -1) return;
 
             if (direction == Vector2.down)
-                SwitchTo(rightOptions[Mathf.Min(rightOptions.Count - 1, index + 1)]);
+            {
+                // Already at bottom
+                if (index == rightOptions.Count - 1)
+                    return;
+
+                SwitchTo(rightOptions[index + 1]);
+            }
             else if (direction == Vector2.up)
-                SwitchTo(rightOptions[Mathf.Max(0, index - 1)]);
+            {
+                // Already at top
+                if (index == 0)
+                    return;
+
+                SwitchTo(rightOptions[index - 1]);
+            }
             else if (direction == Vector2.left && leftOptions.Count > 0)
             {
                 currentPanel = PanelSide.Left;
@@ -392,14 +440,41 @@ public class ObstacleLabMenuNavigator : BaseMenu
     // --------------------------------------------------------------------
     private Vector2 GetDirectionalInput()
     {
-        if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
-            return Vector2.up;
-        if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
-            return Vector2.down;
-        if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveLeft))
-            return Vector2.left;
-        if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveRight))
-            return Vector2.right;
+        Vector2 currentInput = Vector2.zero;
+
+        if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveUp))
+            currentInput = Vector2.up;
+        else if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveDown))
+            currentInput = Vector2.down;
+        else if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveLeft))
+            currentInput = Vector2.left;
+        else if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveRight))
+            currentInput = Vector2.right;
+
+        // No input held
+        if (currentInput == Vector2.zero)
+        {
+            waitingForRepeat = false;
+            lastHeldDirection = Vector2.zero;
+            return Vector2.zero;
+        }
+
+        // Fresh press
+        if (currentInput != lastHeldDirection)
+        {
+            lastHeldDirection = currentInput;
+            waitingForRepeat = true;
+            nextRepeatTime = Time.unscaledTime + repeatDelay;
+
+            return currentInput;
+        }
+
+        // Held repeat
+        if (waitingForRepeat && Time.unscaledTime >= nextRepeatTime)
+        {
+            nextRepeatTime = Time.unscaledTime + repeatRate;
+            return currentInput;
+        }
 
         return Vector2.zero;
     }

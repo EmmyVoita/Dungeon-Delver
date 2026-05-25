@@ -23,10 +23,14 @@ public class CanvasGroupFadeOnMenuState : MonoBehaviour
     {
         if(newState == activeState)
         {
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
             canvasGroup.DOFade(1,fadeInDuration);
         }
         else
         {
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
             canvasGroup.DOFade(0,fadeOutDuration);
         }
     }

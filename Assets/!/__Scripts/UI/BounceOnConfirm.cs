@@ -27,7 +27,7 @@ public class BounceOnConfirm : MonoBehaviour
         originalPos = rect.anchoredPosition;
 
         string key = InputBindingManager.Instance
-            .GetKey(InputActionType.Confirm)
+            .GetKeyName(InputActionType.Confirm)
             .ToString();
 
         textElement.text = $"[<color=yellow>{key}</color>]!";

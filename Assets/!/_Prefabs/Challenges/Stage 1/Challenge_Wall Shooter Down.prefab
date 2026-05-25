@@ -44,10 +44,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c37f6cd9b3fddbc4dbe8c74f531bdd26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  priority: 0
+  controlMode: 1
   easeCurve: 22
   startWindupDelay: 0
   oscilationXSpeed: 1
   lifetimeMode: 0
+  listenForBossActive: 0
   activationMode: 0
   portalPrefab: {fileID: 0}
   projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
@@ -69,7 +72,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 1
     pitch: 1
-    usePitchVariation: 0
     pitchVariation: 0
   predefinedOffsets: []
   projectileFireDirection: {x: 0, y: -1}
@@ -84,18 +86,16 @@ MonoBehaviour:
   randPosOffsetY: 0
   fireSound:
     clip: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
-    channel: 0
+    channel: 2
     affectedByTimeScale: 0
     volume: 1
     pitch: 1
-    usePitchVariation: 0
     pitchVariation: 0
   tickSound:
     clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
-    channel: 0
+    channel: 2
     affectedByTimeScale: 0
     volume: 1
     pitch: 1
-    usePitchVariation: 0
     pitchVariation: 0
   tickCount: 3

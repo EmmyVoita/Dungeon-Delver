@@ -86,7 +86,7 @@ public class AddArrowUI : MonoBehaviour
     // ------------------------------------------------------------
     private void OnAddArrow()
     {
-        AudioSettingsManager.PlayGeneralButtonSound();
+        //AudioSettingsManager.PlayGeneralButtonSound();
         if(LevelEditorData.Instance.currentLevelAsset == null)
         {
             UIToast.Error("No level loaded to add arrow");
@@ -100,7 +100,7 @@ public class AddArrowUI : MonoBehaviour
         if (!float.TryParse(speedInput.text, out float speed))
         {
             UIToast.Error("❌ Invalid speed value");
-            AudioSettingsManager.PlayNegativeUISound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
             return;
         }
 
@@ -121,7 +121,7 @@ public class AddArrowUI : MonoBehaviour
         playbackController.RebuildSimulation();
         TimelineToolController.Instance.ExitTool();
 
-        AudioSettingsManager.PlaySelectSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
     }
 
 }

@@ -18,6 +18,7 @@ public class FallingBreakableSpawner : ChallengeBase
         AllDestroyed,
         Timer
     }
+    [SerializeField] private bool listenForBossActive = false;
     [SerializeField] private LifetimeMode lifetimeMode = LifetimeMode.SelfManaged;
     [SerializeField] private bool switchPlayerState = true;
     [SerializeField] private CompletionConditon completionCondition = CompletionConditon.Timer;
@@ -76,6 +77,8 @@ public class FallingBreakableSpawner : ChallengeBase
 
     void Update()
     {
+        if(listenForBossActive && !BossManager.Instance.IsBossActive) return;
+        
         if (switchPlayerState && InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
         {
             if (Time.time >= nextAllowedFireTime)
@@ -91,16 +94,11 @@ public class FallingBreakableSpawner : ChallengeBase
 
     void Start()
     {
-        if(lifetimeMode != LifetimeMode.External) 
+        if(!listenForBossActive && lifetimeMode != LifetimeMode.External) 
             Begin();
-        
-        /*
-        if (lifetimeMode != LifetimeMode.External)
-        {
-            ObstacleManager.Instance.RegisterObstacle(gameObject);
-            StartChallenge();
-        }
-        */
+
+        if(listenForBossActive && BossManager.Instance.IsBossActive)
+            Begin();
     }
 
 

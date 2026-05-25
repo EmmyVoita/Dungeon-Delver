@@ -6,7 +6,7 @@ public class BossManager : MonoBehaviour
 {
     public static BossManager Instance { get; private set; }
 
-    [SerializeField]private BossDefinition activeBoss;
+    //[SerializeField]private BossDefinition activeBoss;
     private Coroutine bossRoutine;
     [SerializeField] private bool _practiceBoss = false;
 
@@ -20,57 +20,65 @@ public class BossManager : MonoBehaviour
         Instance = this;
     }
 
+    private bool _activeBoss;
 
-
-    public bool IsBossActive => activeBoss != null || _practiceBoss;
+    public bool IsBossActive => _activeBoss;
 
     // --------------------------------------------------
     // Entry / Exit
     // --------------------------------------------------
 
+    private void OnEnable()
+    {
+        GameStateManager.OnStateChanged += HandleStateChanged;
+    }
+
+    private void OnDisable()
+    {
+        GameStateManager.OnStateChanged -= HandleStateChanged;
+    }
+
+    private void HandleStateChanged(GameState previousState, GameState newState)
+    {
+        if(newState == GameState.UpgradeSelection)
+        {
+            Debug.Log($"Setting active boss to false. Active boss was => {IsBossActive}");
+            _activeBoss = false;
+        }
+    }
+
     private void Start()
     {
-        //if(GameSceneLoader.PendingConfig == null) return;
         _practiceBoss = GameSessionBootstrap.Config.Mode == GameMode.ObstaclePracticeBoss;
+        if(_practiceBoss)
+         _activeBoss = true;
+
     }
 
-    public void StartBoss(BossDefinition bossDef)
+    public void StartBoss()
     {
-        if (bossDef == null)
-        {
-            Debug.LogError("❌ StartBoss called with null BossDefinition");
-            return;
-        }
-
-        StopBoss();
-
-        activeBoss = bossDef;
-
-        // Spawn visuals if any
-        if (bossDef.bossVisualPrefab != null)
-            Instantiate(bossDef.bossVisualPrefab);
-
-        BossContext.StartBoss();
-        bossRoutine = StartCoroutine(RunBoss(bossDef));
-
-        Debug.Log($"👹 Boss started: {bossDef.bossName}");
+        Debug.Log("StartingBoss");
+        _activeBoss = true;
     }
 
+    /*
     public void StopBoss()
     {
         if (bossRoutine != null)
             StopCoroutine(bossRoutine);
 
         bossRoutine = null;
-        activeBoss = null;
+        //activeBoss = null;
 
         BossContext.EndBoss();
     }
+    */
 
     // --------------------------------------------------
     // Phase Flow
     // --------------------------------------------------
 
+    /*
     private IEnumerator RunBoss(BossDefinition boss)
     {
         BossContext.StartBoss();
@@ -114,8 +122,8 @@ public class BossManager : MonoBehaviour
             //yield return null;
         //}
 
-        BossContext.EndBoss();
-    }
+        //BossContext.EndBoss();
+    //}
 
 
 }

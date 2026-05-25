@@ -5,6 +5,8 @@ public abstract class PracticeMenuOption : MonoBehaviour
 {
     public static Action<Vector2> OnNavigateToOption;
 
+
+
     public bool IsCurrent()
     {
         return ObstacleLabMenuNavigator.Instance.CurrentOption == this;

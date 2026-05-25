@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 497a73d3a2b0c3e4ca1f896016f06294, type: 3}
   m_Name: Heal And Ability Charge
   m_EditorClassIdentifier: Assembly-CSharp::IntermediateHealAndAbilityChargeSO
-  icon: {fileID: -959222126, guid: b0a5ba2851172754ea0220daf62541e4, type: 3}
+  upgradeId: 
+  icon: {fileID: -505152447, guid: 25ac50c490e48ea409201eae004b8ebc, type: 3}
+  iconMaterial: {fileID: 2100000, guid: 8b3fb34896e326c4a8fb58bd5ad01864, type: 2}
   displayName: Refresh
   descriptionTemplate: Heal for <color=#00E676>{HEAL_AMOUNT}</color> health now,
     and start the next level with full ability charge

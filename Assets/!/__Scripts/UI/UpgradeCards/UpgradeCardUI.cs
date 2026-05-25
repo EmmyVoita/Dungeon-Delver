@@ -32,12 +32,12 @@ public class UpgradeCardUI : MonoBehaviour
     [SerializeField] private Image backgroundImage;
     [SerializeField] private float scrollSpeed = 0.2f;
 
-    private Material backgroundMatInstance;
+    //private Material backgroundMatInstance;
     private Vector2 scrollOffset;
     private Vector2 scrollDirection;
     private float uniqueScrollOffset;
 
-    private RectTransform rect;
+    [SerializeField] private RectTransform movementRect;
     private Vector3 originalScale;
     private Tween currentTween;
     private Tween idleWobbleTween;
@@ -50,11 +50,11 @@ public class UpgradeCardUI : MonoBehaviour
     // -------------------------
     void Awake()
     {
-        rect = GetComponent<RectTransform>();
-        originalScale = rect.localScale;
+        //movementRect = GetComponent<RectTransform>();
+        originalScale = movementRect.localScale;
 
         // Create unique material instance if applicable
-        if (backgroundImage != null && backgroundImage.material != null)
+        /*if (backgroundImage != null && backgroundImage.material != null)
         {
             backgroundMatInstance = Instantiate(backgroundImage.material);
             backgroundImage.material = backgroundMatInstance;
@@ -62,6 +62,7 @@ public class UpgradeCardUI : MonoBehaviour
             scrollDirection = UnityEngine.Random.insideUnitCircle.normalized * 20f;
             backgroundMatInstance.SetVector("_MainScrollDirection", scrollDirection);
         }
+        */
     }
 
     // -------------------------
@@ -70,20 +71,23 @@ public class UpgradeCardUI : MonoBehaviour
         idleWobbleTween?.Kill();
         currentTween?.Kill();
         // Ensure DOTween doesn't keep references to destroyed objects
-        DOTween.Kill(rect);
+        DOTween.Kill(movementRect);
         DOTween.Kill(this);
-        if (backgroundMatInstance != null)
+        /*if (backgroundMatInstance != null)
             Destroy(backgroundMatInstance);
+        */
     }
 
     // -------------------------
     void Update()
     {
+        /*
         if (backgroundMatInstance != null)
         {
             scrollOffset.x = (Time.time * scrollSpeed + uniqueScrollOffset) % 1f;
             backgroundMatInstance.SetTextureOffset("_MainTex", scrollOffset);
         }
+        */
     }
 
     // -------------------------
@@ -92,7 +96,10 @@ public class UpgradeCardUI : MonoBehaviour
     public void Setup(UpgradeOption option)
     {
         if (iconImage != null)
+        {
             iconImage.sprite = option.Icon;
+            iconImage.material = option.Base.iconMaterial;
+        }
 
         if (nameText != null)
             nameText.text = option.DisplayName;
@@ -106,7 +113,7 @@ public class UpgradeCardUI : MonoBehaviour
     // -------------------------
     public void SetHighlighted(bool isHighlighted)
     {
-        if (rect == null || !gameObject.activeInHierarchy) return;
+        if (movementRect == null || !gameObject.activeInHierarchy) return;
 
         currentTween?.Kill();
         idleWobbleTween?.Kill();
@@ -116,25 +123,25 @@ public class UpgradeCardUI : MonoBehaviour
             Sequence seq = DOTween.Sequence();
 
             // Slight scale-up
-            seq.Append(rect.DOScale(originalScale * hoverScale, scaleDuration).SetEase(Ease.OutBack));
+            seq.Append(movementRect.DOScale(originalScale * hoverScale, scaleDuration).SetEase(Ease.OutBack));
 
             // Custom shake pattern
-            seq.Append(rect.DOLocalRotate(new Vector3(0, 0, -shakeAngle), shakeDuration * 0.25f).SetEase(Ease.OutQuad));
-            seq.Append(rect.DOLocalRotate(new Vector3(0, 0, shakeReturnAngle), shakeDuration * 0.25f).SetEase(Ease.OutQuad));
-            seq.Append(rect.DOLocalRotate(new Vector3(0, 0, -shakeReturnAngle * 0.5f), shakeDuration * 0.25f).SetEase(Ease.InOutQuad));
-            seq.Append(rect.DOLocalRotate(Vector3.zero, shakeDuration * 0.25f).SetEase(Ease.OutBack));
+            seq.Append(movementRect.DOLocalRotate(new Vector3(0, 0, -shakeAngle), shakeDuration * 0.25f).SetEase(Ease.OutQuad));
+            seq.Append(movementRect.DOLocalRotate(new Vector3(0, 0, shakeReturnAngle), shakeDuration * 0.25f).SetEase(Ease.OutQuad));
+            seq.Append(movementRect.DOLocalRotate(new Vector3(0, 0, -shakeReturnAngle * 0.5f), shakeDuration * 0.25f).SetEase(Ease.InOutQuad));
+            seq.Append(movementRect.DOLocalRotate(Vector3.zero, shakeDuration * 0.25f).SetEase(Ease.OutBack));
 
             seq.AppendInterval(idleStartDelay);
 
             seq.OnComplete(() =>
             {
-                if (rect == null) return;
+                if (movementRect == null) return;
 
                 idleWobbleTween = DOTween.Sequence()
-                    .Append(rect.DOScale(originalScale * (hoverScale + wobbleScaleOffset), wobbleDuration / 2).SetEase(Ease.InOutSine))
-                    .Join(rect.DOLocalRotate(new Vector3(0, 0, wobbleRotation), wobbleDuration / 2).SetEase(Ease.InOutSine))
-                    .Append(rect.DOScale(originalScale * (hoverScale - wobbleScaleOffset), wobbleDuration / 2).SetEase(Ease.InOutSine))
-                    .Join(rect.DOLocalRotate(new Vector3(0, 0, -wobbleRotation), wobbleDuration / 2).SetEase(Ease.InOutSine))
+                    .Append(movementRect.DOScale(originalScale * (hoverScale + wobbleScaleOffset), wobbleDuration / 2).SetEase(Ease.InOutSine))
+                    .Join(movementRect.DOLocalRotate(new Vector3(0, 0, wobbleRotation), wobbleDuration / 2).SetEase(Ease.InOutSine))
+                    .Append(movementRect.DOScale(originalScale * (hoverScale - wobbleScaleOffset), wobbleDuration / 2).SetEase(Ease.InOutSine))
+                    .Join(movementRect.DOLocalRotate(new Vector3(0, 0, -wobbleRotation), wobbleDuration / 2).SetEase(Ease.InOutSine))
                     .SetLoops(-1, LoopType.Yoyo);
             });
 
@@ -142,16 +149,16 @@ public class UpgradeCardUI : MonoBehaviour
         }
         else
         {
-            if (rect == null) return;
-            rect.DOScale(originalScale, scaleDuration).SetEase(Ease.InOutSine);
-            rect.DOLocalRotate(Vector3.zero, 0.25f).SetEase(Ease.OutSine);
+            if (movementRect == null) return;
+            movementRect.DOScale(originalScale, scaleDuration).SetEase(Ease.InOutSine);
+            movementRect.DOLocalRotate(Vector3.zero, 0.25f).SetEase(Ease.OutSine);
         }
     }
 
     // -------------------------
     public void PlaySelectAnimation(Action onComplete = null)
     {
-        if (rect == null || !gameObject.activeInHierarchy)
+        if (movementRect == null || !gameObject.activeInHierarchy)
             return;
 
         currentTween?.Kill();
@@ -160,7 +167,7 @@ public class UpgradeCardUI : MonoBehaviour
         Sequence seq = DOTween.Sequence();
 
         // Step 1: Quick pop
-        seq.Append(rect.DOScale(originalScale * (hoverScale + 0.15f), 0.12f).SetEase(Ease.OutQuad));
+        seq.Append(movementRect.DOScale(originalScale * (hoverScale + 0.15f), 0.12f).SetEase(Ease.OutQuad));
 
         // Step 2: Flash highlight
         if (highlightFrame != null)
@@ -170,8 +177,8 @@ public class UpgradeCardUI : MonoBehaviour
         }
 
         // Step 3: Settle back down
-        seq.Append(rect.DOScale(originalScale * (hoverScale - 0.05f), 0.15f).SetEase(Ease.InOutQuad));
-        seq.Join(rect.DOLocalRotate(new Vector3(0, 0, UnityEngine.Random.Range(-5f, 5f)), 0.2f).SetEase(Ease.OutSine));
+        seq.Append(movementRect.DOScale(originalScale * (hoverScale - 0.05f), 0.15f).SetEase(Ease.InOutQuad));
+        seq.Join(movementRect.DOLocalRotate(new Vector3(0, 0, UnityEngine.Random.Range(-5f, 5f)), 0.2f).SetEase(Ease.OutSine));
 
         // Step 4: Fade out highlight
         if (highlightFrame != null)
@@ -183,16 +190,16 @@ public class UpgradeCardUI : MonoBehaviour
         // Step 5: Completion + restart idle wobble
         seq.OnComplete(() =>
         {
-            if (rect == null || this == null) return;
+            if (movementRect == null || this == null) return;
 
             Debug.Log("✅ Completed select animation sequence for card.");
 
             // Start idle wobble again (separate tween)
             idleWobbleTween = DOTween.Sequence()
-                .Append(rect.DOScale(originalScale * (hoverScale + 0.02f), 0.6f).SetEase(Ease.InOutSine))
-                .Join(rect.DOLocalRotate(new Vector3(0, 0, 3f), 0.6f).SetEase(Ease.InOutSine))
-                .Append(rect.DOScale(originalScale * (hoverScale - 0.02f), 0.6f).SetEase(Ease.InOutSine))
-                .Join(rect.DOLocalRotate(new Vector3(0, 0, -3f), 0.6f).SetEase(Ease.InOutSine))
+                .Append(movementRect.DOScale(originalScale * (hoverScale + 0.02f), 0.6f).SetEase(Ease.InOutSine))
+                .Join(movementRect.DOLocalRotate(new Vector3(0, 0, 3f), 0.6f).SetEase(Ease.InOutSine))
+                .Append(movementRect.DOScale(originalScale * (hoverScale - 0.02f), 0.6f).SetEase(Ease.InOutSine))
+                .Join(movementRect.DOLocalRotate(new Vector3(0, 0, -3f), 0.6f).SetEase(Ease.InOutSine))
                 .SetLoops(-1, LoopType.Yoyo);
 
             onComplete?.Invoke();

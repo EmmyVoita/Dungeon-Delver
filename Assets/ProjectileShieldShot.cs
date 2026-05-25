@@ -81,7 +81,7 @@ public class ProjectileShieldShot : MonoBehaviour
         {
             if (useFreezeEffect)
             {
-                arrow.Freeze(freezeDuration);
+                //arrow.Freeze(freezeDuration);
             }
             else
             {

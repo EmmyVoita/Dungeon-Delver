@@ -4,67 +4,71 @@ using System.Collections.Generic;
 
 public class ShrinkingRingObstacle : MonoBehaviour
 {
-    [Header("Center Target (Player)")]
-    public Transform centerTarget;
+    [Header("References")]
+    [SerializeField] private DamageEffect dEf;
+    [SerializeField] private GameObject destroyEffectPrefab;
+    [SerializeField] private GameObject segmentPrefab;
+    [SerializeField] private GameObject ringHolePrefab;
+
 
     [Header("Ring Generation")]
-    public GameObject destroyEffectPrefab;
-    public GameObject segmentPrefab;
-    public GameObject ringHolePrefab;
-    public int segmentCount = 24;     // number of pieces making the ring
-    public float ringRadius = 3f;     // spawn distance
-    public float shrinkSpeed = 0.5f;  // units per second
-    public int gapSize = 3;           // number of missing segments
+    [SerializeField] private int segmentCount = 24;     // number of pieces making the ring
+    [SerializeField] private float ringRadius = 3f;     // spawn distance
+    [SerializeField] private float shrinkSpeed = 0.5f;  // units per second
+    [SerializeField] private int gapSize = 3;           // number of missing segments
+
 
     [Header("Rotation")]
-    public bool autoRotate = true;
-    public float rotationSpeed = 60f;
-    public float rotationSpeedCountIncrease = 10f;
+    [SerializeField] private bool autoRotate = true;
+    [SerializeField] private float rotationSpeed = 60f;
+    [SerializeField] private float rotationSpeedCountIncrease = 10f;
 
-    [Header("Cleanup")]
-    public SoundEffect passThroughSound;
-
-    public AudioClip expireSound;
-    public RingObstacleSpawner owner;
-
+  
     [Header("Player Hit Settings")]
-    public float hitRadius = 0.6f;   // When the ring shrinks this close, it hits
-    public int damageOnFail = 1;
-    public float ringStayTime = 0.5f;
+    [SerializeField] private float hitRadius = 0.6f;   // When the ring shrinks this close, it hits
+
 
     [Header("Audio")]
     [SerializeField] private float pitchStep = 0.05f;
-    public SoundEffect failSound;
+    [SerializeField] private SoundEffect failSound;
+    [SerializeField] private SoundEffect passThroughSound;
 
+    
 
-    private List<GameObject> segments = new List<GameObject>();
-    private bool completed = false;
-    private float currentRadius;
-    private bool shouldShrink;
-    private int ringNumber;
-    private float finalRotationSpeed;
+    private List<GameObject> _segments = new List<GameObject>();
+    private bool _completed = false;
+    private float _currentRadius;
+    private bool _shouldShrink;
+    private int _ringNumber;
+    private float _finalRotationSpeed;
+    private Transform _centerTarget;
+    private RingObstacleSpawner _owner;
 
 
     void OnEnable()
     {
         RingHoleTrigger.RingHolePassedThrough += OnPassedThroughGap;
+        BasicProjectile.OnProjectileHit += OnPlayerHitRing;
     }
 
     void OnDisable()
     {
         RingHoleTrigger.RingHolePassedThrough -= OnPassedThroughGap;
+        BasicProjectile.OnProjectileHit -= OnPlayerHitRing;
     }
 
-    public void Initialize(int ringNumber)
+    public void Initialize(int ringNumber, RingObstacleSpawner owner, Transform centerTarget)
     {
-        this.ringNumber = ringNumber;
-        finalRotationSpeed = rotationSpeed + (rotationSpeedCountIncrease * ringNumber);
+        this._ringNumber = ringNumber;
+        _finalRotationSpeed = rotationSpeed + (rotationSpeedCountIncrease * ringNumber);
+        _centerTarget = centerTarget;
+        _owner = owner;
     }
 
     void Start()
     {
-        currentRadius = ringRadius;
-        shouldShrink = true;
+        _currentRadius = ringRadius;
+        _shouldShrink = true;
 
         SpawnRing();
         RandomizeStartRotation();
@@ -73,7 +77,7 @@ public class ShrinkingRingObstacle : MonoBehaviour
     void Update()
     {
         if (autoRotate)
-            transform.Rotate(Vector3.forward, finalRotationSpeed * Time.deltaTime);
+            transform.Rotate(Vector3.forward, _finalRotationSpeed * Time.deltaTime);
 
         ShrinkTowardsCenter();
     }
@@ -93,7 +97,7 @@ public class ShrinkingRingObstacle : MonoBehaviour
                 segment.transform.localPosition = pos;
                 segment.transform.up = pos.normalized;
 
-                segments.Add(segment);
+                _segments.Add(segment);
             } 
             else
             {
@@ -105,7 +109,7 @@ public class ShrinkingRingObstacle : MonoBehaviour
                 segment.transform.up = pos.normalized;
                 segment.transform.localScale = new Vector3(0.75f, 0.75f, 1f );
 
-                segments.Add(segment);
+                _segments.Add(segment);
             }
         }
     }
@@ -119,25 +123,24 @@ public class ShrinkingRingObstacle : MonoBehaviour
 
     private void ShrinkTowardsCenter()
     {
-        if (!shouldShrink) return;
+        if (!_shouldShrink) return;
 
-        currentRadius -= shrinkSpeed * Time.deltaTime;
+        _currentRadius -= shrinkSpeed * Time.deltaTime;
 
         
-        // 🔴 If it reaches danger zone and was not cleared → HIT PLAYER
-        if (currentRadius <= hitRadius)
+        if (_currentRadius <= hitRadius)
         {
             HandleFailedHit();
             return;
         }
             
 
-        foreach (var segment in segments)
+        foreach (var segment in _segments)
         {
             if (segment != null)
             {
                 Vector3 dir = segment.transform.localPosition.normalized;
-                segment.transform.localPosition = dir * currentRadius;
+                segment.transform.localPosition = dir * _currentRadius;
             }
         }
     }
@@ -145,22 +148,19 @@ public class ShrinkingRingObstacle : MonoBehaviour
 
     private void HandleFailedHit()
     {
-        completed = true;
-        shouldShrink = false;
+        _completed = true;
+        _shouldShrink = false;
 
         StopAllCoroutines();
 
         // Damage player
         if (Player.Instance != null)
-            Player.Instance.DamageSelf(damageOnFail);
+            Player.Instance.DamageSelf(dEf.damage, dEf.sourceName);
 
-        // Play expire sound
-        //if (expireSound != null)
-            //AudioHelpers.PlayMyClipAtPoint(expireSound, AudioChannel.SFX, Camera.main.transform.position);\
         AudioHelpers.PlaySoundEffect(failSound, Camera.main.transform.position);
 
         // Notify owner
-        owner?.OnRingResolved(this);
+        _owner?.OnRingResolved(this);
 
         HandleDestroy();
     }
@@ -178,11 +178,11 @@ public class ShrinkingRingObstacle : MonoBehaviour
 
     public void OnPassedThroughGap(GameObject targetRing)
     {
-        if (completed) return;
+        if (_completed) return;
         if (targetRing != gameObject) return;
-        completed = true;
+        _completed = true;
 
-        float pitchScalar = 1.0f + ringNumber * pitchStep;
+        float pitchScalar = 1.0f + _ringNumber * pitchStep;
         AudioHelpers.PlaySoundEffect(passThroughSound,Camera.main.transform.position, pitchScalar);
 
         StartCoroutine(ResolveRing());
@@ -190,71 +190,52 @@ public class ShrinkingRingObstacle : MonoBehaviour
 
     private IEnumerator ResolveRing()
     {
-        yield return new WaitForSeconds(ringStayTime);
-
-        if (this == null || completed == false)
+        if (this == null || _completed == false)
             yield break;
 
-        shouldShrink = false;
-        foreach (var segment in segments)
+        _shouldShrink = false;
+        foreach (var segment in _segments)
         {
             if (segment == null) continue;
 
-            SpikyBall s = segment.GetComponent<SpikyBall>();
+            BasicProjectile s = segment.GetComponent<BasicProjectile>();
             if (s != null)
-                s.FadeOut();
+                s.DestroyProjectile();
         }
 
-
-        owner?.OnRingResolved(this);
+        _owner?.OnRingResolved(this);
         HandleDestroy();
     }
 
     public void OnPlayerHitRing()
     {
-        if (completed) return;
-        completed = true;
+        if (_completed) return;
+        _completed = true;
 
         StopAllCoroutines();
 
         // Fade all segments
-        foreach (var segment in segments)
+        foreach (var segment in _segments)
         {
-            var spiky = segment.GetComponent<SpikyBall>();
+            var spiky = segment.GetComponent<BasicProjectile>();
             if (spiky != null)
-                spiky.FadeOut();
+                spiky.DestroyProjectile();
         }
 
-        // Play fail sound
-        if (expireSound != null)
-            AudioHelpers.PlayMyClipAtPoint(expireSound, AudioChannel.SFX, Camera.main.transform.position);
-
         // Notify Spawner
-        owner?.OnRingResolved(this);
-
-
+        _owner?.OnRingResolved(this);
 
         HandleDestroy();
     }
 
 
-    private void HandleExpired()
-    {
-        if(completed) return;
-        completed = true;
-        if (expireSound != null)
-            AudioHelpers.PlayMyClipAtPoint(expireSound, AudioChannel.SFX, Camera.main.transform.position);
-
-        owner?.OnRingResolved(this);
-        Destroy(gameObject);
-    }
 
     private void RandomizeStartRotation()
     {
         transform.rotation = Quaternion.Euler(0, 0, Random.Range(0f, 360f));
 
         if (autoRotate && Random.value < 0.5f)
-            finalRotationSpeed = -finalRotationSpeed;
+            _finalRotationSpeed = -_finalRotationSpeed;
     }
 
 }

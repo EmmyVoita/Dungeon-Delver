@@ -10,6 +10,7 @@ public class DescriptionPanelController : MonoBehaviour
     [SerializeField] private TextTypewriter typewriter;
 
     [Header("Animation")]
+    [SerializeField] private Ease easeCurve = Ease.OutBack;
     [SerializeField] private float hiddenY = -300f;
     [SerializeField] private float shownY = 0f;
     [SerializeField] private float duration = 0.4f;
@@ -44,7 +45,7 @@ public class DescriptionPanelController : MonoBehaviour
 
         canvasGroup.alpha = 1;
         rect.DOAnchorPosY(shownY, duration)
-            .SetEase(Ease.OutBack);
+            .SetEase(easeCurve);
 
         // start typing AFTER movement (feels better)
         typewriter.StartTyping(text);

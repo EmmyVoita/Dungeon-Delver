@@ -134,7 +134,10 @@ public class EditorPlaybackController : MonoBehaviour
             if (col) col.enabled = false;
 
             // Orient arrow visually
-            arrow.GetComponent<ArrowBase>().OrientArrow(evt.direction);
+            ArrowBase arrowBase = arrow.GetComponent<ArrowBase>();
+            
+            arrowBase.OrientArrow(evt.direction);
+            arrowBase.SetToEditorArrow();
 
             // Add simulation component
             EditorSimulatedArrow sim = arrow.AddComponent<EditorSimulatedArrow>();

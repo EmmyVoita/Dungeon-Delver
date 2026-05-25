@@ -29,8 +29,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Influence: 1
     - _ScanlineFrequency: 800
-    - _ScanlineLowerBound: 0.9
+    - _ScanlineLowerBound: 0.95
     - _Speed: 0.05
     m_Colors: []
   m_BuildTextureStacks: []

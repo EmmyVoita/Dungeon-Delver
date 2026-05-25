@@ -8,24 +8,25 @@ using System;
 
 public class MenuManager : MonoBehaviour
 {
-    public static event Action<MenuState> OnMenuOpened;
-
-    public static Action OnMainMenuOpened;
-    public static Action OnPlayMenuOpened;
-    public static Action OnSettingsMenuOpened;
-
     public static MenuManager Instance { get; private set; }
 
-    private readonly Dictionary<MenuState, BaseMenu> menus = new();
-    private BaseMenu activeMenu;
-    private bool isTransitioning = false;
+    public static event Action<MenuState> OnMenuOpened;
+
 
     [Header("Transition Settings")]
     public float defaultTransitionDelay = 0.25f; 
 
 
-    public MenuState CurrentState => activeMenu != null ? activeMenu.menuType : MenuState.None;
-    public BaseMenu GetActiveMenu => activeMenu;
+    [SerializeField] private List<BaseMenu> menuList = new ();
+
+    private Dictionary<MenuState, BaseMenu> _lookup = new();
+    [SerializeField] private BaseMenu _activeMenu;
+    [SerializeField] private bool _isTransitioning = false;
+
+
+    public MenuState CurrentState => _activeMenu != null ? _activeMenu.menuType : MenuState.None;
+    public BaseMenu ActiveMenu => _activeMenu;
+    public bool ActiveMenuLocked => _activeMenu.IsInputLocked;
 
 
     void Awake()
@@ -40,13 +41,33 @@ public class MenuManager : MonoBehaviour
     }
 
 
-    public void RegisterMenu(BaseMenu menu)
+    void Start()
     {
-        if (!menus.ContainsKey(menu.menuType))
+        // Convert List to dictionary
+        _lookup = new Dictionary<MenuState, BaseMenu>();
+
+        foreach (BaseMenu entry in menuList)
         {
-            menus.Add(menu.menuType, menu);
+             if (!_lookup.ContainsKey(entry.menuType))
+            {
+                _lookup.Add(entry.menuType, entry);
+            }
+        }
+
+        // Load menu from game scene config if it exists.
+        GameSceneConfig config = GameSessionBootstrap.Config;
+
+        if(config != null)
+        {
+            MenuState target = config.ReturnTarget;
+            OpenMenu(target);
+        }
+        else
+        {
+           OpenMenu(MenuState.Main); 
         }
     }
+
 
     public void RequestMenuTransition(MenuState newState)
     {
@@ -56,19 +77,19 @@ public class MenuManager : MonoBehaviour
 
     public void OpenMenu(MenuState type)
     {
-        if (activeMenu != null && activeMenu.menuType == type)
+        if (_activeMenu != null && _activeMenu.menuType == type)
             return;
 
         OnMenuOpened?.Invoke(type);
         Debug.Log($"Trying to open menu {type}");
 
-        if (activeMenu != null)
-            activeMenu.OnClose();
+        if (_activeMenu != null)
+            _activeMenu.OnClose();
 
-        if (menus.TryGetValue(type, out var menu))
+        if (_lookup.TryGetValue(type, out var menu))
         {
-            activeMenu = menu;
-            activeMenu.OnOpen();
+            _activeMenu = menu;
+            _activeMenu.OnOpen();
         }
         else
         {
@@ -79,28 +100,28 @@ public class MenuManager : MonoBehaviour
 
     public void TransitionToMenu(MenuState nextMenu, float delay = -1f)
     {
-        if (isTransitioning) return;
+        if (_isTransitioning) return;
         StartCoroutine(TransitionRoutine(nextMenu, delay < 0 ? defaultTransitionDelay : delay));
     }
 
     private IEnumerator TransitionRoutine(MenuState nextMenu, float delay)
     {
-        isTransitioning = true;
+        _isTransitioning = true;
 
         // 🔸 Step 1: Close current menu
-        if (activeMenu != null)
+        if (_activeMenu != null)
         {
-            activeMenu.OnTransitionOut();
+            _activeMenu.OnTransitionOut();
             yield return new WaitForSecondsRealtime(delay);
-            activeMenu.OnClose();
+            _activeMenu.OnClose();
         }
 
         // 🔸 Step 2: Open the next menu
-        if (menus.TryGetValue(nextMenu, out var newMenu))
+        if (_lookup.TryGetValue(nextMenu, out var newMenu))
         {
-            activeMenu = newMenu;
-            activeMenu.OnOpen();
-            activeMenu.OnTransitionIn();
+            _activeMenu = newMenu;
+            _activeMenu.OnOpen();
+            _activeMenu.OnTransitionIn();
             OnMenuOpened?.Invoke(nextMenu);
         }
         else
@@ -109,12 +130,10 @@ public class MenuManager : MonoBehaviour
         }
 
         yield return null;
-        isTransitioning = false;
+        _isTransitioning = false;
     }
 
-    // --------------------------------------------------------
-    // 🔹 Input Lock System (delegated to active menu)
-    // --------------------------------------------------------
+    // Input Lock System (delegated to active menu)
     public void LockActiveMenuInput(bool locked, float delay = 0f)
     {
         StartCoroutine(DelayedInputLock(locked, delay));
@@ -125,19 +144,17 @@ public class MenuManager : MonoBehaviour
         if (delay > 0f)
             yield return new WaitForSecondsRealtime(delay);
 
-        if (activeMenu != null)
-            activeMenu.SetInputLocked(locked);
+        if (_activeMenu != null)
+            _activeMenu.SetInputLocked(locked);
     }
 
-    // --------------------------------------------------------
-    // 🔹 Helper Utilities
-    // --------------------------------------------------------
+    //  Helper Utilities
     public void CloseCurrentMenu()
     {
-        if (activeMenu != null)
+        if (_activeMenu != null)
         {
-            activeMenu.OnClose();
-            activeMenu = null;
+            _activeMenu.OnClose();
+            _activeMenu = null;
         }
     }
 

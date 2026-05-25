@@ -6,40 +6,26 @@ using DG.Tweening;
 
 public class ScoreDisplayView : MonoBehaviour
 {
-    public enum ScoreSoundMode { BlipPerIncrement, ContinuousTone }
-    public bool showHideOnGameState = true;
-
     [Header("UI References")]
     public TextMeshProUGUI scoreText;
     public Transform popupTarget;
     public GameObject scorePopupPrefab;
-    public Gradient colorGradient;
-    public int maxComboColor = 40;
+    public RectTransform scoreJumpTarget;
+    public float jumpScale = 0.4f;
+    public float scaleDuration = 0.1f;
+    public ScreenShakeRequest shakeRequest;
 
     [Header("Popup Settings")]
-    public Color popupColor = Color.yellow;
-    public float popupFlyTime = 0.8f;
-    public float popupScale = 1.2f;
+    public float maxPopupScale = 2.5f;
+    public int maxIndex = 60;
     public float popupRadius = 1.0f;
     public Vector2 popUpSpawnAngle = new Vector2(180,270);
-
-    [Header("Score Roll Animation")]
-    public float rollDistance = 12f;
-    public float rollDownTime = 0.05f;
-    public float rollUpTime = 0.08f;
-    public Ease rollDownEase = Ease.InQuad;
-    public Ease rollUpEase = Ease.OutQuad;
 
     public float digitRollDuration = 0.12f;
     public float digitRollYOffset = 12f;
     public bool flipDigitRollDirection = false;
 
-    public float countDelay = 0.1f;
-
     [Header("Sound Settings")]
-    public ScoreSoundMode soundMode = ScoreSoundMode.BlipPerIncrement;
-    public AudioClip tallyBlip;
-    public AudioSource tallyLoop;
     public float basePitch = 1f;
     public float baseVolume = 0.1f;
     public float pitchStep = 0.02f;
@@ -47,10 +33,10 @@ public class ScoreDisplayView : MonoBehaviour
     public float maxPitch = 2f;
     public float maxVolume = 1.0f;
     public float minBlipDelay = 0.02f;
-    public float loopPitchRiseSpeed = 0.5f;
+
 
     [Header("Accent Tally Sound")]
-    public AudioClip accentTallyClip;
+    public bool playAudio = false;
     public int accentComboStart = 30;
     public int accentComboInterval = 10;
     public float accentPitch = 1f;
@@ -62,12 +48,6 @@ public class ScoreDisplayView : MonoBehaviour
 
 
 
-    [Header("High Combo Effect ✨")]
-    public ParticleSystem highComboParticles;
-    public int highComboThreshold = 40;
-
-
-
     [Header("Popup Styles")]
     public float popupStyleScalingFactor = 0.25f;
     public ScorePopupStyle normalPopup;
@@ -76,36 +56,33 @@ public class ScoreDisplayView : MonoBehaviour
     public ScorePopupStyle goldenPopup;
 
 
-    private int displayedScore = 0;
-    private float lastBlipTime;
+    private int _displayedScore = 0;
+    private int _accentPitchIndex = 0;
+    private float _lastBlipTime;
+    private string _lastScoreString = "0";
+    private bool _suppressLiveUpdates = false;
+    private RectTransform _scoreRect;
+    private Vector2 _originalAnchoredPos;
+    private TMP_TextInfo _textInfo;
 
-    private bool suppressLiveUpdates = false;
-
-    private RectTransform scoreRect;
-    private Vector2 originalAnchoredPos;
-
-    private string lastScoreString = "0";
-    private TMP_TextInfo textInfo;
-    private int accentPitchIndex = 0;
+    
+    
+    
 
 
     private void OnEnable()
     {
         ScoreManager.OnScoreUpdated += UpdateScoreInstant;
-        GameStateManager.OnStateChanged += HandleStateChanged;
         ScoreTallyController.OnTallyTick += HandleTallyTick;
         ScoreTallyController.OnTallyStart += HandleTallyStart;
         ScoreTallyController.OnTallyComplete += HandleTallyComplete;
-        //ScoreEvents.OnScorePopupRequested += SpawnScorePopup;
     }
     private void OnDisable()
     {
         ScoreManager.OnScoreUpdated -= UpdateScoreInstant;
-        GameStateManager.OnStateChanged -= HandleStateChanged;
         ScoreTallyController.OnTallyTick -= HandleTallyTick;
         ScoreTallyController.OnTallyStart -= HandleTallyStart;
         ScoreTallyController.OnTallyComplete -= HandleTallyComplete;
-        //ScoreEvents.OnScorePopupRequested -= SpawnScorePopup;
     }
 
     private void Awake()
@@ -115,34 +92,31 @@ public class ScoreDisplayView : MonoBehaviour
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
 
 
-        scoreRect = scoreText.rectTransform;
-        originalAnchoredPos = scoreRect.anchoredPosition;
+        _scoreRect = scoreText.rectTransform;
+        _originalAnchoredPos = _scoreRect.anchoredPosition;
 
-        scoreText.text = FormatScore(displayedScore);
+        scoreText.text = FormatScore(_displayedScore);
         scoreText.ForceMeshUpdate();
-        textInfo = scoreText.textInfo;
-        lastScoreString = scoreText.text;
+        _textInfo = scoreText.textInfo;
+        _lastScoreString = scoreText.text;
     }
 
 
     private void UpdateScoreWithRoll(int newScore)
     {
-        //if (newScore == displayedScore)
-            //return;
-
         string newScoreStr = FormatScore(newScore);
 
-        var changedDigits = GetChangedDigitIndices(lastScoreString, newScoreStr);
+        var changedDigits = GetChangedDigitIndices(_lastScoreString, newScoreStr);
 
         scoreText.text = newScoreStr;
         scoreText.ForceMeshUpdate();
-        textInfo = scoreText.textInfo;
+        _textInfo = scoreText.textInfo;
 
-        Vector3[][] cachedBaselineVerts = new Vector3[textInfo.meshInfo.Length][];
+        Vector3[][] cachedBaselineVerts = new Vector3[_textInfo.meshInfo.Length][];
 
-        for (int j = 0; j < textInfo.meshInfo.Length; j++)
+        for (int j = 0; j < _textInfo.meshInfo.Length; j++)
             cachedBaselineVerts[j] =
-                (Vector3[])textInfo.meshInfo[j].vertices.Clone();
+                (Vector3[])_textInfo.meshInfo[j].vertices.Clone();
 
         foreach (int index in changedDigits)
         {
@@ -156,7 +130,7 @@ public class ScoreDisplayView : MonoBehaviour
             );
         }
 
-        lastScoreString = newScoreStr;
+        _lastScoreString = newScoreStr;
     }
 
 
@@ -166,122 +140,103 @@ public class ScoreDisplayView : MonoBehaviour
     private void HandleTallyStart(TallyType type)
     {
         // Prevent live score updates from fighting the animation
-        suppressLiveUpdates = true;
-
-        //ComboManager.Instance.ResetCombo();
-
-        if (soundMode == ScoreSoundMode.ContinuousTone && tallyLoop != null)
-        {
-            tallyLoop.pitch = 1f;
-            tallyLoop.volume = 1f;
-            tallyLoop.Play();
-        }
-
-        accentPitchIndex = 0;
+        _suppressLiveUpdates = true;
+        _accentPitchIndex = 0;
     }
 
     private void HandleTallyComplete(TallyType type)
     {
-        // --- Stop continuous tone ---
-        if (soundMode == ScoreSoundMode.ContinuousTone && tallyLoop != null)
-        {
-            tallyLoop.DOFade(0f, 0.2f).OnComplete(() =>
-            {
-                tallyLoop.Stop();
-                tallyLoop.volume = 1f;
-            });
-        }
-
         // --- Hard reset transform safety ---
-        scoreRect.anchoredPosition = originalAnchoredPos;
-
-        suppressLiveUpdates = false;
+        _scoreRect.anchoredPosition = _originalAnchoredPos;
+        _suppressLiveUpdates = false;
     }
 
     void HandleTallyTick(TallyTick tick)
     {
-        // --- Update score ---
-        //ScoreManager.Instance.AddScore(tick.addedScore, type == TallyType.Combo ? ScoreSource.Combo : ScoreSource.BaseArrow);
-        displayedScore = ScoreManager.Instance.CurrentScore;
+        _displayedScore = ScoreManager.Instance.CurrentScore;
 
-        
-        UpdateScoreWithRoll(displayedScore);
-           
-      
-        SpawnScorePopup(tick.addedScore, ScorePopupKind.NormalHit);
+        UpdateScoreWithRoll(_displayedScore);
+        SpawnScorePopup(tick.addedScore, tick, ScorePopupKind.NormalHit);
 
 
-         // --- Audio ---
-        if (soundMode == ScoreSoundMode.BlipPerIncrement && tallyBlip != null)
+        if (Time.time - _lastBlipTime > minBlipDelay)
         {
-            if (Time.time - lastBlipTime > minBlipDelay)
-            {
-                float pitch = Mathf.Min(
-                    basePitch + (tick.index * pitchStep) + (tick.total * 0.01f),
-                    maxPitch
-                );
-
-                float volume = Mathf.Clamp(
-                    baseVolume + (tick.index * volumeStep),
-                    0f,
-                    maxVolume
-                );
-
-                AudioSettingsManager.PlayTallySound(pitch, volume);
-
-
-
-                lastBlipTime = Time.time;
-            }
-        }
-        else if (soundMode == ScoreSoundMode.ContinuousTone && tallyLoop != null)
-        {
-            tallyLoop.pitch = Mathf.Lerp(1f, maxPitch, (float)tick.index / tick.total);
-        }
-
-        bool isAccent = tick.type == TallyType.Combo &&
-            ShouldPlayAccent(tick.index, tick.total);
-
-        if (isAccent && accentTallyClip != null)
-        {
-            AudioSettingsManager.PlayAccentTallySound(
-                AccentPitch(),
-                AccentVolume()
+            float pitch = Mathf.Min(
+                basePitch + (tick.index * pitchStep) + (tick.total * 0.01f),
+                maxPitch
             );
-            accentPitchIndex++;
+
+            float volume = Mathf.Clamp(
+                baseVolume + (tick.index * volumeStep),
+                0f,
+                maxVolume
+            );
+
+
+            SoundEffect soundEffect = AudioLibrary.Instance.Database.tallyBase;
+            soundEffect.pitch = pitch;
+            soundEffect.volume *= volume;
+
+            AudioHelpers.PlaySoundEffect(soundEffect, transform.position);
+
+
+
+            _lastBlipTime = Time.time;
         }
+        
+ 
 
+        bool isAccent = tick.type == TallyType.Combo && ShouldPlayAccent(tick.index, tick.total);
+            
 
-        // --- High combo particles ---
-        if (tick.index % highComboThreshold == 0 && tick.index != 0 && highComboParticles != null)
-            highComboParticles.Play();
+        if (isAccent)
+        {
+            ScreenShakeManager.Instance.Shake(shakeRequest);
+
+            if(playAudio)
+            {
+                SoundEffect soundEffect = AudioLibrary.Instance.Database.tallyAccent;
+                soundEffect.volume *= AccentVolume();
+                soundEffect.pitch =  AccentPitch();
+
+                AudioHelpers.PlaySoundEffect(soundEffect, transform.position);
+            }
+
+           
+
+            scoreJumpTarget.transform.DOKill();
+
+            scoreJumpTarget.transform.localScale = Vector3.one;
+
+            Sequence seq = DOTween.Sequence();
+
+            seq.Append(
+                scoreJumpTarget.transform
+                    .DOScaleY(jumpScale, scaleDuration)
+            );
+
+            seq.Append(
+                scoreJumpTarget.transform
+                    .DOScaleY(1f, scaleDuration * 1.2f)
+                    .SetEase(Ease.OutBack)
+            );
+
+            BackgroundVisualManager.FlareBottom();
+
+          
+            _accentPitchIndex++;
+        }
     }
     
-
-    private void HandleStateChanged(GameState previous, GameState newState)
-    {
-        /*
-        if (GameStateEffectManager.ShowScoreUI)
-        {
-            scoreText.DOColor(Color.white, 0.3f);
-        }
-        else
-        {
-            scoreText.DOColor(Color.clear, 0.3f);
-        } 
-        */
-    }
-
 
 
     private void UpdateScoreInstant(int score)
     {
-        if (suppressLiveUpdates)
+        if (_suppressLiveUpdates)
             return;
 
-        displayedScore = score;
-        //scoreText.text = FormatScore(displayedScore);
-        UpdateScoreWithRoll(displayedScore);
+        _displayedScore = score;
+        UpdateScoreWithRoll(_displayedScore);
     }
 
     private bool ShouldPlayAccent(int comboIndex, int totalCombo)
@@ -296,12 +251,12 @@ public class ScoreDisplayView : MonoBehaviour
 
     private float AccentPitch()
     {
-        return Mathf.Min(accentPitch + (accentPitchIndex * accentPitchStep), maxAccentPitch);
+        return Mathf.Min(accentPitch + (_accentPitchIndex * accentPitchStep), maxAccentPitch);
     }
 
     private float AccentVolume()
     {
-        return Mathf.Min(accentVolume + (accentPitchIndex * accentVolumeStep), maxAccentVolume);
+        return Mathf.Min(accentVolume + (_accentPitchIndex * accentVolumeStep), maxAccentVolume);
     }
 
 
@@ -334,10 +289,10 @@ public class ScoreDisplayView : MonoBehaviour
         Vector3[][] baselineVerts
     )
     {
-        if (charIndex >= textInfo.characterCount)
+        if (charIndex >= _textInfo.characterCount)
             yield break;
 
-        TMP_CharacterInfo charInfo = textInfo.characterInfo[charIndex];
+        TMP_CharacterInfo charInfo = _textInfo.characterInfo[charIndex];
         if (!charInfo.isVisible)
             yield break;
 
@@ -345,7 +300,7 @@ public class ScoreDisplayView : MonoBehaviour
         int materialIndex = charInfo.materialReferenceIndex;
 
         Vector3[] baseline = baselineVerts[materialIndex];
-        Vector3[] liveVerts = textInfo.meshInfo[materialIndex].vertices;
+        Vector3[] liveVerts = _textInfo.meshInfo[materialIndex].vertices;
 
         float t = 0f;
 
@@ -393,20 +348,19 @@ public class ScoreDisplayView : MonoBehaviour
     }
 
 
-    private void SpawnScorePopup(int amount, ScorePopupKind kind = ScorePopupKind.Default)
+    private void SpawnScorePopup(int amount, TallyTick tick, ScorePopupKind kind = ScorePopupKind.Default)
     {
         if (scorePopupPrefab == null || popupTarget == null)
             return;
 
         float scoreMult = GetScoreMuliplierFor(kind);
-        float runtimeScale = ScoreToPopupScale(scoreMult);
+        float runtimeScale = ScoreToPopupScale(scoreMult, tick);
+
 
         Vector3 spawnPos = GetSemiCircleSpawnPos(popupTarget, popupRadius);
 
-        var popup = Instantiate(scorePopupPrefab, spawnPos, Quaternion.identity)
-            .GetComponent<ScorePopup>();
-
-        
+        var popup = Instantiate(scorePopupPrefab, spawnPos, Quaternion.identity).GetComponent<ScorePopup>();
+            
 
         popup.Initialize(
             amount,
@@ -463,10 +417,18 @@ public class ScoreDisplayView : MonoBehaviour
         }
     }
 
-    float ScoreToPopupScale(float scoreMultiplier)
+    float ScoreToPopupScale(float scoreMultiplier, TallyTick tick)
     {
-        float scale = Mathf.Pow(Mathf.Max(0.01f, scoreMultiplier), popupStyleScalingFactor);
-        return Mathf.Clamp(scale, 0.75f, 1.35f);
+        float scale = Mathf.Pow(
+            Mathf.Max(0.01f, scoreMultiplier),
+            popupStyleScalingFactor
+        );
+
+        scale = Mathf.Clamp(scale, 0.75f, 1.35f);
+
+        float t = Mathf.Clamp01((float)tick.index / maxIndex);
+
+        return scale * Mathf.Lerp(1.0f, maxPopupScale, t);
     }
 
 
@@ -477,7 +439,7 @@ public class ScoreDisplayView : MonoBehaviour
 
     private Vector3 GetSemiCircleSpawnPos(Transform center, float radius)
     {
-        float angle = UnityEngine.Random.Range(popUpSpawnAngle.x, popUpSpawnAngle.y) * Mathf.Deg2Rad;
+        float angle = Random.Range(popUpSpawnAngle.x, popUpSpawnAngle.y) * Mathf.Deg2Rad;
         Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * radius;
         return center.position + offset;
     }

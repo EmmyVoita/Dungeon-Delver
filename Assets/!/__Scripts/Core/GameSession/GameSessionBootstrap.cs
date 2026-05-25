@@ -6,7 +6,7 @@ public class GameSessionBootstrap : MonoBehaviour
 
     private void Awake()
     {
-        Config = GameSceneLoader.PendingConfig ?? new GameSceneConfig();
+        Config = GameSceneLoader.PendingConfig ?? Config ?? new GameSceneConfig();
 
         GameSceneLoader.PendingConfig = null; // prevent leakage
 
@@ -19,7 +19,7 @@ public class GameSessionBootstrap : MonoBehaviour
 
     private void ApplySessionConfig()
     {
-
+        Debug.Log($"Applying Session config for Game mode {Config.Mode}");
         switch (Config.Mode)
         {
             case GameMode.StandardRun:
@@ -40,6 +40,9 @@ public class GameSessionBootstrap : MonoBehaviour
 
             case GameMode.Tutorial:
                 GameStateManager.Instance.SetStateForceUpdate(GameState.Tutorial);
+                break;
+            default:
+                Debug.LogError($"Config mode when loading the game session was incorrect => {Config.Mode}");
                 break;
         }
     }

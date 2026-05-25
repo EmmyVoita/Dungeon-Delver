@@ -44,12 +44,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dccb91422507f17428fe5c1801d1ed55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoopingLaneDodger
+  registerWithManager: 1
   priority: 0
   controlMode: 4
   config:
     maxLanes: 7
     laneSpacing: 1
     laneMoveDuration: 0.15
+    laneWidthScale: 1
   spawnPrefabs:
   - {fileID: 2209782324246233958, guid: 4f5aa79f35a74c94990e3f363c4ae8ed, type: 3}
   projectileMinCount: 3
@@ -57,8 +59,9 @@ MonoBehaviour:
   baseSpawnInterval: 1.4
   spawnIntervalStep: 0.125
   minSpawnInterval: 0.65
-  obstacleActiveTime: 18
+  obstacleActiveTime: 16
   spawnX: 7
+  reverse: 0
   reverseAtTime: 10
   reverseSound:
     clip: {fileID: 8300000, guid: 26d5a4bc6e09ecb4ca444cd3b3da43f6, type: 3}

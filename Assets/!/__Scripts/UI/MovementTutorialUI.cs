@@ -140,7 +140,7 @@ public class MovementTutorialUI : MonoBehaviour
             this.text = text;
             this.parent = parent;
 
-            this.text.text = InputBindingManager.Instance.GetKey(actionType).ToString();
+            this.text.text = InputBindingManager.Instance.GetKeyName(actionType).ToString();
 
             // Create a local looping audio source
             GameObject audioObj = new GameObject($"HoldSound_{actionType}");

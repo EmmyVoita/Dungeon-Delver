@@ -7,79 +7,96 @@ using System.Collections.Generic;
 
 public class ObstacleTutorialUI : MonoBehaviour
 {
-    public List<ObstacleTypeDefinition> obstacleTypes;
+    [SerializeField] private Player.PlayerControlState controlMode = Player.PlayerControlState.BasicJump;
+    [SerializeField] private List<ObstacleTypeDefinition> obstacleTypes;
+    [SerializeField] private GameObject collectStar;
+    [SerializeField] private List<Vector3> starLocations;
+
     [Header("UI References")]
-    public TextTypewriter typewriter;
-    public TextMeshProUGUI tutorialText;
+    [SerializeField] private TextTypewriter typewriter;
+    [SerializeField] private RectTransform dipTransform;
+    [SerializeField] private TextMeshProUGUI tutorialText;
 
     [Header("Direction Indicators")]
-    public Image upArrow;
-    public Image downArrow;
-    public Image leftArrow;
-    public Image rightArrow;
+    [SerializeField] private Image upArrow;
+    [SerializeField] private Image downArrow;
+    [SerializeField] private Image leftArrow;
+    [SerializeField] private Image rightArrow;
 
     [Header("Settings")]
-    public float textDisplayTime = 1.5f;
-    public float fadeDuration = 0.4f;
-    public float obstacleSpawnInterval = 2.0f;
-    public int obstacleCountGoal = 3;
-    public Vector2 obstacleSpawnPosition = new Vector2(8f, 0f);
-    public int obstacleTypeA = 0;
-    public int obstacleTypeB = 1;
+    [SerializeField] private float textDisplayTime = 1.5f;
+    [SerializeField] private float fadeDuration = 0.4f;
+    [SerializeField] private float obstacleSpawnInterval = 2.0f;
+    [SerializeField] private int obstacleCountGoal = 3;
+    [SerializeField] private Vector2 obstacleSpawnPosition = new Vector2(8f, 0f);
+    [SerializeField] private int obstacleTypeA = 0;
+    [SerializeField] private int obstacleTypeB = 1;
 
     [Header("Audio")]
-    public AudioClip showTextSound;
-    public AudioClip completeSound;
-    public AudioClip directionJumpSound;
-    public AudioClip obstacleJumpSound;
+    [SerializeField] private AudioClip showTextSound;
+    [SerializeField] private AudioClip completeSound;
+    [SerializeField] private AudioClip directionJumpSound;
+    [SerializeField] private AudioClip obstacleJumpSound;
 
-    private AudioSource audioSource;
-    private Tween idleWobbleTween;
-    private Vector3 basePos;
-    private bool isDipping = false;
-    private readonly HashSet<Vector2> completedJumps = new();
-    private bool tutorialComplete = false;
+    private AudioSource _audioSource;
+    private Tween _idleWobbleTween;
+    private Vector3 _basePos;
+    private readonly HashSet<Vector2> _completedJumps = new();
+    private bool _tutorialComplete = false;
 
-    private int obstaclesCleared = 0;
-    private bool spawningObstacles = false;
-    private bool tookDamageThisRound = false;
-    private bool checkForJumpInput = false;
-    private bool completed = false;
+    private int _obstaclesCleared = 0;
+    private bool _spawningObstacles = false;
+    private bool _tookDamageThisRound = false;
+    private bool _checkForJumpInput = false;
+    private bool _completed = false;
+    [SerializeField] private int _starsCollected = 0;
 
-    public bool TutorialComplete => completed;
+    public bool TutorialComplete => _completed;
 
     void OnEnable()
     {
         Player.OnJumped += HandlePlayerJump;
+        TutorialStar.OnStarCollected += HandleStarCollected;
     }
 
     void OnDisable()
     {
         Player.OnJumped -= HandlePlayerJump;
+        TutorialStar.OnStarCollected -= HandleStarCollected;
+    }
+
+    void HandleStarCollected()
+    {
+        _starsCollected++;
     }
 
     void HandlePlayerJump(Vector2 dir)
     {
-        if (!checkForJumpInput)
+        return;
+
+        if (!_checkForJumpInput)
             return;
                 
-        TriggerJumpDip();
+        dipTransform.PlayJumpDip(baseY: _basePos.y,
+                                        dipAmount: 15f,
+                                        dipDuration: 0.15f,
+                                        returnDuration: 0.25f);
 
         // --- Phase 1: Learn jump directions ---
-        if (!tutorialComplete)
+        if (!_tutorialComplete)
         {
             Vector2 snapped = SnapToCardinal(dir);
 
-            if (!completedJumps.Contains(snapped))
+            if (!_completedJumps.Contains(snapped))
             {
-                completedJumps.Add(snapped);
+                _completedJumps.Add(snapped);
                 FadeOutArrow(snapped);
-                PlayDirectionSound(completedJumps.Count);
+                PlayDirectionSound(_completedJumps.Count);
             }
 
-            if (completedJumps.Count >= 4 && !tutorialComplete)
+            if (_completedJumps.Count >= 4 && !_tutorialComplete)
             {
-                tutorialComplete = true;
+                _tutorialComplete = true;
                 StartCoroutine(OnAllDirectionsJumped());
             }
         }
@@ -87,9 +104,9 @@ public class ObstacleTutorialUI : MonoBehaviour
 
     void Start()
     {
-        completed = false;
-        audioSource = gameObject.AddComponent<AudioSource>();
-        basePos = tutorialText.rectTransform.anchoredPosition;
+        _completed = false;
+        _audioSource = gameObject.AddComponent<AudioSource>();
+        _basePos = tutorialText.rectTransform.anchoredPosition;
 
         SetArrowsAlpha(0f);
         StartCoroutine(RunObstacleTutorial());
@@ -98,31 +115,48 @@ public class ObstacleTutorialUI : MonoBehaviour
 
     private IEnumerator RunObstacleTutorial()
     {
-        string keyName = InputBindingManager.Instance.GetKey(InputActionType.Jump).ToString();
-        typewriter.StartTyping($"Jump [{keyName}]");
+        
+
+        string keyName = InputBindingManager.Instance.GetKeyName(InputActionType.Jump).ToString();
+        typewriter.StartTyping($"Hold [{keyName}] to jump");
 
         yield return new WaitForSeconds(textDisplayTime);
 
-        FadeInArrows();
+        foreach(Vector3 spawnPos in starLocations)
+        {
+            GameObject obj = Instantiate(collectStar, spawnPos, Quaternion.identity);
+        }
+
+     
+
+        //FadeInArrows();
 
         yield return new WaitForSeconds(1.0f);
 
+        Player.Instance.SetPlayerControlState(controlMode);
         ScreenDimmerManager.Instance.AddDimSource("tutorial");
         ObstacleManager.Instance.RegisterObstacle(this.gameObject);
 
-        checkForJumpInput = true;
+        while(_starsCollected < starLocations.Count)
+        {
+            yield return null;
+        }
+
+        yield return StartCoroutine(OnAllDirectionsJumped());
+
+        //_checkForJumpInput = true;
     }
 
     private IEnumerator OnAllDirectionsJumped()
     {
-        checkForJumpInput = false;
+        _checkForJumpInput = false;
         yield return new WaitForSeconds(1.0f);
 
         ScreenDimmerManager.Instance.RemoveDimSource("tutorial");
         yield return new WaitForSeconds(0.5f);
 
         typewriter.StartTyping("Jump over obstacles");
-        if (completeSound) audioSource.PlayOneShot(completeSound);
+        if (completeSound) _audioSource.PlayOneShot(completeSound);
 
         yield return new WaitForSeconds(2.0f);
 
@@ -134,24 +168,24 @@ public class ObstacleTutorialUI : MonoBehaviour
     // --------------------------------------------------
     private IEnumerator SpawnObstaclePhase()
     {
-        spawningObstacles = true;
-        obstaclesCleared = 0;
-        tookDamageThisRound = false;
+        _spawningObstacles = true;
+        _obstaclesCleared = 0;
+        _tookDamageThisRound = false;
 
         Player.OnDamageTaken += HandleDamageTaken;
 
         bool updateText = true;
 
-        while (obstaclesCleared < obstacleCountGoal)
+        while (_obstaclesCleared < obstacleCountGoal)
         {
-            int typeIndex = (obstaclesCleared % 2 == 0) ? obstacleTypeA : obstacleTypeB;
-            tookDamageThisRound = false;
+            int typeIndex = (_obstaclesCleared % 2 == 0) ? obstacleTypeA : obstacleTypeB;
+            _tookDamageThisRound = false;
 
             // Spawn obstacle
             ArrowSpawner.Instance.SpawnObstacle(obstacleSpawnPosition, obstacleTypes[typeIndex].fileName, 0);
 
             // Update text at start of each round
-            int remaining = Mathf.Max(0, obstacleCountGoal - obstaclesCleared);
+            int remaining = Mathf.Max(0, obstacleCountGoal - _obstaclesCleared);
             
             if(updateText)
             {
@@ -162,19 +196,19 @@ public class ObstacleTutorialUI : MonoBehaviour
             // Play sound
             if (obstacleJumpSound && updateText)
             {
-                float pitch = 1f + (obstaclesCleared * 0.1f);
-                audioSource.pitch = pitch;
-                audioSource.PlayOneShot(obstacleJumpSound);
+                float pitch = 1f + (_obstaclesCleared * 0.1f);
+                _audioSource.pitch = pitch;
+                _audioSource.PlayOneShot(obstacleJumpSound);
             }
 
             // Wait for the obstacle’s active time
             yield return new WaitForSeconds(obstacleSpawnInterval);
 
             // ✅ Count cleared only if no damage taken
-            if (!tookDamageThisRound)
+            if (!_tookDamageThisRound)
             {
                 updateText = true;
-                obstaclesCleared++;
+                _obstaclesCleared++;
             }
             else
             {
@@ -184,25 +218,25 @@ public class ObstacleTutorialUI : MonoBehaviour
         }
 
         Player.OnDamageTaken -= HandleDamageTaken;
-        spawningObstacles = false;
+        _spawningObstacles = false;
 
         yield return new WaitForSeconds(1f);
 
         typewriter.StartTyping("Great!");
-        audioSource.pitch = 1f;
-        audioSource.PlayOneShot(completeSound);
+        _audioSource.pitch = 1f;
+        _audioSource.PlayOneShot(completeSound);
 
         yield return new WaitForSeconds(textDisplayTime);
         ObstacleManager.Instance.UnregisterObstacle(this.gameObject);
         tutorialText.DOFade(0f, 0.5f);
 
-        completed = true;
+        _completed = true;
     }
 
     private void HandleDamageTaken(int newHealth)
     {
-        if (spawningObstacles)
-            tookDamageThisRound = true;
+        if (_spawningObstacles)
+            _tookDamageThisRound = true;
     }
 
     // --------------------------------------------------
@@ -210,29 +244,14 @@ public class ObstacleTutorialUI : MonoBehaviour
     // --------------------------------------------------
     private void StartIdleWobble()
     {
-        idleWobbleTween?.Kill();
-        idleWobbleTween = tutorialText.rectTransform
-            .DOAnchorPosY(basePos.y + 10f, 1.2f)
+        _idleWobbleTween?.Kill();
+        _idleWobbleTween = tutorialText.rectTransform
+            .DOAnchorPosY(_basePos.y + 10f, 1.2f)
             .SetEase(Ease.InOutSine)
             .SetLoops(-1, LoopType.Yoyo);
     }
 
-    private void TriggerJumpDip()
-    {
-        if (isDipping) return;
-        isDipping = true;
 
-        idleWobbleTween?.Kill();
-
-        Sequence dipSeq = DOTween.Sequence();
-        dipSeq.Append(tutorialText.rectTransform.DOAnchorPosY(basePos.y - 15f, 0.15f).SetEase(Ease.OutQuad));
-        dipSeq.Append(tutorialText.rectTransform.DOAnchorPosY(basePos.y, 0.25f).SetEase(Ease.OutBack));
-        dipSeq.OnComplete(() =>
-        {
-            StartIdleWobble();
-            isDipping = false;
-        });
-    }
 
     // --------------------------------------------------
     // 🔹 Arrow Handling
@@ -280,8 +299,8 @@ public class ObstacleTutorialUI : MonoBehaviour
     {
         if (directionJumpSound == null) return;
         float pitch = Mathf.Lerp(1f, 1.3f, (count - 1) / 3f);
-        audioSource.pitch = pitch;
-        audioSource.PlayOneShot(directionJumpSound);
+        _audioSource.pitch = pitch;
+        _audioSource.PlayOneShot(directionJumpSound);
     }
 
     // --------------------------------------------------

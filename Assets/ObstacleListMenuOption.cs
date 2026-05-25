@@ -1,8 +1,11 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.EventSystems;
+using System;
 
-public class ObstacleListMenuOption : PracticeMenuOption
+public class ObstacleListMenuOption : PracticeMenuOption, IPointerClickHandler
 {
+    public static event Action<PracticeMenuOption> OnObstacleListOptionClick;
     private ObstacleTypeDefinition obstacle;
     private TextMeshProUGUI text;
     //public Color exitColor = Color.white;
@@ -12,6 +15,11 @@ public class ObstacleListMenuOption : PracticeMenuOption
         obstacle = def;
         text = GetComponent<TextMeshProUGUI>();
         text.color = obstacle.textColor;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        OnObstacleListOptionClick?.Invoke(this);
     }
 
     public override void OnEnter()

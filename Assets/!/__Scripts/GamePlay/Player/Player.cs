@@ -49,7 +49,8 @@ public class Player : MonoBehaviour
     
 
     [Header("On Damage Settings")]
-    [SerializeField] private AudioClip damageSound;
+    [SerializeField] private SoundEffect damageSoundEffect;
+    [SerializeField] private SoundEffect abilityChargeDamageSoundEffect;
     [SerializeField] private GameObject damageEffectPrefab;
     [SerializeField] private float invincibilityDuration = 0.5f;
     [SerializeField] private float hitShakeStrength = 0.05f;
@@ -145,6 +146,7 @@ public class Player : MonoBehaviour
     public int CurrentLane => currentLane;
 
     public bool FullyLocked { get; private set; } = false;
+    public bool AbilityChargeLocked { get; set; } = false;
     public bool CanJump => playerControlState == PlayerControlState.Shooter || playerControlState ==  PlayerControlState.BasicJump;
 
     private bool _invincible;
@@ -469,8 +471,36 @@ public class Player : MonoBehaviour
 
         DamageEffect dEf = coll.GetComponent<DamageEffect>();
         
-        if(dEf && dEf.enabled == true)
-            DamageSelf(dEf.damage, dEf.sourceName, arrow);
+
+        if(dEf)
+        {
+            Debug.Log(
+                $"Damage effect for impacted object [{coll.name}]\n" +
+                $"Damage effect damage => {dEf.damage}\n" +
+                $"Damage effect source => {dEf.sourceName}"
+            );
+
+            if (dEf.playHitSound)
+            {
+                AudioHelpers.PlaySoundEffect(damageSoundEffect, transform.position);
+            }
+
+            if(dEf.damage > 0)
+            {
+                DamageSelf(dEf.damage, dEf.sourceName, arrow);
+            }
+
+            if(dEf.abilityChargeDamage > 0)
+            {
+                AudioHelpers.PlaySoundEffect(abilityChargeDamageSoundEffect, transform.position);
+                AbilityCharge -= dEf.abilityChargeDamage;
+            }
+
+            if(dEf.abilityChargeDamage > 0 && dEf.damage == 0)
+            {
+                Squish();
+            }
+        }
     }
 
     public void ShootProjectile(PlayerProjectile projectilePrefab)
@@ -511,6 +541,7 @@ public class Player : MonoBehaviour
 
         Debug.Log($"Control State Changed -> old {playerControlState} : new {newState}");
 
+        bool resetPosition = playerControlState == PlayerControlState.LaneDodger && newState == PlayerControlState.Normal;
         playerControlState = newState;
 
         
@@ -534,7 +565,8 @@ public class Player : MonoBehaviour
                 wings.HideWings();
                 break;
             case PlayerControlState.Normal:
-                transform.position = Vector3.zero;
+                if(resetPosition)
+                    transform.position = Vector3.zero;
                 wings.HideWings();
                 break;
             case PlayerControlState.BasicJump:
@@ -593,25 +625,6 @@ public class Player : MonoBehaviour
         OnMaxHealthChanged?.Invoke();
     }
 
-    private void EnableJumping()
-    {
-        SetPlayerControlState(PlayerControlState.BasicJump);
-        obstaclesActive = true;
-        //canJump = true;
-        wings.ShowWings();
-        Debug.Log("🟡 Jumping enabled — obstacle present");
-    }
-
-    private void DisableJumping()
-    {
-        SetPlayerControlState(PlayerControlState.Normal);
-        obstaclesActive = false;
-        //canJump = false;
-        wings.HideWings();
-        Debug.Log("⚫ Jumping disabled — no obstacles");
-    }
-
-
 
     private void HandleRoundEnd()
     {
@@ -627,6 +640,8 @@ public class Player : MonoBehaviour
 
     public void OnCriticalCatch()
     {
+        if (AbilityChargeLocked)
+            return;
         AbilityCharge += _abilityChargeGain;
         Debug.Log($"⚡ Gained {_abilityChargeGain} ability charge from crit catch!");
     }
@@ -778,9 +793,11 @@ public class Player : MonoBehaviour
         if(!GameStateEffectManager.PlayerDamageAllowed)
             return;
 
-        OnPreDamageTaken?.Invoke(damage);
-
         int finalDamage = UpgradeManager.Instance.ModifyDamageTaken(damage);
+
+        OnPreDamageTaken?.Invoke(finalDamage);
+
+        
         
         Debug.Log($"💥 Player taking {finalDamage} damage (base {damage})");
         Health -= finalDamage;
@@ -795,13 +812,45 @@ public class Player : MonoBehaviour
         Invincible = true;
         invincibileDone = Time.time + invincibilityDuration;
 
-        if (damageSound != null)
-            AudioHelpers.PlayMyClipAtPoint(damageSound, AudioChannel.SFX, Camera.main.transform.position);
-
+       
         if(damageEffectPrefab != null)
         {
             Instantiate(damageEffectPrefab, transform.position, Quaternion.identity);
         }
+
+        Squish();
+    }
+
+    private void Squish()
+    {
+        sRend.transform.DOKill();
+
+        sRend.transform.localScale = Vector3.one;
+
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(
+            sRend.transform.DOScale(
+                new Vector3(0.5f, 1.6f, 1f), // squash X, stretch Y
+                0.06f
+            )
+        );
+
+        seq.Append(
+            sRend.transform.DOScale(
+                new Vector3(1.15f, 0.85f, 1f), // overshoot opposite
+                0.08f
+            )
+            .SetEase(Ease.OutQuad)
+        );
+
+        seq.Append(
+            sRend.transform.DOScale(
+                Vector3.one,
+                0.15f
+            )
+            .SetEase(Ease.OutBack)
+        );
 
         spriteObj.GetComponent<PlayerSpriteShaker>()?.Shake(hitShakeStrength, hitShakeDuration);
     }
@@ -890,25 +939,62 @@ public class Player : MonoBehaviour
 
     void SetLane(int newLane)
     {
-        newLane = Mathf.Clamp(newLane, 0, currentLaneConfig.maxLanes - 1);
+        int direction = (int)Mathf.Sign(newLane - currentLane);
 
-        if (newLane == currentLane) return;
+        newLane = FindNextValidLane(
+            currentLane,
+            direction
+        );
+
+        if (newLane == currentLane)
+            return;
 
         wings.PlayFlap();
 
-        AudioHelpers.PlaySoundEffect(moveLaneSoundEffect, transform.position, 1.0f + newLane * lanePitchStep);
+        AudioHelpers.PlaySoundEffect(
+            moveLaneSoundEffect,
+            transform.position,
+            1.0f + newLane * lanePitchStep
+        );
 
         currentLane = newLane;
 
-        float targetY = GetLaneY(currentLane);
+        float targetY =
+            GetLaneY(currentLane);
 
-        if (laneMoveTween != null && laneMoveTween.IsActive())
-        {
-            laneMoveTween.Kill();
-        }
+        laneMoveTween?.Kill();
 
-        laneMoveTween = transform.DOMoveY(targetY, currentLaneConfig.laneMoveDuration)
+        laneMoveTween =
+            transform.DOMoveY(
+                targetY,
+                currentLaneConfig.laneMoveDuration
+            )
             .SetEase(Ease.OutQuad);
+    }
+
+    int FindNextValidLane(
+    int startLane,
+    int direction)
+    {
+        int lane = startLane;
+
+        while (true)
+        {
+            lane += direction;
+
+            if (
+                lane < 0 ||
+                lane >= currentLaneConfig.maxLanes
+            )
+            {
+                return startLane;
+            }
+
+            if (!LaneState.IsLaneCollapsed(lane))
+            {
+                return lane;
+            }
+        }
     }
 
     float GetLaneY(int lane)
@@ -927,7 +1013,8 @@ public class Player : MonoBehaviour
 
         laneVisualizer?.ShowLanes(
             currentLaneConfig.maxLanes,
-            currentLaneConfig.laneSpacing
+            currentLaneConfig.laneSpacing,
+            currentLaneConfig.laneWidthScale
         );
 
         currentLane = currentLaneConfig.maxLanes / 2;

@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System;
 using System.Collections;
+using UnityEditor;
 
 public class CountdownUI : MonoBehaviour
 {
@@ -32,20 +33,30 @@ public class CountdownUI : MonoBehaviour
     /// </summary>
     public void BeginCountdown(Action onComplete = null)
     {
+        Debug.Log("Being Countdown");
+
         if (isCounting) return; // prevent overlap
         if (currentRoutine != null) StopCoroutine(currentRoutine);
+        
 
         currentRoutine = StartCoroutine(CountdownCoroutine(onComplete));
+        Debug.Log("Starting Countdown");
     }
 
     public void KillActiveCountdown(Action onComplete = null)
     {
-        if (!isCounting) return; // prevent overlap
+        Debug.Log("trying to killing Countdown");
+        if (!isCounting)
+        {
+            onComplete?.Invoke();
+            return;
+        }  // prevent overlap
         if (currentRoutine != null) StopCoroutine(currentRoutine);
         isCounting = false;
         currentRoutine = null;
         countdownText.text = "";
         countdownText.gameObject.SetActive(false);
+        Debug.Log("killing Countdown");
         onComplete?.Invoke();
     }
 
@@ -66,11 +77,15 @@ public class CountdownUI : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(startDelay);
 
-        for(int i = 0; i < 3; i++)
+        int i = 0;
+
+        while(i < 3)
         {
+            yield return new WaitUntil(() => !OverlayManager.Instance.IsPaused);
             float pitchMult = 1.0f + i * beepPitchIncrement;
             AudioHelpers.PlaySoundEffect(countdownBeep,transform.position,pitchMult);
             yield return new WaitForSecondsRealtime(0.5f);
+            i++;
         }
 
         isCounting = false;

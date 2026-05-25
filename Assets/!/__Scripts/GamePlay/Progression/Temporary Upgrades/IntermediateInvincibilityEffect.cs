@@ -15,7 +15,7 @@ public class IntermediateInvincibilityEffect : UpgradeBase
     {
         Player.OnAbilityUsed += HandleAbilityUsed;
         GameStateManager.OnStateChanged += HandleStateChanged;
-        Player.Instance.AbilityCharge = Player.Instance.MaxAbilityCharge;
+        //Player.Instance.AbilityCharge = Player.Instance.MaxAbilityCharge;
     }
 
     private void HandleStateChanged(GameState previousState, GameState newState)

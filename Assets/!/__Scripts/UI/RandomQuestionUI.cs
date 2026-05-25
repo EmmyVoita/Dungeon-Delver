@@ -190,19 +190,19 @@ public class RandomQuestionUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
         {
             selectedIndex = (selectedIndex + 1) % options.Length;
-            AudioSettingsManager.PlayNavigateSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             UpdateVisuals();
         }
         else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
             selectedIndex = (selectedIndex - 1 + options.Length) % options.Length;
-            AudioSettingsManager.PlayNavigateSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             UpdateVisuals();
         }
 
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
         {
-            AudioSettingsManager.PlaySelectSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
             SelectAnswer(selectedIndex == 0);
         }
     }

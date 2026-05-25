@@ -13,7 +13,6 @@ public class StageData
 
     [Header("Boss")]
     public TextAsset bossLevelFile;
-    public BossDefinition bossDefinition;
 
     public int levelsToPlay = 2;
 

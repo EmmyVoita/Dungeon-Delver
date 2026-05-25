@@ -85,7 +85,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &3182988993961710935
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,7 +183,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: aasdadasdasdadaddadadadadd
+  m_text: '100
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 38279ce5ea27c68499c74e01219a1355, type: 2}
   m_sharedMaterial: {fileID: -8852437591962295723, guid: 38279ce5ea27c68499c74e01219a1355, type: 2}
@@ -265,6 +267,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1509120677338721510}
   - component: {fileID: 8311495697902162012}
+  - component: {fileID: 4389513876368392558}
   m_Layer: 0
   m_Name: UIScorePopup
   m_TagString: Untagged
@@ -304,3 +307,11 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!222 &4389513876368392558
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6941123270929124576}
+  m_CullTransparentMesh: 1

@@ -1,8 +1,8 @@
 public enum AudioChannel
 {
-    Master,
     Music,
-    SFX,
     UI,
+    SFX,
     Ambience
 }
+

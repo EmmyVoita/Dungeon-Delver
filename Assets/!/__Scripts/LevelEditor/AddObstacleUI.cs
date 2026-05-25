@@ -36,7 +36,7 @@ public class AddChallengeUI : MonoBehaviour
 
     void AddChallenge()
     {
-        AudioSettingsManager.PlayGeneralButtonSound();
+        //AudioSettingsManager.PlayGeneralButtonSound();
         if(LevelEditorData.Instance.currentLevelAsset == null)
         {
             UIToast.Error("No level loaded to add challenge");

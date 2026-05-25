@@ -3,15 +3,15 @@ using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 using System;
+using System.Collections;
 
 [RequireComponent(typeof(RectTransform))]
 public class AbilityCardUI : MonoBehaviour
 {
     [Header("UI References")]
+    public AbilityUnlockVisual unlockVisual;
     public Image icon;   
     public Image background;  
-    public Image lockImage;
-    public Image highlightFrame;
     public Color lockColor = Color.grey;
 
     [Header("Animation Settings")]
@@ -103,9 +103,24 @@ public class AbilityCardUI : MonoBehaviour
 
     // -------------------------
 
-    public void Setup(AbilityData card)
+    public void Setup(AbilityData card, AbilityCardState cardState)
     {
         Card = card;
+
+        switch(cardState)
+        {
+            case AbilityCardState.Locked:
+                unlockVisual.ShowLocked();
+                break;
+
+            case AbilityCardState.NewlyUnlocked:
+                unlockVisual.ShowLocked();
+                break;
+
+            case AbilityCardState.Unlocked:
+                unlockVisual.ShowUnlocked();
+                break;
+        }
 
         // Animated
         if(card.iconData.frames.Count > 1 && card.iconData.animated)
@@ -118,12 +133,17 @@ public class AbilityCardUI : MonoBehaviour
             icon.sprite = card.iconData.frames[0];
         }
 
+        // When we set up the card we want to check whether the ability is unlocked and whether it has been presented yet.
+        // If it has not been unlocked, then we show the lock symbol. If it has been unlocked and not presented, we also
+        // show the locked symbol. If it has been unlocked and presented, when we dont show it.
 
+        /*
         if (lockImage != null)
         {
             lockImage.gameObject.SetActive(!(ScoreManager.Instance.HighScore >= card.scoreRequirement));
             icon.color = ScoreManager.Instance.HighScore >= card.scoreRequirement ? Color.white : lockColor;
         }
+        */
            
         icon.rectTransform.localScale = card.iconScale * Vector3.one;
 
@@ -133,6 +153,12 @@ public class AbilityCardUI : MonoBehaviour
             background.sprite = card.cardBackground;
 
         SetHighlighted(false);
+    }
+
+    public IEnumerator PlayUnlockAnimation()
+    {
+        yield return unlockVisual.PlayUnlockAnimation();
+        unlockVisual.ShowUnlocked();
     }
 
     // -------------------------
@@ -196,23 +222,12 @@ public class AbilityCardUI : MonoBehaviour
         // Step 1: Quick pop
         seq.Append(rect.DOScale(originalScale * (hoverScale + 0.15f), 0.12f).SetEase(Ease.OutQuad));
 
-        // Step 2: Flash highlight
-        if (highlightFrame != null)
-        {
-            highlightFrame.DOFade(1f, 0.1f).From(0f);
-            seq.Join(highlightFrame.rectTransform.DOScale(1.1f, 0.15f).SetEase(Ease.OutQuad));
-        }
 
         // Step 3: Settle back down
         seq.Append(rect.DOScale(originalScale * (hoverScale - 0.05f), 0.15f).SetEase(Ease.InOutQuad));
         seq.Join(rect.DOLocalRotate(new Vector3(0, 0, UnityEngine.Random.Range(-5f, 5f)), 0.2f).SetEase(Ease.OutSine));
 
-        // Step 4: Fade out highlight
-        if (highlightFrame != null)
-        {
-            seq.Append(highlightFrame.DOFade(0f, 0.25f).SetEase(Ease.OutSine));
-            seq.Join(highlightFrame.rectTransform.DOScale(1f, 0.25f));
-        }
+
 
         // Step 5: Completion + restart idle wobble
         seq.OnComplete(() =>

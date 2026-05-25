@@ -26,7 +26,6 @@ public class LeaderBoardUIManager : BaseMenu
 
     void Awake()
     {
-        MenuManager.Instance.RegisterMenu(this);
         lockInput = true;
     }
 
@@ -52,7 +51,7 @@ public class LeaderBoardUIManager : BaseMenu
         
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.Back))
         {
-            AudioSettingsManager.PlayBackSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.back, transform.position);
             MenuManager.Instance.RequestMenuTransition(MenuState.Main);
             return;
         }

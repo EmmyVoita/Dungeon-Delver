@@ -1,8 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.InputSystem;
 using TMPro;
 using System;
+using UnityEngine.UI;
+using DG.Tweening;
+using Unity.VisualScripting;
+
 
 public class SettingsMenuNavigator : BaseMenu
 {
@@ -12,12 +15,15 @@ public class SettingsMenuNavigator : BaseMenu
     [SerializeField] private GameObject holderObject;
     [SerializeField] private Transform currentPanel;
     [SerializeField] private SettingsTabManager tabManager;
+    [SerializeField] private RectTransform horzontalBar;
+    [SerializeField] private Image barImage;
 
     [Header("Visuals")]
     [SerializeField] private Color selectedColor = Color.yellow;
     [SerializeField] private Color defaultColor = Color.white;
     [SerializeField] private float selectedScale = 1.2f;
     [SerializeField] private float transitionSpeed = 8f;
+    [SerializeField] private float barAlpha = 0.2f;
 
     private List<BaseSettingOption> currentOptions = new List<BaseSettingOption>();
     private int selectedIndex = -1;
@@ -26,25 +32,55 @@ public class SettingsMenuNavigator : BaseMenu
 
     void Awake()
     {
-        MenuManager.Instance.RegisterMenu(this);
         lockInput = true;
     }
 
     void Start()
     {
-        holderObject.SetActive(false);
+        //holderObject.SetActive(false);
         LoadPanelOptions();
+    }
+
+    private void OnEnable()
+    {
+        BaseSettingOption.OnSettingOptionEnter += HandlePointerEnter;
+    }
+
+    private void OnDisable()
+    {
+        BaseSettingOption.OnSettingOptionEnter -= HandlePointerEnter;
+    }
+
+    private void HandlePointerEnter(BaseSettingOption option)
+    {
+        int index = currentOptions.IndexOf(option);
+
+        if (index == -1)
+            return;
+
+        inTabNavigation = false;
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        selectedIndex = index;
+
+        barImage.DOKill();
+        barImage.DOFade(barAlpha,  0.15f);
+        tabManager.SetTabFocus(false);
+
+        HighlightOption(selectedIndex, true);
     }
 
     public override void OnOpen()
     {
+        lockInput = false;
         base.OnOpen();
 
         ScreenDimmerManager.Instance.AddDimSource("SettingsMenu");
 
-        holderObject.SetActive(true);
+        //holderObject.SetActive(true);
 
         // Start on the tabs
+        barImage.DOKill();
+        barImage.color = new Color(barImage.color.r, barImage.color.g, barImage.color.b, 0f);
         inTabNavigation = true;
         tabManager.SetTabFocus(true);
 
@@ -57,7 +93,7 @@ public class SettingsMenuNavigator : BaseMenu
 
         ScreenDimmerManager.Instance.RemoveDimSource("SettingsMenu");
 
-        holderObject.SetActive(false);
+        //holderObject.SetActive(false);
         selectedIndex = 0;
     }
 
@@ -75,12 +111,17 @@ public class SettingsMenuNavigator : BaseMenu
 
         if (fromTabSwitch)
         {
+            barImage.DOKill();
+            barImage.DOFade(0.0f, 0.1f);
             inTabNavigation = true;
             tabManager.SetTabFocus(true);
             HighlightAllOptionsDefault();
         }
         else
         {
+            Debug.LogError("In navigation false");
+            barImage.DOKill();
+            barImage.DOFade(barAlpha, 0.1f);
             inTabNavigation = false;
         }
     }
@@ -94,12 +135,34 @@ public class SettingsMenuNavigator : BaseMenu
 
         BaseSettingOption current = currentOptions[selectedIndex];
 
+        if(!inTabNavigation)
+        {
+            RectTransform currentRect = current.GetComponent<RectTransform>();
+
+            Vector3 worldPos = currentRect.position;
+
+            Vector2 localPos;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                horzontalBar.parent as RectTransform,
+                RectTransformUtility.WorldToScreenPoint(null, worldPos),
+                null,
+                out localPos
+            );
+
+            horzontalBar.anchoredPosition = new Vector2(
+                horzontalBar.anchoredPosition.x,
+                localPos.y
+            );
+        }
+
+        
+ 
         // -----------------------------
         // Exit settings
         // -----------------------------
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.Back) && !current.IsNavigationLocked)
         {
-            AudioSettingsManager.PlayBackSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.back, transform.position);
             SettingsMenuClosed?.Invoke();
             MenuManager.Instance.RequestMenuTransition(MenuState.Main);
             return;
@@ -121,8 +184,10 @@ public class SettingsMenuNavigator : BaseMenu
             if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
             {
                 inTabNavigation = false;
+                barImage.DOKill();
+                barImage.DOFade(barAlpha,  0.15f);
                 tabManager.SetTabFocus(false);
-                AudioSettingsManager.PlayNavigateSound();
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
                 HighlightOption(selectedIndex, instant: true);
             }
 
@@ -155,10 +220,12 @@ public class SettingsMenuNavigator : BaseMenu
         {
             if (selectedIndex == 0)
             {
+                barImage.DOKill();
+                barImage.DOFade(0.0f, 0.15f);
                 // Move back to tab mode
                 inTabNavigation = true;
                 tabManager.SetTabFocus(true);
-                AudioSettingsManager.PlayNavigateSound();
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
                 HighlightAllOptionsDefault();
                 return;
             }
@@ -195,7 +262,7 @@ public class SettingsMenuNavigator : BaseMenu
     void MoveSelection(int direction)
     {
         selectedIndex = Mathf.Clamp(selectedIndex + direction, 0, currentOptions.Count - 1);
-        AudioSettingsManager.PlayNavigateSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
         HighlightOption(selectedIndex);
     }
 
@@ -205,7 +272,7 @@ public class SettingsMenuNavigator : BaseMenu
         {
             bool active = (i == index);
 
-            var settingOption = currentOptions[i] as SettingOption;
+            var settingOption = currentOptions[i] as AudioSettingOption;
             if (settingOption != null)
                 settingOption.SetSelected(active);
 
@@ -223,7 +290,7 @@ public class SettingsMenuNavigator : BaseMenu
     {
         foreach (var option in currentOptions)
         {
-            var settingOption = option as SettingOption;
+            var settingOption = option as AudioSettingOption;
             if (settingOption != null)
                 settingOption.SetSelected(false);
 

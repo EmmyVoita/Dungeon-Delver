@@ -320,7 +320,7 @@ public class LevelTimelineUI : MonoBehaviour
             if (float.IsNaN(lastTickTime) || Time.time - lastTickTime >= minTickInterval)
             {
                 lastTickTime = Time.time;
-                AudioSettingsManager.PlayGeneralButtonSound();
+                //AudioSettingsManager.PlayGeneralButtonSound();
             }
         }
     }

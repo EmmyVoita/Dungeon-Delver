@@ -24,11 +24,12 @@ public class LoopingLaneDodger : ChallengeBase
     [SerializeField] private float spawnX = 7f;
 
     [Header("IBossReactive")]
+    [SerializeField] private bool reverse = false;
     [SerializeField] private float reverseAtTime = -1f;
     [SerializeField] private SoundEffect reverseSound;
     [SerializeField] private TimeSlowImpulseData impulseData;
 
-    private List<SpikyBall> _activeBalls = new List<SpikyBall>();
+    private List<BasicProjectile> _activeBalls = new List<BasicProjectile>();
     private List<IReversible> _reversibleObjects = new List<IReversible>();
     private Coroutine _spawnRoutine;
     private bool _spawnProjectiles = true;
@@ -44,7 +45,7 @@ public class LoopingLaneDodger : ChallengeBase
 
     void Update()
     {
-        if(!BossManager.Instance.IsBossActive) return;
+        if(!BossManager.Instance.IsBossActive || !reverse) return;
 
         if (!IsActive) return;
 
@@ -152,7 +153,7 @@ public class LoopingLaneDodger : ChallengeBase
             _reversibleObjects.Add(mover); 
         }
 
-        SpikyBall ball = obj.GetComponent<SpikyBall>();
+        BasicProjectile ball = obj.GetComponent<BasicProjectile>();
         if (ball != null)
         {
             _activeBalls.Add(ball);
@@ -226,7 +227,7 @@ public class LoopingLaneDodger : ChallengeBase
             _spawnRoutine = null;
         }
 
-        foreach (SpikyBall ball in _activeBalls)
+        foreach (BasicProjectile ball in _activeBalls)
         {
             if (ball != null)
                 Destroy(ball.gameObject);

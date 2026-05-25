@@ -241,10 +241,10 @@ public class ComboManager : MonoBehaviour
     ComboBreakReason reason,
     ComboBreakPriority priority)
     {
-        Debug.Log("Requesting combo break -> " + reason);
+        Debug.Log($"Requesting combo break. Reason => {reason}. Priority => {priority}");
 
-        if (comboCount <= 0)
-            return;
+        //if (comboCount <= 0)
+            //return;
 
         // 🛡️ Shield: consume + block entire frame
         if (ignoreNextMiss && reason != ComboBreakReason.StateChange && activeShieldObject != null)
@@ -280,6 +280,8 @@ public class ComboManager : MonoBehaviour
 
             return;
         }
+
+        Debug.Log($"RequestComboBreak(). blockBreakThisFrame => {blockBreakThisFrame}");
 
         // 🛡️ If already blocked this frame, just register and exit
         if (blockBreakThisFrame)
@@ -322,6 +324,7 @@ public class ComboManager : MonoBehaviour
 
     private IEnumerator ResolveComboBreakEndOfFrame()
     {
+        Debug.Log($"ResolveComboBreakEndOfFrame(). blockBreakThisFrame => {blockBreakThisFrame}");
         yield return null;
 
         if (!blockBreakThisFrame)
@@ -348,6 +351,7 @@ public class ComboManager : MonoBehaviour
     {
         //int comboScore = CalculateComboScore(comboCount);
         //ScoreManager.Instance.AddScore(comboScore, ScoreSource.Combo);
+        Debug.Log($"CacheCombo. AnimateAbilityCharge => {animateAbilityCharge}");
 
         if(animateAbilityCharge)
         {

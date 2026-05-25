@@ -1,9 +1,22 @@
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System;
 
-public class CarouselArrow : MonoBehaviour
+public class CarouselArrow : MonoBehaviour, IPointerClickHandler
 {
+    public enum CarosuelDirection
+    {
+        Left,
+        Right
+    }
+
+    public static event Action<CarosuelDirection> OnCarouselArrowClicked;
+    
+    [Header("References")]
+    [SerializeField] private AbilitySelectManager selectManager;
+
     [Header("Input")]
     [SerializeField] private MenuState activeState;
     [SerializeField] private InputActionType inputAction;
@@ -14,6 +27,7 @@ public class CarouselArrow : MonoBehaviour
     [SerializeField] private CanvasGroup canvasGroup;
 
     [Header("Direction")]
+    [SerializeField] private CarosuelDirection carosuelDirection;
     [SerializeField] private int direction = 1; // -1 = left, 1 = right
 
     [Header("Animation")]
@@ -40,27 +54,18 @@ public class CarouselArrow : MonoBehaviour
 
     private void OnEnable()
     {
-        MenuManager.OnMenuOpened += HandleMenuOpened;
-        HandleMenuOpened(MenuManager.Instance.CurrentState);
     }
 
     private void OnDisable()
     {
-        MenuManager.OnMenuOpened -= HandleMenuOpened;
         KillTweens();
     }
 
-    private void HandleMenuOpened(MenuState newState)
-    {
-        if(newState == activeState) 
-            SetEnabled(true, true); // force refresh
-        else 
-            SetEnabled(false, true);
-    }
+
 
     private void Update()
     {
-        if(isEnabled && InputBindingManager.Instance.GetKeyInput(inputAction))
+        if(isEnabled && InputBindingManager.Instance.GetKeyInput(inputAction) && !selectManager.IsInputLocked)
         {
             PlayPressFeedback();
         }
@@ -137,5 +142,18 @@ public class CarouselArrow : MonoBehaviour
             10,
             1
         );
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Debug.Log("OnPointerClick");
+        
+        if (InputModeManager.Instance.CurrentMode
+            != InputModeManager.InputMode.Mouse)
+            return;
+
+        OnCarouselArrowClicked?.Invoke(carosuelDirection);
+
+        PlayPressFeedback();
     }
 }

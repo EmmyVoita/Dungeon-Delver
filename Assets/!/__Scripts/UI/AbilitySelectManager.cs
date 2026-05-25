@@ -6,6 +6,7 @@ using DG.Tweening;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using TMPro;
+using System.Linq;
 
 public class AbilitySelectManager : BaseMenu
 {
@@ -16,6 +17,7 @@ public class AbilitySelectManager : BaseMenu
 
     [Header("References")]
     [SerializeField] private StartOptionsNavigator startOptions;
+    [SerializeField] private AbilityUnlockManager unlockManager;
 
     [Header("Transition Settings")]
     [SerializeField] private MenuState backState = MenuState.Main;
@@ -52,6 +54,23 @@ public class AbilitySelectManager : BaseMenu
     private Vector2 targetPosition;
     private float totalWidth;
 
+    private void OnEnable()
+    {
+        CarouselArrow.OnCarouselArrowClicked += HanldeCarouselArrowClicked;
+        AbilityCardMouseHandler.OnAbilityCardClicked += HandleAbilityCardClicked;
+    }
+
+    private void OnDisable()
+    {
+        CarouselArrow.OnCarouselArrowClicked -= HanldeCarouselArrowClicked;
+        AbilityCardMouseHandler.OnAbilityCardClicked -= HandleAbilityCardClicked;
+    }
+
+    private void HandleAbilityCardClicked(AbilityData data)
+    {
+        SelectAbility(data);
+    }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -61,7 +80,25 @@ public class AbilitySelectManager : BaseMenu
         }
         Instance = this;
 
-        MenuManager.Instance.RegisterMenu(this);
+    }
+
+    public AbilityCardUI GetCard(AbilityType type)
+    {
+        return currentCards
+            .FirstOrDefault(a => a.Card.abilityType == type);
+    }
+
+    private void HanldeCarouselArrowClicked(CarouselArrow.CarosuelDirection direction)
+    {   
+
+        if(direction == CarouselArrow.CarosuelDirection.Left)
+            selectedIndex = (selectedIndex - 1 + currentCards.Count) % currentCards.Count;
+        else if (direction == CarouselArrow.CarosuelDirection.Right)
+            selectedIndex = (selectedIndex + 1) % currentCards.Count;
+    
+        OnHoverChanged?.Invoke();
+        HighlightCard();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
     }
 
 
@@ -92,7 +129,30 @@ public class AbilitySelectManager : BaseMenu
         {
             GameObject uiObj = Instantiate(cardUIPrefab, cardParent);
             AbilityCardUI ui = uiObj.GetComponent<AbilityCardUI>();
-            ui.Setup(ability);
+
+            bool unlocked =
+                unlockManager.IsUnlocked(ability.abilityType);
+
+            bool presented =
+                unlockManager.IsPresented(ability.abilityType);
+
+            AbilityCardState state;
+
+            if (!unlocked)
+            {
+                state = AbilityCardState.Locked;
+            }
+            else if (!presented)
+            {
+                state = AbilityCardState.NewlyUnlocked;
+            }
+            else
+            {
+                state = AbilityCardState.Unlocked;
+            }
+
+
+            ui.Setup(ability, state);
             currentCards.Add(ui);
         }
 
@@ -142,37 +202,6 @@ public class AbilitySelectManager : BaseMenu
     // ----------------------------
     private void Update()
     {
-        if (lockInput || currentCards.Count == 0 || !isActive) return;
-
-        if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveLeft))
-        {
-            selectedIndex = (selectedIndex - 1 + currentCards.Count) % currentCards.Count;
-            OnHoverChanged?.Invoke();
-            HighlightCard();
-            AudioSettingsManager.PlayNavigateSound();
-        }
-        else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveRight))
-        {
-            selectedIndex = (selectedIndex + 1) % currentCards.Count;
-            OnHoverChanged?.Invoke();
-            HighlightCard();
-            AudioSettingsManager.PlayNavigateSound();
-        }
-        else if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
-        {
-            if (ScoreManager.Instance.HighScore >= currentCards[selectedIndex].Card.scoreRequirement)
-            {
-                SelectAbility(currentCards[selectedIndex].Card);
-            }
-        }
-        else if (InputBindingManager.Instance.GetKeyDown(InputActionType.Back))
-        {
-            MenuManager.Instance.RequestMenuTransition(backState);
-            AudioSettingsManager.PlayBackSound();
-            OnMenuAbilitySelected?.Invoke();
-        }
-
-
         // Smooth slide effect
         if (cardContainer != null)
         {
@@ -182,8 +211,86 @@ public class AbilitySelectManager : BaseMenu
                 Time.unscaledDeltaTime * slideSpeed
             );
         }
+
+        if (lockInput || currentCards.Count == 0 || !isActive) return;
+
+        if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveLeft))
+        {
+            selectedIndex = (selectedIndex - 1 + currentCards.Count) % currentCards.Count;
+            OnHoverChanged?.Invoke();
+            HighlightCard();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        }
+        else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveRight))
+        {
+            selectedIndex = (selectedIndex + 1) % currentCards.Count;
+            OnHoverChanged?.Invoke();
+            HighlightCard();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        }
+        else if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
+        {
+            if (ScoreManager.Instance.HighScore >= currentCards[selectedIndex].Card.scoreRequirement)
+            {
+                SelectAbility(currentCards[selectedIndex].Card);
+            }
+            else
+            {
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
+            }
+        }
+        else if (InputBindingManager.Instance.GetKeyDown(InputActionType.Back))
+        {
+            MenuManager.Instance.RequestMenuTransition(backState);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.back, transform.position);
+            OnMenuAbilitySelected?.Invoke();
+        }
+
+
+   
     }
 
+    public IEnumerator ScrollToCard(AbilityType type)
+    {
+        int returnIndex = currentCards.FindIndex(c => c.Card.abilityType == type);
+
+        // --- Calculate target anchored position just like HighlightCard() does ---
+        float totalWidth = (currentCards.Count - 1) * cardSpacing;
+        float startOffset = (totalWidth / 2f) - (selectedIndex * cardSpacing);
+        float targetOffset = (totalWidth / 2f) - (returnIndex * cardSpacing);
+
+        Vector2 startPos = new Vector2(startOffset, 0);
+        Vector2 endPos = new Vector2(targetOffset, 0);
+
+        float duration = 0.6f;
+        float elapsed = 0f;
+
+        // --- Animate the scroll and index together ---
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
+
+            // interpolate scroll position
+            targetPosition = Vector2.Lerp(startPos, endPos, t);
+
+            // interpolate selection visually
+            int interpIndex = Mathf.RoundToInt(Mathf.Lerp(selectedIndex, returnIndex, t));
+            if (interpIndex != selectedIndex)
+            {
+                selectedIndex = interpIndex;
+                HighlightCard();
+            }
+
+            yield return null;
+        }
+
+        selectedIndex = returnIndex;
+        HighlightCard(forceInstant: true);
+    }
+
+    
+    /*
     private IEnumerator ScrollAndSelectReturnCard()
     {
         // Find the Return card
@@ -246,7 +353,7 @@ public class AbilitySelectManager : BaseMenu
         // --- Select it just like Enter ---
         SelectAbility(currentCards[selectedIndex].Card);
     }
-
+    */
 
 
     // ----------------------------
@@ -320,13 +427,15 @@ public class AbilitySelectManager : BaseMenu
 
     private void SelectAbility(AbilityData card)
     {
+        lockInput = true;
+
         if (card == null)
         {
             Debug.LogError("❌ No ability card selected!");
             return;
         }
 
-        AudioSettingsManager.PlaySelectSound();
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
         if (backgroundDimmer != null)
             backgroundDimmer.FadeOut();
 

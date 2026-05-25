@@ -19,16 +19,11 @@ public class MovingBallsObstacle : ChallengeBase
     [Range(0f, 1f)]
     public float skipChance = 0.25f;   // 25% chance to skip a slot
 
-
-    private int ballsAlive = 0;
-    private bool registered = false;
-    private List<SpikyBall> balls;
+    private List<BasicProjectile> _projectiles;
 
     void Start()
     {
-        balls = new List<SpikyBall>();
-        ballsAlive = ballCount;
-
+        _projectiles = new List<BasicProjectile>();
         Begin();
     }
 
@@ -69,38 +64,39 @@ public class MovingBallsObstacle : ChallengeBase
         End();
     }
 
-    void CleanUp()
+    protected override void CleanUp()
     {
-        foreach (SpikyBall spikyBall in balls)
+        foreach (BasicProjectile projectile in _projectiles)
         {
-            if (spikyBall != null)
-                spikyBall.FadeOut();
+            if (projectile != null)
+                projectile.DestroyProjectile();
         }
+
+        base.CleanUp();
     }
 
 
     private void SpawnSingleBall()
     {
-        GameObject ball = Instantiate(
+        GameObject obj = Instantiate(
             ballPrefab,
             spawnPosition,
             Quaternion.identity,
             transform
         );
 
-        OscillateMovement movement = ball.gameObject.AddComponent<OscillateMovement>();
+        OscillateMovement movement = obj.gameObject.AddComponent<OscillateMovement>();
 
         movement.direction = Vector3.right;
         movement.distance = travelDistance;
         movement.speed = speed;
 
-        SpikyBall sb = ball.GetComponent<SpikyBall>();
-        if(sb != null)
+        BasicProjectile projectile = obj.GetComponent<BasicProjectile>();
+        
+        if(projectile != null)
         {
-            balls.Add(sb);
+            _projectiles.Add(projectile);
         }
-
-        //
     }
 
 

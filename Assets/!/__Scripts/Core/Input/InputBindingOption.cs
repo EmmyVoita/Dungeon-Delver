@@ -3,14 +3,17 @@ using UnityEngine.InputSystem;
 using TMPro;
 using System.Collections;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.EventSystems;
 
 public class InputBindingOption : BaseSettingOption
 {
+    private static InputBindingOption activeRebind;
+
     [SerializeField] private InputActionType actionType;
     [SerializeField] private TextMeshProUGUI label;
     [SerializeField] private TextMeshProUGUI keyDisplay;
 
-    private bool waitingForInput = false;
+    private bool _waitingForInput = false;
 
     private void OnEnable()
     {
@@ -20,6 +23,19 @@ public class InputBindingOption : BaseSettingOption
     private void OnDisable()
     {
         InputBindingManager.OnResetKeybinds -= UpdateKeyDisplay;
+    }
+
+    override public void OnPointerClick(PointerEventData eventData)
+    {
+        // Ignore if keyboard mode active
+        if (InputModeManager.Instance.CurrentMode
+            != InputModeManager.InputMode.Mouse)
+            return;
+
+        if(_waitingForInput)
+            return;
+
+        BeginRebind();
     }
 
     override public void AdjustValue(int direction)
@@ -40,20 +56,40 @@ public class InputBindingOption : BaseSettingOption
 
     void UpdateKeyDisplay()
     {
-        var key = InputBindingManager.Instance.GetKey(actionType);
+        var key = InputBindingManager.Instance.GetKeyName(actionType);
         keyDisplay.text = key.ToString();
     }
 
     public void BeginRebind()
     {
-        if (!waitingForInput)
+        // Cancel previous active binding
+        if (activeRebind != null &&
+            activeRebind != this)
+        {
+            activeRebind.CancelRebind();
+        }
+
+        activeRebind = this;
+        
+        if (!_waitingForInput)
             StartCoroutine(WaitForKeyPress());
+    }
+
+    public void CancelRebind()
+    {
+        StopAllCoroutines();
+
+        LockNavigation = false;
+        _waitingForInput = false;
+
+        UpdateKeyDisplay();
+        keyDisplay.color = Color.white;
     }
 
     IEnumerator WaitForKeyPress()
     {
         LockNavigation = true;
-        waitingForInput = true;
+        _waitingForInput = true;
         keyDisplay.text = "_";
         keyDisplay.color = Color.yellow;
 
@@ -91,7 +127,7 @@ public class InputBindingOption : BaseSettingOption
 
         LockNavigation = false;
 
-        waitingForInput = false;
+        _waitingForInput = false;
         UpdateKeyDisplay();
     }
 }

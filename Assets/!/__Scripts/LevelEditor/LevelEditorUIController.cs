@@ -61,7 +61,7 @@ public class LevelEditorUIController : MonoBehaviour
         if (string.IsNullOrEmpty(assetName))
         {
             UIToast.Error("❌ No level name entered");
-            AudioSettingsManager.PlayNegativeUISound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
             return;
         }
 
@@ -69,7 +69,7 @@ public class LevelEditorUIController : MonoBehaviour
         if (level == null)
         {
             UIToast.Error($"❌ Could not find TextAsset: {LEVEL_ROOT + assetName}");
-            AudioSettingsManager.PlayNegativeUISound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
             return;
         }
 
@@ -82,7 +82,7 @@ public class LevelEditorUIController : MonoBehaviour
         EditorPlaybackController.Instance.JumpToTime(0);
 
         if(UIToast.Instance != null) UIToast.Show($"✅ Loaded level asset: {level.name}");
-        AudioSettingsManager.PlayGeneralButtonSound();
+        //AudioSettingsManager.PlayGeneralButtonSound();
     }
 
     // ------------------------------------------------------
@@ -93,7 +93,7 @@ public class LevelEditorUIController : MonoBehaviour
         if (LevelEditorData.Instance.currentLevelAsset == null)
         {
             UIToast.Error("No level loaded to test");
-            AudioSettingsManager.PlayNegativeUISound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
             return;
         }
 
@@ -133,7 +133,7 @@ public class LevelEditorUIController : MonoBehaviour
         if (LevelEditorData.Instance.currentLevelAsset == null)
         {
             UIToast.Error("No level loaded to test");
-            AudioSettingsManager.PlayNegativeUISound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
             return;
         }
 

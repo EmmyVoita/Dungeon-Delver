@@ -46,6 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
   priority: 1
   controlMode: 2
+  listenForBossActive: 1
   lifetimeMode: 2
   switchPlayerState: 1
   completionCondition: 1
@@ -57,7 +58,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 1
     pitch: 1
-    usePitchVariation: 0
     pitchVariation: 0
   spawnDistance: 7
   spawnInterval: 1.5

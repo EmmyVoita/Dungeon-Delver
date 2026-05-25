@@ -87,7 +87,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
+  abilityChargeDamage: 0
   sourceName: Fireball
+  playHitSound: 1
 --- !u!114 &4152787262406474082
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100,12 +102,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37171b931c77c5a4c8099efd2880ddfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destroyOnHit: 1
-  destroyEffectPrefab: {fileID: 812096446077587059, guid: 0122fb0db57ebc44d96c02daa09df9f4, type: 3}
-  fadeDuration: 0.3
-  hitSound: {fileID: 0}
-  soundPitch: 1
   sRend: {fileID: 1701950934398510850}
+  destroyEffectPrefab: {fileID: 2006831378883737717, guid: 2704f4964937dd64a9d868ceacebd77d, type: 3}
+  destroyType: 1
+  destroyOnHit: 1
+  fadeOutDuration: 0.2
+  hitSound:
+    clip: {fileID: 0}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 0
+    pitch: 0
+    pitchVariation: 0
+  destroySound:
+    clip: {fileID: 8300000, guid: 8911ed8fb4464e342ad36e8066fb88b0, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1
+    pitchVariation: 0.1
 --- !u!50 &3736460493710722258
 Rigidbody2D:
   serializedVersion: 5

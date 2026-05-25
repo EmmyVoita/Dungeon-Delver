@@ -36,8 +36,9 @@ public class ArrowSpawner : MonoBehaviour
 
     [Header("Prefabs")]
 
-    [SerializeField] private List<ArrowTypeDefinition> arrowTypeDefinitions;
-    [SerializeField] private List<ObstacleTypeDefinition> obstacleTypeDefinitions;
+    //[SerializeField] private List<ArrowTypeDefinition> arrowTypeDefinitions;
+    [SerializeField] private ArrowObjectDatabase arrowDatabase;
+    [SerializeField] private ChallengeObjectDatabase challengeDatabase;
 
     [SerializeField] private ObstacleHandlingMode obstacleHandlingMode = ObstacleHandlingMode.PauseResume;
 
@@ -59,8 +60,8 @@ public class ArrowSpawner : MonoBehaviour
 
     public int TotalArrowsThisRound { get; private set; }
     public float ActiveBPM => bpm;
-    public List<ArrowTypeDefinition> ArrowTypeDefinitions => arrowTypeDefinitions;
-    public List<ObstacleTypeDefinition> ChallengesTypeDefinitions => obstacleTypeDefinitions;
+    public List<ArrowTypeDefinition> ArrowTypeDefinitions => arrowDatabase.arrows;
+    public List<ObstacleTypeDefinition> ChallengesTypeDefinitions => challengeDatabase.obstacles;
     public float SpawnDistance => spawnDistance;
     public float GoalRadius => goalRadius;
     public float ArrowTravelDistance => Mathf.Max(spawnDistance - goalRadius,0f);
@@ -138,7 +139,7 @@ public class ArrowSpawner : MonoBehaviour
         LoadPattern(patternAsset, bpmModifier);
 
         Player.Instance.UseEightDirections = useEightDirections;
-        spawnCoroutine = StartCoroutine(SpawnFromPattern());
+        spawnCoroutine = StartCoroutine(SpawnFromPattern(GameSessionBootstrap.Config.LevelEditorStartTime));
         yield return spawnCoroutine;
         yield return null;
         IsSpawning = false;
@@ -189,7 +190,7 @@ public class ArrowSpawner : MonoBehaviour
 
         currentIndex = FindStartingIndex(startTime);
 
-        spawnCoroutine = StartCoroutine(SpawnFromPattern(startTime));
+        spawnCoroutine = StartCoroutine(SpawnFromPattern(GameSessionBootstrap.Config.LevelEditorStartTime));
         yield return spawnCoroutine;
         IsSpawning = false;
     }
@@ -276,7 +277,7 @@ public class ArrowSpawner : MonoBehaviour
                     _ => Vector2.zero
                 };
 
-                ArrowTypeDefinition arrowTypeDef =  arrowTypeDefinitions.Find(def => def.displayName.ToLower() == type.ToLower());
+                ArrowTypeDefinition arrowTypeDef =  arrowDatabase.arrows.Find(def => def.displayName.ToLower() == type.ToLower());
                        
                 float spawnTime = CalculateSpawnTime(time, speed);
                 float arrivalTime = CalculateArrivalTime(time);
@@ -364,7 +365,9 @@ public class ArrowSpawner : MonoBehaviour
     {
         int index = FindStartingIndex(startTime);
 
-        //lastDSPTime = AudioSettings.dspTime;
+        Debug.Log($"Spawning from pattern at time => {startTime} \n" + 
+                  $"Which evaluates to start index => {index}");
+
 
         while (index < patternEvents.Count)
         {
@@ -452,7 +455,7 @@ public class ArrowSpawner : MonoBehaviour
     public void SpawnObstacle(Vector2 _ignored, string type, int damageOverride = -1)
     {
 
-        ObstacleTypeDefinition obstacleTypeDef = obstacleTypeDefinitions.Find(def => def.fileName.ToLower() == type.ToLower());
+        ObstacleTypeDefinition obstacleTypeDef = challengeDatabase.obstacles.Find(def => def.fileName.ToLower() == type.ToLower());
 
         if(obstacleTypeDef == null)
         {
@@ -476,7 +479,7 @@ public class ArrowSpawner : MonoBehaviour
     // --------------------------------------------------
     public void SpawnArrow(Vector2 direction, float speed, float spawnTime, float arrivalTime, string type, Color colorOverride = default, int damageOverride = -1)
     {
-        ArrowTypeDefinition arrowTypeDef = arrowTypeDefinitions.Find(def => def.displayName.ToLower() == type.ToLower());
+        ArrowTypeDefinition arrowTypeDef = arrowDatabase.arrows.Find(def => def.displayName.ToLower() == type.ToLower());
 
         GameObject arrowPrefab = arrowTypeDef.prefab;
         if(arrowPrefab == null)
@@ -504,7 +507,7 @@ public class ArrowSpawner : MonoBehaviour
 
         ArrowEffectManager.Instance.ApplyEffectsToArrow(arrow.GetComponent<ArrowBase>());
 
-        Debug.Log($"Arrow Spawned At => {spawnTime}, Arrival Time => {arrivalTime}");
+        //Debug.Log($"Arrow Spawned At => {spawnTime}, Arrival Time => {arrivalTime}");
         
         arrow.GetComponent<ArrowBase>().Init(direction, 
                                              speed,
@@ -518,7 +521,7 @@ public class ArrowSpawner : MonoBehaviour
 
     public void TriggerWarning(Vector2 direction, string type)
     {
-        ArrowTypeDefinition arrowTypeDef = arrowTypeDefinitions.Find(def => def.displayName.ToLower() == type.ToLower());
+        ArrowTypeDefinition arrowTypeDef = arrowDatabase.arrows.Find(def => def.displayName.ToLower() == type.ToLower());
 
         if(arrowTypeDef == null)
         {

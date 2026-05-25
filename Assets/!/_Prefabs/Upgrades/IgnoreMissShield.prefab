@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4934272885370255661}
   - component: {fileID: 1492001767438458348}
-  - component: {fileID: 8454106970842010138}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -82,7 +81,7 @@ SpriteRenderer:
   m_SortingLayer: -2
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -581223166, guid: a45f819b278ebcd4fabaffa81a7b75a6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: cf1936595c75e8942894b6b1e7f9cbdb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 0.78431374}
   m_FlipX: 0
   m_FlipY: 0
@@ -92,36 +91,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &8454106970842010138
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2713574485122988334}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5939e4ebe905089439fa24ba0df3c1ca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpriteCyclerPerFrameTime
-  spriteRenderer: {fileID: 1492001767438458348}
-  frames:
-  - {fileID: -581223166, guid: a45f819b278ebcd4fabaffa81a7b75a6, type: 3}
-  - {fileID: 1446368742, guid: a45f819b278ebcd4fabaffa81a7b75a6, type: 3}
-  - {fileID: -893757624, guid: a45f819b278ebcd4fabaffa81a7b75a6, type: 3}
-  - {fileID: 79578544, guid: a45f819b278ebcd4fabaffa81a7b75a6, type: 3}
-  - {fileID: -297304634, guid: a45f819b278ebcd4fabaffa81a7b75a6, type: 3}
-  - {fileID: 1144226120, guid: a45f819b278ebcd4fabaffa81a7b75a6, type: 3}
-  - {fileID: -1029277692, guid: a45f819b278ebcd4fabaffa81a7b75a6, type: 3}
-  frameDurations:
-  - 0.1
-  - 0.1
-  - 0.1
-  - 0.1
-  - 0.1
-  - 0.1
-  - 0.1
-  stopAtLastFrame: 0
 --- !u!1 &6998217769083237475
 GameObject:
   m_ObjectHideFlags: 0

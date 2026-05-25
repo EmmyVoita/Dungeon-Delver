@@ -36,6 +36,22 @@ public class StartOptionsNavigator : MonoBehaviour
     private GameMode _targetGameMode;
     private string _targetSceneName;
 
+    private void OnEnable()
+    {
+        StartOptionMouseHandler.OnStartOptionClicked += HandleStartOptionClicked;
+    }
+
+    private void OnDisable()
+    {
+        StartOptionMouseHandler.OnStartOptionClicked += HandleStartOptionClicked;
+    }
+
+    private void HandleStartOptionClicked(int index)
+    {
+        _selectedIndex = index;
+        ActivateOption();
+    }
+
     void Start()
     {
         CloseImmediate();
@@ -58,24 +74,24 @@ public class StartOptionsNavigator : MonoBehaviour
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveRight))
         {
             _selectedIndex = (_selectedIndex + 1) % options.Length;
-            AudioSettingsManager.PlayNavigateSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             UpdateVisuals();
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveLeft))
         {
             _selectedIndex = (_selectedIndex - 1 + options.Length) % options.Length;
-            AudioSettingsManager.PlayNavigateSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             UpdateVisuals();
         }
 
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
         {
-            AudioSettingsManager.PlaySelectSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
             ActivateOption();
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.Back))
         {
-            AudioSettingsManager.PlayBackSound();
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.back, transform.position);
             CancelAndClose();
         }
     }

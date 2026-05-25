@@ -27,6 +27,11 @@ public class SineWaveMover : MonoBehaviour, IReversible
         _initialized = true;
     }
 
+    public void SetAmplitude(float value)
+    {
+        _amplitude = value;
+    }
+
     public float GetInitialY()
     {
         return _waveDir * _amplitude * Mathf.Sin(_frequency * (_x - _waveDir * _time));

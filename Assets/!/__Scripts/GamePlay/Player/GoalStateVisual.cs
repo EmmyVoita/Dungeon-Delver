@@ -99,8 +99,9 @@ public class GoalStateVisual : MonoBehaviour
                 break;
 
             default:
-                sRend.sprite = null;
-                targetScale = Vector3.one;
+                sRend.sprite = normalSprite;
+                targetScale = normalScale;
+                Debug.LogError("When handling state change in goal state visual, the state was found to be null.");
             break;
         }
     }

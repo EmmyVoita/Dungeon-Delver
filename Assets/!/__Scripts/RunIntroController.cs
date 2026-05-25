@@ -4,6 +4,7 @@ using DG.Tweening;
 
 public class RunIntroController : MonoBehaviour
 {
+    [SerializeField] private bool skipInEditor = true;
     [SerializeField] private bool stop = false;
     [Header("References")]
     [SerializeField] private GuiPanelArrow healthVisuals;
@@ -42,9 +43,28 @@ public class RunIntroController : MonoBehaviour
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
         if(ObstacleManager.Instance.TestOn || stop) return;
-        if(newState == GameState.RunIntro && previousState != newState)
+        
+        if(newState == GameState.RunIntro)
         {
-            introCoroutine = StartCoroutine(IntroSequence());
+            if(Application.isEditor)
+            {
+                if(skipInEditor)
+                {
+                   playerContainer.position = new Vector3(0f,0f,0f);
+                   Player.Instance.HealPlayer(999);
+                   healthVisuals.Glow = true;
+                   starGlow.gameObject.SetActive(true);
+                   GameStateManager.Instance.SetState(GameState.RunLoad);
+                } 
+                else
+                {
+                     introCoroutine = StartCoroutine(IntroSequence());
+                }
+            }
+            else
+            {
+                introCoroutine = StartCoroutine(IntroSequence());
+            }              
         }
     }
 

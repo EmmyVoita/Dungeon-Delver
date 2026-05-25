@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fa28d592a2842f4abaaf3d7c3fa697e, type: 3}
   m_Name: Refresh Charge
   m_EditorClassIdentifier: 
-  icon: {fileID: -496092870, guid: 7f239c827232d5e42b192d0ad4ee6875, type: 3}
-  displayName: Refresh Charge
-  descriptionTemplate: Gain <color=#00E676>{REFRESH_AMOUNT}</color> shop refreshes.
-  refreshAmount: 2
+  upgradeId: 
+  icon: {fileID: -2121724080, guid: 7f239c827232d5e42b192d0ad4ee6875, type: 3}
+  iconMaterial: {fileID: 2100000, guid: 8b3fb34896e326c4a8fb58bd5ad01864, type: 2}
+  displayName: Reroll Charge
+  descriptionTemplate: Gain <color=#00E676>{REFRESH_AMOUNT}</color> card rerolls.
+  refreshAmount: 3

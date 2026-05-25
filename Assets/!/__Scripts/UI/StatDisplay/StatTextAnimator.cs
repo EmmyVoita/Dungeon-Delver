@@ -122,7 +122,10 @@ public class StatTextAnimator : MonoBehaviour
                 if (animateTickSound != null &&
                     Time.time - lastTickTime >= animateTickMinInterval)
                 {
-                    AudioSettingsManager.PlayTallySound(currentPitch, 1f);
+                    SoundEffect soundEffect = AudioLibrary.Instance.Database.tallyBase;
+                    soundEffect.pitch = currentPitch;
+
+                    AudioHelpers.PlaySoundEffect(soundEffect, transform.position);
 
                     currentPitch += animateTickPitchIncrease;
                     lastTickTime = Time.time;
@@ -169,7 +172,10 @@ public class StatTextAnimator : MonoBehaviour
                 if (animateTickSound != null &&
                     Time.time - lastTickTime >= animateTickMinInterval)
                 {
-                    AudioSettingsManager.PlayTallySound(currentPitch, 1f);
+                    SoundEffect soundEffect = AudioLibrary.Instance.Database.tallyBase;
+                    soundEffect.pitch = currentPitch;
+
+                    AudioHelpers.PlaySoundEffect(soundEffect, transform.position);
 
                     currentPitch += animateTickPitchIncrease;
                     lastTickTime = Time.time;

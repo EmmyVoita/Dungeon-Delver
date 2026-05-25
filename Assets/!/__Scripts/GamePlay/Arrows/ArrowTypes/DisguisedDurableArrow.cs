@@ -109,7 +109,7 @@ public class DisguisedDurableArrow : ArrowBase
         hasRevealed = false;
 
         // Speed-safe reveal timing
-        float travelTime = ArrowSpawner.Instance.SpawnDistance / speed;
+        float travelTime = ArrowSpawner.Instance.SpawnDistance / _speed;
         revealTimer = travelTime * Mathf.Clamp01(revealFraction);
     }
 
@@ -187,16 +187,16 @@ public class DisguisedDurableArrow : ArrowBase
 
         // --- Setup ---
         Vector3 startPos = transform.position;
-        Vector3 awayDir = (Vector3)direction.normalized;
+        Vector3 awayDir = (Vector3)_direction.normalized;
 
         float distance;
         if (maxBounceDistance > 0f)
             distance = maxBounceDistance;
         else
-            distance = speed * (duration * 0.5f);
+            distance = _speed * (duration * 0.5f);
 
         // Pause physics
-        rb.linearVelocity = Vector2.zero;
+        _rb.linearVelocity = Vector2.zero;
 
         float t = 0f;
 
@@ -216,7 +216,7 @@ public class DisguisedDurableArrow : ArrowBase
         transform.position = startPos;
 
         // Resume motion toward player
-        rb.linearVelocity = -direction * speed;
+        _rb.linearVelocity = -_direction * _speed;
 
         bounceRoutine = null;
     }
