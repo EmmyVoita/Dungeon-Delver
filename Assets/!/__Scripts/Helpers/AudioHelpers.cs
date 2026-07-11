@@ -7,6 +7,7 @@ public static class AudioHelpers
     public const float hpfNeutral = 300;
     public const float lpfNeutral = 20000f;
     public const float midNeutral = 0.5f;
+    public const float spatialBlend = 0.3f;
 
     public static void PlayClipWithVariation(AudioClip clip, AudioChannel audioChannel, Vector3 position, float basePitch = 1f, float pitchRange = 0.1f, float volume = 1f)
     {
@@ -76,7 +77,7 @@ public static class AudioHelpers
         Object.Destroy(temp, clip.length / Mathf.Max(source.pitch, 0.01f)); // destroy after playback
     }
 
-    public static void PlaySoundEffect(SoundEffect sound, Vector3 position, float pitchScalar = 1f)
+    public static void PlaySoundEffect(SoundEffect sound, Vector3 position, float pitchScalar = 1f, float volumeScalar = 1f)
     {
         if (!Application.isPlaying) return;
         if (!sound.IsValid) return;
@@ -88,18 +89,18 @@ public static class AudioHelpers
         source.clip = sound.clip;
 
         float volume = sound.volume * AudioSettingsManager.GetVolume(sound.channel);
-        source.volume = volume;
+        source.volume = volume * volumeScalar;
 
         float pitch = sound.pitch * pitchScalar;
 
-        if (sound.affectedByTimeScale)
-            pitch *= GetPitchOffsetForTimeScale();
+        //if (sound.affectedByTimeScale)
+        //    pitch *= GetPitchOffsetForTimeScale();
 
         pitch += Random.Range(-sound.pitchVariation, sound.pitchVariation);
 
         source.pitch = Mathf.Max(pitch, 0.01f);
 
-        source.spatialBlend = 0.3f;
+        source.spatialBlend = spatialBlend;
 
         source.Play();
 

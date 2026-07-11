@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6e1dea847162ba4796c83034623a69a, type: 3}
   m_Name: Slow On Crit
   m_EditorClassIdentifier: 
+  cost: 1000
+  upgradeId: 
   icon: {fileID: 107000970, guid: 42bbe21d08e2c1f409778bef6d20109f, type: 3}
+  iconMaterial: {fileID: 0}
   displayName: Slow On Crit
   descriptionTemplate: Slows time for a brief period on crits. Meanwhile, normal
     arrow value is reduced by <color=#E53935>{NORMAL_ARROW_MULTIPLIER}</color>.

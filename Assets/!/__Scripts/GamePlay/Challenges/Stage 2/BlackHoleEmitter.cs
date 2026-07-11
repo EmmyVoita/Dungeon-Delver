@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Unity.VisualScripting;
+using System.Collections.Generic;
 
 public class BlackholeEmitter : MonoBehaviour
 {
@@ -16,9 +17,27 @@ public class BlackholeEmitter : MonoBehaviour
     [Header("Audio")]
     public SoundEffect shootSound;
 
+    private List<GameObject> _projectiles;
+
+    private void Awake()
+    {
+        _projectiles = new();
+    }
+
     public void FireBurst()
     {
         StartCoroutine(BurstRoutine());
+    }
+
+    public void Cleanup()
+    {
+        foreach(GameObject proj in _projectiles)
+        {
+            if(proj != null)
+                Destroy(proj);
+        }
+
+        Destroy(gameObject);
     }
 
     private IEnumerator BurstRoutine()
@@ -46,5 +65,7 @@ public class BlackholeEmitter : MonoBehaviour
         {
             rb.linearVelocity = dir * ballSpeed;
         }
+
+        _projectiles.Add(ball);
     }
 }

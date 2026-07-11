@@ -10,12 +10,12 @@ public class MainMenuHighscoreText : MonoBehaviour
 
     private void OnEnable()
     {
-        AbilitySelectManager.OnHoverChanged += UpdateHighscoreText;
+        PlayMenuNavigator.OnHoverChanged += UpdateHighscoreText;
     }
 
     private void OnDisable()
     {
-        AbilitySelectManager.OnHoverChanged -= UpdateHighscoreText;
+        PlayMenuNavigator.OnHoverChanged -= UpdateHighscoreText;
     }
 
 
@@ -23,7 +23,7 @@ public class MainMenuHighscoreText : MonoBehaviour
     {
         // Read from ScoreManager save data and build 
         SaveData saveData = ScoreManager.Instance.SaveData;
-        AbilityType targetType = AbilitySelectManager.Instance.ActiveHover;
+        AbilityType targetType = PlayMenuNavigator.Instance.ActiveHover;
 
         if(targetType == AbilityType.ReturnToMenu || targetType == AbilityType.None)
         {
@@ -31,7 +31,7 @@ public class MainMenuHighscoreText : MonoBehaviour
             return;
         }
 
-        List<RunRecord> topRuns = LeaderBoardUIManager.GetTopRunsForAbility(targetType, saveData, 1);
+        List<RunRecord> topRuns = LeaderBoardMenuNavigator.GetTopRunsForAbility(targetType, saveData, 1);
         
         int highscore = topRuns[0].score;
 

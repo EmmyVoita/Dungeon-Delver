@@ -13,6 +13,7 @@ public class BossSafeLaneChallenge : ChallengeBase
 
     [Header("Timing")]
     [SerializeField] private float safeLaneInterval = 1.5f;
+    [SerializeField] private float safeLaneVisualDelay = 1.0f;
     [SerializeField] private float safeLaneWarningDuration = 0.75f;
     [SerializeField] private float obstacleActiveTime = 10f;
 
@@ -81,6 +82,12 @@ public class BossSafeLaneChallenge : ChallengeBase
             SelectSafeLane();
 
             yield return new WaitForSeconds(
+                safeLaneVisualDelay
+            );
+
+             LaneVisualizer.RequestHighlightLane(_currentSafeLane);
+
+            yield return new WaitForSeconds(
                 safeLaneWarningDuration
             );
 
@@ -104,24 +111,25 @@ public class BossSafeLaneChallenge : ChallengeBase
 
     private void SelectSafeLane()
     {
-        LaneVisualizer.RequestClearLaneHighlights();
+        if(_currentSafeLane >= 0)
+            LaneReservationManager.ReleaseLane(_currentSafeLane);
 
-        int laneCount = LaneState.MaxLanes;
+        LaneVisualizer.RequestClearLaneHighlights();
 
         int previous = _currentSafeLane;
 
         do
         {
             _currentSafeLane =
-                Random.Range(0, laneCount);
+                Random.Range(0, LaneState.MaxLanes);
 
         }
         while (
-            laneCount > 1 &&
+            LaneState.MaxLanes > 1 &&
             _currentSafeLane == previous
         );
 
-        LaneVisualizer.RequestHighlightLane(_currentSafeLane);
+        LaneReservationManager.ReserveLane(_currentSafeLane);
     }
 
 
@@ -230,6 +238,9 @@ public class BossSafeLaneChallenge : ChallengeBase
 
     protected override void CleanUp()
     {
+        if(_currentSafeLane >= 0)
+            LaneReservationManager.ReleaseLane(_currentSafeLane);
+
         if (_spawnRoutine != null)
         {
             StopCoroutine(

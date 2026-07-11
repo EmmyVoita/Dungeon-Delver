@@ -6,7 +6,7 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
 {
     public static event Action<int, int> MenuOptionIndexChanged;
 
-    [SerializeField] private ObstacleLabMenuNavigator manager;
+    [SerializeField] private PracticeMenuNavigator manager;
     [SerializeField] private int selectedIndex = 0;
     [SerializeField] private int optionCount = 2; // 4-way, 8-way. Expandable later.
 
@@ -87,7 +87,7 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
 
     private void UpdateVisuals(bool isExiting = false)
     {
-        bool isCurrent = ObstacleLabMenuNavigator.Instance.CurrentOption == this;
+        bool isCurrent = PracticeMenuNavigator.Instance.CurrentOption == this;
 
         // If we are explicitly exiting, treat as "not current"
         if (isExiting)

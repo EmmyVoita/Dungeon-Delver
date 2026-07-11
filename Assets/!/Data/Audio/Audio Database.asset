@@ -13,79 +13,74 @@ MonoBehaviour:
   m_Name: Audio Database
   m_EditorClassIdentifier: Assembly-CSharp::AudioDatabase
   navigate:
-    clip: {fileID: 8300000, guid: 97121d1dc23c91847a63f7a825b72f9b, type: 3}
+    clip: {fileID: 8300000, guid: f08e4e684365b2941ba5fb373264dd6f, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
-    pitch: 1
-    pitchVariation: 0
+    pitch: 2.3
+    pitchVariation: 0.05
   select:
-    clip: {fileID: 8300000, guid: c9cc45fa7cdeb03438bd145cc98a48b1, type: 3}
+    clip: {fileID: 8300000, guid: 76185870d18f62d4aa7d71461be9be05, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
-    pitch: 1
+    pitch: 3.5
     pitchVariation: 0
   back:
     clip: {fileID: 8300000, guid: 126f92ff01dd9d5489f6049b715b16da, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 0.9
     pitchVariation: 0
   negative:
-    clip: {fileID: 8300000, guid: f098960fad9033c4da96914f226f9fbf, type: 3}
+    clip: {fileID: 8300000, guid: 39cf5373bf5e6c94db1eb15f30fb7ed7, type: 3}
     channel: 2
-    affectedByTimeScale: 0
-    volume: 0.5
-    pitch: 1
-    pitchVariation: 0
-  typewriterBlip:
-    clip: {fileID: 8300000, guid: 97121d1dc23c91847a63f7a825b72f9b, type: 3}
-    channel: 2
-    affectedByTimeScale: 0
     volume: 1
-    pitch: 0.4
-    pitchVariation: 0.05
+    pitch: 4
+    pitchVariation: 0.1
+  purchase:
+    clip: {fileID: 8300000, guid: eba8394a383f8f6448d5697739119d07, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0.1
+  typewriterBlip:
+    clip: {fileID: 8300000, guid: cb6cce2a140f264439d10eac0fbe217c, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 0.9
+    pitchVariation: 0.1
   arrowHit:
     clip: {fileID: 8300000, guid: fef65794fbfc1754197e5acab64dbbfd, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 0.5
     pitch: 1
     pitchVariation: 0
   explosion:
     clip: {fileID: 0}
     channel: 0
-    affectedByTimeScale: 0
     volume: 0
     pitch: 0
     pitchVariation: 0
   unlock:
     clip: {fileID: 0}
     channel: 0
-    affectedByTimeScale: 0
     volume: 0
     pitch: 0
     pitchVariation: 0
   ambienceLoop:
     clip: {fileID: 0}
     channel: 0
-    affectedByTimeScale: 0
     volume: 0
     pitch: 0
     pitchVariation: 0
   tallyBase:
     clip: {fileID: 8300000, guid: 7b5af3e0a5cb3f94c96f6a46abb56915, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tallyAccent:
     clip: {fileID: 8300000, guid: 42ae7e3e5b598c848bb49f36ab3c1202, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0

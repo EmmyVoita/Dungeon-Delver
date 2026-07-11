@@ -11,6 +11,12 @@ public class PlayVFXAndDestroy : MonoBehaviour
     [Tooltip("VFX event name to trigger")]
     public string playEventName = "OnPlay";
 
+    [Header("Stop Settings")]
+    [SerializeField] private float stopAfterTime = 5f;
+    [SerializeField] private string stopEventName = "OnStop";
+
+
+    [Header("Fallback")]
     [Tooltip("Fallback lifetime if the VFX never reports completion")]
     public float safetyLifetime = 5f;
 
@@ -58,22 +64,37 @@ public class PlayVFXAndDestroy : MonoBehaviour
         {
             effect.SendEvent(playEventName);
         }
-        StartCoroutine(WaitForFinish());
+        StartCoroutine(StopAndDestroy());
     }
 
-    private IEnumerator WaitForFinish()
+    private IEnumerator StopAndDestroy()
     {
+        yield return new WaitForSeconds(stopAfterTime);
+
+        foreach (var effect in vfx)
+        {
+            effect.SendEvent(stopEventName);
+        }
+
         float elapsed = 0f;
 
-        // Wait while particles are alive
-        while (true)
+        while (elapsed < safetyLifetime)
         {
-            elapsed += Time.deltaTime;
+            bool anyAlive = false;
 
-            // Safety escape
-            if (elapsed >= safetyLifetime)
+            foreach (var effect in vfx)
+            {
+                if (effect.aliveParticleCount > 0)
+                {
+                    anyAlive = true;
+                    break;
+                }
+            }
+
+            if (!anyAlive)
                 break;
 
+            elapsed += Time.deltaTime;
             yield return null;
         }
 

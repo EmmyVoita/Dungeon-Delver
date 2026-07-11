@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 public class ObstacleTutorialUI : MonoBehaviour
 {
-    [SerializeField] private Player.PlayerControlState controlMode = Player.PlayerControlState.BasicJump;
+    [SerializeField] private PlayerControlState controlMode = PlayerControlState.BasicJump;
     [SerializeField] private List<ObstacleTypeDefinition> obstacleTypes;
     [SerializeField] private GameObject collectStar;
     [SerializeField] private List<Vector3> starLocations;

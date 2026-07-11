@@ -1,44 +1,50 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FullAbilityBarBonusIndicator : MonoBehaviour
 {
-    [Header("Upgrade")]
-    [Tooltip("Must match UpgradeBase.upgradeId")]
-    [SerializeField] private string upgradeId;
+
+    public static event Action OnStartAnimatOutline;
+    public static event Action OnStopAnimatOutline;
 
     [Header("UI")]
-    //[SerializeField] private GameObject indicatorObject;
-    // or use Image if you prefer:
     [SerializeField] private Image indicatorImage;
-
-    private void Awake()
-    {
-        //if (indicatorObject != null)
-        //    indicatorObject.SetActive(false);
-
-        indicatorImage.enabled = false;
-    }
 
     private void OnEnable()
     {
-        UpgradeManager.OnUpgradeStateChanged += HandleUpgradeStateChanged;
+        OnStartAnimatOutline += StartAnimation;
+        OnStopAnimatOutline += StopAnimation;
     }
 
     private void OnDisable()
     {
-        UpgradeManager.OnUpgradeStateChanged -= HandleUpgradeStateChanged;
+        OnStartAnimatOutline -= StartAnimation;
+        OnStopAnimatOutline -= StopAnimation;
     }
 
-    private void HandleUpgradeStateChanged(string changedUpgradeId, bool active)
+    private void Awake()
     {
-        if (changedUpgradeId != upgradeId)
-            return;
+        indicatorImage.enabled = false;
+    }
 
-        //if (indicatorObject != null)
-        //    indicatorObject.SetActive(active);
+    public static void RequestStartAnimateOutline()
+    {
+        OnStartAnimatOutline?.Invoke();
+    }
 
-        // If using Image instead:
-        indicatorImage.enabled = active;
+    public static void RequestStopAnimateOutline()
+    {
+        OnStopAnimatOutline?.Invoke();
+    }
+
+    private void StartAnimation()
+    {
+        indicatorImage.enabled = true;
+    }
+
+    private void StopAnimation()
+    {
+        indicatorImage.enabled = false;
     }
 }

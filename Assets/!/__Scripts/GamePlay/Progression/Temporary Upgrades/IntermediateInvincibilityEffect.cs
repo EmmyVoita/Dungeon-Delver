@@ -3,8 +3,15 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Intermediate Effects/InvincibilityEffect")]
 public class IntermediateInvincibilityEffect : UpgradeBase
 {
-    public float invincibleDuration = 3f;
+    [SerializeField] private float invincibleDuration = 3f;
+    [SerializeField] private bool infiniteDuration = true;
     
+    private void OnDisable()
+    {
+        Player.OnAbilityUsed -= HandleAbilityUsed;
+        GameStateManager.OnStateChanged -= HandleStateChanged;
+    }
+
     public override string GetDescription()
     {
         return descriptionTemplate
@@ -13,9 +20,13 @@ public class IntermediateInvincibilityEffect : UpgradeBase
 
     public override void Apply()
     {
+        Player.OnAbilityUsed -= HandleAbilityUsed;
+        GameStateManager.OnStateChanged -= HandleStateChanged;
+
         Player.OnAbilityUsed += HandleAbilityUsed;
-        GameStateManager.OnStateChanged += HandleStateChanged;
-        //Player.Instance.AbilityCharge = Player.Instance.MaxAbilityCharge;
+
+        if(!infiniteDuration)
+            GameStateManager.OnStateChanged += HandleStateChanged;
     }
 
     private void HandleStateChanged(GameState previousState, GameState newState)

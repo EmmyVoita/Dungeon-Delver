@@ -42,6 +42,7 @@ public class MenuMusicPlayer : MonoBehaviour
         AudioSettingsManager.OnVolumeUpdated += HandleVolumeUpdated;
         GameStateManager.OnStateChanged += HandleStateChanged;
         SceneManager.sceneLoaded += OnSceneLoaded;
+        TimeManager.OnTimeScaleChanged += HandleTimeScaleChanged;
     }
 
     private void OnDisable()
@@ -49,6 +50,7 @@ public class MenuMusicPlayer : MonoBehaviour
         AudioSettingsManager.OnVolumeUpdated -= HandleVolumeUpdated;
         GameStateManager.OnStateChanged -= HandleStateChanged;
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        TimeManager.OnTimeScaleChanged -= HandleTimeScaleChanged;
     }
 
     private void Start()
@@ -57,6 +59,12 @@ public class MenuMusicPlayer : MonoBehaviour
         {
             PlayMenuMusic();
         }
+    }
+
+    private void HandleTimeScaleChanged(float scale)
+    {
+        if (source != null)
+            source.pitch = scale;
     }
 
     private void HandleVolumeUpdated()

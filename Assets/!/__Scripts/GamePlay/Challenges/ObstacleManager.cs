@@ -10,7 +10,7 @@ public class ObstacleManager : MonoBehaviour
     public static ObstacleManager Instance { get; private set; }
 
     public static event Action OnFirstObstacleAppeared;
-    public static event Action OnAllObstaclesCleared;
+    public static event Action<int> OnAllObstaclesCleared;
     public static event Action OnObstacleCleared;
     public static Action<GameObject> OnObstacleSpawned;
 
@@ -28,6 +28,7 @@ public class ObstacleManager : MonoBehaviour
  
     private bool _playerStateDirty = false;
     private bool _resolvingPlayerState = false;
+    private int _damageTaken = 0;
 
     public bool TestOn => practiceController.TestOn;
 
@@ -40,6 +41,22 @@ public class ObstacleManager : MonoBehaviour
             return;
         }
         Instance = this;
+    }
+
+    private void OnEnable()
+    {
+        Player.OnDamageTaken += HandleDamageTaken;
+    }
+
+    private void OnDisable()
+    {
+        Player.OnDamageTaken -= HandleDamageTaken;
+    }
+
+    private void HandleDamageTaken(int damage)
+    {
+        if(AnyActive)
+        _damageTaken++;
     }
 
     private void OnDestroy()
@@ -88,8 +105,11 @@ public class ObstacleManager : MonoBehaviour
         activeObstacles.Add(challenge);
 
         if (wasEmpty)
+        {
+            _damageTaken = 0;
             OnFirstObstacleAppeared?.Invoke();
-
+        }
+    
         MarkPlayerStateDirty();
     }
 
@@ -110,7 +130,9 @@ public class ObstacleManager : MonoBehaviour
             MarkPlayerStateDirty();
 
             if (activeObstacles.Count == 0)
-                OnAllObstaclesCleared?.Invoke();
+            {
+                OnAllObstaclesCleared?.Invoke(_damageTaken);
+            }
         }
     }
 
@@ -118,7 +140,7 @@ public class ObstacleManager : MonoBehaviour
     {
         if (activeObstacles.Count == 0)
         {
-            Player.Instance.SetPlayerControlState(Player.PlayerControlState.Normal);
+            Player.Instance.SetPlayerControlState(PlayerControlState.Normal);
             return;
         }
 
@@ -139,7 +161,7 @@ public class ObstacleManager : MonoBehaviour
 
         if (best == null)
         {
-            Player.Instance.SetPlayerControlState(Player.PlayerControlState.Normal);
+            Player.Instance.SetPlayerControlState(PlayerControlState.Normal);
             return;
         }
 
@@ -155,7 +177,7 @@ public class ObstacleManager : MonoBehaviour
             OnObstacleCleared?.Invoke();
 
             if (activeObstacles.Count == 0)
-                OnAllObstaclesCleared?.Invoke();
+                OnAllObstaclesCleared?.Invoke(_damageTaken);
 
             MarkPlayerStateDirty();
         }

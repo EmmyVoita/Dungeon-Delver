@@ -49,7 +49,7 @@ MonoBehaviour:
   centerTarget: {x: 0, y: 0, z: 0}
   blackHoleVisual: {fileID: 2129283529575701880}
   armPivot: {fileID: 4912163890904307426}
-  spikyBallPrefab: {fileID: 2209782324246233958, guid: 138321865779ec84fb6ee6db3bba6acc, type: 3}
+  spikyBallPrefab: {fileID: 2209782324246233958, guid: c283cf36520fd1048adc5ebd1984fa61, type: 3}
   orbitRadius: 2.6
   orbitAngularSpeed: 120
   clockwiseOrbit: 1
@@ -60,7 +60,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 1
     pitch: 1
-    usePitchVariation: 0
     pitchVariation: 0
   armSegmentCount: 7
   buildSegmentDelay: 0.2

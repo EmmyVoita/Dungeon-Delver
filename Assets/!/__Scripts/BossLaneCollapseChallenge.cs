@@ -11,7 +11,8 @@ public class BossLaneCollapseChallenge : ChallengeBase
 
     void Start()
     {
-        Begin();
+        if(BossManager.Instance.IsBossActive)
+            Begin();
     }
 
     public override void Begin(object config = null)

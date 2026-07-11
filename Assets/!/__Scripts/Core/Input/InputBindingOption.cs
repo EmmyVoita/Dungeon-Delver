@@ -45,6 +45,8 @@ public class InputBindingOption : BaseSettingOption
 
     public override void OnActivate()
     {
+        SoundEffect adjustSound = AudioLibrary.Instance.Database.navigate;
+        AudioHelpers.PlaySoundEffect(adjustSound,Camera.main.transform.position);
         BeginRebind();
     }
 
@@ -106,12 +108,19 @@ public class InputBindingOption : BaseSettingOption
                     bool success = InputBindingManager.Instance.TrySetKey(actionType, keyControl.keyCode);
                     if(success)
                     {
+                        SoundEffect confrimSound = AudioLibrary.Instance.Database.select;
+                        AudioHelpers.PlaySoundEffect(confrimSound,Camera.main.transform.position);
+
+
                         keyAssigned = true;
                         keyDisplay.color = Color.white;
                         break;
                     }
                     else
                     {
+                        SoundEffect negativeSound = AudioLibrary.Instance.Database.negative;
+                        AudioHelpers.PlaySoundEffect(negativeSound,Camera.main.transform.position);
+
                         // Key is invalid → show feedback
                         keyDisplay.text = "X";
                         keyDisplay.color = Color.red;
@@ -119,6 +128,8 @@ public class InputBindingOption : BaseSettingOption
 
                         keyDisplay.text = "_";
                         keyDisplay.color = Color.yellow;
+
+                     
                     }    
                 }
             }

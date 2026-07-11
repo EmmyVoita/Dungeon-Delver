@@ -169,7 +169,7 @@ public class WallShooter : ChallengeBase
                     break;
             }
 
-            Vector3 basePos = transform.position + spawnPositionOffset + (Vector3)spawnAxis * (startOffset + i * projectileSpacing);
+            Vector3 basePos = spawnPositionOffset + (Vector3)spawnAxis * (startOffset + i * projectileSpacing);
 
             // 🎯 Random offset
             basePos += new Vector3(
@@ -236,6 +236,8 @@ public class WallShooter : ChallengeBase
             yield break;
         }
 
+  
+
         SpawnProjectiles();
         
 
@@ -294,6 +296,7 @@ public class WallShooter : ChallengeBase
     IEnumerator ChallengeSequence()
     {
         yield return new WaitForSeconds(startDelay);
+        
         switch(fireMode)
         {
             case FireMode.Burst:
@@ -390,6 +393,18 @@ public class WallShooter : ChallengeBase
             projectile.StartCoroutine(projectile.WindupAnim());
     }
 
+    protected override void CleanUp()
+    {
+        base.CleanUp();
+
+        foreach(WallProjectile projectile in projectiles)
+        {
+            Destroy(projectile.gameObject);
+        }
+
+        Destroy(obstacleContainer);
+    }
+
     public override void Begin(object config = null)
     {
         base.Begin();
@@ -399,10 +414,7 @@ public class WallShooter : ChallengeBase
     public override void End()
     {
         base.End();
-        foreach(WallProjectile projectile in projectiles)
-        {
-            Destroy(projectile.gameObject);
-        }
+        
         Destroy(gameObject,1.0f);
     }
 

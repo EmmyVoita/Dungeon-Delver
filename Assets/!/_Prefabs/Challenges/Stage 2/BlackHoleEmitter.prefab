@@ -46,9 +46,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BlackholeEmitter
   centerTarget: {x: 0, y: 0, z: 0}
-  spikyBallPrefab: {fileID: 2209782324246233958, guid: d5a5d0bd5cd858140b7fec2ac16c4933, type: 3}
+  spikyBallPrefab: {fileID: 2209782324246233958, guid: c283cf36520fd1048adc5ebd1984fa61, type: 3}
   ballsPerBurst: 3
-  burstSpacing: 0.08
+  burstSpacing: 0.1
   ballSpeed: 5
   shootSound:
     clip: {fileID: 8300000, guid: 6f9fd92ffae75114a9d3de5d96084c57, type: 3}
@@ -56,7 +56,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 1
     pitch: 1
-    usePitchVariation: 0
     pitchVariation: 0.2
 --- !u!1 &8573114405628806459
 GameObject:

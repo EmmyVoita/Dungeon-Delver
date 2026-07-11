@@ -1,22 +1,33 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.VFX;
 
 public class Goal : MonoBehaviour
 {
     public enum GoalType { Miss, Normal, Critical }
 
+    [SerializeField] private SpriteRenderer critRing;
+    [SerializeField] private float critActiveAlpha = 0.8f;
+    [SerializeField] private float critInactiveAlpha = 0.15f;
+    [SerializeField] private float activeScale = 1.05f;
+
+    private Tween critRingTween;
+
+
     [Header("Crit Movement Thresholds")]
     [SerializeField] private float critOnAngularSpeed = 35f;
     [SerializeField] private float critOffAngularSpeed = 20f;
-
+    [SerializeField] private List<PlayerControlState> showWindowVisuals;
    
 
 
     [Header("Visual / Audio")]
     [SerializeField] private AudioClip goalSound;
     [SerializeField] private AudioClip goalCritSound;
-    [SerializeField] private ParticleSystem critCatchEffect;
+    //[SerializeField] private ParticleSystem critCatchEffect;
+    [SerializeField] private VisualEffect critCatchEffect;
     [SerializeField] private float flashDuration = 0.5f;
     //[SerializeField] private Sprite defaultGoalSprite;
     //[SerializeField] private Sprite normalCatchGoalSprite;
@@ -47,25 +58,56 @@ public class Goal : MonoBehaviour
     private Quaternion targetRotation;
     private float lastManualRotateTime = -999f; // ✅ New — last time goal was rotated
 
-    private float lastZRotation;
+
     [SerializeField] private bool isCritWindowActive = false;
-    [SerializeField] private bool critArmed = false;
-    [SerializeField] private float angularVelocity;
+    private float critExpireTime = -999f;
+    [SerializeField] private Material spriteMat;
+    
+    [ColorUsage(true, true)] [SerializeField] private Color glowColor;
+    //[SerializeField] private bool critArmed = false;
+    //[SerializeField] private float angularVelocity;
+
+    private bool prevCritWindowActive = false;
+
+    private Tween ringTween;
+
+    private void SetRingAlpha(float alpha)
+    {
+        Color color = critRing.color;
+        color.a = alpha;
+        critRing.color = color;
+    }
 
 
     // Exposed direction property (read-only)
     public Vector2 GoalDirection => _goalDirection;
+    public bool CritWindowActive => Time.time <= critExpireTime;
 
     void Awake()
     {
         sRend = GetComponentInChildren<SpriteRenderer>();
-        //sRend.sprite = defaultGoalSprite;
         targetRotation = Quaternion.identity;
+        prevCritWindowActive = CritWindowActive;
     }
 
     void Start()
     {
         baseLocalPos = transform.localPosition;
+    }
+
+    void OnEnable()
+    {
+        Player.OnControlStateChanged += HandleControlStateChanged;
+    }
+
+    void OnDiable()
+    {
+        Player.OnControlStateChanged -= HandleControlStateChanged;
+    }
+
+    private void HandleControlStateChanged(PlayerControlState newState)
+    {
+        spriteMat.SetColor("_Color", Color.white);
     }
 
     void Update()
@@ -77,14 +119,21 @@ public class Goal : MonoBehaviour
             targetRotation,
             smoothing
         );
+    }
 
-           // 🔹 Measure angular velocity
-        float currentZ = transform.localEulerAngles.z;
-        angularVelocity = Mathf.Abs(Mathf.DeltaAngle(lastZRotation, currentZ)) / Time.deltaTime;
-        lastZRotation = currentZ;
+    private void TriggerCritWindowVisual(float critWindow)
+    {
+        if(!showWindowVisuals.Contains(Player.Instance.playerControlState))
+            return;
 
-        UpdateCritArmedState();
-        UpdateCritWindowVisual();
+
+        critRingTween?.Kill();
+
+        critRing.transform.localScale = Vector3.one * activeScale;
+
+        critRingTween = critRing.transform
+            .DOScale(1f, 0.08f)
+            .SetDelay(critWindow);
     }
     
     public void EnterHarvestMode()
@@ -121,20 +170,31 @@ public class Goal : MonoBehaviour
         transform.localScale = originalScale;
     }
 
-    // --------------------------------------------------------
-    // 🧭 External control for direction
-    // --------------------------------------------------------
+
     public void SetGoalDirection(Vector2 dir)
     {
         if (dir == Vector2.zero)
+            return;
+
+        dir = dir.normalized;
+
+        if (dir == _goalDirection)
             return;
 
         _goalDirection = dir.normalized;
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
         targetRotation = Quaternion.Euler(0, 0, angle);
 
-        // 🕒 Record when rotation happened
         lastManualRotateTime = Time.time;
+
+        float critWindow =
+            UpgradeManager.Instance == null
+            ? Player.Instance.CritWindow
+            : UpgradeManager.Instance.ModifyCritWindow(Player.Instance.CritWindow);
+
+        critExpireTime = Time.time + critWindow;
+
+        TriggerCritWindowVisual(critWindow);
     }
 
     // --------------------------------------------------------
@@ -155,13 +215,11 @@ public class Goal : MonoBehaviour
         {
             ResolveArrowCaught(arrow);
         }
-
-       
     }
 
     public void ResolveArrowCaught(ArrowBase arrow)
     {
-        bool isCrit = IsCritWindowActive();
+        bool isCrit = CritWindowActive;
 
         int score;
         ScorePopupKind popupKind;
@@ -203,14 +261,11 @@ public class Goal : MonoBehaviour
 
     private void ResolveInverseArrowCaught(ArrowBase arrow, DamageEffect damageEffect)
     {
-        Player.Instance.DamageSelf(damageEffect.damage, null, arrow);
+        Player.Instance.DamageSelf(damageEffect,arrow);
     }
 
 
 
-    // --------------------------------------------------------
-    // 💥 Shake feedback
-    // --------------------------------------------------------
     public void PlayImpactShake()
     {
         Debug.Log("🔔 Playing goal impact shake.");
@@ -240,71 +295,4 @@ public class Goal : MonoBehaviour
 
         activeShakeTween = shakeSeq;
     }
-
-    bool IsCritWindowActive()
-    {
-        // Movement-based crit
-        if (critArmed) return true;
-        
-        return false;
-    }
-
-
-    void UpdateCritArmedState()
-    {
-        float critWindowModifier = UpgradeManager.Instance == null ? 1f : UpgradeManager.Instance.ModifyCritWindow(Player.Instance.CritWindow);
-        critWindowModifier = Mathf.Max(0.001f, critWindowModifier);
-
-        float speedScale = Player.Instance.CritWindow / critWindowModifier;
-
-        float onThreshold = critOnAngularSpeed * speedScale;
-        float offThreshold = critOffAngularSpeed * speedScale;
-
-        // When critWidnowModifier > 1, then speedScale < 1, and the onThreshold will be lower. The off theshold will also be lower.
-        // When critWindowModifier < 1, then speedScale > 1, and the onThreshold will be higher. The off threshold will also be higher.
-
-        if (!critArmed)
-        {
-            // Turn ON only when clearly moving
-            if (angularVelocity >= onThreshold)
-            {
-                critArmed = true;
-            }
-        }
-        else
-        {
-            // Turn OFF only when clearly stopped
-            if (angularVelocity <= offThreshold)
-            {
-                critArmed = false;
-            }
-        }
-    }
-
-
-
-    void UpdateCritWindowVisual()
-    {
-        /*
-        bool critActive = IsCritWindowActive();
-
-        if (critActive == isCritWindowActive)
-            return;
-
-        isCritWindowActive = critActive;
-
-        if (isCritWindowActive && critWindowSprite != null)
-        {
-            sRend.sprite = critWindowSprite;
-        }
-        else
-        {
-            sRend.sprite = defaultGoalSprite;
-        }
-        */
-    }
-
-
-
-
 }

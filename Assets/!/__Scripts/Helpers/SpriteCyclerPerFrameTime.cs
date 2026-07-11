@@ -10,14 +10,28 @@ public class SpriteCyclerPerFrameTime : MonoBehaviour
     [SerializeField] private float[] frameDurations;
 
     [SerializeField] private bool stopAtLastFrame = false;
+    [SerializeField] private bool playOnAwake = true;
 
-    private int currentFrame = 0;
-    private float timer = 0f;
-    private bool isPlaying = true;
+    private int _currentFrame = 0;
+    private float _timer = 0f;
+    private bool _isPlaying = true;
 
-    private void Reset()
+    private void Awake()
+    {
+        if(playOnAwake)
+            Play();
+        else
+            Stop();
+    }
+
+    public void Reset()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        _currentFrame = 0;
+        _timer = 0f;
+
+        if (frames != null && frames.Length > 0 && spriteRenderer != null)
+            spriteRenderer.sprite = frames[0];
     }
 
     private void OnValidate()
@@ -40,56 +54,53 @@ public class SpriteCyclerPerFrameTime : MonoBehaviour
 
     private void Update()
     {
-        if (!isPlaying || frames == null || frames.Length == 0 || spriteRenderer == null)
+        if (!_isPlaying || frames == null || frames.Length == 0 || spriteRenderer == null)
             return;
 
         if (frameDurations == null || frameDurations.Length != frames.Length)
             return;
 
-        timer += Time.deltaTime;
+        _timer += Time.deltaTime;
 
-        float currentDuration = Mathf.Max(0.001f, frameDurations[currentFrame]);
+        float currentDuration = Mathf.Max(0.001f, frameDurations[_currentFrame]);
 
-        if (timer >= currentDuration)
+        if (_timer >= currentDuration)
         {
-            timer = 0f;
-            currentFrame++;
+            _timer = 0f;
+            _currentFrame++;
 
-            if (currentFrame >= frames.Length)
+            if (_currentFrame >= frames.Length)
             {
                 if (stopAtLastFrame)
                 {
-                    currentFrame = frames.Length - 1;
-                    isPlaying = false;
+                    _currentFrame = frames.Length - 1;
+                    _isPlaying = false;
                 }
                 else
                 {
-                    currentFrame = 0;
+                    _currentFrame = 0;
                 }
             }
 
-            spriteRenderer.sprite = frames[currentFrame];
+            spriteRenderer.sprite = frames[_currentFrame];
         }
     }
 
     // Optional helpers
     public void Play()
     {
-        isPlaying = true;
+        
+        _isPlaying = true;
     }
 
     public void Stop()
     {
-        isPlaying = false;
+        _isPlaying = false;
     }
 
     public void Restart()
     {
-        currentFrame = 0;
-        timer = 0f;
-        isPlaying = true;
-
-        if (frames != null && frames.Length > 0 && spriteRenderer != null)
-            spriteRenderer.sprite = frames[0];
+        Reset();
+        _isPlaying = true;
     }
 }

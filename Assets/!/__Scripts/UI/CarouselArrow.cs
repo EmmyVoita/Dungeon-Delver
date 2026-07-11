@@ -15,7 +15,7 @@ public class CarouselArrow : MonoBehaviour, IPointerClickHandler
     public static event Action<CarosuelDirection> OnCarouselArrowClicked;
     
     [Header("References")]
-    [SerializeField] private AbilitySelectManager selectManager;
+    [SerializeField] private PlayMenuNavigator selectManager;
 
     [Header("Input")]
     [SerializeField] private MenuState activeState;

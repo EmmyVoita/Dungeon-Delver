@@ -6,6 +6,7 @@ public class SpiralObject : MonoBehaviour
 {
     [Header("Effects")]
     public GameObject destroyEffectPrefab;
+    public GameObject destroyPlayerEffectPrefab;
     public SoundEffect destroySoundEffect;
 
     [Header("Spiral Line Settings")]
@@ -152,11 +153,12 @@ public class SpiralObject : MonoBehaviour
     {
         if(collision.transform.tag == "Player")
         {
+            Instantiate(destroyPlayerEffectPrefab, transform.position, Quaternion.identity);
+            AudioHelpers.PlaySoundEffect(destroySoundEffect, Camera.main.transform.position);
             Destroy(gameObject);
         }
 
-            
-
+        
 
         if (!collision.CompareTag("Center"))
             return;

@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f647f10395ee3ce4a89a2a4d397a9375, type: 3}
   m_Name: Golden Wave
   m_EditorClassIdentifier: 
+  cost: 3000
+  upgradeId: 
   icon: {fileID: 78976016, guid: 7f239c827232d5e42b192d0ad4ee6875, type: 3}
+  iconMaterial: {fileID: 0}
   displayName: Golden Wave
   descriptionTemplate: This level, your ability releases a <color=#9C27B0>golden</color>
     wave after time resumes. The wave grows with arrows caught during the slow.

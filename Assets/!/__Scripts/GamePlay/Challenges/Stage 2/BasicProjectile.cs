@@ -29,93 +29,91 @@ public class BasicProjectile : MonoBehaviour, IProjectile
     
     
     private Collider2D _col;
-    private bool _hasBeenHit = false;
+    private bool _invincible = false;
 
 
 
     void Awake()
     {
         _col = GetComponent<Collider2D>();
-        _hasBeenHit = false;
+        _invincible = false;
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
        // Prevent multiple triggers & only care about hitting the player
-        if (!other.CompareTag("Player") || _hasBeenHit) return;
+        if (!other.CompareTag("Player") || _invincible) return;
 
         OnProjectileHit?.Invoke();
-
-        AudioHelpers.PlaySoundEffect(hitSound, transform.position);
+        
 
         // Destroy after fade & particle delay
         if(destroyOnHit)
             DestroyProjectile();
+        else
+            AudioHelpers.PlaySoundEffect(hitSound, transform.position);
     }
 
     public void DestroyProjectile(bool silent = false)
     {
-        // Prevent multiple triggers
-        if (_hasBeenHit) return; 
+        if (_invincible) return;
 
-        _hasBeenHit = true;
+        _invincible = true;
 
-        // Disable Collider Immediately
         _col.enabled = false;
 
-        if(silent)
+        // Skip all VFX/SFX entirely
+        if (silent)
         {
+            sRend?.DOKill();
             Destroy(gameObject);
             return;
         }
 
-        if(destroyType == DestroyType.Instant)
+        if (destroyType == DestroyType.Instant)
         {
-            AudioHelpers.PlaySoundEffect(destroySound,transform.position);
+            AudioHelpers.PlaySoundEffect(
+                destroySound,
+                transform.position
+            );
 
-            if(destroyEffectPrefab != null)
+            if (destroyEffectPrefab != null)
             {
-                Instantiate(destroyEffectPrefab, transform.position, transform.rotation);
+                Instantiate(
+                    destroyEffectPrefab,
+                    transform.position,
+                    transform.rotation
+                );
             }
 
             Destroy(gameObject);
         }
         else
         {
-            // Fade transparency using DOTween
-            sRend?.DOFade(0f, fadeOutDuration)
+            sRend?.DOFade(
+                0f,
+                fadeOutDuration
+            )
             .SetEase(Ease.OutQuad)
             .SetLink(gameObject)
             .OnComplete(() =>
             {
-                AudioHelpers.PlaySoundEffect(destroySound,transform.position);
+                AudioHelpers.PlaySoundEffect(
+                    destroySound,
+                    transform.position
+                );
 
-                if(destroyEffectPrefab != null)
+                if (destroyEffectPrefab != null)
                 {
-                    Instantiate(destroyEffectPrefab, transform.position, transform.rotation);
+                    Instantiate(
+                        destroyEffectPrefab,
+                        transform.position,
+                        transform.rotation
+                    );
                 }
 
-                // Destroy after fade
                 Destroy(gameObject);
             });
         }
     }
-
-    /*
-    public void FadeOut()
-    {
-        // Prevent multiple triggers
-        if (_hasBeenHit) return; 
-
-        _hasBeenHit = true;
-
-        // Disable Collider Immediately
-        _col.enabled = false;
-
-        if(destroyEffectPrefab != null)
-        {
-            Instantiate(destroyEffectPrefab, transform.position, transform.rotation);
-        }
-    }
-    */
 }

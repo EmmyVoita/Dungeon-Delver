@@ -11,12 +11,14 @@ public class SettingsMenuNavigator : BaseMenu
 {
     public static Action SettingsMenuClosed;
 
+
     [Header("References")]
     [SerializeField] private GameObject holderObject;
     [SerializeField] private Transform currentPanel;
     [SerializeField] private SettingsTabManager tabManager;
     [SerializeField] private RectTransform horzontalBar;
     [SerializeField] private Image barImage;
+
 
     [Header("Visuals")]
     [SerializeField] private Color selectedColor = Color.yellow;
@@ -25,21 +27,11 @@ public class SettingsMenuNavigator : BaseMenu
     [SerializeField] private float transitionSpeed = 8f;
     [SerializeField] private float barAlpha = 0.2f;
 
-    private List<BaseSettingOption> currentOptions = new List<BaseSettingOption>();
-    private int selectedIndex = -1;
-    private bool enableInput = false;
-    [SerializeField] private bool inTabNavigation = false;
 
-    void Awake()
-    {
-        lockInput = true;
-    }
+    private List<BaseSettingOption> _currentOptions = new List<BaseSettingOption>();
+    private int _selectedIndex = -1;
+    private bool _inTabNavigation = false;
 
-    void Start()
-    {
-        //holderObject.SetActive(false);
-        LoadPanelOptions();
-    }
 
     private void OnEnable()
     {
@@ -51,91 +43,26 @@ public class SettingsMenuNavigator : BaseMenu
         BaseSettingOption.OnSettingOptionEnter -= HandlePointerEnter;
     }
 
-    private void HandlePointerEnter(BaseSettingOption option)
+    void Awake()
     {
-        int index = currentOptions.IndexOf(option);
-
-        if (index == -1)
-            return;
-
-        inTabNavigation = false;
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
-        selectedIndex = index;
-
-        barImage.DOKill();
-        barImage.DOFade(barAlpha,  0.15f);
-        tabManager.SetTabFocus(false);
-
-        HighlightOption(selectedIndex, true);
+        lockInput = true;
     }
 
-    public override void OnOpen()
+    void Start()
     {
-        lockInput = false;
-        base.OnOpen();
-
-        ScreenDimmerManager.Instance.AddDimSource("SettingsMenu");
-
-        //holderObject.SetActive(true);
-
-        // Start on the tabs
-        barImage.DOKill();
-        barImage.color = new Color(barImage.color.r, barImage.color.g, barImage.color.b, 0f);
-        inTabNavigation = true;
-        tabManager.SetTabFocus(true);
-
-        HighlightAllOptionsDefault();
-    }
-
-    public override void OnClose()
-    {
-        base.OnClose();
-
-        ScreenDimmerManager.Instance.RemoveDimSource("SettingsMenu");
-
-        //holderObject.SetActive(false);
-        selectedIndex = 0;
-    }
-
-    void LoadPanelOptions()
-    {
-        currentOptions.Clear();
-        currentOptions.AddRange(currentPanel.GetComponentsInChildren<BaseSettingOption>(true));
-        selectedIndex = Mathf.Clamp(selectedIndex, 0, currentOptions.Count - 1);
-    }
-
-    public void ChangeActivePanel(Transform newPanel, bool fromTabSwitch = false)
-    {
-        currentPanel = newPanel;
         LoadPanelOptions();
-
-        if (fromTabSwitch)
-        {
-            barImage.DOKill();
-            barImage.DOFade(0.0f, 0.1f);
-            inTabNavigation = true;
-            tabManager.SetTabFocus(true);
-            HighlightAllOptionsDefault();
-        }
-        else
-        {
-            Debug.LogError("In navigation false");
-            barImage.DOKill();
-            barImage.DOFade(barAlpha, 0.1f);
-            inTabNavigation = false;
-        }
     }
 
     void Update()
     {
         if (lockInput || !isActive) return;
 
-        if (currentOptions.Count == 0)
+        if (_currentOptions.Count == 0)
             return;
 
-        BaseSettingOption current = currentOptions[selectedIndex];
+        BaseSettingOption current = _currentOptions[_selectedIndex];
 
-        if(!inTabNavigation)
+        if(!_inTabNavigation)
         {
             RectTransform currentRect = current.GetComponent<RectTransform>();
 
@@ -171,7 +98,7 @@ public class SettingsMenuNavigator : BaseMenu
         // ======================================================================
         // TAB NAVIGATION MODE
         // ======================================================================
-        if (inTabNavigation)
+        if (_inTabNavigation)
         {
             tabManager.SetTabFocus(true);
 
@@ -183,12 +110,12 @@ public class SettingsMenuNavigator : BaseMenu
 
             if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
             {
-                inTabNavigation = false;
+                _inTabNavigation = false;
                 barImage.DOKill();
                 barImage.DOFade(barAlpha,  0.15f);
                 tabManager.SetTabFocus(false);
                 AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
-                HighlightOption(selectedIndex, instant: true);
+                HighlightOption(_selectedIndex, instant: true);
             }
 
             return;
@@ -202,7 +129,7 @@ public class SettingsMenuNavigator : BaseMenu
 
 
         // ----------------------------------------------------------------------
-        //  🔒 BLOCK ALL NAVIGATION IF LOCKED
+        //  BLOCK ALL NAVIGATION IF LOCKED
         // ----------------------------------------------------------------------
         if (current.IsNavigationLocked)
         {
@@ -218,12 +145,12 @@ public class SettingsMenuNavigator : BaseMenu
         // ----------------------------------------------------------------------
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
-            if (selectedIndex == 0)
+            if (_selectedIndex == 0)
             {
                 barImage.DOKill();
                 barImage.DOFade(0.0f, 0.15f);
                 // Move back to tab mode
-                inTabNavigation = true;
+                _inTabNavigation = true;
                 tabManager.SetTabFocus(true);
                 AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
                 HighlightAllOptionsDefault();
@@ -259,36 +186,91 @@ public class SettingsMenuNavigator : BaseMenu
         AnimateSelection();
     }
 
+
+    public override void OnOpen()
+    {
+        lockInput = false;
+        base.OnOpen();
+
+        ScreenDimmerManager.Instance.AddDimSource("SettingsMenu");
+
+        // Start on the tabs
+        barImage.DOKill();
+        barImage.color = new Color(barImage.color.r, barImage.color.g, barImage.color.b, 0f);
+        _inTabNavigation = true;
+        tabManager.SetTabFocus(true);
+
+        HighlightAllOptionsDefault();
+    }
+
+    public override void OnClose()
+    {
+        base.OnClose();
+        ScreenDimmerManager.Instance.RemoveDimSource("SettingsMenu");
+        _selectedIndex = 0;
+    }
+
+    void LoadPanelOptions()
+    {
+        _currentOptions.Clear();
+        _currentOptions.AddRange(currentPanel.GetComponentsInChildren<BaseSettingOption>(true));
+        _selectedIndex = Mathf.Clamp(_selectedIndex, 0, _currentOptions.Count - 1);
+    }
+
+    public void ChangeActivePanel(Transform newPanel, bool fromTabSwitch = false)
+    {
+        currentPanel = newPanel;
+        LoadPanelOptions();
+
+        if (fromTabSwitch)
+        {
+            barImage.DOKill();
+            barImage.DOFade(0.0f, 0.1f);
+            _inTabNavigation = true;
+            tabManager.SetTabFocus(true);
+            HighlightAllOptionsDefault();
+        }
+        else
+        {
+            Debug.LogError("In navigation false");
+            barImage.DOKill();
+            barImage.DOFade(barAlpha, 0.1f);
+            _inTabNavigation = false;
+        }
+    }
+
+   
+
     void MoveSelection(int direction)
     {
-        selectedIndex = Mathf.Clamp(selectedIndex + direction, 0, currentOptions.Count - 1);
+        _selectedIndex = Mathf.Clamp(_selectedIndex + direction, 0, _currentOptions.Count - 1);
         AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
-        HighlightOption(selectedIndex);
+        HighlightOption(_selectedIndex);
     }
 
     void HighlightOption(int index, bool instant = false)
     {
-        for (int i = 0; i < currentOptions.Count; i++)
+        for (int i = 0; i < _currentOptions.Count; i++)
         {
             bool active = (i == index);
 
-            var settingOption = currentOptions[i] as AudioSettingOption;
+            var settingOption = _currentOptions[i] as AudioSettingOption;
             if (settingOption != null)
                 settingOption.SetSelected(active);
 
-            var text = currentOptions[i].GetComponentInChildren<TextMeshProUGUI>();
+            var text = _currentOptions[i].GetComponentInChildren<TextMeshProUGUI>();
             if (text != null)
                 text.color = active ? selectedColor : defaultColor;
 
             float targetScale = active ? selectedScale : 1f;
             if (instant)
-                currentOptions[i].transform.localScale = Vector3.one * targetScale;
+                _currentOptions[i].transform.localScale = Vector3.one * targetScale;
         }
     }
 
     void HighlightAllOptionsDefault()
     {
-        foreach (var option in currentOptions)
+        foreach (var option in _currentOptions)
         {
             var settingOption = option as AudioSettingOption;
             if (settingOption != null)
@@ -304,20 +286,20 @@ public class SettingsMenuNavigator : BaseMenu
 
     void AnimateSelection()
     {
-        for (int i = 0; i < currentOptions.Count; i++)
+        for (int i = 0; i < _currentOptions.Count; i++)
         {
-            float targetScale = (i == selectedIndex) ? selectedScale : 1f;
+            float targetScale = (i == _selectedIndex) ? selectedScale : 1f;
 
-            currentOptions[i].transform.localScale = Vector3.Lerp(
-                currentOptions[i].transform.localScale,
+            _currentOptions[i].transform.localScale = Vector3.Lerp(
+                _currentOptions[i].transform.localScale,
                 Vector3.one * targetScale,
                 Time.deltaTime * transitionSpeed
             );
 
-            var text = currentOptions[i].GetComponentInChildren<TextMeshProUGUI>();
+            var text = _currentOptions[i].GetComponentInChildren<TextMeshProUGUI>();
             if (text != null)
             {
-                Color targetColor = (i == selectedIndex) ? selectedColor : defaultColor;
+                Color targetColor = (i == _selectedIndex) ? selectedColor : defaultColor;
                 text.color = Color.Lerp(
                     text.color,
                     targetColor,
@@ -325,5 +307,23 @@ public class SettingsMenuNavigator : BaseMenu
                 );
             }
         }
+    }
+
+    private void HandlePointerEnter(BaseSettingOption option)
+    {
+        int index = _currentOptions.IndexOf(option);
+
+        if (index == -1)
+            return;
+
+        _inTabNavigation = false;
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        _selectedIndex = index;
+
+        barImage.DOKill();
+        barImage.DOFade(barAlpha,  0.15f);
+        tabManager.SetTabFocus(false);
+
+        HighlightOption(_selectedIndex, true);
     }
 }

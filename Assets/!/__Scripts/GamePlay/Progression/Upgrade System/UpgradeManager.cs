@@ -137,7 +137,6 @@ public class UpgradeManager : MonoBehaviour
         if (newState == GameState.UpgradeSelection && (temporaryModifiers.Count > 0 || activeUpgrades.Count > 0))
         {
             ClearTemporaryModifiers();
-            ClearUpgrades();
         }
     }
 

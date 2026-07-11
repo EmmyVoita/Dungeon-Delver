@@ -15,6 +15,7 @@ public class ArcAxeEncounter : ChallengeBase
     [SerializeField] private Vector2 spawnX = new Vector2(6,8);
     [SerializeField] private float minY = -3f;
     [SerializeField] private float maxY = 3f;
+    [SerializeField] private float randomYOffset = 0.25f;
 
     [Header("Arc Settings")]
     [SerializeField] private float arcHeight = 2.5f;
@@ -93,7 +94,25 @@ public class ArcAxeEncounter : ChallengeBase
     {
         int direction = Random.value < 0.5f ? -1 : 1;
 
-        float startY = Random.Range(minY, maxY);
+        List<int> availableLanes =
+            LaneReservationManager.GetAvailableLanes(
+                LaneState.MaxLanes
+            );
+
+        if (availableLanes.Count == 0)
+            return;
+
+        int lane =
+            availableLanes[
+                Random.Range(
+                    0,
+                    availableLanes.Count
+                )
+            ];
+
+        float startY = GetLaneY(lane);
+        startY += Random.Range(-randomYOffset, randomYOffset);
+
 
         float _spawnX = Random.Range(spawnX.x,spawnX.y);
 
@@ -183,5 +202,20 @@ public class ArcAxeEncounter : ChallengeBase
     {
         base.End();
         Destroy(gameObject);
+    }
+
+    private float GetLaneY(int lane)
+    {
+        if (LaneState.MaxLanes <= 1)
+            return (minY + maxY) * .5f;
+
+        float lane01 =
+            (float)lane / (LaneState.MaxLanes - 1);
+
+        return Mathf.Lerp(
+            minY,
+            maxY,
+            lane01
+        );
     }
 }

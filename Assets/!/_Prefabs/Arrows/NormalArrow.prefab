@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5892528185532056661}
   - component: {fileID: 7488991445482098621}
   - component: {fileID: 1372070942466369641}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: NormalArrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,7 +94,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
+  abilityChargeDamage: 0
   sourceName: Arrow
+  playHitSound: 1
 --- !u!114 &1372070942466369641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -110,16 +112,22 @@ MonoBehaviour:
   health: 1
   catchRule: 0
   flip180: 1
-  arrowHitSound: {fileID: 8300000, guid: fef65794fbfc1754197e5acab64dbbfd, type: 3}
-  normalHitPitch: 1
-  criticalHitPitch: 1
+  sRend: {fileID: 6126199824829436692}
+  baseMaterial: {fileID: 2100000, guid: 82c78b02c81a1e040b2596ee2105c5f4, type: 2}
+  colorApropertyName: _ColorA
+  colorBpropertyName: _ColorB
+  goldenColorA: {r: 1.7568628, g: 0.36078432, b: 0.09411765, a: 1}
+  goldenColorB: {r: 1.8490566, g: 0.7805711, b: 0.13082945, a: 1}
+  recoveryColorA: {r: 0.012014951, g: 0.09433961, b: 0.03516876, a: 1}
+  recoveryColorB: {r: 0.45112416, g: 1.8443025, b: 0.45112416, a: 1}
+  arrowHitSound: {fileID: 8300000, guid: f08e4e684365b2941ba5fb373264dd6f, type: 3}
+  normalHitPitch: 1.8
+  criticalHitPitch: 2.1
   directionalPitchFactor: 0
   directionalEQStrength: 0.5
-  hpfNeutral: 300
-  lpfNeutral: 20000
-  midNeutral: 0.5
-  invincible: 0
-  status: 0
+  killEffect: {fileID: 6150066417496139723, guid: 9fb52edbed03ad74bab4878615f4c202, type: 3}
+  _invincible: 0
+  _status: 0
 --- !u!1 &7051393215649728960
 GameObject:
   m_ObjectHideFlags: 0
@@ -130,7 +138,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4680544758289538092}
   - component: {fileID: 6126199824829436692}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -178,7 +186,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 82c78b02c81a1e040b2596ee2105c5f4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -201,7 +209,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -193658917, guid: 2643ceeec1f901e48b35b170c4e84480, type: 3}
+  m_Sprite: {fileID: 615993537, guid: 1743557c4c9a4f1499946f84df77cff1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

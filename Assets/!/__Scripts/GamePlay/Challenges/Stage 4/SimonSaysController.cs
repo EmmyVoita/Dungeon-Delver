@@ -249,7 +249,7 @@ public class SimonSaysController : MonoBehaviour
         
         inputEnabled = false;
         AudioHelpers.PlayClipWithVariation(failSound, AudioChannel.SFX, Camera.main.transform.position, pitchRange: 0.1f);//
-        Player.Instance.DamageSelf(1); // or your damage system
+        //Player.Instance.DamageSelf(1); // or your damage system
         yield return new WaitForSeconds(0.5f);
     }
 }

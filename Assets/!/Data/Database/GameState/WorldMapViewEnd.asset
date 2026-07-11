@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameStateSettingData
   state: 18
   dimScreen: 1
-  allowPlayerInput: 0
+  allowPlayerInput: 1
   enableDamage: 0
   allowPause: 1
   showScoreUI: 0

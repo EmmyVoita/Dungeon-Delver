@@ -57,7 +57,7 @@ public static class StatDisplayHelpers
                 );
             case StatValueType.RunTotalScore:
                 return StatValue.FromInt(
-                    ScoreManager.Instance.GameScoreTotal
+                    ScoreManager.Instance.RunScoreTotal
                 );
             case StatValueType.RunHighestCombo:
                 return StatValue.FromInt(
@@ -88,7 +88,10 @@ public static class StatDisplayHelpers
                 return StatValue.FromInt(
                     RoundManager.Instance.stats.Score
                 );
-            
+            case StatValueType.Currency:
+                return StatValue.FromInt(
+                    CurrencyManager.Instance.CurrentCurrency
+                );
 
             default:
                 return StatValue.FromString("Unknown Stat Row Data");

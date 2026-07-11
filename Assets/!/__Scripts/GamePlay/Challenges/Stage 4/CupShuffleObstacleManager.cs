@@ -372,7 +372,7 @@ public class CupShuffleObstacleManager : MonoBehaviour
             yield return new WaitForSeconds(0.2f);
         }
 
-        Player.Instance.DamageSelf(1); // or your damage system
+        // /layer.Instance.DamageSelf(1); // or your damage system
         
 
         yield return new WaitForSeconds(2.0f);

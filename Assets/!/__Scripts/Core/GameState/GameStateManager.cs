@@ -10,6 +10,9 @@ public class GameStateManager : MonoBehaviour
     public GameState CurrentState => currentState;
     public GameState PreviousState => previousState;
 
+    public static GameState LevelStartState => GameState.RoundActive;
+    public static GameState LevelEndState => GameState.RoundResultsTally;
+
     public static event Action<GameState, GameState> OnStateChanged;
 
     private void Awake()
@@ -41,6 +44,8 @@ public class GameStateManager : MonoBehaviour
 
         previousState = CurrentState;
         currentState = newState;
+
+        Debug.Log($"Set state from {previousState} => {newState}!");
 
         OnStateChanged?.Invoke(previousState, newState);
     }

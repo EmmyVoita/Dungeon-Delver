@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6060b2a77a0dab46ac888703315c5a4, type: 3}
+  m_Name: PowerExchange
+  m_EditorClassIdentifier: 
+  _cost: 0
+  _maxStacks: 999
+  upgradeId: increasedamageincreasescore
+  icon: {fileID: 21300000, guid: f40f18ef14b3c8a4e86ad137acd5f48f, type: 3}
+  iconMaterial: {fileID: 2100000, guid: 8b3fb34896e326c4a8fb58bd5ad01864, type: 2}
+  displayName: Power Exchange
+  descriptionTemplate: Gain {COLOR_LAVENDER}${CURRENCY_AMOUNT}</color> now, and increase
+    damage taken in the next level by <color=#E53935>{ADDITIONAL_DAMAGE}</color>.
+  additionalDamage: 1
+  currencyAmount: 300

@@ -205,8 +205,9 @@ MonoBehaviour:
     pitch: 1.25
     pitchVariation: 0.1
   spawnX: {x: 7, y: 8}
-  minY: -9
-  maxY: 0
+  minY: -7.5
+  maxY: -2
+  randomYOffset: 1
   arcHeight: 5
   arcYOffset: 0
   travelDuration: 2

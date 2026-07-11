@@ -113,7 +113,7 @@ public class ScreenDimmerManager : MonoBehaviour
         AddDimSource("obstacle");
     }
 
-    private void HandleObstacleUndim()
+    private void HandleObstacleUndim(int damageTaken)
     {
         if(ObstacleManager.Instance == null) return;
         RemoveDimSource("obstacle");

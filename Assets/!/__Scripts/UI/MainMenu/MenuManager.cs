@@ -17,11 +17,16 @@ public class MenuManager : MonoBehaviour
     public float defaultTransitionDelay = 0.25f; 
 
 
+    [Header("Menu References")]
     [SerializeField] private List<BaseMenu> menuList = new ();
 
-    private Dictionary<MenuState, BaseMenu> _lookup = new();
+    
+    [Header("Dynamic")]
     [SerializeField] private BaseMenu _activeMenu;
     [SerializeField] private bool _isTransitioning = false;
+
+
+    private Dictionary<MenuState, BaseMenu> _lookup = new();
 
 
     public MenuState CurrentState => _activeMenu != null ? _activeMenu.menuType : MenuState.None;
@@ -38,12 +43,8 @@ public class MenuManager : MonoBehaviour
         }
 
         Instance = this;
-    }
 
-
-    void Start()
-    {
-        // Convert List to dictionary
+         // Convert List to dictionary
         _lookup = new Dictionary<MenuState, BaseMenu>();
 
         foreach (BaseMenu entry in menuList)
@@ -53,7 +54,11 @@ public class MenuManager : MonoBehaviour
                 _lookup.Add(entry.menuType, entry);
             }
         }
+    }
 
+
+    void Start()
+    {
         // Load menu from game scene config if it exists.
         GameSceneConfig config = GameSessionBootstrap.Config;
 

@@ -237,8 +237,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3da55463a36a704cbb067cc69d9ff88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
+  registerWithManager: 0
   priority: 1
   controlMode: 2
+  listenForBossActive: 0
   lifetimeMode: 1
   switchPlayerState: 0
   completionCondition: 0
@@ -250,7 +252,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 1
     pitch: 1
-    usePitchVariation: 0
     pitchVariation: 0
   spawnDistance: 7
   spawnInterval: 2.5
@@ -445,8 +446,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3da55463a36a704cbb067cc69d9ff88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
+  registerWithManager: 1
   priority: 0
   controlMode: 2
+  listenForBossActive: 0
   lifetimeMode: 0
   switchPlayerState: 1
   completionCondition: 0
@@ -458,7 +461,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 1
     pitch: 1
-    usePitchVariation: 0
     pitchVariation: 0
   spawnDistance: 7
   spawnInterval: 1.5

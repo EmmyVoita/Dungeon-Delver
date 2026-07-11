@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2490980988234526953}
   - component: {fileID: 193027958192837250}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: ExtraSprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +105,7 @@ GameObject:
   - component: {fileID: 5892528185532056661}
   - component: {fileID: 7488991445482098621}
   - component: {fileID: 5755594465958058858}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: NormalMagicArrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -274,7 +274,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
-  sourceName: Magic Arrow
+  abilityChargeDamage: 3
+  sourceName: Magic Sword Arrow
+  playHitSound: 1
 --- !u!114 &5755594465958058858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -290,16 +292,21 @@ MonoBehaviour:
   health: 1
   catchRule: 0
   flip180: 1
+  sRend: {fileID: 0}
+  baseMaterial: {fileID: 0}
+  colorApropertyName: _ColorA
+  colorBpropertyName: _ColorB
+  goldenColorA: {r: 0, g: 0, b: 0, a: 0}
+  goldenColorB: {r: 0, g: 0, b: 0, a: 0}
+  recoveryColorA: {r: 0, g: 0, b: 0, a: 0}
+  recoveryColorB: {r: 0, g: 0, b: 0, a: 0}
   arrowHitSound: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
   normalHitPitch: 1
   criticalHitPitch: 1
   directionalPitchFactor: 0
   directionalEQStrength: 0.5
-  hpfNeutral: 300
-  lpfNeutral: 20000
-  midNeutral: 0.5
-  invincible: 0
-  status: 0
+  _invincible: 0
+  _status: 0
   destroyEffect: {fileID: 812096446077587059, guid: 39cfcc1d74ff7ff4eae49039225c3877, type: 3}
 --- !u!1001 &9112137364864987663
 PrefabInstance:
@@ -312,6 +319,10 @@ PrefabInstance:
     - target: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
       propertyPath: m_Name
       value: Projectile Line
+      objectReference: {fileID: 0}
+    - target: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
+      propertyPath: m_Layer
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
       propertyPath: m_IsActive

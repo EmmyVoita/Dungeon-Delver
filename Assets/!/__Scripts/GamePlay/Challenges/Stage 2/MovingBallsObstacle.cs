@@ -20,6 +20,7 @@ public class MovingBallsObstacle : ChallengeBase
     public float skipChance = 0.25f;   // 25% chance to skip a slot
 
     private List<BasicProjectile> _projectiles;
+    private Coroutine _spawnRoutine;
 
     void Start()
     {
@@ -66,10 +67,16 @@ public class MovingBallsObstacle : ChallengeBase
 
     protected override void CleanUp()
     {
+        if(_spawnRoutine != null)
+        {
+            StopCoroutine(_spawnRoutine);
+            _spawnRoutine = null;
+        }
+
         foreach (BasicProjectile projectile in _projectiles)
         {
             if (projectile != null)
-                projectile.DestroyProjectile();
+                projectile.DestroyProjectile(true);
         }
 
         base.CleanUp();
@@ -103,7 +110,7 @@ public class MovingBallsObstacle : ChallengeBase
     public override void Begin(object config = null)
     {
         base.Begin();
-        StartCoroutine(SpawnBallsRoutine());
+        _spawnRoutine = StartCoroutine(SpawnBallsRoutine());
     }
 
     public override void End()

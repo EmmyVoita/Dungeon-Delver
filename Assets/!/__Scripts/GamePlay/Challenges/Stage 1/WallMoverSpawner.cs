@@ -17,6 +17,7 @@ public class WallMoverSpawner : ChallengeBase
     public float speedVariation = 0.3f;
     public float lifeDuration = 4f;
     public float unRegisterDelay = 0.5f;
+    public bool randomlyFlipWalls = true;
 
     [Header("Prefab Options")]
     public GameObject[] wallPrefabs;
@@ -97,10 +98,7 @@ public class WallMoverSpawner : ChallengeBase
 
         Vector2 chosenDirection = (dirIndex >= 0) ? fireDirections[dirIndex] : Vector2.left;
 
-        bool flipDirection = Random.value > 0.5f;
-
-        //if(ScreenShaker.Instance != null)
-        //ScreenShaker.Instance.ShakeInDirection(chosenDirection);
+        bool flipDirection = randomlyFlipWalls ? Random.value > 0.5f : false;
 
         // 🔹 Spawn object at offset in chosen direction
         GameObject obj = Instantiate(

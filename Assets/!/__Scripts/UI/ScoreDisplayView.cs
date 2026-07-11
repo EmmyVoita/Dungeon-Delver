@@ -14,6 +14,7 @@ public class ScoreDisplayView : MonoBehaviour
     public float jumpScale = 0.4f;
     public float scaleDuration = 0.1f;
     public ScreenShakeRequest shakeRequest;
+    public RectTransform scoreRootRect;
 
     [Header("Popup Settings")]
     public float maxPopupScale = 2.5f;
@@ -56,6 +57,11 @@ public class ScoreDisplayView : MonoBehaviour
     public ScorePopupStyle goldenPopup;
 
 
+    [Header("Position")]
+    [SerializeField] private Vector2 gameplayPosition;
+    [SerializeField] private Vector2 upgradeSelectionPosition;
+
+
     private int _displayedScore = 0;
     private int _accentPitchIndex = 0;
     private float _lastBlipTime;
@@ -76,6 +82,7 @@ public class ScoreDisplayView : MonoBehaviour
         ScoreTallyController.OnTallyTick += HandleTallyTick;
         ScoreTallyController.OnTallyStart += HandleTallyStart;
         ScoreTallyController.OnTallyComplete += HandleTallyComplete;
+        GameStateManager.OnStateChanged += HandleStateChanged;
     }
     private void OnDisable()
     {
@@ -83,6 +90,34 @@ public class ScoreDisplayView : MonoBehaviour
         ScoreTallyController.OnTallyTick -= HandleTallyTick;
         ScoreTallyController.OnTallyStart -= HandleTallyStart;
         ScoreTallyController.OnTallyComplete -= HandleTallyComplete;
+        GameStateManager.OnStateChanged -= HandleStateChanged;
+    }
+
+    private void HandleStateChanged(GameState previous, GameState newState)
+    {
+        if(newState == GameState.UpgradeSelection)
+        {
+            MoveTo(upgradeSelectionPosition);
+
+            scoreText.alignment = TextAlignmentOptions.Center;
+            scoreText.fontSize = 112;
+        }
+        else
+        {
+            MoveTo(gameplayPosition);
+
+            scoreText.alignment = TextAlignmentOptions.Right;
+            scoreText.fontSize = 64;
+        }
+    }
+
+    private void MoveTo(Vector2 target)
+    {
+        scoreRootRect.DOAnchorPos(
+            target,
+            0.35f
+        )
+        .SetEase(Ease.OutCubic);
     }
 
     private void Awake()

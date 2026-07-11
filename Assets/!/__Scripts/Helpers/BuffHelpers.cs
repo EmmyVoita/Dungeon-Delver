@@ -4,6 +4,7 @@ using UnityEngine;
 public static class BuffHelpers
 {
     public static Action OnGoldenArrowSessionStarted;
+  
     public static GoldenArrowEffect GetGoldenBuff(GameObject target)
     {
         return target.GetComponent<GoldenArrowEffect>();
@@ -28,8 +29,7 @@ public static class BuffHelpers
         return effect;
     }
 
-     public static RecoveryArrowBuff GetOrCreateRecoveryArrow(
-        int addAmount)
+    public static RecoveryArrowBuff GetOrCreateRecoveryArrow(int addAmount)
     {
         var effect = ArrowEffectManager.Instance.GetEffect<RecoveryArrowBuff>();
         if (effect == null)
@@ -41,6 +41,8 @@ public static class BuffHelpers
         {
             effect.AddArrows(addAmount);
         }
+
+
 
         return effect;
     }

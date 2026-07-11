@@ -5,13 +5,15 @@ using System;
 
 public class TextTypewriter : MonoBehaviour
 {
-    [Header("Text Settings")]
-    [SerializeField] private float beginDelay = 0.2f;
+    [Header("References")]
     [SerializeField] public TMP_Text textComponent;
-    [SerializeField] private string fullText = "GAME OVER";
-    [SerializeField] private float typeSpeed = 0.05f;
+
+
+    [Header("Text Settings")]   
+    [SerializeField] private float beginDelay = 0.2f;
+    [Range(1,300)] [SerializeField] private int charactersPerSecond = 20;
     [SerializeField] private bool castToUpperCase = false;
-    public AudioClip typeSound;
+    
 
     [Header("Wiggle Settings")]
     [SerializeField] private bool enableWiggle = false;
@@ -21,15 +23,17 @@ public class TextTypewriter : MonoBehaviour
     [SerializeField] private float volume = 0.5f;
     [SerializeField] private float basePitch = 1.0f;
 
+
     [Header("Behaviour")]
     [SerializeField] private bool stopOnPause = false;
 
-    private bool isTyping = false;
-    private bool isWiggling = false;
-    private Coroutine typingCoroutine;
 
-    private TMP_TextInfo textInfo;
+    
+    private Coroutine _typingCoroutine;
+
+    private TMP_TextInfo _textInfo;
     private bool _paused;
+    private bool _isWiggling = false;
 
     private void Awake()
     {
@@ -69,11 +73,11 @@ public class TextTypewriter : MonoBehaviour
     // Start typing new text
     // ------------------------------------------------------------
 
-    public void StartTyping(string description, Action onComplete = null)
+    public void StartTyping(string newText, Action onComplete = null)
     {
-        fullText = castToUpperCase ? description.ToUpper() : description;
         StopAllCoroutines();
-        typingCoroutine = StartCoroutine(TypeText(onComplete));
+        textComponent.text = castToUpperCase ? newText.ToUpper() : newText;
+        _typingCoroutine = StartCoroutine(TypeText(onComplete));
         _paused = false;
     }
 
@@ -86,9 +90,9 @@ public class TextTypewriter : MonoBehaviour
 
         textComponent.text += castToUpperCase ? extra.ToUpper() : extra;
         textComponent.ForceMeshUpdate();
-        textInfo = textComponent.textInfo;
+        _textInfo = textComponent.textInfo;
 
-        textComponent.maxVisibleCharacters = textInfo.characterCount;
+        textComponent.maxVisibleCharacters = _textInfo.characterCount;
     }
 
     // ------------------------------------------------------------
@@ -100,9 +104,9 @@ public class TextTypewriter : MonoBehaviour
 
         textComponent.text = castToUpperCase ? newText.ToUpper() : newText;
         textComponent.ForceMeshUpdate();
-        textInfo = textComponent.textInfo;
+        _textInfo = textComponent.textInfo;
 
-        textComponent.maxVisibleCharacters = textInfo.characterCount;
+        textComponent.maxVisibleCharacters = _textInfo.characterCount;
     }
 
     // ------------------------------------------------------------
@@ -112,48 +116,46 @@ public class TextTypewriter : MonoBehaviour
     {
         StopWiggle();
 
-        textComponent.text = castToUpperCase ? fullText.ToUpper() : fullText;
         textComponent.maxVisibleCharacters = 0;
         textComponent.ForceMeshUpdate();
-        textInfo = textComponent.textInfo;
+        _textInfo = textComponent.textInfo;
 
         yield return new WaitForSecondsRealtime(beginDelay);
 
-        isTyping = true;
+        float charsVisible = 0f;
         float lastSoundTime = -999f;
-        int totalVisibleChars = textInfo.characterCount;
+        int totalVisibleChars = _textInfo.characterCount;
 
         int i = 0;
 
-        while( i <= totalVisibleChars)
+        while(textComponent.maxVisibleCharacters < totalVisibleChars)
         {
-            yield return new WaitUntil(() => !_paused);
-
-            textComponent.maxVisibleCharacters = i;
-
-            if (typeSound != null && Time.unscaledTime - lastSoundTime >= minSoundDelay)
+            
+            while (_paused)
             {
-                /*
-                AudioHelpers.PlayClipWithVariation(
-                    typeSound,
-                    AudioChannel.UI,
-                    Camera.main.transform.position,
-                    basePitch,
-                    0.05f,
-                    volume
-                );
-                */
-                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.typewriterBlip, transform.position);
+                yield return null;
+            };
+            
+            charsVisible += charactersPerSecond * Time.unscaledDeltaTime;
 
-                lastSoundTime = Time.unscaledTime;
+            int visibleCount = Mathf.FloorToInt(charsVisible);
+            visibleCount = Mathf.Clamp(visibleCount,0,totalVisibleChars);
+
+            if(visibleCount > textComponent.maxVisibleCharacters)
+            {
+                textComponent.maxVisibleCharacters = visibleCount;
+
+                if (Time.unscaledTime - lastSoundTime >= minSoundDelay)
+                {
+                    AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.typewriterBlip, transform.position);
+                    lastSoundTime = Time.unscaledTime;
+                }
             }
+    
 
-            i++;
-
-            yield return new WaitForSecondsRealtime(typeSpeed);
+            yield return null;//new WaitForSecondsRealtime(1f/(float)charactersPerSecond);
         }
 
-        isTyping = false;
         onComplete?.Invoke();
 
         if (enableWiggle)
@@ -166,32 +168,32 @@ public class TextTypewriter : MonoBehaviour
     private void StartWiggle()
     {
         StopWiggle();
-        isWiggling = true;
+        _isWiggling = true;
         StartCoroutine(WiggleCharacters());
     }
 
     private void StopWiggle()
     {
-        isWiggling = false;
+        _isWiggling = false;
     }
 
     private IEnumerator WiggleCharacters()
     {
-        while (isWiggling)
+        while (_isWiggling)
         {
             textComponent.ForceMeshUpdate();
-            textInfo = textComponent.textInfo;
+            _textInfo = textComponent.textInfo;
 
             float time = Time.unscaledTime * wiggleSpeed;
 
-            for (int i = 0; i < textInfo.characterCount; i++)
+            for (int i = 0; i < _textInfo.characterCount; i++)
             {
-                if (!textInfo.characterInfo[i].isVisible)
+                if (!_textInfo.characterInfo[i].isVisible)
                     continue;
 
-                int vertexIndex = textInfo.characterInfo[i].vertexIndex;
-                int materialIndex = textInfo.characterInfo[i].materialReferenceIndex;
-                Vector3[] verts = textInfo.meshInfo[materialIndex].vertices;
+                int vertexIndex = _textInfo.characterInfo[i].vertexIndex;
+                int materialIndex = _textInfo.characterInfo[i].materialReferenceIndex;
+                Vector3[] verts = _textInfo.meshInfo[materialIndex].vertices;
 
                 float wave = Mathf.Sin(time + i * 0.4f) * wiggleAmplitude;
                 Vector3 offset = new Vector3(0, wave, 0);
@@ -202,9 +204,9 @@ public class TextTypewriter : MonoBehaviour
                 verts[vertexIndex + 3] += offset;
             }
 
-            for (int i = 0; i < textInfo.meshInfo.Length; i++)
+            for (int i = 0; i < _textInfo.meshInfo.Length; i++)
             {
-                var meshInfo = textInfo.meshInfo[i];
+                var meshInfo = _textInfo.meshInfo[i];
                 meshInfo.mesh.vertices = meshInfo.vertices;
                 textComponent.UpdateGeometry(meshInfo.mesh, i);
             }

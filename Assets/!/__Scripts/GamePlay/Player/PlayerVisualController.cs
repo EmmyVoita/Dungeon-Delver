@@ -24,19 +24,19 @@ public class PlayerVisualController : MonoBehaviour
         HandleStateChanged(Player.Instance.playerControlState);
     }
 
-    private void HandleStateChanged(Player.PlayerControlState state)
+    private void HandleStateChanged(PlayerControlState state)
     {
         switch (state)
         {
-            case Player.PlayerControlState.Normal:
+            case PlayerControlState.Normal:
                 spriteRenderer.sprite = normalSprite;
                 break;
 
-            case Player.PlayerControlState.Shooter:
+            case PlayerControlState.Shooter:
                 spriteRenderer.sprite = shooterSprite;
                 break;
 
-            case Player.PlayerControlState.LockedShooter:
+            case PlayerControlState.LockedShooter:
                 spriteRenderer.sprite = lockedShooterSprite;
                 break;
         }

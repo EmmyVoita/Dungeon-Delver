@@ -54,8 +54,9 @@ MonoBehaviour:
     laneWidthScale: 1
   spawnPrefabs:
   - {fileID: 2209782324246233958, guid: cb3d57ff39828094c8a78df7a4362069, type: 3}
-  safeLaneInterval: 3
-  safeLaneWarningDuration: 1
+  safeLaneInterval: 1
+  safeLaneVisualDelay: 2
+  safeLaneWarningDuration: 0.5
   obstacleActiveTime: 16
   spawnX: 7
 --- !u!1 &7452298568174148011
@@ -120,8 +121,9 @@ MonoBehaviour:
     pitch: 1.25
     pitchVariation: 0.1
   spawnX: {x: 7, y: 8}
-  minY: -7
-  maxY: -2
+  minY: -7.75
+  maxY: -1.75
+  randomYOffset: 0.5
   arcHeight: 5
   arcYOffset: 0
   travelDuration: 2

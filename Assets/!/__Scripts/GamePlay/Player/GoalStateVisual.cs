@@ -69,31 +69,31 @@ public class GoalStateVisual : MonoBehaviour
         );
     }
 
-    private void HandleStateChanged(Player.PlayerControlState state)
+    private void HandleStateChanged(PlayerControlState state)
     {
         switch (state)
         {
-            case Player.PlayerControlState.Normal:
+            case PlayerControlState.Normal:
                 sRend.sprite = normalSprite;
                 targetScale = normalScale;
                 break;
 
-            case Player.PlayerControlState.BasicJump:
+            case PlayerControlState.BasicJump:
                 sRend.sprite = basicJumpSprite;
                 targetScale = basicJumpScale;
                 break;
 
-            case Player.PlayerControlState.Shooter:
+            case PlayerControlState.Shooter:
                 sRend.sprite = shooterSprite;
                 targetScale = shooterScale;
                 break;
 
-            case Player.PlayerControlState.LockedShooter:
+            case PlayerControlState.LockedShooter:
                 sRend.sprite = lockedShooterSprite;
                 targetScale = lockedShooterScale;
                 break;
 
-            case Player.PlayerControlState.LaneDodger:
+            case PlayerControlState.LaneDodger:
                 sRend.sprite = laneDodgerSprite;
                 targetScale = laneDodgerScale;
                 break;

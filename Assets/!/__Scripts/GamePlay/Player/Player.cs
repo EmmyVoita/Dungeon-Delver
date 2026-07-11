@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using UnityEngine.VFX;
 
 public class Player : MonoBehaviour
 {
@@ -14,20 +15,14 @@ public class Player : MonoBehaviour
     //public static event System.Action OnMaxAbilityChargeChanged;
     public static event System.Action OnAbilityUsed;
     public static event System.Action<int> OnDamageTaken;
-    public static event System.Action<int> OnHeal;
+    public static event System.Action<int, bool> OnHeal;
     public static event System.Action OnMaxHealthChanged;
+    public static event System.Action<HitData> OnProcessHit;
     public static event System.Action<int> OnPreDamageTaken;
     public static event System.Action<PlayerControlState> OnControlStateChanged;
 
 
-    public enum PlayerControlState
-    {
-        Normal,
-        BasicJump,
-        Shooter,
-        LockedShooter,
-        LaneDodger
-    }
+
 
 
     [Header("Set in Inspector")]
@@ -49,6 +44,7 @@ public class Player : MonoBehaviour
     
 
     [Header("On Damage Settings")]
+    [SerializeField] private bool playAudioWhenInvincible = false;
     [SerializeField] private SoundEffect damageSoundEffect;
     [SerializeField] private SoundEffect abilityChargeDamageSoundEffect;
     [SerializeField] private GameObject damageEffectPrefab;
@@ -60,6 +56,7 @@ public class Player : MonoBehaviour
     [Header("Heal Settings")]
     [SerializeField] private AudioClip healSound;
     [SerializeField] private ParticleSystem healParticleSystem;
+    [SerializeField] private VisualEffect healEffect;
 
 
     [Header("Boost Settings")]
@@ -101,55 +98,58 @@ public class Player : MonoBehaviour
 
 
 
-    //public JumpInputMode jumpInputMode { get; private set; } = JumpInputMode.Normal;
-    public PlayerControlState playerControlState { get; private set; } = PlayerControlState.Normal;
-    public string LastDamageSource { get; private set; } = "Unknown";
-
+    // Upgrades
     private List<UpgradeEffectBase> activeUpgrades = new List<UpgradeEffectBase>();
-    private int dirHeld = -1;
-    private int facing = 1;
-    private bool invincible = false;
+
+    // Ability Logic
     private int _abilityCharge = 0;
     private int _maxAbilityCharge = 10;
-    private float invincibileDone = 0;
-    private SpriteRenderer sRend;
+
+    // Rotation
+    private Vector2 _lastFacingDir = Vector2.up;
+    private Quaternion _targetRotation;
     private bool _isRotating = false;
     private float _rotateStartTime;
-    private Tween activeShakeTween;
-    private Vector3 baseLocalPos;
-    //private bool canJump = false;
-    private bool obstaclesActive = false;
-    public bool lockInput = false;
-    private Quaternion targetRotation;
-    private Vector2 lastFacingDir = Vector2.up;
-    private bool isBoosting = false;
-    private bool boostOnCooldown = false;
-    private Vector3 centerPosition;
-    private Coroutine boostRoutine;
-    private Rigidbody2D rb;
 
+    // Input
+    public bool _lockInput = false;
 
-    private Vector2 jumpAxis; // direction for current jump
-    private bool isJumping = false;
-    private float jumpElapsedTime = 0f;
-    private Tween laneMoveTween;
+    // Visuals
+    private SpriteRenderer _sRend;
+
+    // Jump Logic
+    private Rigidbody2D _rb;
+    private Vector3 _centerPosition;
+    private Vector2 _jumpAxis; 
+    private bool _isJumping = false;
+    private float _jumpElapsedTime = 0f;
+    private Tween _laneMoveTween;
+    private bool _hoverActive;
+    private bool _hoverLockedOut;
+    private Vector2 _lastToCenter;
+
+    // Invincible
+    private bool _invincible;
+    private float invincibileDone = 0;
+    private int _blockedHits = 0;
 
    
 
 
-
-    public Vector2 LastFacingDirection => lastFacingDir;
+    public PlayerControlState playerControlState { get; private set; } = PlayerControlState.Normal;
+    public string LastDamageSource { get; private set; } = "Unknown";
+    public Vector2 LastFacingDirection => _lastFacingDir;
     public bool IsRotating => _isRotating;
     public float RotateStartTime => _rotateStartTime;
     public float CritWindow => _critWindow;
     public bool FullAbilityCharge => AbilityCharge >= MaxAbilityCharge; 
     public int CurrentLane => currentLane;
-
     public bool FullyLocked { get; private set; } = false;
     public bool AbilityChargeLocked { get; set; } = false;
     public bool CanJump => playerControlState == PlayerControlState.Shooter || playerControlState ==  PlayerControlState.BasicJump;
+    public bool CanTakeDamage => GameStateEffectManager.PlayerDamageAllowed && !DevCheats.Invincible;
 
-    private bool _invincible;
+  
     public bool Invincible
     {
         get => _invincible;
@@ -157,7 +157,7 @@ public class Player : MonoBehaviour
         {
             if (_invincible == value) return;
             _invincible = value;
-            sRend.color = _invincible ? Color.red : Color.white;
+            _sRend.color = _invincible ? Color.red : Color.white;
         }
     }
 
@@ -186,7 +186,7 @@ public class Player : MonoBehaviour
 
     public int MaxAbilityCharge
     {
-        get { return UpgradeManager.Instance != null ? (int) UpgradeManager.Instance.ModifyAbilityCost(_maxAbilityCharge) : 0; }
+        get { return UpgradeManager.Instance != null ? Mathf.Max((int) UpgradeManager.Instance.ModifyAbilityCost(_maxAbilityCharge),10) : 0; }
         set { _maxAbilityCharge = value; }
     }   
 
@@ -240,29 +240,25 @@ public class Player : MonoBehaviour
             invincibileDone = newEndTime;
     }
 
+    public void AddHitBlock(int amount = 1)
+    {
+        _blockedHits += amount;
+        Debug.Log($"Add hit block amount => {amount}");
+    }
+
     
     void OnEnable()
     {
         RoundManager.OnRoundStart += HandleRoundStart;
         RoundManager.OnRoundEnd += HandleRoundEnd;
-
         GameStateManager.OnStateChanged += HandleStateChanged;
-
-        // ✅ Subscribe to ObstacleManager events
-        //ObstacleManager.OnFirstObstacleAppeared += EnableJumping;
-        //ObstacleManager.OnAllObstaclesCleared += DisableJumping;
     }
 
     void OnDisable()
     {
         RoundManager.OnRoundStart -= HandleRoundStart;
         RoundManager.OnRoundEnd -= HandleRoundEnd;
-
         GameStateManager.OnStateChanged -= HandleStateChanged;
-
-        // ✅ Unsubscribe safely
-        //ObstacleManager.OnFirstObstacleAppeared -= EnableJumping;
-        //ObstacleManager.OnAllObstaclesCleared -= DisableJumping;
     }
 
     void HandleStateChanged(GameState previousState, GameState newState)
@@ -292,28 +288,32 @@ public class Player : MonoBehaviour
 
     void OnDestroy()
     {
-        laneMoveTween?.Kill();
+        _laneMoveTween?.Kill();
     }
 
     void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
             return;
         }
 
         Instance = this;
-        targetRotation = Quaternion.identity;
-        sRend = spriteObj.GetComponent<SpriteRenderer>();
+        _targetRotation = Quaternion.identity;
+        _sRend = spriteObj.GetComponent<SpriteRenderer>();
         Health = 0;
-        centerPosition = transform.position; // cache original center
-        baseLocalPos = spriteObj.transform.localPosition;
-        rb = GetComponent<Rigidbody2D>();
+        _centerPosition = transform.position; // cache original center
+        _rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.B))
+        {
+            HealPlayer(1,true);
+        }
+
         goal.transform.position = transform.position;
 
         Vector2 dir = Vector2.zero;
@@ -341,7 +341,7 @@ public class Player : MonoBehaviour
             {
                 dir.Normalize();
                 RotateCollider(dir);
-                lastFacingDir = dir;
+                _lastFacingDir = dir;
             }
         }
         else
@@ -354,7 +354,7 @@ public class Player : MonoBehaviour
             if (dir != Vector2.zero)
             {
                 RotateCollider(dir);
-                lastFacingDir = dir;
+                _lastFacingDir = dir;
             }
         }
 
@@ -363,10 +363,7 @@ public class Player : MonoBehaviour
         // Ability usage
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.UseAbility) && 
            FullAbilityCharge
-           && !lockInput)
-           //&& GameStateEffectManager.PlayerInputEnabled)
-           //&& (GameStateManager.Instance.CurrentState == GameState.RoundActive ||
-           //GameStateManager.Instance.CurrentState == GameState.Tutorial))
+           && !_lockInput)
         {
             AbilityCharge -= MaxAbilityCharge;
             OnAbilityUsed?.Invoke();
@@ -380,7 +377,7 @@ public class Player : MonoBehaviour
         }
 
 
-        if (InputBindingManager.Instance.GetKeyDown(InputActionType.Jump) && !lockInput)
+        if (InputBindingManager.Instance.GetKeyDown(InputActionType.Jump) && !_lockInput)
         {
             if (playerControlState == PlayerControlState.LockedShooter)
             {
@@ -392,11 +389,7 @@ public class Player : MonoBehaviour
        
 
             // Normal jump path
-            if (!isBoosting &&
-                !boostOnCooldown &&
-                CanJump &&
-                //obstaclesActive &&
-                !isJumping)
+            if (CanJump && !_isJumping)
             {
                 PerformJump(dir);
             }
@@ -415,17 +408,17 @@ public class Player : MonoBehaviour
         AudioHelpers.PlayMyClipAtPoint(boostSound, AudioChannel.SFX, Camera.main.transform.position);
 
         // Use last direction if no input
-        Vector2 inputDir = dir != Vector2.zero ? dir : lastFacingDir;
+        Vector2 inputDir = dir != Vector2.zero ? dir : _lastFacingDir;
         inputDir.Normalize();
 
-        jumpAxis = inputDir;  // store jump direction
-        isJumping = true;
+        _jumpAxis = inputDir;  // store jump direction
+        _isJumping = true;
 
-        hoverActive = true;        // Hover is allowed at start
-        hoverLockedOut = false;    // Not locked yet
-        jumpElapsedTime = 0f;
+        _hoverActive = true;        // Hover is allowed at start
+        _hoverLockedOut = false;    // Not locked yet
+        _jumpElapsedTime = 0f;
 
-        rb.linearVelocity = jumpAxis * jumpForce;
+        _rb.linearVelocity = _jumpAxis * jumpForce;
 
         if (wings != null)
         wings.PlayFlap();
@@ -440,7 +433,7 @@ public class Player : MonoBehaviour
         BounceBomb bomb = coll.GetComponentInParent<BounceBomb>();
         if (bomb != null)
         {
-            bomb.OnPlayerHit(lastFacingDir);
+            bomb.OnPlayerHit(_lastFacingDir);
             return;
         }
 
@@ -448,8 +441,12 @@ public class Player : MonoBehaviour
 
         // If arrow is the collider and the arrow is invincible, ignore
         ArrowBase arrow = coll.GetComponent<ArrowBase>();
+        
+        
+        
 
-       
+        //
+            
     
         if(arrow != null && arrow.IsInverse)
         {
@@ -470,42 +467,172 @@ public class Player : MonoBehaviour
         
 
         DamageEffect dEf = coll.GetComponent<DamageEffect>();
-        
 
-        if(dEf)
+        if(dEf == null) return;
+
+        HitData hit = new()
         {
-            Debug.Log(
-                $"Damage effect for impacted object [{coll.name}]\n" +
-                $"Damage effect damage => {dEf.damage}\n" +
-                $"Damage effect source => {dEf.sourceName}"
-            );
+            Damage = dEf.damage,
+            AbilityDamage = dEf.abilityChargeDamage,
+            SourceName = dEf.sourceName,
+            Arrow = arrow,
+            PlayHitSound = dEf.playHitSound
+        };
 
-            if (dEf.playHitSound)
-            {
-                AudioHelpers.PlaySoundEffect(damageSoundEffect, transform.position);
-            }
+        ProcessHit(hit);
+    }
 
-            if(dEf.damage > 0)
-            {
-                DamageSelf(dEf.damage, dEf.sourceName, arrow);
-            }
+    private void ProcessHit(HitData hit)
+    {
+        OnProcessHit?.Invoke(hit);
 
-            if(dEf.abilityChargeDamage > 0)
-            {
-                AudioHelpers.PlaySoundEffect(abilityChargeDamageSoundEffect, transform.position);
-                AbilityCharge -= dEf.abilityChargeDamage;
-            }
+        if (hit.PlayHitSound && (!Invincible || playAudioWhenInvincible))
+            AudioHelpers.PlaySoundEffect(damageSoundEffect, transform.position);
 
-            if(dEf.abilityChargeDamage > 0 && dEf.damage == 0)
-            {
-                Squish();
-            }
+        HandleArrowLogic(hit);
+
+        if(!CanTakeDamage)
+            return;
+
+        if(TryBlockHit(hit))
+            return;
+
+        ApplyAbilityDamage(hit);
+
+        bool tookHealthDamage = ApplyHealthDamage(hit);
+
+        if(tookHealthDamage)
+        {
+            PlayerDamageFeedback();
+            CheckForDeath();
         }
     }
 
+    private bool TryBlockHit(HitData hit)
+    {
+        if (_blockedHits <= 0)
+            return false;
+
+        _blockedHits--;
+
+        SetInvincible(0.15f);
+
+        hit.Arrow?.KillArrow();
+
+        OnPreDamageTaken?.Invoke(0);
+
+        return true;
+    }
+
+    private void HandleArrowLogic(HitData hit)
+    {
+        // If we hit an arrow, we kill the arrow
+        if (hit.Arrow != null) hit.Arrow.KillArrow();
+    }
+
+    private void ApplyAbilityDamage(HitData hit)
+    {
+        if(hit.AbilityDamage > 0)
+        {
+            AudioHelpers.PlaySoundEffect(abilityChargeDamageSoundEffect, transform.position);
+            AbilityCharge -= hit.AbilityDamage;
+        }
+    }
+
+    private bool ApplyHealthDamage(HitData hit)
+    {
+        // We need to keep track of the last damage source for the game over screen
+        if(hit.Damage > 0)
+            LastDamageSource = hit.SourceName;
+
+        // Damage logic
+        int finalDamage = UpgradeManager.Instance.ModifyDamageTaken(hit.Damage);
+        OnPreDamageTaken?.Invoke(finalDamage);
+        Health -= finalDamage;
+        OnDamageTaken?.Invoke(finalDamage);
+
+        // Handle temporary invincibility
+        if(finalDamage > 0)
+        {
+            Invincible = true;
+            invincibileDone = Time.time + invincibilityDuration;
+        }
+
+        return finalDamage > 0;
+    }
+
+    private void CheckForDeath()
+    {
+        if(Health <= 0 && GameStateEffectManager.PlayerDeathAllowed)
+        {
+            GameStateManager.Instance.SetState(GameState.DeathSequence);
+        }
+    }
+
+    private void PlayerDamageFeedback()
+    {
+        // Visual Effects
+        if(damageEffectPrefab != null)
+            Instantiate(damageEffectPrefab, transform.position, Quaternion.identity);
+        
+        Squish();
+    }
+
+    public void DamageSelf(DamageEffect dEf, ArrowBase arrow = null)
+    {
+        
+
+        //if(!GameStateEffectManager.PlayerDamageAllowed)
+            //return;
+
+        // Play Hit sound
+        if (dEf.playHitSound && (!Invincible || playAudioWhenInvincible))
+            AudioHelpers.PlaySoundEffect(damageSoundEffect, transform.position);
+
+        
+
+        // If we hit an arrow, we kill the arrow
+        if (arrow != null) arrow.KillArrow();
+
+        if (DevCheats.Invincible)
+            return;
+
+        if (_blockedHits > 0)
+        {
+            _blockedHits--;
+
+            // optional feedback
+            SetInvincible(0.15f);
+
+            if (arrow != null)
+                arrow.KillArrow();
+
+            Debug.Log("Blocked hit !");
+
+            OnPreDamageTaken?.Invoke(0);
+
+            return;
+        }
+
+        
+
+        // Handle death case
+        if (Health <= 0 && GameStateEffectManager.PlayerDeathAllowed)
+        {
+            GameStateManager.Instance.SetState(GameState.DeathSequence);
+        }
+
+        
+
+        
+
+        Squish();
+    }
+
+
     public void ShootProjectile(PlayerProjectile projectilePrefab)
     {
-        Vector2 snappedDir = GetSnappedDirection(lastFacingDir, _useEightDirections);
+        Vector2 snappedDir = GetSnappedDirection(_lastFacingDir, _useEightDirections);
 
         Vector3 spawnPos = transform.position + (Vector3)(snappedDir * projectileSpawnOffset);
 
@@ -535,7 +662,7 @@ public class Player : MonoBehaviour
         if(playerControlState == PlayerControlState.LaneDodger
             && newState != PlayerControlState.LaneDodger)
         {
-            laneMoveTween.Kill();
+            _laneMoveTween.Kill();
             laneVisualizer?.Clear();
         }
 
@@ -561,7 +688,7 @@ public class Player : MonoBehaviour
                 wings.ShowWings();
                 break;
             case PlayerControlState.LockedShooter:
-                rb.linearVelocity = Vector2.zero;
+                _rb.linearVelocity = Vector2.zero;
                 wings.HideWings();
                 break;
             case PlayerControlState.Normal:
@@ -586,9 +713,9 @@ public class Player : MonoBehaviour
 
     public void ResetPositionAndVelocity()
     {
-        transform.position = centerPosition;
-        rb.linearVelocity = Vector2.zero;
-        isJumping = false;
+        transform.position = _centerPosition;
+        _rb.linearVelocity = Vector2.zero;
+        _isJumping = false;
     }
 
         
@@ -601,17 +728,35 @@ public class Player : MonoBehaviour
 
     public void HealPlayer(int amount, bool useEffects = true)
     {
+        int previousHealth = Health;
+
         Health = Mathf.Min(MaxHealth, Health + amount);
 
-        OnHeal?.Invoke(amount);
+        int actualHealing = Health - previousHealth;
+        bool wasFullHealth = previousHealth >= MaxHealth;
 
-        if(useEffects)
+        OnHeal?.Invoke(amount, wasFullHealth);
+
+        if (useEffects && actualHealing > 0)
         {
-            if (healParticleSystem != null)
-                healParticleSystem.Play();
-
-            AudioHelpers.PlayMyClipAtPoint(healSound, AudioChannel.SFX, Camera.main.transform.position);
+            PlayHealEffects();
         }
+    }
+
+    private void PlayHealEffects()
+    {
+        if (healParticleSystem != null)
+            healParticleSystem.Play();
+
+        if (healEffect != null)
+            healEffect.SendEvent("OnPlay");
+            //healEffect.Play();
+
+        AudioHelpers.PlayMyClipAtPoint(
+            healSound,
+            AudioChannel.SFX,
+            Camera.main.transform.position
+        );
     }
 
 
@@ -629,13 +774,13 @@ public class Player : MonoBehaviour
     private void HandleRoundEnd()
     {
         //canJump = false;
-        lockInput = true;
+        _lockInput = true;
     }
 
     private void HandleRoundStart()
     {
         //canJump = true;
-        lockInput = false;
+        _lockInput = false;
     }
 
     public void OnCriticalCatch()
@@ -646,67 +791,14 @@ public class Player : MonoBehaviour
         Debug.Log($"⚡ Gained {_abilityChargeGain} ability charge from crit catch!");
     }
 
-    // -------------------------------------
-    // BOOST LOGIC
-    // -------------------------------------
-
-    IEnumerator BoostRoutine(Vector2 dir)
-    {
-        isBoosting = true;
-        boostOnCooldown = true;
-
-        // 🪽 start wing flap
-        if (wings != null)
-            wings.PlayFlap();
-
-        Vector3 startPos = centerPosition;
-        Vector3 targetPos = centerPosition + (Vector3)dir * boostDistance;
-
-        if (boostSound != null)
-            AudioHelpers.PlayMyClipAtPoint(boostSound, AudioChannel.SFX, Camera.main.transform.position);
-
-        float t = 0f;
-        while (t < boostDuration)
-        {
-            t += Time.deltaTime;
-            float normalized = t / boostDuration;
-            float ease = 1f - Mathf.Pow(1f - normalized, 2f);
-            transform.position = Vector3.Lerp(startPos, targetPos, ease);
-            yield return null;
-        }
-
-        StartCoroutine(ReturnToCenter());
-        yield return new WaitForSeconds(boostCooldown);
-        boostOnCooldown = false;
-    }
-
-
-    IEnumerator ReturnToCenter()
-    {
-        Vector3 startPos = transform.position;
-        float t = 0f;
-        while (t < returnDuration)
-        {
-            t += Time.deltaTime;
-            float normalized = t / returnDuration;
-            // 🌀 ease-in curve (slow start, quick end)
-            float ease = normalized * normalized;
-            transform.position = Vector3.Lerp(startPos, centerPosition, ease);
-            yield return null;
-        }
-
-        transform.position = centerPosition;
-        isBoosting = false;
-    }
-
-
+ 
 
     // -------------------------------------
 
     private void SpawnAbility()
     {
         // Find the current facing direction the player is allowed to use
-        Vector2 snappedDir = GetSnappedDirection(lastFacingDir, _useEightDirections);
+        Vector2 snappedDir = GetSnappedDirection(_lastFacingDir, _useEightDirections);
 
         // Compute snapped rotation
         float angle = Mathf.Atan2(snappedDir.y, snappedDir.x) * Mathf.Rad2Deg - 90f;
@@ -724,7 +816,7 @@ public class Player : MonoBehaviour
     private Vector2 GetSnappedDirection(Vector2 inputDir, bool useEight)
     {
         if (inputDir == Vector2.zero)
-            return lastFacingDir; // fallback to previous
+            return _lastFacingDir; // fallback to previous
 
         // 4 or 8 directions (unit vectors)
         Vector2[] dirs4 = {
@@ -772,72 +864,32 @@ public class Player : MonoBehaviour
         angle -= 90f;
         Quaternion newTarget = Quaternion.Euler(0, 0, angle);
 
-        if (newTarget != targetRotation)
+        if (newTarget != _targetRotation)
         {
-            targetRotation = newTarget;
+            _targetRotation = newTarget;
             _isRotating = true;
             _rotateStartTime = Time.time;
         }
     }
 
-    public void DamageSelf(int damage, string sourceName = null, ArrowBase arrow = null)
-    {
-        LastDamageSource = sourceName;
-
-        // If we hit an arrow, we kill the arrow
-        if (arrow != null) arrow.KillArrow();
-
-        if (DevCheats.Invincible)
-            return;
-
-        if(!GameStateEffectManager.PlayerDamageAllowed)
-            return;
-
-        int finalDamage = UpgradeManager.Instance.ModifyDamageTaken(damage);
-
-        OnPreDamageTaken?.Invoke(finalDamage);
-
-        
-        
-        Debug.Log($"💥 Player taking {finalDamage} damage (base {damage})");
-        Health -= finalDamage;
-
-        OnDamageTaken?.Invoke(finalDamage);
-
-        if (Health <= 0 && GameStateEffectManager.PlayerDeathAllowed)
-        {
-            GameStateManager.Instance.SetState(GameState.DeathSequence);
-        }
-
-        Invincible = true;
-        invincibileDone = Time.time + invincibilityDuration;
-
-       
-        if(damageEffectPrefab != null)
-        {
-            Instantiate(damageEffectPrefab, transform.position, Quaternion.identity);
-        }
-
-        Squish();
-    }
-
+  
     private void Squish()
     {
-        sRend.transform.DOKill();
+        _sRend.transform.DOKill();
 
-        sRend.transform.localScale = Vector3.one;
+        _sRend.transform.localScale = Vector3.one;
 
         Sequence seq = DOTween.Sequence();
 
         seq.Append(
-            sRend.transform.DOScale(
+            _sRend.transform.DOScale(
                 new Vector3(0.5f, 1.6f, 1f), // squash X, stretch Y
                 0.06f
             )
         );
 
         seq.Append(
-            sRend.transform.DOScale(
+            _sRend.transform.DOScale(
                 new Vector3(1.15f, 0.85f, 1f), // overshoot opposite
                 0.08f
             )
@@ -845,7 +897,7 @@ public class Player : MonoBehaviour
         );
 
         seq.Append(
-            sRend.transform.DOScale(
+            _sRend.transform.DOScale(
                 Vector3.one,
                 0.15f
             )
@@ -855,74 +907,69 @@ public class Player : MonoBehaviour
         spriteObj.GetComponent<PlayerSpriteShaker>()?.Shake(hitShakeStrength, hitShakeDuration);
     }
 
-    private Vector2 lastToCenter;
-    private Vector2 lastPosition;
-    private bool hoverActive;
-    private bool hoverLockedOut;
 
     void ApplySmartGravity()
     {
-        if (!isJumping) return;
+        if (!_isJumping) return;
 
         // Project onto jump axis
-        Vector2 projected = Vector2.Dot(rb.linearVelocity, jumpAxis) * jumpAxis;
-        rb.linearVelocity = projected;
+        Vector2 projected = Vector2.Dot(_rb.linearVelocity, _jumpAxis) * _jumpAxis;
+        _rb.linearVelocity = projected;
 
-        Vector2 currentToCenter = (Vector2)centerPosition - rb.position;
+        Vector2 currentToCenter = (Vector2)_centerPosition - _rb.position;
         Vector2 toCenterDir = currentToCenter.normalized;
 
-        float outwardDot = Vector2.Dot(rb.linearVelocity, -toCenterDir);
+        float outwardDot = Vector2.Dot(_rb.linearVelocity, -toCenterDir);
         //bool jumpHeld = InputBindingManager.Instance.GetKeyInput(InputActionType.Jump);
        
 
         bool jumpHeld = InputBindingManager.Instance.GetKeyInput(InputActionType.Jump);
 
         // If they release jump while rising, permanently disable hover
-        if (!jumpHeld && hoverActive)
+        if (!jumpHeld && _hoverActive)
         {
-            hoverLockedOut = true;
+            _hoverLockedOut = true;
         }
 
         // Hover only works if:
         // - jump is held
         // - not locked out
         // - within hold time
-        bool canHover = jumpHeld && !hoverLockedOut && jumpElapsedTime <= maxJumpHoldTime;
+        bool canHover = jumpHeld && !_hoverLockedOut && _jumpElapsedTime <= maxJumpHoldTime;
 
         if (canHover)
         {
-            jumpElapsedTime += Time.deltaTime;
+            _jumpElapsedTime += Time.deltaTime;
         }
 
          //UIToast.Show($"Jump Being Held -> {jumpHeld}", 0.05f);
 
         if (outwardDot < 0f)
         {
-            rb.linearVelocity += toCenterDir * fallMultiplier * Time.deltaTime;
+            _rb.linearVelocity += toCenterDir * fallMultiplier * Time.deltaTime;
         }
         //else if (outwardDot > 0f && (!jumpHeld || jumpElapsedTime > maxJumpHoldTime))
         else if (outwardDot > 0f && !canHover)
         {
-            rb.linearVelocity += toCenterDir * lowJumpMultiplier * Time.deltaTime;
+            _rb.linearVelocity += toCenterDir * lowJumpMultiplier * Time.deltaTime;
         }
 
-        bool distanceCheck = Vector2.Distance(transform.position, centerPosition) <= 0.175f && Vector2.Dot(rb.linearVelocity, currentToCenter) > 0f;
-        bool dotCheck = lastToCenter != Vector2.zero && Vector2.Dot(lastToCenter, currentToCenter) <= 0f;
+        bool distanceCheck = Vector2.Distance(transform.position, _centerPosition) <= 0.175f && Vector2.Dot(_rb.linearVelocity, currentToCenter) > 0f;
+        bool dotCheck = _lastToCenter != Vector2.zero && Vector2.Dot(_lastToCenter, currentToCenter) <= 0f;
 
         // 🔒 Only check crossing AFTER lastToCenter is valid
         if (distanceCheck || dotCheck)
         {
-            rb.linearVelocity = Vector2.zero;
-            rb.position = centerPosition;
-            isJumping = false;
-            lastToCenter = Vector2.zero;
-            hoverActive = false;
-            hoverLockedOut = false;
+            _rb.linearVelocity = Vector2.zero;
+            _rb.position = _centerPosition;
+            _isJumping = false;
+            _lastToCenter = Vector2.zero;
+            _hoverActive = false;
+            _hoverLockedOut = false;
             return;
         }
 
-        lastPosition = rb.position;
-        lastToCenter = currentToCenter;
+        _lastToCenter = currentToCenter;
     }
 
     void HandleLaneMovement()
@@ -962,9 +1009,9 @@ public class Player : MonoBehaviour
         float targetY =
             GetLaneY(currentLane);
 
-        laneMoveTween?.Kill();
+        _laneMoveTween?.Kill();
 
-        laneMoveTween =
+        _laneMoveTween =
             transform.DOMoveY(
                 targetY,
                 currentLaneConfig.laneMoveDuration
@@ -1020,6 +1067,6 @@ public class Player : MonoBehaviour
         currentLane = currentLaneConfig.maxLanes / 2;
 
         float y = GetLaneY(currentLane);
-        transform.position = new Vector3(centerPosition.x, y, transform.position.z);
+        transform.position = new Vector3(_centerPosition.x, y, transform.position.z);
     }
 }

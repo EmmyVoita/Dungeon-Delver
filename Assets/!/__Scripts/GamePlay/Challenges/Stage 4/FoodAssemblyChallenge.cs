@@ -362,7 +362,7 @@ public class FoodAssemblyChallenge : MonoBehaviour
         endState = true;
         HandleCleanup();
         AudioHelpers.PlayMyClipAtPoint(failSound, AudioChannel.SFX, Camera.main.transform.position);
-        Player.Instance.DamageSelf(1);
+        //Player.Instance.DamageSelf(1);
         ObstacleManager.Instance.UnregisterObstacle(gameObject, 2);
         Destroy(this.gameObject, 3.0f);
     }

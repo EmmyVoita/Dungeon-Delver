@@ -1,178 +1,42 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
 
 public class UpgradeIconUI : MonoBehaviour
 {
     [Header("References")]
-    public Image iconImage;
-    public Image fillImage;
-    public Color fillBackgroundColor = Color.white;
-    public HoverAndSway idleHover;
+    [SerializeField] private Image iconImage;
+    [SerializeField] private TMP_Text stackText;
+    [SerializeField] private TMP_Text xText;
 
-    [Header("Settings")]
-    public float activeScale = 1.1f;
+    private int _stackCount;
 
-    private string upgradeId;
-    private Tween glowTween;
-    private IconFeedbackStyle feedbackStyle;
-    private UpgradeBase upgradeData;
-
-
-    // ----------------------------------------------------
-    // INITIALIZATION
-    // ----------------------------------------------------
-
-    public void Initialize(UpgradeBase upgrade)
+    public void Initialize(Sprite icon, Material material, int stackCount)
     {
-        upgradeId = upgrade.upgradeId;
-        upgradeData = upgrade;
-        //feedbackStyle = upgrade.feedbackStyle;
+        iconImage.sprite = icon;
+        iconImage.material = material;
 
-        //iconImage.sprite = upgrade.baseIcon;
-
-        // Idle hover defaults OFF
-        //idleHover.enableHover = false;
-        //idleHover.enableSway = false;
-        //idleHover.enableScoreJump = false;
-        idleHover.ApplyState();
-
-        // Recharge fill defaults
-        fillImage.fillAmount = 0f;
-        //fillImage.sprite = upgrade.baseIcon;
-        fillImage.color = Color.white;
-
-        UpgradeManager.OnUpgradeStateChanged += HandleStateChanged;
-        UpgradeManager.OnUpgradeRechargeProgress += HandleRechargeProgress;
+        SetStackCount(stackCount);
     }
 
-    private void OnDestroy()
+    public void SetStackCount(int count)
     {
-        UpgradeManager.OnUpgradeStateChanged -= HandleStateChanged;
-        UpgradeManager.OnUpgradeRechargeProgress -= HandleRechargeProgress;
+        _stackCount = count;
+
+        stackText.text = _stackCount.ToString();
+
+        // Optional: hide count when only one stack
+        stackText.gameObject.SetActive(_stackCount > 1);
+        xText.gameObject.SetActive(_stackCount > 1);
     }
 
-    // ----------------------------------------------------
-    // EVENT HANDLERS
-    // ----------------------------------------------------
-
-    private void HandleStateChanged(string id, bool active)
+    public void AddStack(int amount = 1)
     {
-        if (id != upgradeId)
-            return;
-
-        if (active)
-            ActivateVisuals();
-        else
-            DeactivateVisuals();
+        SetStackCount(_stackCount + amount);
     }
 
-    private void HandleRechargeProgress(string id, float deltaAmount)
+    public int GetStackCount()
     {
-        if (id != upgradeId)
-            return;
-
-        
-
-        fillImage.fillAmount = Mathf.Clamp01(fillImage.fillAmount + deltaAmount);
-
-        Debug.Log($"UpgradeIconUI: Recharge progress for {id} is {deltaAmount}, new fillAmount={fillImage.fillAmount}, fill image color={fillImage.color}   ");
-
-        // Fully recharged → jump impulse
-        if (fillImage.fillAmount >= 1f)
-        {
-            fillImage.color = Color.clear;
-            //PlayJumpImpulse();
-        }
-
-        // Just used → shake
-        if (fillImage.fillAmount == 0f)
-        {
-            //idleHover.ShakeJumpTarget();
-        }
+        return _stackCount;
     }
-
-    // ----------------------------------------------------
-    // PERSISTENT STATE VISUALS
-    // ----------------------------------------------------
-
-    private void ActivateVisuals()
-    {
-        switch (feedbackStyle)
-        {
-            case IconFeedbackStyle.None:
-                break;
-
-            case IconFeedbackStyle.SwayAndHover:
-                //idleHover.enableHover = true;
-                //idleHover.enableSway = true;
-                idleHover.UpdateState();
-
-                glowTween?.Kill();
-                glowTween = iconImage.transform
-                    .DOScale(activeScale, 0.6f)
-                    .SetLoops(-1, LoopType.Yoyo)
-                    .SetEase(Ease.InOutSine);
-
-                //iconImage.sprite = upgradeData.activeIcon;
-                break;
-
-            case IconFeedbackStyle.Jump:
-                // Jump-only upgrades do NOT stay active
-                //PlayJumpImpulse();
-                break;
-
-            case IconFeedbackStyle.ActiveInactiveColor:
-                iconImage.color = fillBackgroundColor;
-                break;
-        }
-    }
-
-    private void DeactivateVisuals()
-    {
-        Destroy(gameObject);
-        switch (feedbackStyle)
-        {
-            case IconFeedbackStyle.None:
-                break;
-
-            case IconFeedbackStyle.SwayAndHover:
-                //idleHover.enableHover = false;
-                //idleHover.enableSway = false;
-                idleHover.ApplyState();
-
-                glowTween?.Kill();
-                iconImage.transform.localScale = Vector3.one;
-                //iconImage.sprite = upgradeData.baseIcon;
-                break;
-
-            case IconFeedbackStyle.Jump:
-                // Jump visuals reset themselves — nothing to do
-                //iconImage.sprite = upgradeData.baseIcon;
-                break;
-
-            case IconFeedbackStyle.ActiveInactiveColor:
-                iconImage.color = Color.white;
-                break;
-        }
-    }
-
-    // ----------------------------------------------------
-    // ONE-SHOT JUMP IMPULSE (IMPORTANT)
-    // ----------------------------------------------------
-
-    /*
-    private void PlayJumpImpulse()
-    {
-        idleHover.enableScoreJump = true;
-
-        idleHover.JumpImmediate(() =>
-        {
-            // Restore base state AFTER jump finishes
-            idleHover.enableScoreJump = false;
-            //iconImage.sprite = upgradeData.baseIcon;
-            fillImage.color = Color.white;
-        });
-    }
-    */
 }

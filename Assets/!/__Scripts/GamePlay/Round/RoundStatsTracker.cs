@@ -12,6 +12,7 @@ public class RoundStatsTracker : MonoBehaviour
 
     public float RoundAccuracy => Spawned == 0 ? 0f : (float)Hit / Spawned;
     public bool PerfectRound => Spawned > 0 && Hit == Spawned;
+    public bool PlayerTookNoDamage => DamageTaken == 0;
 
     public float LevelProgress
     {

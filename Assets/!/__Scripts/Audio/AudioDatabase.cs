@@ -8,6 +8,7 @@ public class AudioDatabase : ScriptableObject
     public SoundEffect select;
     public SoundEffect back;
     public SoundEffect negative;
+    public SoundEffect purchase;
     public SoundEffect typewriterBlip;
 
     [Header("Gameplay")]

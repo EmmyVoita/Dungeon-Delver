@@ -3,6 +3,7 @@ using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 
 
@@ -84,6 +85,11 @@ public class TimeManager : MonoBehaviour
         ApplyCombinedScale();
     }
 
+    public void AddTemporaryModifier(TimeScaleModifier mod, float duration)
+    {
+        StartCoroutine(ApplyForDuration(mod,duration));
+    }
+
     public void RemoveModifier(string id)
     {
         foreach (var mod in modifiers)
@@ -121,6 +127,15 @@ public class TimeManager : MonoBehaviour
         return mod;
     }
 
+    private IEnumerator ApplyForDuration(TimeScaleModifier mod, float duration)
+    {
+        AddModifier(mod);
+
+        yield return new WaitForSecondsRealtime(duration);
+
+        RemoveModifier(mod.Id);
+    }
+
     public void Pause()
     {
         _paused = true;
@@ -132,76 +147,4 @@ public class TimeManager : MonoBehaviour
         _paused = false;
         ApplyCombinedScale();
     }
-
-
-
-  
-
-    // ------------------------------
-    // Controls
-    // ------------------------------
-
-    /*
-    public void SetBaseScale(float newBase, float duration = 0.2f)
-    {
-        baseTween?.Kill();
-        baseTween = DOTween.To(() => baseScale, x => baseScale = x, newBase, duration)
-            .SetEase(Ease.InOutSine)
-            .SetUpdate(true)
-            .OnUpdate(ApplyCombinedScale);
-    }
-
-    public void SetModifier(float newModifier, float duration = 0.2f)
-    {
-        modifierTween?.Kill();
-        modifierTween = DOTween.To(() => modifier, x => modifier = x, newModifier, duration)
-            .SetEase(Ease.InOutSine)
-            .SetUpdate(true)
-            .OnUpdate(ApplyCombinedScale);
-    }
-    */
-
-    /*
-    public void ResetAll(float duration = 0.3f)
-    {
-        SetBaseScale(1f, duration);
-        SetModifier(1f, duration);
-    }
-
-    public void Pause()
-    {
-        if(paused) return;
-        previousModifier = modifier;
-        previousBase = baseScale;
-        SetBaseScale(0f, duration: 0f);
-        SetModifier(0f, duration: 0f);
-        paused = true;
-    }
-
-    public void Resume()
-    {
-        SetBaseScale(previousBase, duration: 0f);
-        SetModifier(previousModifier, duration: 0f);
-        paused = false;
-    }
-    */
-    /*
-    public void PlayImpulseSlow(TimeSlowImpulseData data)
-    {
-        impulseTween?.Kill();
-
-        impulseTween = DOTween.Sequence()
-            .SetUpdate(true)
-
-            .Append(DOTween.To(() => impulse, x => impulse = x, data.slowMultiplier, data.inDuration)
-                .SetEase(Ease.OutSine)
-                .OnUpdate(ApplyCombinedScale))
-
-            .AppendInterval(data.holdDuration)
-
-            .Append(DOTween.To(() => impulse, x => impulse = x, 1f, data.outDuration)
-                .SetEase(Ease.InSine)
-                .OnUpdate(ApplyCombinedScale));
-    }
-    */
 }

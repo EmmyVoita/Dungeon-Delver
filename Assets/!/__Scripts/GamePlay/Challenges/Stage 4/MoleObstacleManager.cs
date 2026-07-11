@@ -186,7 +186,7 @@ public class MoleObstacleManager : MonoBehaviour
 
         AudioHelpers.PlayMyClipAtPoint(failSound, AudioChannel.SFX, Camera.main.transform.position);
 
-        Player.Instance.DamageSelf(1);
+        //Player.Instance.DamageSelf(1);
 
         StartCoroutine(KillClumps());
         StartCoroutine(Unregister());

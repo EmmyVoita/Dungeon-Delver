@@ -7,7 +7,6 @@ public struct SoundEffect
 {
     public AudioClip clip;
     public AudioChannel channel;
-    public bool affectedByTimeScale;
 
 
     [Header("Volume Settings")]

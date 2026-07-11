@@ -120,7 +120,7 @@ public class AbilityTutorialUI : MonoBehaviour
     private IEnumerator RunCriticalCatchTutorial()
     {
         // 🟡 Demonstration loops
-        Player.Instance.lockInput = true;
+        Player.Instance._lockInput = true;
         _lockChargeChanged = true;
         yield return StartCoroutine(ShowCatchDemonstration());
         
@@ -334,7 +334,7 @@ public class AbilityTutorialUI : MonoBehaviour
         string keyName = InputBindingManager.Instance.GetKeyName(InputActionType.UseAbility).ToString();
         typewriter.StartTyping($"Press [{keyName}] to use your ability.", () =>
         {
-            Player.Instance.lockInput = false;
+            Player.Instance._lockInput = false;
         });
 
         // 🟣 Wait for the player to use their ability

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: accc893235aee5f45996526d45abdbb1, type: 3}
+  m_Name: Combo Normal Effect
+  m_EditorClassIdentifier: Assembly-CSharp::ComboAudioEffect
+  soundEffect:
+    clip: {fileID: 8300000, guid: 7eaf4e4005c474747bd6e3af6e0c1688, type: 3}
+    channel: 2
+    volume: 0.15
+    pitch: 1
+    pitchVariation: 0
+  comboInterval: 1
+  startCombo: 5
+  pitchStep: 0.01
+  maxPitch: 2
+  volumeStep: 0.03
+  maxVolume: 1

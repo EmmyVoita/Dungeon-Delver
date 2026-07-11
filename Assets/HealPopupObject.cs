@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using DG.Tweening;
 
-public class HealPopupObject : MonoBehaviour
+public class TextPopupObject : MonoBehaviour
 {
     [Header("Visual Settings")]
     public Gradient colorGradient;
@@ -35,10 +35,10 @@ public class HealPopupObject : MonoBehaviour
         }
     }
 
-    public void Initialize(int amount)
+    public void Initialize(int amount, string prefix = null, string suffix = null)
     {
         // Assign text and color
-        text.text = $"+{amount}";
+        text.text = $"{prefix} +{amount} {suffix}";
         text.color = colorGradient.Evaluate(0f);
 
         // Reset visual state

@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class AbilityUnlockPresentationController : MonoBehaviour
 {
-   [SerializeField] private AbilitySelectManager selectManager;
+   [SerializeField] private PlayMenuNavigator selectManager;
    [SerializeField] private AbilityUnlockManager unlockManager;
 
    public IEnumerator PlayUnlockSequence(

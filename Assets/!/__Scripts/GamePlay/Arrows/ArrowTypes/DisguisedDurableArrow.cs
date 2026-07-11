@@ -60,8 +60,8 @@ public class DisguisedDurableArrow : ArrowBase
         // ------------------------------
         // Invincibility window
         // ------------------------------
-        if (invincible && Time.time > invincibleDone)
-            invincible = false;
+        if (_invincible && Time.time > invincibleDone)
+            _invincible = false;
 
         // ------------------------------
         // Disguise reveal timing
@@ -140,7 +140,7 @@ public class DisguisedDurableArrow : ArrowBase
         Goal.GoalType goalType = Goal.GoalType.Normal,
         Vector2 hitDirection = default)
     {
-        if (invincible) return;
+        if (_invincible) return;
 
         hitsTaken++;
 
@@ -150,7 +150,7 @@ public class DisguisedDurableArrow : ArrowBase
         }
         else
         {
-            invincible = true;
+            _invincible = true;
             invincibleDone = Time.time + invincibilityDuration;
 
             if (bounceSound != null)

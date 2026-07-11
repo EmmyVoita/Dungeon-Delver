@@ -2,11 +2,10 @@ using UnityEngine;
 
 
 [CreateAssetMenu(menuName = "Upgrades/Extend Golden On Crit")]
-public class ExtendGoldenOnCritUpgrade : UpgradeBase, IActivatableUpgrade
+public class ExtendGoldenOnCritUpgrade : UpgradeBase
 {
     public int maxStack = 3;
     public int arrowsPerCrit = 1;
-    private int stacksLeft = 0;
 
     public override string GetDescription()
     {
@@ -15,43 +14,9 @@ public class ExtendGoldenOnCritUpgrade : UpgradeBase, IActivatableUpgrade
             .Replace("{ARROWS_PER_CRIT}", arrowsPerCrit.ToString());
     }
 
-    public void Activate()
+    public override void Apply()
     {
-        ArrowBase.OnArrowResolved += HandleArrowResolved;
-        BuffHelpers.OnGoldenArrowSessionStarted += AddArrows;
-        stacksLeft = 0;
-    }
-
-    public void Deactivate()
-    {
-        ArrowBase.OnArrowResolved -= HandleArrowResolved;
-        BuffHelpers.OnGoldenArrowSessionStarted -= AddArrows;
-        stacksLeft = 0;
-    }
-
-    public void AddArrows()
-    {
-        stacksLeft = maxStack;
-    }
-
-    private void HandleArrowResolved(ArrowResolvedData data)
-    {
-        if (data.goalType != Goal.GoalType.Critical)
-            return;
-
-        if (!data.status.HasFlag(ArrowStatus.Golden))
-            return;
-       
-        if(stacksLeft > 0)
-        {
-            BuffHelpers.GetOrCreateGoldenEffect(
-            arrowsPerCrit
-            );
-
-            UpgradeManager.Instance.SetUpgradeActive(upgradeId, true);
-
-            stacksLeft--;
-        }
+        GoldenArrowManager.Instance.AddGoldenExtension(this);
     }
 
 }

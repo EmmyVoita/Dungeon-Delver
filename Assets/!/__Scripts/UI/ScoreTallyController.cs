@@ -40,6 +40,7 @@ public class ScoreTallyController : MonoBehaviour
     }
 
     [SerializeField] private float countDelay = 0.1f;
+    [SerializeField] private float animateAbilityChargeDelay =1.0f;
     private readonly Queue<TallyRequest> tallyQueue = new Queue<TallyRequest>();
     private bool isTallying = false;
     private Coroutine tallyRoutine;
@@ -88,16 +89,21 @@ public class ScoreTallyController : MonoBehaviour
         // so we set finished to false once again
         finished = false;
 
+        
+
         // Ability Charge tally request
         if(Player.Instance.AbilityCharge >= 0)
         {
+            yield return new WaitForSeconds(animateAbilityChargeDelay);
+
              tallyQueue.Enqueue(new TallyRequest(
                 Player.Instance.AbilityCharge,
                 TallyType.AbilityCharge,
                 () => finished = true
             ));
         }
-       
+
+  
         // Grab the top of the queue and start the tally
         if (!isTallying) EnsureTallyProcessor();
             

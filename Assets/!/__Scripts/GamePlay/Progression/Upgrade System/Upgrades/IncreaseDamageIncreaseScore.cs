@@ -2,21 +2,23 @@ using UnityEngine;
 
 
 [CreateAssetMenu(menuName = "Upgrades/Increase Damage Increase Score")]
-public class IncreaseDamageIncreaseScore : UpgradeBase, IDamageModifier, IGlobalScoreMultiplier
+public class IncreaseDamageIncreaseScore : UpgradeBase, IDamageModifier
 {
-    public int additionalDamage = 1;
-    public float globalValueMultiplier = 1.5f;
+    [SerializeField] private int additionalDamage = 1;
+    [SerializeField] private int currencyAmount = 5000;
 
     public override string GetDescription()
     {
         return descriptionTemplate
+            .Replace("{COLOR_LAVENDER}", $"<color=#{UIColors.ToHex(UIColors.Lavender)}>")
             .Replace("{ADDITIONAL_DAMAGE}", additionalDamage.ToString())
-            .Replace("{GLOBAL_VALUE_MULTIPLIER}", (globalValueMultiplier - 1).ToString("P0"));
+            .Replace("{CURRENCY_AMOUNT}", currencyAmount.ToString("N0"));
     }
 
     public override void Apply()
     {
         UpgradeManager.Instance.AddTemporaryModifier(this);
+        CurrencyManager.Instance.AddCurrency(currencyAmount, silent: true);
     }
 
     public int ModifyDamageTaken(int baseDamage)
@@ -24,8 +26,4 @@ public class IncreaseDamageIncreaseScore : UpgradeBase, IDamageModifier, IGlobal
         return baseDamage + additionalDamage;
     }
 
-    public float ModifyGlobalScore(float currentMultiplier)
-    {
-        return currentMultiplier * globalValueMultiplier;
-    }
 }

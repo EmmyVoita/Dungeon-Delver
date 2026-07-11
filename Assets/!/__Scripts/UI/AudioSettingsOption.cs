@@ -94,7 +94,10 @@ public class AudioSettingOption : BaseSettingOption, IDragHandler, IPointerDownH
         float fillPercent = (float)currentValue / tickCount;
         AudioSettingsManager.Instance.SetVolume(audioControl, fillPercent); // raw channel value only
 
-        AudioHelpers.PlayMyClipAtPoint(adjustSound, AudioChannel.UI, Camera.main.transform.position, 0.5f);
+        SoundEffect adjustSound = AudioLibrary.Instance.Database.navigate;
+        AudioHelpers.PlaySoundEffect(adjustSound,Camera.main.transform.position);
+
+        //AudioHelpers.PlayMyClipAtPoint(adjustSound, AudioChannel.UI, Camera.main.transform.position, 0.5f);
         UpdateVisual();
     }
 
@@ -105,7 +108,10 @@ public class AudioSettingOption : BaseSettingOption, IDragHandler, IPointerDownH
         float fillPercent = (float)currentValue / tickCount;
         AudioSettingsManager.Instance.SetVolume(audioControl, fillPercent); // raw channel value only
 
-        AudioHelpers.PlayMyClipAtPoint(adjustSound, AudioChannel.UI, Camera.main.transform.position, 0.5f);
+        //AudioHelpers.PlayMyClipAtPoint(adjustSound, AudioChannel.UI, Camera.main.transform.position, 0.5f);
+
+        SoundEffect adjustSound = AudioLibrary.Instance.Database.navigate;
+        AudioHelpers.PlaySoundEffect(adjustSound,Camera.main.transform.position);
         UpdateVisual();
     }
 

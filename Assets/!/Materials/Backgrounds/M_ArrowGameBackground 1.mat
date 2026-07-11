@@ -61,7 +61,7 @@ Material:
     - _ColorStart: {r: 0.4745547, g: 1.5507768, b: 2.1185474, a: 1}
     - _OffsetDirection: {r: 0.2, g: 0.2, b: 0, a: 0}
     - _RemapOut: {r: 0.9, g: 1.5, b: 0, a: 0}
-    - _Tiling: {r: 1, g: 1, b: 0, a: 0}
+    - _Tiling: {r: 1, g: 3, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &8416330238635509225

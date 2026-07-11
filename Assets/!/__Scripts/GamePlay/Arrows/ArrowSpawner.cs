@@ -61,7 +61,7 @@ public class ArrowSpawner : MonoBehaviour
     public int TotalArrowsThisRound { get; private set; }
     public float ActiveBPM => bpm;
     public List<ArrowTypeDefinition> ArrowTypeDefinitions => arrowDatabase.arrows;
-    public List<ObstacleTypeDefinition> ChallengesTypeDefinitions => challengeDatabase.obstacles;
+    public List<ObstacleTypeDefinition> ChallengesTypeDefinitions => challengeDatabase.challenges;
     public float SpawnDistance => spawnDistance;
     public float GoalRadius => goalRadius;
     public float ArrowTravelDistance => Mathf.Max(spawnDistance - goalRadius,0f);
@@ -108,7 +108,7 @@ public class ArrowSpawner : MonoBehaviour
         isPausedByObstacle = true;
     }
 
-    private void HandleResumeSpawning()
+    private void HandleResumeSpawning(int damageTaken)
     {
         if (obstacleHandlingMode == ObstacleHandlingMode.Ignore) return;
         
@@ -455,7 +455,7 @@ public class ArrowSpawner : MonoBehaviour
     public void SpawnObstacle(Vector2 _ignored, string type, int damageOverride = -1)
     {
 
-        ObstacleTypeDefinition obstacleTypeDef = challengeDatabase.obstacles.Find(def => def.fileName.ToLower() == type.ToLower());
+        ObstacleTypeDefinition obstacleTypeDef = challengeDatabase.challenges.Find(def => def.fileName.ToLower() == type.ToLower());
 
         if(obstacleTypeDef == null)
         {

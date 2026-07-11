@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54662e7133a30b34c9c51ba0715bbae2, type: 3}
+  m_Name: EmergencyFund
+  m_EditorClassIdentifier: Assembly-CSharp::CurrencyDeathSaveUpgrade
+  _cost: 0
+  _maxStacks: 1
+  upgradeId: 
+  cardDecoration: {fileID: 21300000, guid: a8b3bfd76113cec47a85889e616f4654, type: 3}
+  centerIcon: {fileID: 21300000, guid: 8dca92a8dee93464da59228cf01e6526, type: 3}
+  icon: {fileID: 21300000, guid: bf31b210385dbe74891ae5c84ae4a24c, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Emergency Fund
+  displayInFooter: 0
+  descriptionTemplate: "Once per level, If damage would reduce you below 1HP \u2192
+    lose 500 currency instead and heal {HEAL_AMOUNT}\r\n"
+  healAmount: 1

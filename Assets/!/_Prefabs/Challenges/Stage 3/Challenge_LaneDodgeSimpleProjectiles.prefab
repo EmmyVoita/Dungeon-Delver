@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab8821f62409034da4b837180a5ff21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossSafeLaneChallenge
+  registerWithManager: 1
   priority: 0
   controlMode: 4
   config:
@@ -54,7 +55,8 @@ MonoBehaviour:
   spawnPrefabs:
   - {fileID: 2209782324246233958, guid: cb3d57ff39828094c8a78df7a4362069, type: 3}
   safeLaneInterval: 3
-  safeLaneWarningDuration: 1
+  safeLaneVisualDelay: 2
+  safeLaneWarningDuration: 0.5
   obstacleActiveTime: 18
   spawnX: 7
 --- !u!1 &6769059283685959404
@@ -102,6 +104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79c1cb71436b5a943909b1d1c4126056, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimpleLaneDodger
+  registerWithManager: 1
   priority: 0
   controlMode: 4
   config:
@@ -117,6 +120,7 @@ MonoBehaviour:
   randomizeSpawnIntervalAmount: 0
   obstacleActiveTime: 2
   spawnPosition: {x: -6, y: 0, z: 0}
+  reverse: 0
   reverseAtTime: 10
   reverseSound:
     clip: {fileID: 8300000, guid: 26d5a4bc6e09ecb4ca444cd3b3da43f6, type: 3}

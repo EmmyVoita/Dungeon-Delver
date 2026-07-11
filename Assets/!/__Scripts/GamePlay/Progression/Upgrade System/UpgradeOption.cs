@@ -9,6 +9,8 @@ public class UpgradeOption
         this.effect = effect;
     }
 
+    public Sprite CardDecoration => effect.cardDecoration;
+    public Sprite CenterIcon => effect.centerIcon;
     public Sprite Icon => effect.icon;
     public string DisplayName => effect.displayName;
     public string Description => effect.GetDescription();
@@ -16,6 +18,7 @@ public class UpgradeOption
 
     public void OnSelected()
     {
+        Debug.Log($"Upgrade Option Affect Aplied => {DisplayName}");
         effect.Apply();
     }
 }

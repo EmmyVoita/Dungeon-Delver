@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+
 
 public class TimeScaleModifier
 {
@@ -8,10 +10,10 @@ public class TimeScaleModifier
 
     public Action OnChanged;
 
-    public TimeScaleModifier(string id, float value)
+    public TimeScaleModifier(string id, float targetValue)
     {
         Id = id;
-        Value = value;
+        Value = targetValue;
     }
 
     public void SetValue(float v)

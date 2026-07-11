@@ -142,7 +142,16 @@ public class SimpleLaneDodger : ChallengeBase
     {
         int direction = Random.Range(0, 2) == 0 ? -1 : 1;
 
-        int lane = Random.Range(0, config.maxLanes);
+        List<int> availiable = LaneReservationManager.GetAvailableLanes(config.maxLanes);
+
+        if(availiable.Count == 0)
+        {
+            Debug.LogWarning("No Aviliable Lanes in Simple Lane Dodger");
+            return;
+        }
+
+        int lane = availiable[Random.Range(0,availiable.Count)];
+
         float laneY = GetLaneY(lane);
 
         float spawnX = direction * spawnPosition.x;

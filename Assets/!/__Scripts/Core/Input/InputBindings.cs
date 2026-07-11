@@ -9,4 +9,5 @@ public enum InputActionType
     Confirm,
     Back,
     Interact,
+    ViewUpgrades
 }

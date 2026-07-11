@@ -191,7 +191,7 @@ MonoBehaviour:
   outlineRenderer: {fileID: 6520946349492723844}
   outlineResolution: 64
   destroyEffectPrefab: {fileID: 0}
-  segmentPrefab: {fileID: 2209782324246233958, guid: d5a5d0bd5cd858140b7fec2ac16c4933, type: 3}
+  segmentPrefab: {fileID: 2209782324246233958, guid: c283cf36520fd1048adc5ebd1984fa61, type: 3}
   ringHolePrefab: {fileID: 5580632041562484692, guid: b52c83f0145368841a9ac4f64ed5c1e1, type: 3}
   segmentCount: 24
   ringRadius: 4
@@ -206,7 +206,6 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 0
     pitch: 0
-    usePitchVariation: 0
     pitchVariation: 0
   gapCount: 4
   jitterGaps: 0
@@ -222,5 +221,4 @@ MonoBehaviour:
     affectedByTimeScale: 0
     volume: 0
     pitch: 0
-    usePitchVariation: 0
     pitchVariation: 0

@@ -29,7 +29,7 @@ public class ScoreManager : MonoBehaviour
     private string saveFilePath;
 
     public int RoundScoreTotal => CalculateTotalScore();
-    public int GameScoreTotal => currentScore;
+    public int RunScoreTotal => runStats.TotalScore;
     public SaveData SaveData => saveData;
 
     private void OnEnable()
@@ -59,6 +59,11 @@ public class ScoreManager : MonoBehaviour
         LoadData();
     }
 
+    private void Update()
+    {
+      
+    }
+
     private void HandleGameStateChange(GameState previous, GameState newState)
     {
         if(newState == GameState.RunLoad)
@@ -75,6 +80,20 @@ public class ScoreManager : MonoBehaviour
         {
             SaveRunRecord();
         }
+    }
+
+    public bool TrySpendScore(int amount)
+    {
+        if (currentScore < amount)
+            return false;
+
+        currentScore -= amount;
+
+        OnScoreUpdated?.Invoke(currentScore);
+
+        OnScoreAdded?.Invoke(-amount);
+
+        return true;
     }
 
     public void ResetBreakdown()

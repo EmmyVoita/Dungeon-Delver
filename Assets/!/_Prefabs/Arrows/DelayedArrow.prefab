@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8789217392064543819}
   - component: {fileID: 844475444451015729}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -89,7 +89,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!1 &5575773763797762119
 GameObject:
@@ -104,7 +104,7 @@ GameObject:
   - component: {fileID: 5892528185532056661}
   - component: {fileID: 1506437733473752996}
   - component: {fileID: 7488991445482098621}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: DelayedArrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -215,16 +215,21 @@ MonoBehaviour:
   health: 1
   catchRule: 0
   flip180: 1
+  sRend: {fileID: 0}
+  baseMaterial: {fileID: 0}
+  colorApropertyName: _ColorA
+  colorBpropertyName: _ColorB
+  goldenColorA: {r: 0, g: 0, b: 0, a: 0}
+  goldenColorB: {r: 0, g: 0, b: 0, a: 0}
+  recoveryColorA: {r: 0, g: 0, b: 0, a: 0}
+  recoveryColorB: {r: 0, g: 0, b: 0, a: 0}
   arrowHitSound: {fileID: 8300000, guid: fef65794fbfc1754197e5acab64dbbfd, type: 3}
   normalHitPitch: 1
   criticalHitPitch: 1
   directionalPitchFactor: 0
   directionalEQStrength: 0.5
-  hpfNeutral: 300
-  lpfNeutral: 20000
-  midNeutral: 0.5
-  invincible: 0
-  status: 0
+  _invincible: 0
+  _status: 0
   stopDistance: 3
   delayBeats: 2
   useManualStopDistance: 1
@@ -241,4 +246,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
+  abilityChargeDamage: 0
   sourceName: Delayed Arrow
+  playHitSound: 1

@@ -37,7 +37,7 @@ public class MusicChallengeController : MonoBehaviour
         );
     }
 
-    private void ExitChallenge()
+    private void ExitChallenge(int damageTaken)
     {
         var music = MusicManager.Instance;
         if (music == null) return;

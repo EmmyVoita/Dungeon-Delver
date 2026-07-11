@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103c4e3f201af744b8611f2ab9a4de29, type: 3}
+  m_Name: Stage1Data
+  m_EditorClassIdentifier: Assembly-CSharp::StageDataObject
+  stageName: Stage A
+  musicClip: {fileID: 8300000, guid: d1882828bdb679f4088254a129cca18e, type: 3}
+  levelsToPlay: 3
+  levelFiles:
+  - {fileID: 11400000, guid: 59b2bf03644d260418766bc21344c84d, type: 2}
+  - {fileID: 11400000, guid: 78fbc41edbb5f2549b71fb44128ff85e, type: 2}
+  - {fileID: 11400000, guid: 6cea6630669f8de49a47fc005f94a750, type: 2}
+  levelOrderMode: 0
+  allowRepeats: 0
+  bossFile: {fileID: 11400000, guid: a575f945ac7469c44bd1553081b7785d, type: 2}

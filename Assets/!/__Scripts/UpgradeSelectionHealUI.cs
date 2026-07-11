@@ -10,27 +10,54 @@ public class UpgradeSelectionHealUI : MonoBehaviour
     [SerializeField] private List<GameState> showStates;
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private int healAmount = 1;
+    
+
 
     private void OnEnable()
     {
         GameStateManager.OnStateChanged += HandleStateChanged;
+        UpgradeCardManager.OnCardPurchased += HandleCardPurchased;
     }
 
     private void OnDisable()
     {
         GameStateManager.OnStateChanged -= HandleStateChanged;
+        UpgradeCardManager.OnCardPurchased -= HandleCardPurchased;
     }
 
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
-        if(showStates.Contains(newState) && Player.Instance.Health < Player.Instance.MaxHealth)
+        RefreshText();
+    }
+
+    private void HandleCardPurchased(UpgradeOption upgrade)
+    {
+        Debug.Log("HandleCardPurchased");
+        RefreshText();
+    }
+
+    private void RefreshText()
+    {
+        //text.text = $"Continue";
+        /*
+        bool canHeal =
+            showStates.Contains(GameStateManager.Instance.CurrentState) &&
+            Player.Instance.Health < Player.Instance.MaxHealth &&
+            UpgradeCardManager.Instance.PurchasedCardsCount == 0;
+        */
+        /*
+        if(canHeal)
         {
-            text.text = $"Skip [<color=#{UIColors.ToHex(UIColors.Yellow)}>{InputBindingManager.Instance.GetKeyName(InputActionType.Jump)}</color>] and Heal [<color=#{UIColors.ToHex(UIColors.Green)}>{healAmount}</color>]";
+            text.text =
+                $"Continue. Heal: [<color=#{UIColors.ToHex(UIColors.Green)}>{healAmount}</color>]";
         }
-        else if(showStates.Contains(newState))
+        else
         {
-            text.text = $"Skip [{InputBindingManager.Instance.GetKeyName(InputActionType.Jump)}] and Heal [0]";
+            text.text =
+                $"Continue";
         }
+        */
+        
     }
 
 }

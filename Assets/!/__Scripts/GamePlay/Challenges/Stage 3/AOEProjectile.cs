@@ -4,7 +4,8 @@ using DG.Tweening;
 
 public class AOEProjectile : MonoBehaviour
 {
-    public CircleCollider2D coll;
+    [SerializeField] private CircleCollider2D coll;
+    [SerializeField] private DamageEffect dEf;
 
     [Header("Movement")]
     public float speed = 6f;
@@ -120,7 +121,7 @@ public class AOEProjectile : MonoBehaviour
         {
             if (hit.CompareTag("Player"))
             {
-                Player.Instance.DamageSelf(1);
+                Player.Instance.DamageSelf(dEf);
                 // damage player
             }
         }

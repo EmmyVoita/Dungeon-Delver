@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8eda72a9e540d946b833e3c94b90593, type: 3}
   m_Name: Golden Multi
   m_EditorClassIdentifier: 
+  cost: 3000
+  upgradeId: 
   icon: {fileID: -1194955740, guid: 42bbe21d08e2c1f409778bef6d20109f, type: 3}
+  iconMaterial: {fileID: 0}
   displayName: Golden Balue Up
   descriptionTemplate: Increase the bonus score value of <color=#9C27B0>golden</color>
     arrows by {GOLDEN_VALUE_MULTIPLIER}.

@@ -9,7 +9,7 @@ public abstract class PracticeMenuOption : MonoBehaviour
 
     public bool IsCurrent()
     {
-        return ObstacleLabMenuNavigator.Instance.CurrentOption == this;
+        return PracticeMenuNavigator.Instance.CurrentOption == this;
     }
 
 

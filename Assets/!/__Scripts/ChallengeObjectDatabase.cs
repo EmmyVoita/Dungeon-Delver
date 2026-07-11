@@ -4,5 +4,5 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Database/Challenge Objects")]
 public class ChallengeObjectDatabase : ScriptableObject
 {
-    public List<ObstacleTypeDefinition> obstacles;
+    public List<ObstacleTypeDefinition> challenges;
 }

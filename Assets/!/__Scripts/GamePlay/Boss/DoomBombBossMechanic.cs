@@ -125,7 +125,7 @@ public class DoomBombBossMechanic : MonoBehaviour
             Instantiate(destroyEffect,transform.position,Quaternion.identity);
         }
 
-        Player.Instance.DamageSelf(bombDamage);
+        //Player.Instance.DamageSelf(bombDamage);
 
         Destroy(gameObject);
     }

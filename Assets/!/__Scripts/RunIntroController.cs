@@ -7,7 +7,7 @@ public class RunIntroController : MonoBehaviour
     [SerializeField] private bool skipInEditor = true;
     [SerializeField] private bool stop = false;
     [Header("References")]
-    [SerializeField] private GuiPanelArrow healthVisuals;
+    [SerializeField] private HealthPanel healthVisuals;
     [SerializeField] private Transform playerContainer;
     [SerializeField] private GameObject landParticleEffect;
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -9,8 +10,8 @@ public class ContinuePromptUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textComponent;
 
     [Header("State Management")]
-    public GameState showState = GameState.WorldMapView;
-    public GameState hideState = GameState.UpgradeSelection;
+    [SerializeField] private GameState showState = GameState.WorldMapView;
+    [SerializeField] private List<GameState> hideStates;
 
 
     void OnEnable()
@@ -36,7 +37,7 @@ public class ContinuePromptUI : MonoBehaviour
             textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetKeyName(InputActionType.Confirm)}</color>] to continue";
             continuePrompt?.Show();
         }
-        else if(newState == hideState)
+        else if(hideStates.Contains(newState))
         {
             continuePrompt?.Hide();
             return;

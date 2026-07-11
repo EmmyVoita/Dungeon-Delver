@@ -8,7 +8,7 @@ public class GoalFormController : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     [Header("Big Goal")]
-    [SerializeField] private Player.PlayerControlState[] allowedStates;
+    [SerializeField] private PlayerControlState[] allowedStates;
     [SerializeField] private Sprite bigGoalSprite;
     [SerializeField] private Vector3 bigGoalScale = Vector3.one * 1.5f;
 
@@ -17,7 +17,7 @@ public class GoalFormController : MonoBehaviour
 
     private bool isUnlocked; // player owns ability
     private bool isApplied;  // currently active visually
-    private HashSet<Player.PlayerControlState> _allowedStates;
+    private HashSet<PlayerControlState> _allowedStates;
 
     void OnEnable()
     {
@@ -31,7 +31,7 @@ public class GoalFormController : MonoBehaviour
 
     void Awake()
     {
-        _allowedStates = new HashSet<Player.PlayerControlState>(allowedStates);
+        _allowedStates = new HashSet<PlayerControlState>(allowedStates);
         
         foreach (var col in extraColliders)
             col.enabled = false;
@@ -50,7 +50,7 @@ public class GoalFormController : MonoBehaviour
         TryApply();
     }
 
-    private void HandleStateChanged(Player.PlayerControlState state)
+    private void HandleStateChanged(PlayerControlState state)
     {
         TryApply();
     }
@@ -93,7 +93,7 @@ public class GoalFormController : MonoBehaviour
             col.enabled = false;
     }
 
-    bool IsStateAllowed(Player.PlayerControlState state)
+    bool IsStateAllowed(PlayerControlState state)
     {
         return _allowedStates.Contains(state);
     }

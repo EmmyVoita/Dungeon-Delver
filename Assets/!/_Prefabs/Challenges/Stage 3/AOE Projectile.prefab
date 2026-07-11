@@ -316,7 +316,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageEffect
   damage: 1
+  abilityChargeDamage: 0
   sourceName: Bomb
+  playHitSound: 1
 --- !u!114 &42437970533833639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -330,6 +332,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AOEProjectile
   coll: {fileID: 4330140235963293424}
+  dEf: {fileID: 7766809104793485761}
   speed: 6
   fuseTime: 2
   explosionRadius: 3

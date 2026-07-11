@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 
 public enum ComboBreakReason
@@ -36,30 +37,32 @@ public class ComboManager : MonoBehaviour
     [Header("References")]
     public ScoreTallyController tallyController;
 
-    [Header("Combo Score Settings")]
-    public float baseValue = 100;
+
+    [Header("Score Settings")]
+    public int baseValue = 100;
     public float growth = 10f;
     public float exponent = 1.1f;
 
+
+    [Header("Audio")]
+    [SerializeField] private SoundEffect comboTickSEff;
+    [SerializeField] private SoundEffect comboBreakSEff;
+    [Tooltip("Plays as a subtle layer at high combo milestones")]
+    [SerializeField] private SoundEffect highComboAccentSEff;
+
+
+    [Header("ScreenShake")]
+    //[SerializeField] private ScreenShakeRequest ssRequest;
+
     [Header("Normal Combo Settings")]
-    public Color comboFlashColor = Color.red;
-    public AudioClip comboSound;
-    public AudioClip resetComboSound;
+
     public float minGoodComboCount = 10;
     public int resetComboThreshold = 20;
-    public int comboScoreBaseAmount = 100;
-    public float comboBreakScreenShakeDuration = 0.4f;
-    public float comboBreakScreenShakeMagnitude = 0.05f;
-
     // ===================== High Combo Accent =====================
 
     [Header("High Combo Accent")]
-    [Tooltip("Plays as a subtle layer at high combo milestones")]
-    public AudioClip highComboAccentSound;
-
     [Tooltip("Combo count where accent starts")]
     [SerializeField] private int highComboStart = 40;
-
     [Tooltip("Play accent every N combos after start")]
     [SerializeField] private int highComboStep = 10;
 
@@ -83,7 +86,7 @@ public class ComboManager : MonoBehaviour
     [SerializeField] private SoundEffect ignoreMissSoundEffect;
     [SerializeField] private GameObject ignoreMissVFXPrefab;
     [SerializeField] private GameObject shieldPrefab;
-    private bool ignoreNextMiss = false;
+    private int _ignoreNextMissCount = 0;
 
 
     private int comboCount;
@@ -92,7 +95,7 @@ public class ComboManager : MonoBehaviour
     private bool hasPendingBreak = false;
     private ComboBreakPriority pendingBreakPriority;
     private ComboBreakReason pendingBreakReason;
-    private GameObject activeShieldObject = null;
+    private List<GameObject> _activeShieldObjects = null;
     private Coroutine ignoreNextMissCoroutine;
     private bool blockBreakThisFrame = false;
   
@@ -104,7 +107,12 @@ public class ComboManager : MonoBehaviour
     public int HighComboStart => highComboStart;
 
 
-    void Awake() => Instance = this;
+    void Awake()
+    {
+        Instance = this;
+
+        _activeShieldObjects = new();
+    } 
 
     private void OnEnable()
     {
@@ -122,39 +130,54 @@ public class ComboManager : MonoBehaviour
 
     public void PreventNextComboBreak(float duration = -1)
     {
-        if (shieldPrefab != null && activeShieldObject == null)
+        GameObject shieldObject = null;
+
+        if (shieldPrefab != null)
         {
-            activeShieldObject = Instantiate(
+            shieldObject = Instantiate(
                 shieldPrefab,
                 Player.Instance.transform.position,
                 Quaternion.identity
             );
-            activeShieldObject.transform.SetParent(Player.Instance.transform);
+
+            shieldObject.transform.localScale =
+                Vector3.one * (1f + _ignoreNextMissCount * .2f);
+
+            shieldObject.transform.SetParent(
+                Player.Instance.transform
+            );
+
+            _activeShieldObjects.Add(shieldObject);
         }
+
+        _ignoreNextMissCount++;
 
         if(duration != -1)
         {
-            if (ignoreNextMissCoroutine != null)
-            {
-                StopCoroutine(ignoreNextMissCoroutine);
-            }
-
-            ignoreNextMissCoroutine = StartCoroutine(HandleIgnoreNextMiss(duration));
-        }
-        else
-        {
-            ignoreNextMiss = true;
+            StartCoroutine(
+                HandleIgnoreNextMiss(
+                    duration,
+                    shieldObject
+                )
+            );
         }
     }
 
-    private IEnumerator HandleIgnoreNextMiss(float duration)
+    private IEnumerator HandleIgnoreNextMiss(
+    float duration,
+    GameObject shieldObject)
     {
-        ignoreNextMiss = true;
         yield return new WaitForSeconds(duration);
 
-        Destroy(activeShieldObject);
+        // Already consumed?
+        if (!_activeShieldObjects.Contains(shieldObject))
+            yield break;
 
-        if(ignoreNextMiss) ignoreNextMiss = false;
+        _activeShieldObjects.Remove(shieldObject);
+
+        Destroy(shieldObject);
+
+        _ignoreNextMissCount--;
     }
 
 
@@ -170,8 +193,13 @@ public class ComboManager : MonoBehaviour
 
         if( newState == GameState.RoundResultsTally)
         {
-            ignoreNextMiss = false;
-            Destroy(activeShieldObject);
+            _ignoreNextMissCount = 0;
+
+            foreach(GameObject shield in _activeShieldObjects)
+            {
+                Destroy(shield);
+            }
+
             RequestComboBreak(ComboBreakReason.RoundEnd, ComboBreakPriority.RoundEnd);
             critsInARow = 0;
             OnCritStreakUpdated?.Invoke(critsInARow);
@@ -216,7 +244,7 @@ public class ComboManager : MonoBehaviour
 
         if (comboCount > minGoodComboCount)
         {
-            PlayComboSound(comboSound, comboCount);
+            PlayComboSound(comboCount);
             TryPlayHighComboAccent(comboCount);
         }
     }
@@ -243,30 +271,43 @@ public class ComboManager : MonoBehaviour
     {
         Debug.Log($"Requesting combo break. Reason => {reason}. Priority => {priority}");
 
-        //if (comboCount <= 0)
-            //return;
-
-        // 🛡️ Shield: consume + block entire frame
-        if (ignoreNextMiss && reason != ComboBreakReason.StateChange && activeShieldObject != null)
+        // Shield: consume + block entire frame
+        if (_ignoreNextMissCount > 0 && reason != ComboBreakReason.StateChange)
         {
-            Debug.Log("🛡️ Combo break ignored by shield.");
-
-            ignoreNextMiss = false;
-            blockBreakThisFrame = true;
-
-            AudioHelpers.PlaySoundEffect(ignoreMissSoundEffect, Camera.main.transform.position);
-
-            if (ignoreMissVFXPrefab != null)
+         
+            if(!blockBreakThisFrame)
             {
-                Instantiate(
-                    ignoreMissVFXPrefab,
-                    Player.Instance.transform.position,
-                    Quaternion.identity
-                );
+                AudioHelpers.PlaySoundEffect(ignoreMissSoundEffect, Camera.main.transform.position);
+
+                if (ignoreMissVFXPrefab != null)
+                {
+                    Instantiate(
+                        ignoreMissVFXPrefab,
+                        Player.Instance.transform.position,
+                        Quaternion.identity
+                    );
+                }
+                
+                if (_activeShieldObjects.Count > 0)
+                {
+                    //Debug.LogError($"Destroying Shield because shield count is => {_activeShieldObjects.Count} \n"+
+                    //            $"Ignore miss count is => {_ignoreNextMissCount} \n");
+                            
+                    GameObject shield =
+                        _activeShieldObjects[^1];
+
+                    _activeShieldObjects.RemoveAt(
+                        _activeShieldObjects.Count - 1
+                    );
+
+                    Destroy(shield);
+                }
+
+                _ignoreNextMissCount--;
             }
 
-            Destroy(activeShieldObject);
-            activeShieldObject = null;
+                 
+            blockBreakThisFrame = true;
 
             // 🔥 IMPORTANT: still register this frame so it resolves/reset correctly
             if (!hasPendingBreak)
@@ -366,21 +407,14 @@ public class ComboManager : MonoBehaviour
         }
         
 
-        if (comboCount > resetComboThreshold && resetComboSound != null && playSound)
+        if (comboCount > resetComboThreshold && playSound)
         {
-            AudioHelpers.PlayMyClipAtPoint(
-                resetComboSound,
-                AudioChannel.SFX,
-                Camera.main.transform.position
-            );
+            //TimeManager.Instance.AddTemporaryModifier(new TimeScaleModifier("ComboFreezeFrame",0), 0.5f);
 
-            ScreenShake.Instance.Shake(
-                comboBreakScreenShakeDuration,
-                comboBreakScreenShakeMagnitude
-            );
+            AudioHelpers.PlaySoundEffect(comboBreakSEff, transform.position);
         }
 
-        AddComboScoreDisplay?.Invoke(comboCount * comboScoreBaseAmount);
+        AddComboScoreDisplay?.Invoke(comboCount * baseValue);
     }
 
 
@@ -401,7 +435,7 @@ public class ComboManager : MonoBehaviour
 
         if (comboCount > minGoodComboCount)
         {
-            PlayComboSound(comboSound, comboCount);
+            PlayComboSound(comboCount);
             TryPlayHighComboAccent(comboCount);
         }
     }
@@ -426,8 +460,8 @@ public class ComboManager : MonoBehaviour
 
     private void TryPlayHighComboAccent(int combo)
     {
-        if (highComboAccentSound == null)
-            return;
+        //if (highComboAccentSound == null)
+            //return;
 
         if (combo < highComboStart)
             return;
@@ -450,21 +484,15 @@ public class ComboManager : MonoBehaviour
             1f
         );
 
-        AudioHelpers.PlayMyClipAtPoint(
-            highComboAccentSound,
-            AudioChannel.SFX,
-            Camera.main.transform.position,
-            vol,
-            pitch
-        );
+        AudioHelpers.PlaySoundEffect(highComboAccentSEff, transform.position, pitch, vol);
 
         OnComboAccent?.Invoke(combo, accentIndex);
     }
 
 
-    private void PlayComboSound(AudioClip clip, int count)
+    private void PlayComboSound(int count)
     {
-        if (clip == null) return;
+        //if (clip == null) return;
 
         float pitch = Mathf.Min(
             basePitch + ((count - minGoodComboCount) - 1) * pitchStep,
@@ -477,13 +505,7 @@ public class ComboManager : MonoBehaviour
             1f
         );
 
-        AudioHelpers.PlayMyClipAtPoint(
-            clip,
-            AudioChannel.SFX,
-            Camera.main.transform.position,
-            vol,
-            pitch
-        );
+        AudioHelpers.PlaySoundEffect(comboTickSEff, transform.position, pitch, vol);
     }
 
 

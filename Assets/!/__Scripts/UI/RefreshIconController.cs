@@ -6,8 +6,9 @@ using UnityEngine.Rendering;
 
 public class RefreshIconController : MonoBehaviour
 {
-    public TextMeshProUGUI refreshCountText;
-    public TextMeshProUGUI buttonText;
+    [SerializeField] private TextMeshProUGUI refreshCountText;
+    [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private PromptLayoutController prompt;
 
     private void OnEnable()
     {
@@ -31,10 +32,26 @@ public class RefreshIconController : MonoBehaviour
 
     private void RefreshUI()
     {
-        int rerolls = RunStateManager.Instance != null ? RunStateManager.Instance.ShopRerollsRemaining : 0;
-        buttonText.text = rerolls > 0 ? $"[<color=#{UIColors.ToHex(UIColors.Yellow)}>{InputBindingManager.Instance.GetKeyName(InputActionType.Interact)}</color>]" :
-                                        $"[{InputBindingManager.Instance.GetKeyName(InputActionType.Interact)}]";
-                
-        refreshCountText.text = rerolls > 0 ? $"[<color=#{UIColors.ToHex(UIColors.Green)}>{rerolls}</color>]" : $"[{rerolls}]";
+        int rerolls = RunStateManager.Instance != null
+            ? RunStateManager.Instance.ShopRerollsRemaining
+            : 0;
+
+        canvasGroup.alpha = rerolls > 0 ? 1 : 0;
+
+        refreshCountText.text = rerolls > 0
+            ? $"<color=#{UIColors.ToHex(UIColors.Yellow)}>Rerolls Left: {rerolls}</color>"
+            : "";
+
+        refreshCountText.ForceMeshUpdate();
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(
+            refreshCountText.rectTransform
+        );
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(
+            refreshCountText.transform.parent as RectTransform
+        );
+
+        prompt.Refresh();
     }
 }

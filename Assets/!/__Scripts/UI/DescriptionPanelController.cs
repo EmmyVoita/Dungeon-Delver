@@ -51,6 +51,19 @@ public class DescriptionPanelController : MonoBehaviour
         typewriter.StartTyping(text);
     }
 
+    public void ShowImmediate(string text)
+    {
+        rect.DOKill();
+        canvasGroup.DOKill();
+
+        canvasGroup.alpha = 1;
+        rect.DOAnchorPosY(shownY, duration)
+            .SetEase(easeCurve);
+
+        // start typing AFTER movement (feels better)
+        typewriter.SetInstant(text);
+    }
+
     public void Hide()
     {
         rect.DOKill();

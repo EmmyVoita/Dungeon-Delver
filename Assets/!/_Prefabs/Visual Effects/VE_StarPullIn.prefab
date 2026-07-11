@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 263579585914177324}
   - component: {fileID: 448539986581811807}
   - component: {fileID: 526128509702738997}
+  - component: {fileID: 1440214594339305168}
+  - component: {fileID: 7264496377998617134}
   m_Layer: 0
   m_Name: VE_StarPullIn
   m_TagString: Untagged
@@ -26,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 812096446077587059}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -41,7 +43,7 @@ VisualEffect:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 812096446077587059}
   m_Enabled: 1
-  m_Asset: {fileID: 8926484042661614526, guid: 91de7f540141fbd40a1272cd45878874, type: 3}
+  m_Asset: {fileID: 8926484042661614526, guid: dd64131d38eefae4eb169fd3ec325257, type: 3}
   m_InitialEventName: OnPlay
   m_InitialEventNameOverriden: 0
   m_StartSeed: 0
@@ -51,28 +53,43 @@ VisualEffect:
   m_PropertySheet:
     m_Float:
       m_Array:
-      - m_Value: 2.25
+      - m_Value: 2
         m_Name: Size
         m_Overridden: 1
-      - m_Value: 1.2
+      - m_Value: 0.2
         m_Name: Spawn Radius
         m_Overridden: 1
-      - m_Value: 0.5
+      - m_Value: 1.25
         m_Name: Lifetime
         m_Overridden: 1
-      - m_Value: 2
+      - m_Value: 3
         m_Name: Drag Coefficent
         m_Overridden: 1
-      - m_Value: 1
+      - m_Value: -1
         m_Name: Min Speed
+        m_Overridden: 1
+      - m_Value: 0
+        m_Name: SpawnDelay
+        m_Overridden: 1
+      - m_Value: -1.5
+        m_Name: Max Speed
+        m_Overridden: 1
+      - m_Value: 0
+        m_Name: Spiral Factor
         m_Overridden: 1
     m_Vector2f:
       m_Array: []
     m_Vector3f:
-      m_Array: []
+      m_Array:
+      - m_Value: {x: 0, y: 0, z: 0}
+        m_Name: AttractorPosition
+        m_Overridden: 0
+      - m_Value: {x: 0, y: 5, z: 0}
+        m_Name: EffectPosition
+        m_Overridden: 1
     m_Vector4f:
       m_Array:
-      - m_Value: {x: 0.15608764, y: 0.7490196, z: 0.31290236, w: 1}
+      - m_Value: {x: 0.3537736, y: 0.3537736, z: 0.3537736, w: 1}
         m_Name: Main Color
         m_Overridden: 1
     m_Uint:
@@ -125,13 +142,16 @@ VisualEffect:
         m_Overridden: 1
     m_NamedObject:
       m_Array:
-      - m_Value: {fileID: 2800000, guid: 7bb8e7cb3ce17be4fb283d3ea7af2f91, type: 3}
+      - m_Value: {fileID: 2800000, guid: 2213be8e8e36ba24d85b02645a2ed2e9, type: 3}
         m_Name: Main Texture
         m_Overridden: 1
     m_Bool:
       m_Array:
       - m_Value: 1
         m_Name: Flip Direction
+        m_Overridden: 1
+      - m_Value: 1
+        m_Name: Use Circle?
         m_Overridden: 1
 --- !u!73398921 &526128509702738997
 VFXRenderer:
@@ -154,6 +174,8 @@ VFXRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_StaticBatchInfo:
@@ -173,6 +195,40 @@ VFXRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1161071699
-  m_SortingLayer: -1
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: -53470901
+  m_SortingLayer: 3
   m_SortingOrder: -100
+  m_MaskInteraction: 0
+--- !u!114 &1440214594339305168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 812096446077587059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1ac467f0417cb34986189b4098653fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayVFXAndDestroy
+  vfx:
+  - {fileID: 448539986581811807}
+  playEventName: OnPlay
+  stopAfterTime: 0.75
+  stopEventName: OnStop
+  safetyLifetime: 5
+--- !u!114 &7264496377998617134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 812096446077587059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 865d502b222a609498f7eb5a8389fe5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VFXPlayerAttractor
+  attractorPropertyName: AttractorPosition
+  effectPropertyName: EffectPosition

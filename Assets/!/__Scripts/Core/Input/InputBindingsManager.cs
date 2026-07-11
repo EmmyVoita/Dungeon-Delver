@@ -7,12 +7,25 @@ using UnityEngine.InputSystem;
 public class InputBindingManager : MonoBehaviour
 {
     public static InputBindingManager Instance { get; private set; }
-
+    
+    public static event Action OnJumpPressed;
     public static event Action OnConfirmPressed;
     public static event Action OnResetKeybinds;
 
     private const string FileName = " myInputBindings.json";
     private Dictionary<InputActionType, Key> bindings = new();
+
+    private static readonly Dictionary<Key, string> DisplayNames = new()
+    {
+        { Key.Space, "SPC" },
+        { Key.Enter, "ENT" },
+        { Key.Escape, "ESC" },
+
+        { Key.LeftArrow, "←" },
+        { Key.RightArrow, "→" },
+        { Key.UpArrow, "↑" },
+        { Key.DownArrow, "↓" }
+    };
 
     // Define which actions are exclusive with each other
     private static readonly HashSet<InputActionType> MovementGroup = new()
@@ -72,6 +85,11 @@ public class InputBindingManager : MonoBehaviour
         {
             OnConfirmPressed?.Invoke();
         }
+
+        if (GetKeyDown(InputActionType.Jump))
+        {
+              OnJumpPressed?.Invoke();
+        }
     }
 
     // ------------------------------------------------------------
@@ -97,6 +115,7 @@ public class InputBindingManager : MonoBehaviour
         bindings[InputActionType.Confirm] = Key.Enter;
         bindings[InputActionType.Back] = Key.Escape;
         bindings[InputActionType.Interact] = Key.R;
+        bindings[InputActionType.ViewUpgrades] = Key.Tab;
     }
 
     // ------------------------------------------------------------
@@ -162,6 +181,14 @@ public class InputBindingManager : MonoBehaviour
         return bindings.ContainsKey(action) ? bindings[action] : Key.None;
     }
 
+    public string GetKeyDisplayName(Key key)
+    {
+        if (DisplayNames.TryGetValue(key, out string name))
+            return name;
+
+        return key.ToString().ToUpper();
+    }
+
     public bool TrySetKey(InputActionType action, Key newKey)
     {
         // ------------------------------------------------------------
@@ -184,6 +211,12 @@ public class InputBindingManager : MonoBehaviour
                     return false; // conflict in WASD
                 }
             }
+
+            //any of the movement keys cannot be bound to the confrim key
+            Key confirmKey;
+            bindings.TryGetValue(InputActionType.Confirm, out confirmKey);
+            if(newKey == confirmKey)
+                return false;
         }
 
         // ------------------------------------------------------------

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5892528185532056661}
   - component: {fileID: 7488991445482098621}
   - component: {fileID: 5483912620065971591}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: DurableArrowSlow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1860040772, guid: 02de606ff656ae546a4dfe32cc9f50b1, type: 3}
+  m_Sprite: {fileID: 16397731, guid: 1743557c4c9a4f1499946f84df77cff1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -181,7 +181,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
+  abilityChargeDamage: 0
   sourceName: Durable Arrow
+  playHitSound: 1
 --- !u!114 &5483912620065971591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,16 +199,22 @@ MonoBehaviour:
   health: 1
   catchRule: 0
   flip180: 1
+  sRend: {fileID: 0}
+  baseMaterial: {fileID: 0}
+  colorApropertyName: _ColorA
+  colorBpropertyName: _ColorB
+  goldenColorA: {r: 0, g: 0, b: 0, a: 0}
+  goldenColorB: {r: 0, g: 0, b: 0, a: 0}
+  recoveryColorA: {r: 0, g: 0, b: 0, a: 0}
+  recoveryColorB: {r: 0, g: 0, b: 0, a: 0}
   arrowHitSound: {fileID: 8300000, guid: fef65794fbfc1754197e5acab64dbbfd, type: 3}
   normalHitPitch: 1
   criticalHitPitch: 1
   directionalPitchFactor: 0
   directionalEQStrength: 0.5
-  hpfNeutral: 20
-  lpfNeutral: 22000
-  midNeutral: 1
-  invincible: 0
-  status: 0
+  killEffect: {fileID: 6150066417496139723, guid: 9fb52edbed03ad74bab4878615f4c202, type: 3}
+  _invincible: 0
+  _status: 0
   bounceTimeBeats: 4
   maxBounceDistance: 3
   bounceSound: {fileID: 8300000, guid: fef65794fbfc1754197e5acab64dbbfd, type: 3}

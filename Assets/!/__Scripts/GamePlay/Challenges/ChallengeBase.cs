@@ -7,9 +7,9 @@ public abstract class ChallengeBase : MonoBehaviour
 
     [SerializeField] private bool registerWithManager = true;
     [SerializeField] private int priority = 0;
-    [SerializeField] private Player.PlayerControlState controlMode = Player.PlayerControlState.BasicJump;
+    [SerializeField] private PlayerControlState controlMode = PlayerControlState.BasicJump;
 
-    public Player.PlayerControlState ControlState => controlMode;
+    public PlayerControlState ControlState => controlMode;
     public int Priority => priority;
     public bool IsActive { get; private set; }
 

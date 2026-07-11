@@ -1,5 +1,7 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class DevTimeManager : MonoBehaviour, IDevPanel
 {
@@ -15,8 +17,24 @@ public class DevTimeManager : MonoBehaviour, IDevPanel
     [SerializeField] private float minScale = 0.25f;
     [SerializeField] private float maxScale = 3.0f;
 
-    private bool isVisible;
-    private float currentScale = 1f;
+    private bool _isVisible;
+    [SerializeField] private float _currentScale = 1f;
+
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+
+        TimeManager.Instance?.RemoveModifier("DevTimeManager");
+
+        DevPanelFocusManager.ClearFocus(this);
+    }
+
 
     void Awake()
     {
@@ -33,6 +51,17 @@ public class DevTimeManager : MonoBehaviour, IDevPanel
             HandleTimeScaleInput();
     }
 
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+       StartCoroutine(WaitForPeriod());
+    }
+
+    private IEnumerator WaitForPeriod()
+    {
+        yield return null;
+        SetTimeScale(_currentScale);
+    }
+
     // ─────────────────────────────────────────────
     // TOGGLE / FOCUS
     // ─────────────────────────────────────────────
@@ -42,7 +71,7 @@ public class DevTimeManager : MonoBehaviour, IDevPanel
         if (!Input.GetKeyDown(toggleKey))
             return;
 
-        if (isVisible)
+        if (_isVisible)
         {
             SetVisible(false);
             DevPanelFocusManager.ClearFocus(this);
@@ -56,7 +85,7 @@ public class DevTimeManager : MonoBehaviour, IDevPanel
 
     private void SetVisible(bool visible)
     {
-        isVisible = visible;
+        _isVisible = visible;
 
         if (panel != null)
             panel.SetActive(visible);
@@ -96,15 +125,18 @@ public class DevTimeManager : MonoBehaviour, IDevPanel
 
     private void AdjustTimeScale(float delta)
     {
-        SetTimeScale(currentScale + delta);
+        SetTimeScale(_currentScale + delta);
     }
 
     private void SetTimeScale(float value)
     {
-        currentScale = Mathf.Clamp(value, minScale, maxScale);
+        
+        _currentScale = Mathf.Clamp(value, minScale, maxScale);
+
+        Debug.Log($"Updateing time scale modifier DevTimeManager => {_currentScale}");
 
         TimeManager.Instance?.RemoveModifier("DevTimeManager");
-        var mod = new TimeScaleModifier("DevTimeManager", currentScale);
+        var mod = new TimeScaleModifier("DevTimeManager", _currentScale);
         TimeManager.Instance?.AddModifier(mod);
 
         UpdateUI();
@@ -113,13 +145,6 @@ public class DevTimeManager : MonoBehaviour, IDevPanel
     private void UpdateUI()
     {
         if (timeScaleText != null)
-            timeScaleText.text = $"TimeScale: {currentScale:F2}x";
-    }
-
-    private void OnDisable()
-    {
-        TimeManager.Instance?.RemoveModifier("DevTimeManager");
-
-        DevPanelFocusManager.ClearFocus(this);
+            timeScaleText.text = $"TimeScale: {_currentScale:F2}x";
     }
 }

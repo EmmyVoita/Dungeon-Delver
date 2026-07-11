@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71fb4a3af820a864baccddfa86aeb0db, type: 3}
+  m_Name: Combo Shake Effect
+  m_EditorClassIdentifier: Assembly-CSharp::ComboShakeEffect
+  screenShakeTiers:
+  - combo: 25
+    shakeDuration: 0.2
+    shakeMagnitude: 0.075
+  - combo: 50
+    shakeDuration: 0.25
+    shakeMagnitude: 0.125
+  - combo: 75
+    shakeDuration: 0.3
+    shakeMagnitude: 0.15
+  - combo: 100
+    shakeDuration: 0.5
+    shakeMagnitude: 0.15
+  direction: {x: 0, y: 1}
+  directional: 0
+  unscaled: 1

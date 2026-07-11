@@ -92,7 +92,7 @@ public class BalloonGalleryManager : MonoBehaviour
     {
         isEnding = false;
         Player.Instance.UseEightDirections = true;
-        Player.Instance.SetPlayerControlState(Player.PlayerControlState.LockedShooter);
+        Player.Instance.SetPlayerControlState(PlayerControlState.LockedShooter);
 
         ObstacleManager.Instance.RegisterObstacle(gameObject);
         Player.Instance.ResetPositionAndVelocity();
@@ -340,7 +340,7 @@ public class BalloonGalleryManager : MonoBehaviour
         isEnding = true;
 
         AudioHelpers.PlayMyClipAtPoint(failSound, AudioChannel.SFX, Camera.main.transform.position);
-        Player.Instance.DamageSelf(1);
+        //Player.Instance.DamageSelf(1);
         obstacleActive = false;
         StartCoroutine(DestroySequence());
     }
@@ -369,7 +369,7 @@ public class BalloonGalleryManager : MonoBehaviour
             Destroy(aimingDart.gameObject);
 
         Player.Instance.UseEightDirections = false;
-        Player.Instance.SetPlayerControlState(Player.PlayerControlState.Normal);
+        Player.Instance.SetPlayerControlState(PlayerControlState.Normal);
         ObstacleManager.Instance.UnregisterObstacle(gameObject);
         Destroy(gameObject, 0.1f);
     }

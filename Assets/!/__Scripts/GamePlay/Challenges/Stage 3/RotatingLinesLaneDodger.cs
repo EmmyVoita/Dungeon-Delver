@@ -140,6 +140,8 @@ public class RotatingLinesLaneDodger : ChallengeBase
                 Destroy(obj);
         }
 
+        Destroy(_mainAnchor.gameObject);
+
         _spawnObjs.Clear();
     }
 

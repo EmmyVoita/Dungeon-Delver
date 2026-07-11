@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class OrbitingShooterBlackholeSpawner : ChallengeBase
 {
@@ -17,7 +18,7 @@ public class OrbitingShooterBlackholeSpawner : ChallengeBase
     public float burstInterval = 2f;
     public float lifetime = 10f;
 
-    private List<BlackholeEmitter> emitters = new();
+    private List<BlackholeEmitter> _emitters = new();
     private bool registered;
 
     void Start()
@@ -49,7 +50,7 @@ public class OrbitingShooterBlackholeSpawner : ChallengeBase
 
             BlackholeEmitter emitter = obj.GetComponent<BlackholeEmitter>();
             emitter.centerTarget = centerTarget;
-            emitters.Add(emitter);
+            _emitters.Add(emitter);
         }
     }
 
@@ -59,10 +60,10 @@ public class OrbitingShooterBlackholeSpawner : ChallengeBase
         {
             yield return new WaitForSeconds(burstInterval);
 
-            if (emitters.Count == 0) continue;
+            if (_emitters.Count == 0) continue;
 
-            int randomIndex = Random.Range(0, emitters.Count);
-            emitters[randomIndex].FireBurst();
+            int randomIndex = Random.Range(0, _emitters.Count);
+            _emitters[randomIndex].FireBurst();
         }
     }
 
@@ -71,6 +72,16 @@ public class OrbitingShooterBlackholeSpawner : ChallengeBase
         yield return new WaitForSeconds(lifetime);
 
         End();
+    }
+
+    protected override void CleanUp()
+    {
+        base.CleanUp();
+        
+        foreach(BlackholeEmitter emitter in _emitters)
+        {
+            emitter.Cleanup();
+        }
     }
 
 

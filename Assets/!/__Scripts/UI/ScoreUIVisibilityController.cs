@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -6,6 +7,7 @@ public class ScoreUIVisibilityController : MonoBehaviour
 {
     [SerializeField] private ScoreDisplayView scoreDisplay;
     [SerializeField] private CanvasGroup scoreCanvasGroup;
+    [SerializeField] private List<GameState> overrideShowStates;
 
     private void OnEnable()
     {
@@ -27,7 +29,7 @@ public class ScoreUIVisibilityController : MonoBehaviour
         // Kill any existing tween to prevent stacking
         scoreCanvasGroup.DOKill();
 
-        if (GameStateEffectManager.ShowScoreUI)
+        if (GameStateEffectManager.ShowScoreUI || overrideShowStates.Contains(currentState))
         {
             scoreDisplay.enabled = true;
             scoreCanvasGroup.gameObject.SetActive(true);
@@ -41,7 +43,7 @@ public class ScoreUIVisibilityController : MonoBehaviour
                 .SetEase(Ease.InQuad)
                 .OnComplete(() =>
                 {
-                    scoreDisplay.enabled = false;
+                    //scoreDisplay.enabled = false;
                     scoreCanvasGroup.gameObject.SetActive(false);
                 });
         }

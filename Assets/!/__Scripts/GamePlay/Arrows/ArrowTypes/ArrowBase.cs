@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using UnityEngine.Rendering;
 
 public abstract class ArrowBase : MonoBehaviour
 {
@@ -16,6 +17,17 @@ public abstract class ArrowBase : MonoBehaviour
 
     [Header("Sprite")]
     [SerializeField] private bool flip180 = false;
+    [SerializeField] private SpriteRenderer sRend;
+    [SerializeField] private Material baseMaterial;
+    [SerializeField] private string colorApropertyName = "_ColorA";
+    [SerializeField] private string colorBpropertyName = "_ColorB";
+
+    [Header("Flag Colors")]
+    [ColorUsage(true, true)][SerializeField] private Color goldenColorA;
+    [ColorUsage(true, true)][SerializeField] private Color goldenColorB;
+    [ColorUsage(true, true)][SerializeField] private Color recoveryColorA;
+    [ColorUsage(true, true)][SerializeField] private Color recoveryColorB;
+
 
 
     [Header("Audio Base Settings")]
@@ -25,11 +37,13 @@ public abstract class ArrowBase : MonoBehaviour
     [Range(0f, 1f),SerializeField] private float directionalPitchFactor = 1f;
     [Range(0f, 1f)] public float directionalEQStrength = 0.5f;
 
+    [Header("VFX")]
+    [SerializeField] private GameObject killEffect;
+
 
     [Header("Dynamic")]
-    [SerializeField] protected bool invincible = false;
-    [SerializeField] private ArrowStatus status;
-
+    [SerializeField] protected bool _invincible = false;
+    [SerializeField] private ArrowStatus _status;
 
 
     protected Vector2 _direction;
@@ -41,14 +55,17 @@ public abstract class ArrowBase : MonoBehaviour
     protected Vector2 _startPos;
     protected Vector2 _endPos;
     private ArrowType _arrowType = ArrowType.Normal;
+    private Material runTimeMaterial;
 
 
-    public bool IsGolden => status.HasFlag(ArrowStatus.Golden);
-    public bool IsRecoveryArrow => status.HasFlag(ArrowStatus.Recovery);
-    public bool Invincible => invincible;
+    public bool IsGolden => _status.HasFlag(ArrowStatus.Golden);
+    public bool IsRecoveryArrow => _status.HasFlag(ArrowStatus.Recovery);
+    public bool Invincible => _invincible;
     public ArrowCatchRule CatchRule => catchRule;
     public bool IsInverse => catchRule == ArrowCatchRule.Avoid;
     public Vector2 Direction => _direction;
+    public bool IsDead => _isDead;
+
 
 
     void OnEnable()
@@ -69,6 +86,12 @@ public abstract class ArrowBase : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         ArrowManager.Instance.RegisterArrow(this);
+
+        if(sRend != null && baseMaterial != null)
+        {
+            runTimeMaterial = Instantiate(baseMaterial);
+            sRend.material = runTimeMaterial;
+        }
     }
 
     protected virtual void Update()
@@ -128,7 +151,7 @@ public abstract class ArrowBase : MonoBehaviour
     // Called when something hits the arrow (not necessarily killing it)
     public virtual void OnArrowHit(float damage = 1f, Goal.GoalType goalType = Goal.GoalType.Normal, Vector2 hitDirection = default)
     {
-        if (invincible) return;
+        if (_invincible) return;
 
         health -= damage;
 
@@ -136,12 +159,17 @@ public abstract class ArrowBase : MonoBehaviour
             Die(goalType, hitDirection: hitDirection);
     }
 
-    public virtual void KillArrow()
+    public virtual void KillArrow(Goal.GoalType goalType = Goal.GoalType.Miss, bool playKillEffect = false)
     {
         // Instantly die, bypassing health
         health = 0f;
         // Miss type since killed externally
-        Die(Goal.GoalType.Miss, true); 
+        Die(goalType, true); 
+
+        if(playKillEffect && killEffect)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+        {
+            Instantiate(killEffect, transform.position, Quaternion.identity);
+        }
     }
 
     public virtual void OrientArrow(Vector2 direction)
@@ -167,7 +195,7 @@ public abstract class ArrowBase : MonoBehaviour
             ArrowResolvedData data = new ArrowResolvedData
             {
                 goalType = goalType,
-                status = this.status
+                status = this._status
             };
             
             OnArrowResolved?.Invoke(data);  
@@ -261,16 +289,22 @@ public abstract class ArrowBase : MonoBehaviour
     {
         AddStatus(ArrowStatus.Recovery);
 
-        var sRend = GetComponentInChildren<SpriteRenderer>();
-        sRend.color = new Color(0.8f, 1f, 0.8f, 1f); // light green tint   
+        if(!runTimeMaterial) 
+            return;
+
+        runTimeMaterial.SetColor(colorApropertyName, recoveryColorA);
+        runTimeMaterial.SetColor(colorBpropertyName, recoveryColorB);
     }
 
     public void SetGolden()
     {
         AddStatus(ArrowStatus.Golden);
         
-        var sRend = GetComponentInChildren<SpriteRenderer>();
-        sRend.color = new Color(1f, 1f, 0f, 1f);
+        if(!runTimeMaterial) 
+            return;
+
+        runTimeMaterial.SetColor(colorApropertyName, goldenColorA);
+        runTimeMaterial.SetColor(colorBpropertyName, goldenColorB);
     }
 
 
@@ -280,43 +314,43 @@ public abstract class ArrowBase : MonoBehaviour
 
     public bool HasStatus(ArrowStatus s)
     {
-        return status.HasFlag(s);
+        return _status.HasFlag(s);
     }
 
     public bool HasAny(ArrowStatus mask)
     {
-        return (status & mask) != 0;
+        return (_status & mask) != 0;
     }
 
     public bool HasAll(ArrowStatus mask)
     {
-        return (status & mask) == mask;
+        return (_status & mask) == mask;
     }
 
     // ---------- Mutations ----------
 
     public void AddStatus(ArrowStatus s)
     {
-        status |= s;
+        _status |= s;
     }
 
     public void RemoveStatus(ArrowStatus s)
     {
-        status &= ~s;
+        _status &= ~s;
     }
 
     public void ClearStatus()
     {
-        status = ArrowStatus.None;
+        _status = ArrowStatus.None;
     }
 
     public void SetStatus(ArrowStatus s)
     {
-        status = s;
+        _status = s;
     }
 
     public ArrowStatus GetStatus()
     {
-        return status;
+        return _status;
     }
 }

@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3da55463a36a704cbb067cc69d9ff88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
+  registerWithManager: 1
   priority: 1
   controlMode: 2
   listenForBossActive: 1
@@ -207,9 +208,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920fc9d7446266d459d36f2ccc4f738c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovingBallsObstacle
+  registerWithManager: 1
   priority: 0
   controlMode: 1
-  ballPrefab: {fileID: 2209782324246233958, guid: d5a5d0bd5cd858140b7fec2ac16c4933, type: 3}
+  ballPrefab: {fileID: 2209782324246233958, guid: c283cf36520fd1048adc5ebd1984fa61, type: 3}
   ballCount: 5
   spawnInterval: 1.5
   randomizeSpawnIntervalAmount: 0

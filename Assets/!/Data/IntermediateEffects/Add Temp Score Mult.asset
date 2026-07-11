@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f40df4f5313f07b4d997c68297784ec2, type: 3}
   m_Name: Add Temp Score Mult
   m_EditorClassIdentifier: 
+  cost: 1000
+  upgradeId: 
   icon: {fileID: -1194955740, guid: 42bbe21d08e2c1f409778bef6d20109f, type: 3}
+  iconMaterial: {fileID: 0}
   displayName: Temp Score Mult
   descriptionTemplate: For the next level, arrows are worth <color=#00E676>{TEMP_SCORE_MULT_AMOUNT}</color>
     more, and <color=#9C27B0>golden</color> arrows are worth  <color=#00E676>{GOLDEN_VALUE_MULTIPLIER}</color>

@@ -38,7 +38,7 @@ public class SpikeLaneObstacle : MonoBehaviour
         ObstacleManager.Instance.RegisterObstacle(gameObject);
         registered = true;
 
-        Player.Instance.SetPlayerControlState(Player.PlayerControlState.LaneDodger, config);
+        Player.Instance.SetPlayerControlState(PlayerControlState.LaneDodger, config);
 
         SpawnSpikes();
         StartCoroutine(ObstacleRoutine());
@@ -158,7 +158,7 @@ public class SpikeLaneObstacle : MonoBehaviour
 
         if (!openLanes.Contains(playerLane))
         {
-            Player.Instance.DamageSelf(1);
+            //Player.Instance.DamageSelf(1);
         }
     }
 
@@ -173,7 +173,7 @@ public class SpikeLaneObstacle : MonoBehaviour
         if (registered && ObstacleManager.Instance != null)
         {
             ObstacleManager.Instance.UnregisterObstacle(gameObject);
-            Player.Instance.SetPlayerControlState(Player.PlayerControlState.Normal);
+            Player.Instance.SetPlayerControlState(PlayerControlState.Normal);
             Destroy(gameObject);
         }
     }

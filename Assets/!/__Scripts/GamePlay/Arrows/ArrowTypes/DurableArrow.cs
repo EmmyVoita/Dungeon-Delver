@@ -33,8 +33,8 @@ public class DurableArrow : ArrowBase
 
     protected override void Update()
     {
-        if (invincible && Time.time > invincibleDone)
-            invincible = false;
+        if (_invincible && Time.time > invincibleDone)
+            _invincible = false;
 
         if (_isDead) return;
 
@@ -104,7 +104,7 @@ public class DurableArrow : ArrowBase
                                     Goal.GoalType goalType = Goal.GoalType.Normal,
                                     Vector2 hitDirection = default)
     {
-        if (invincible) return;
+        if (_invincible) return;
 
         hitsTaken++;
 
@@ -115,7 +115,7 @@ public class DurableArrow : ArrowBase
         else
         {
 
-            invincible = true;
+            _invincible = true;
             invincibleDone = Time.time + invincibilityDuration;
 
             base.PlayAudio(goalType);

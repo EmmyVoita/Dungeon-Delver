@@ -56,6 +56,15 @@ MonoBehaviour:
   autoRotate: 1
   rotationSpeed: 100
   rotationSpeedCountIncrease: 10
+  hitRadius: 0.9
+  pitchStep: 0.05
+  failSound:
+    clip: {fileID: 8300000, guid: 8911ed8fb4464e342ad36e8066fb88b0, type: 3}
+    channel: 2
+    affectedByTimeScale: 0
+    volume: 1
+    pitch: 1
+    pitchVariation: 0.1
   passThroughSound:
     clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
     channel: 2
@@ -63,17 +72,6 @@ MonoBehaviour:
     volume: 1
     pitch: 1
     pitchVariation: 0
-  expireSound: {fileID: 0}
-  hitRadius: 0.9
-  ringStayTime: 0
-  pitchStep: 0.05
-  failSound:
-    clip: {fileID: 8300000, guid: 2a4a0e77c4760dd4786d936c57eeb33b, type: 3}
-    channel: 2
-    affectedByTimeScale: 0
-    volume: 1
-    pitch: 1
-    pitchVariation: 0.1
 --- !u!114 &8306183531269452317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87,4 +85,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageEffect
   damage: 1
+  abilityChargeDamage: 0
   sourceName: Spiky Ball Ring Collapse
+  playHitSound: 1
