@@ -44,8 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31f4261e9e662304287a49b9cd486537, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
-  abilityBaseCost: 20
-  activateSound: {fileID: 0}
-  abilitySpecificUpgrades: []
-  slowTimeEffectPrefab: {fileID: 2306586631246076703, guid: 7c6d814ac2a89134c9e9b1d6d7dadec1, type: 3}
+  effectPrefab: {fileID: 2306586631246076703, guid: 7c6d814ac2a89134c9e9b1d6d7dadec1, type: 3}
+  spawnAtPlayer: 1

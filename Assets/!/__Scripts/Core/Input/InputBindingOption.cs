@@ -58,7 +58,7 @@ public class InputBindingOption : BaseSettingOption
 
     void UpdateKeyDisplay()
     {
-        var key = InputBindingManager.Instance.GetKeyName(actionType);
+        var key = InputBindingManager.Instance.GetBoundKey(actionType);
         keyDisplay.text = key.ToString();
     }
 

@@ -107,7 +107,7 @@ public class AbilityTutorialUI : MonoBehaviour
         tutorialText.alpha = 1f;
         Player.Instance.MaxAbilityCharge = playerMaxAbilityCharge;
 
-        string keyName = InputBindingManager.Instance.GetKeyName(InputActionType.Confirm).ToString();
+        string keyName = InputBindingManager.Instance.GetBoundKey(InputActionType.Confirm).ToString();
         string hint = $"\n<size=70%><color=#aaaaaa>Press [{keyName}] to continue</color></size>";
         hintText.text = hint;
         hintText.alpha = 0f;
@@ -259,7 +259,7 @@ public class AbilityTutorialUI : MonoBehaviour
     // --------------------------------------------------------
     private IEnumerator PlayTypewriterLineWaitForInput(string text)
     {
-        string keyName = InputBindingManager.Instance.GetKeyName(InputActionType.Confirm).ToString();
+        string keyName = InputBindingManager.Instance.GetBoundKey(InputActionType.Confirm).ToString();
         string hint = $"\n<size=70%><color=#aaaaaa>Press [{keyName}] to continue</color></size>";
 
         bool done = false;
@@ -331,7 +331,7 @@ public class AbilityTutorialUI : MonoBehaviour
         // Tell player they filled their ability bar
         yield return StartCoroutine(PlayTypewriterLineWaitForInput("Great!"));
 
-        string keyName = InputBindingManager.Instance.GetKeyName(InputActionType.UseAbility).ToString();
+        string keyName = InputBindingManager.Instance.GetBoundKey(InputActionType.UseAbility).ToString();
         typewriter.StartTyping($"Press [{keyName}] to use your ability.", () =>
         {
             Player.Instance._lockInput = false;

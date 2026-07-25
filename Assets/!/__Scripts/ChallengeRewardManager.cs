@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using System.Linq;
 
-public class ChallengeRewardManager : MonoBehaviour
+public class ChallengeRewardManager : RuntimeModifierManager<IChallengeReward>
 {
     public static ChallengeRewardManager Instance;
 
@@ -11,22 +12,11 @@ public class ChallengeRewardManager : MonoBehaviour
     [SerializeField] string transitionValuePropertyName = "_TransitionValue";
     [SerializeField] private float transitionDuration = 0.25f;
 
-    private Tween _borderTween;
+    private Tween _borderTween; 
 
 
-    private bool _initialized;
-    private List<IChallengeReward> _rewards;
-    private List<IChallengeReward> _renewingRewards;
     private List<IChallengeReward> _rewardsRolledToBeActive;
 
-
-    private void OnDisable()
-    {
-        ObstacleManager.OnAllObstaclesCleared -= HandleObstaclesCleared;
-        GameStateManager.OnStateChanged -= HandleStateChanged;
-        ObstacleManager.OnFirstObstacleAppeared -= HandleFirstObstacleSpawned;
-        _initialized = false;
-    }
 
     private void Awake()
     {
@@ -38,60 +28,49 @@ public class ChallengeRewardManager : MonoBehaviour
 
         Instance = this;
 
-        _rewards = new();
-        _renewingRewards = new();
         _rewardsRolledToBeActive = new();
     }
 
-    private void Initialize()
-    {
-        if(_initialized)
-            return;
 
-        _initialized = true;
-        
+    protected override void Subscribe()
+    {
         ObstacleManager.OnAllObstaclesCleared += HandleObstaclesCleared;
-        GameStateManager.OnStateChanged += HandleStateChanged;
         ObstacleManager.OnFirstObstacleAppeared += HandleFirstObstacleSpawned;
     }
 
-    // Remove temporary at the end of the round;
-    private void HandleStateChanged(GameState previousState, GameState newState)
+    protected override void Unsubscribe()
     {
-        if(newState == GameStateManager.LevelStartState)
-        {
-            foreach(IChallengeReward item in _renewingRewards)
-            {
-                _rewards.Add(item.Clone());
-            }
-        }
+        ObstacleManager.OnAllObstaclesCleared -= HandleObstaclesCleared;
+        ObstacleManager.OnFirstObstacleAppeared -= HandleFirstObstacleSpawned;
 
-        if(newState == GameStateManager.LevelEndState)
-        {
-            RemoveTemporary();
-        }
+        base.Unsubscribe();
     }
 
-
-    public void Register(IChallengeReward reward)
+    public void RegisterOrStackCurrencyReward(
+        int currencyReward,
+        int maxUses = 999,
+        float appearancePercentage = 1f)
     {
         Initialize();
 
-        _rewards.Add(reward);
+        CurrencyChallengeReward existingReward =
+            renewingModifiers
+                .OfType<CurrencyChallengeReward>()
+                .FirstOrDefault();
 
-        Debug.Log($"Adding Challenge Reward upgrade \n"+
-                  $"Priority => {reward.Priority} \n");
-    }
+        if (existingReward != null)
+        {
+            existingReward.AddStack();
+            return;
+        }
 
+        CurrencyChallengeReward newReward = new(
+            currencyReward,
+            maxUses,
+            appearancePercentage
+        );
 
-    public void RegisterRenewing(IChallengeReward reward)
-    {
-        Initialize();
-
-        _renewingRewards.Add(reward);
-
-        Debug.Log($"Adding Renewing Challenge Reward upgrade \n"+
-                  $"Priority => {reward.Priority} \n");
+        RegisterRenewing(newReward);
     }
 
     // We include a variable within the IChallengeReward interface for the chance that the effect triggers
@@ -125,25 +104,30 @@ public class ChallengeRewardManager : MonoBehaviour
     
     private bool PullRewards(int damage)
     {
-        if(_rewardsRolledToBeActive.Count <= 0)
+        if (_rewardsRolledToBeActive.Count == 0)
             return false;
 
-        _rewardsRolledToBeActive.Sort((x,y) => y.Priority.CompareTo(x.Priority));
+        bool grantedAny = false;
 
-        for (int i = _rewardsRolledToBeActive.Count - 1; i >= 0; i--)
+        _rewardsRolledToBeActive.Sort(
+            (x, y) => y.Priority.CompareTo(x.Priority)
+        );
+
+        for (int i = 0; i < _rewardsRolledToBeActive.Count; i++)
         {
             IChallengeReward reward = _rewardsRolledToBeActive[i];
 
             if (!reward.ShouldGrantReward(damage))
                 continue;
 
-            reward.GrantReward(damage);
+            bool granted = reward.GrantReward(damage);
+            grantedAny |= granted;
 
-            if (reward.UsesRemaining == 0)
-                _rewards.Remove(reward);
+            if (reward.UsesRemaining <= 0)
+                activeModifiers.Remove(reward);
         }
 
-        return false;
+        return grantedAny;
     }
 
     // If the challenge reward is rolled to be active, then we need a way of communicating
@@ -160,9 +144,9 @@ public class ChallengeRewardManager : MonoBehaviour
     {
         _rewardsRolledToBeActive.Clear();
 
-        for (int i = _rewards.Count - 1; i >= 0; i--)
+        for (int i = activeModifiers.Count - 1; i >= 0; i--)
         {
-            IChallengeReward reward = _rewards[i];
+            IChallengeReward reward = activeModifiers[i];
 
             if (UnityEngine.Random.value <= reward.AppearancePercentage)
             {
@@ -173,11 +157,15 @@ public class ChallengeRewardManager : MonoBehaviour
         return _rewardsRolledToBeActive.Count > 0;
     }
 
-
-    private void RemoveTemporary()
+    protected override void RemoveTemporaryModifiers()
     {
-        _rewards.Clear();
+        _rewardsRolledToBeActive.Clear();
+        AnimateBorder(0f);
+
+        base.RemoveTemporaryModifiers();
     }
+
+
 
     private void AnimateBorder(float targetValue)
     {

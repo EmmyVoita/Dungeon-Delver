@@ -34,11 +34,15 @@ public class UpgradeCardManager : MonoBehaviour
     [SerializeField] private UIPanelNudge panelNudge;
 
     [SerializeField] private List<RectTransform> cardContainers;
+    [SerializeField] private CanvasGroup shopUIgroup;
 
 
     [Header("Available Upgrades")]
     [SerializeField] private List<UpgradeBase> cards;
     [SerializeField] private int _numCardsToDisplay = 3;
+
+    [Header("Input")]
+    [SerializeField] private float continueInputDelay = 0.5f;
 
 
     private List<UpgradeBase> selectedCards = new ();
@@ -48,6 +52,7 @@ public class UpgradeCardManager : MonoBehaviour
     private int selectedIndex = 0;
     private bool _rerollLock;
     private int _numPurchasedCards;
+    private bool _canContinue;
 
 
     private HashSet<int> _purchasedIndices = new();
@@ -57,6 +62,16 @@ public class UpgradeCardManager : MonoBehaviour
     private Dictionary<UpgradeCardUI, RectTransform> _cardToContainer = new();
 
     public int PurchasedCardsCount => _numPurchasedCards;
+
+    public void HideUpgradeUI()
+    {
+        shopUIgroup.DOFade(0,0.2f);
+    }
+
+    public void ShowUpgradeUI()
+    {
+        shopUIgroup.DOFade(1,0.2f);
+    }
 
     public bool HasCard(UpgradeOption cardOption)
     {
@@ -103,8 +118,19 @@ public class UpgradeCardManager : MonoBehaviour
 
         if(newState == GameState.UpgradeSelection)
         {
+            StartCoroutine(InputDelay());
+
             ShowCardChoices();
         }
+    }
+
+    private IEnumerator InputDelay()
+    {
+        _canContinue = false;
+
+        yield return new WaitForSeconds(continueInputDelay);
+
+        _canContinue = true;
     }
 
     private void Awake()
@@ -143,8 +169,9 @@ public class UpgradeCardManager : MonoBehaviour
 
     private void UpdateFooterIcon(UpgradeBase upgrade)
     {
-        if (!upgrade.displayInFooter)
-            return;
+        return;
+        //if (!upgrade.displayInFooter)
+            //return;
 
         if (activeUpgradeIcons.TryGetValue(upgrade, out var iconUI))
         {
@@ -330,8 +357,10 @@ public class UpgradeCardManager : MonoBehaviour
             TryPurchaseCard();
         }
 
-        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Jump))
+        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Jump) && _canContinue)
         {
+            _canContinue = false;
+            
             if(Player.Instance.Health < Player.Instance.MaxHealth && _numPurchasedCards == 0)
             {
                 Player.Instance.HealPlayer(1);
@@ -357,6 +386,8 @@ public class UpgradeCardManager : MonoBehaviour
                 .WaitForCompletion();
 
             Destroy(currentCards[i].gameObject);
+
+            RefreshInvalidNextCards();
 
             currentCards[i] = nextCards[i];
 
@@ -395,6 +426,52 @@ public class UpgradeCardManager : MonoBehaviour
         );
 
         _rerollLock = false;
+    }
+
+    private void RefreshInvalidNextCards()
+    {
+        List<UpgradeCardUI> invalidCards = nextCards
+            .Where(card =>
+                card == null ||
+                card.Option == null ||
+                card.Option.Base == null ||
+                !CanAppear(card.Option.Base))
+            .ToList();
+
+        if (invalidCards.Count == 0)
+            return;
+
+        HashSet<UpgradeBase> validCardsToAvoid = nextCards
+            .Where(card =>
+                card != null &&
+                card.Option != null &&
+                card.Option.Base != null &&
+                CanAppear(card.Option.Base))
+            .Select(card => card.Option.Base)
+            .ToHashSet();
+
+        List<UpgradeOption> pool = CreateDrawPool()
+            .Where(option =>
+                option?.Base != null &&
+                !validCardsToAvoid.Contains(option.Base))
+            .ToList();
+
+        if (pool.Count < invalidCards.Count)
+        {
+            Debug.LogError(
+                $"Not enough valid cards to replace invalid cards. " +
+                $"Needed {invalidCards.Count}, found {pool.Count}."
+            );
+
+            return;
+        }
+
+        List<UpgradeOption> picked = pool.PickUnique(invalidCards.Count);
+
+        for (int i = 0; i < invalidCards.Count; i++)
+        {
+            invalidCards[i].Setup(picked[i]);
+        }
     }
 
     

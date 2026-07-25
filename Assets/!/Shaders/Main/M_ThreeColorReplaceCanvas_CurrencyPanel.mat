@@ -57,6 +57,7 @@ Material:
     - _BUILTIN_QueueControl: 0
     - _BUILTIN_QueueOffset: 0
     - _ColorMask: 15
+    - _Saturation: 1
     - _Stencil: 0
     - _StencilComp: 8
     - _StencilOp: 0
@@ -67,9 +68,9 @@ Material:
     - _UIMaskSoftnessY: 1
     m_Colors:
     - _ClipRect: {r: 0, g: 0, b: 0, a: 0}
-    - _ColorA: {r: 0.8980393, g: 0.6862745, b: 0.4901961, a: 1}
-    - _ColorB: {r: 0.8980393, g: 0.6862745, b: 0.4901961, a: 1}
-    - _ColorC: {r: 0.9843138, g: 0.9058824, b: 0.5647059, a: 1}
+    - _ColorA: {r: 0.58430326, g: 0.4295123, b: 0.7169812, a: 1}
+    - _ColorB: {r: 0.4826862, g: 0.3964489, b: 0.5566038, a: 1}
+    - _ColorC: {r: 0.8745099, g: 0.7372549, b: 0.98823535, a: 1}
     - _Tint: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

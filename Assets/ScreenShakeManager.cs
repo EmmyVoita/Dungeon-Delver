@@ -49,19 +49,34 @@ public class ScreenShakeManager : MonoBehaviour
         );
     }
 
-    private IEnumerator DoShake(float duration, float magnitude, bool unscaled)
+    private IEnumerator DoShake(
+        float duration,
+        float magnitude,
+        bool unscaled)
     {
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
-            float delta = unscaled ? Time.unscaledDeltaTime : Time.deltaTime;
+            float delta = unscaled
+                ? Time.unscaledDeltaTime
+                : Time.deltaTime;
+
+            // Scaled shake should freeze while timeScale is zero.
+            if (!unscaled && delta <= 0f)
+            {
+                transform.localPosition = originalPos;
+                yield return null;
+                continue;
+            }
+
             elapsed += delta;
 
             float x = Random.Range(-1f, 1f) * magnitude;
             float y = Random.Range(-1f, 1f) * magnitude;
 
-            transform.localPosition = originalPos + new Vector3(x, y, 0);
+            transform.localPosition =
+                originalPos + new Vector3(x, y, 0f);
 
             yield return null;
         }

@@ -4,16 +4,14 @@ using System;
 using UnityEngine.VFX;
 using DG.Tweening;
 
-public class SlowTimeAbilityObject : MonoBehaviour
+public class SlowTimeAbilityObject : AbilityEffectBase
 {
     public static event Action<SlowTimeAbilityObject> OnSlowTimeEnded;
     public static event Action<SlowTimeAbilityObject> OnSlowTimeStarted;
 
     [Header("Slow Time Settings")]
     public VisualEffect slowTimeEffect;
-    public float slowDuration = 2.0f;
     public float slowFactor = 0.5f; // Slow down to 50% speed
-    public AudioClip slowSound;
 
     [Header("Visual Effect")]
     public SpriteRenderer spinSprite;       // assign the child sprite
@@ -51,10 +49,14 @@ public class SlowTimeAbilityObject : MonoBehaviour
         arrowsCaught++;
     }
 
-    void Awake()
+    public override void Activate(AbilityEffectContext context)
     {
-        SlowTime();
+        base.Activate(context);
+        BeginSlowTime();
     }
+
+
+    
 
     Action onFadeComplete
     {
@@ -113,7 +115,7 @@ public class SlowTimeAbilityObject : MonoBehaviour
         }
     }
 
-    void SlowTime()
+    void BeginSlowTime()
     {
         if (slowTimeEffect != null)
             slowTimeEffect.SendEvent("OnPlay");
@@ -140,10 +142,8 @@ public class SlowTimeAbilityObject : MonoBehaviour
 
         Debug.Log("Time slowed down due to crit combo!");
 
-        slowTimeDone = Time.unscaledTime + slowDuration;
+        slowTimeDone = Time.unscaledTime + Mathf.Max(0.1f,Context.Duration);
         slowTime = true;
-
-        AudioHelpers.PlayMyClipAtPoint(slowSound, AudioChannel.SFX, Camera.main.transform.position, 1f);
 
         if (spinRoutine != null)
             StopCoroutine(spinRoutine);
@@ -234,5 +234,7 @@ public class SlowTimeAbilityObject : MonoBehaviour
         spinSprite.transform.SetParent(Player.Instance.transform);
 
         onComplete?.Invoke();
+
+        EndEffect();
     }
 }

@@ -2,24 +2,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CoinCollectEffectsManager : MonoBehaviour
+public class CoinCollectEffectsManager : RuntimeModifierManager<ICoinCollectEffect>
 {
     public static CoinCollectEffectsManager Instance;
-
 
     [Header("Feedback")]
     [SerializeField] private SoundEffect procSoundEffect;
 
-    private bool _initialized;
-    private List<ICoinCollectEffect> _collectEffects;
-
-    
-
-
-    private void OnDisable()
-    {
-        CurrencyManager.OnCurrencyAdded -= HandleCurrencyAdded;
-    }
 
     private void Awake()
     {
@@ -30,83 +19,42 @@ public class CoinCollectEffectsManager : MonoBehaviour
         }
 
         Instance = this;
-
-        _collectEffects = new();
     }
 
-    private void Initialize()
+
+    protected override void Subscribe()
     {
-        if (_initialized)
-            return;
-
-        _initialized = true;
-
         CurrencyManager.OnCurrencyAdded += HandleCurrencyAdded;
     }
 
-
-    // Remove temporary at the end of the round;
-    private void HandleStateChanged(GameState previousState, GameState newState)
+    protected override void Unsubscribe()
     {
-        /*
-        if(newState == GameStateManager.LevelStartState)
-        {
-            foreach(IDamageSave item in _renewingDamageSaves)
-            {
-                Debug.Log("Adding renewing death save item");
-                _damageSaves.Add(item.Clone());
-            }
-        }
+        CurrencyManager.OnCurrencyAdded -= HandleCurrencyAdded;
+    }
 
-        if(newState == GameStateManager.LevelEndState)
-        {
-            RemoveTemporary();
-        }
-        */
+
+    private void HandleCurrencyAdded(int amount)
+    {
+        if (!TriggerCurrencyEffects(amount))
+            return;
+
+        AudioHelpers.PlaySoundEffect(
+            procSoundEffect,
+            Player.Instance.transform.position
+        );
     }
 
     /*
-    public void RegisterRenewing(IDamageSave upgrade)
-    {
-        Initialize();
-
-        _renewingDamageSaves.Add(upgrade);
-
-        Debug.Log($"Adding death save upgrade \n"+
-                  $"Priority => {upgrade.Priority} \n" +
-                  $"Remove at level end => {upgrade.RemoveAtLevelEnd} \n");
-    }
-    */
-
-    public void Register(ICoinCollectEffect upgrade)
-    {
-        Initialize();
-
-        _collectEffects.Add(upgrade);
-
-        Debug.Log($"Adding death save upgrade \n"+
-                  $"Priority => {upgrade.Priority} \n" +
-                  $"Remove at level end => {upgrade.RemoveAtLevelEnd} \n");
-    }
-
-    private void  HandleCurrencyAdded(int amount)
-    {
-        if(!PullCurrencyEffect(amount))
-            return;
-
-        AudioHelpers.PlaySoundEffect(procSoundEffect, Player.Instance.transform.position);
-    }
-
     private bool PullCurrencyEffect(int amount)
     {
-        if(_collectEffects.Count <= 0)
+        if( activeModifiers.Count <= 0)
             return false;
 
-        _collectEffects.Sort((x,y) => y.Priority.CompareTo(x.Priority));
+         activeModifiers.Sort((x,y) => y.Priority.CompareTo(x.Priority));
 
-        for(int i = 0; i < _collectEffects.Count; i++)
+        for(int i = 0; i <  activeModifiers.Count; i++)
         {
-            ICoinCollectEffect effect = _collectEffects[i];
+            ICoinCollectEffect effect =  activeModifiers[i];
 
             if(!effect.CanTriggerEffect(amount))
                 continue;
@@ -118,4 +66,29 @@ public class CoinCollectEffectsManager : MonoBehaviour
 
         return false;
     } 
+    */
+
+    private bool TriggerCurrencyEffects(int amount)
+    {
+        if (activeModifiers.Count <= 0)
+            return false;
+
+        bool anyEffectTriggered = false;
+
+        for (int i = 0; i < activeModifiers.Count; i++)
+        {
+            ICoinCollectEffect effect = activeModifiers[i];
+
+            if (effect == null)
+                continue;
+
+            if (!effect.CanTriggerEffect(amount))
+                continue;
+
+            if (effect.TriggerEffect(amount))
+                anyEffectTriggered = true;
+        }
+
+        return anyEffectTriggered;
+    }
 }

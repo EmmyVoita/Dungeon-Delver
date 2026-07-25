@@ -409,13 +409,13 @@ public class PracticeMenuNavigator : BaseMenu
     {
         Vector2 currentInput = Vector2.zero;
 
-        if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveUp))
+        if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveUp))
             currentInput = Vector2.up;
-        else if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveDown))
+        else if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveDown))
             currentInput = Vector2.down;
-        else if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveLeft))
+        else if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveLeft))
             currentInput = Vector2.left;
-        else if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveRight))
+        else if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveRight))
             currentInput = Vector2.right;
 
         // No input held

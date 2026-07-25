@@ -47,7 +47,7 @@ public class GoldenHarvestAbility : AbilityBase
     public override void Activate(Quaternion rotation)
     {
         if (isActive) return;
-        AudioHelpers.PlaySoundEffect(activateSound, Player.Instance.transform.position);
+        //AudioHelpers.PlaySoundEffect(activateSound, Player.Instance.transform.position);
         StartCoroutine(GoldenHarvestRoutine());
     }
 

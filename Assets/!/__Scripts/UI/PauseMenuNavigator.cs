@@ -136,7 +136,7 @@ public class PauseMenuNavigator : BaseMenu
     {
         if (waitForConfirmRelease)
         {
-            if (!InputBindingManager.Instance.GetKeyInput(InputActionType.Confirm))
+            if (!InputBindingManager.Instance.GetKeyHeld(InputActionType.Confirm))
             {
                 waitForConfirmRelease = false;
             }

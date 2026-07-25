@@ -83,10 +83,12 @@ public class GameWinAnimation : MonoBehaviour
 
     private void Update()
     {
+        /*
         if(Input.GetKeyDown(KeyCode.M))
         {
             GameStateManager.Instance.SetStateForceUpdate(GameState.GameWin);
         }
+        */
     }
 
     private void HandleStateChanged(GameState previousState, GameState newState)

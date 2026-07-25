@@ -9,11 +9,20 @@ public class CoinCollectorUpgrade : UpgradeBase
     public override string GetDescription()
     {
         return descriptionTemplate
-            .Replace("{CURRENCY_AMOUNT}", currencyAmount.ToString("N0"));
+            .Replace("{CURRENCY_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{currencyAmount.ToString("N0")}</color>")
+            .Replace("{APPEARANCE_PERCENTAGE}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{appearancePercentage.ToString("P0")}</color>");
+    }
+
+    public override string GetDetails()
+    {
+        return detailsTemplate
+            .Replace("{CURRENCY_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{currencyAmount.ToString("N0")}</color>")
+            .Replace("{APPEARANCE_PERCENTAGE}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{appearancePercentage.ToString("P0")}</color>");
     }
 
     public override void Apply()
     {
-        ChallengeRewardManager.Instance.RegisterRenewing(new CurrencyChallengeReward(currencyAmount,appearancePercentage:appearancePercentage));
+        ChallengeRewardManager.Instance.RegisterOrStackCurrencyReward(currencyAmount, appearancePercentage: appearancePercentage);
+        //ChallengeRewardManager.Instance.RegisterRenewing(new CurrencyChallengeReward(currencyAmount,appearancePercentage:appearancePercentage));
     }
 }

@@ -34,7 +34,7 @@ public class ContinuePromptUI : MonoBehaviour
     {
         if(newState == showState)
         {
-            textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetKeyName(InputActionType.Confirm)}</color>] to continue";
+            textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetBoundKey(InputActionType.Confirm)}</color>] to continue";
             continuePrompt?.Show();
         }
         else if(hideStates.Contains(newState))

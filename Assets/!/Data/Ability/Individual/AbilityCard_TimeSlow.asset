@@ -13,11 +13,24 @@ MonoBehaviour:
   m_Name: AbilityCard_TimeSlow
   m_EditorClassIdentifier: 
   abilityType: 2
-  baseCost: 20
+  baseCost: 25
   scoreRequirement: 0
+  baseDuration: 2.5
   abilityName: Lazy Hour
   description: Slows time for a brief period
   iconData: {fileID: 11400000, guid: cbeb5c7753649734f9f3a143c3bc5ae1, type: 2}
   cardBackground: {fileID: 0}
   iconScale: 1.75
-  abilityPrefab: {fileID: 2183329598545661104, guid: b28a2ea1892825d47acdd00761c6bd4b, type: 3}
+  activationSound:
+    clip: {fileID: 8300000, guid: ed5fd421ddeebc149a27ede4450dac66, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0
+  deactivateSound:
+    clip: {fileID: 0}
+    channel: 0
+    volume: 0
+    pitch: 0
+    pitchVariation: 0
+  abilityPrefab: {fileID: 3485696474613262414, guid: b28a2ea1892825d47acdd00761c6bd4b, type: 3}

@@ -188,9 +188,9 @@ public class Goal : MonoBehaviour
         lastManualRotateTime = Time.time;
 
         float critWindow =
-            UpgradeManager.Instance == null
+            StatModifierManager.Instance == null
             ? Player.Instance.CritWindow
-            : UpgradeManager.Instance.ModifyCritWindow(Player.Instance.CritWindow);
+            : Player.Instance.CritWindow;//UpgradeManager.Instance.ModifyCritWindow(Player.Instance.CritWindow);
 
         critExpireTime = Time.time + critWindow;
 

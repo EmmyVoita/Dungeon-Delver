@@ -13,7 +13,7 @@ public class DragonsCrownUpgrade : UpgradeBase
 
     public override void Apply()
     {
-        DeathSaveManager.Instance.RegisterRenewing(new CurrencyDeathSave(healAmount, true));
+        DeathSaveManager.Instance.RegisterRenewing(new CurrencyDeathSave(healAmount, 500, true));
     }
 
 }

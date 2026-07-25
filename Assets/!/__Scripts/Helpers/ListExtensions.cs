@@ -41,6 +41,37 @@ public static class ListExtensions
         return result;
     }
 
+    public static List<T> PickUnique<T>(this List<T> source, int count, List<T> avoidList)
+    {
+        List<T> result = new();
+
+        if (source == null || source.Count == 0)
+            return result;
+
+        if (source.Count <= count)
+        {
+            result.AddRange(source);
+            return result;
+        }
+
+        List<T> pool = new();
+
+        foreach(var item in source)
+        {
+            if(!avoidList.Contains(item))
+                pool.Add(item);
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            int index = Random.Range(0, pool.Count);
+            result.Add(pool[index]);
+            pool.RemoveAt(index);
+        }
+
+        return result;
+    }
+
     public static T GetRandom<T>(this IList<T> list)
     {
         if (list == null || list.Count == 0)

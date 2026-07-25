@@ -113,7 +113,7 @@ public class GameStatsUI : MonoBehaviour
 
     private IEnumerator PlayBreakdownIntros()
     {
-        RoundManager.Instance.runStats.PrintStats();
+        RoundManager.Instance?.runStats.PrintStats();
 
         for (int i = 0; i < _rowAnimators.Count; i++)
         {
@@ -136,24 +136,48 @@ public class GameStatsUI : MonoBehaviour
     {
         if (_skipRequested) yield break;
 
+    
         var rowAnimator = _rowAnimators[i];
-        var rowData = breakdownRowDataList[i];
+        StatRowData rowData = breakdownRowDataList[i];
         var rowObj = _rowObjs[i];
         var prefix = _prefixTexts[i];
 
+        
+        if(rowAnimator == null)
+        {
+            Debug.LogError("When playing stat breakdown animator, the row animator was found to be null");
+            yield break;
+        }
+
+        if(rowObj == null)
+        {
+            Debug.LogError("When playing stat breakdown animator, the row gameobject was found to be null");
+            yield break;
+        }
+
         TextMeshProUGUI displayText = rowAnimator.GetComponentInChildren<TextMeshProUGUI>();
+
+        if(displayText == null)
+        {
+            Debug.LogError("When playing stat breakdown animator, the displayText was found to be null");
+            yield break;
+        }
+
 
         rowAnimator.PlayIntro();
 
         StatDisplayHelpers.SetupStatRow(displayText, rowData, rowObj);
 
-        if (_skipRequested) yield break;
+        if (_skipRequested) 
+            yield break;
 
         StatValue stat = StatDisplayHelpers.ResolveStatValue(rowData);
 
         float pitchMult = 1.0f + (i * animateStatPitchStep);
         AudioHelpers.PlaySoundEffect(rowIntroSoundEffect, Camera.main.transform.position, pitchMult);
 
+
+        Debug.Log("Resolved stat successfully.");
 
         yield return StartCoroutine(
             animator.AnimateStatText(
@@ -164,6 +188,8 @@ public class GameStatsUI : MonoBehaviour
                 () => _skipRequested
             )
         );
+
+        Debug.Log("Finished AnimateStatText.");
 
         if (_skipRequested) yield break;
 
@@ -216,7 +242,7 @@ public class GameStatsUI : MonoBehaviour
     private IEnumerator DisplaySequence()
     {
         if (!BeakdownAnimatorsExists)
-        CreateBreakdownRowAnimators();
+            CreateBreakdownRowAnimators();
 
         mainContainer?.SetActive(true);
 

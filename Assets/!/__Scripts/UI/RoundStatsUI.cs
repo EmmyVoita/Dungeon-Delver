@@ -179,7 +179,7 @@ public class RoundStatsUI : MonoBehaviour
                 return new Vector2Int(ScoreManager.Instance.RoundScoreTotal, -1);
 
             case StatValueType.Hits:
-                return new Vector2Int(RoundManager.Instance.stats.Hit, RoundManager.Instance.stats.Spawned);
+                return new Vector2Int(RoundManager.Instance.roundStats.Hit, RoundManager.Instance.roundStats.Spawned);
 
             default:
                 return Vector2Int.zero;
@@ -231,7 +231,7 @@ public class RoundStatsUI : MonoBehaviour
 
         if (skipRequested)
         {
-            var roundAccuracy = RoundManager.Instance.stats.RoundAccuracy;
+            var roundAccuracy = RoundManager.Instance.roundStats.RoundAccuracy;
             RatingDisplayData chosenImageData = GetRatingForAccuracy(roundAccuracy);
 
             ratingTextObject.text = chosenImageData.ratingText;
@@ -255,7 +255,7 @@ public class RoundStatsUI : MonoBehaviour
             }
 
             // Snap rating instantly
-            var chosenData = GetRatingForAccuracy(RoundManager.Instance.stats.RoundAccuracy);
+            var chosenData = GetRatingForAccuracy(RoundManager.Instance.roundStats.RoundAccuracy);
             ratingPresenter.ShowRating(chosenData);
 
             yield break; // ← IMPORTANT
@@ -266,7 +266,7 @@ public class RoundStatsUI : MonoBehaviour
 
     private IEnumerator PlayRatingImageIntro()
     {
-        var roundAccuracy = RoundManager.Instance.stats.RoundAccuracy;
+        var roundAccuracy = RoundManager.Instance.roundStats.RoundAccuracy;
         RatingDisplayData chosenData = GetRatingForAccuracy(roundAccuracy);
 
         ratingPresenter.ShowRating(chosenData);
@@ -317,7 +317,7 @@ public class RoundStatsUI : MonoBehaviour
 
         if (continuePrompt.TryGetComponent(out TextMeshProUGUI textComponent))
         {
-            textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetKeyName(InputActionType.Confirm)}</color>] to continue";
+            textComponent.text = $"[<color=#FFD700>{InputBindingManager.Instance.GetBoundKey(InputActionType.Confirm)}</color>] to continue";
             continuePrompt?.Show();
         }
 

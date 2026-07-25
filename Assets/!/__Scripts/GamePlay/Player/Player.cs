@@ -133,9 +133,6 @@ public class Player : MonoBehaviour
     private float invincibileDone = 0;
     private int _blockedHits = 0;
 
-   
-
-
     public PlayerControlState playerControlState { get; private set; } = PlayerControlState.Normal;
     public string LastDamageSource { get; private set; } = "Unknown";
     public Vector2 LastFacingDirection => _lastFacingDir;
@@ -148,6 +145,7 @@ public class Player : MonoBehaviour
     public bool AbilityChargeLocked { get; set; } = false;
     public bool CanJump => playerControlState == PlayerControlState.Shooter || playerControlState ==  PlayerControlState.BasicJump;
     public bool CanTakeDamage => GameStateEffectManager.PlayerDamageAllowed && !DevCheats.Invincible;
+
 
   
     public bool Invincible
@@ -186,9 +184,22 @@ public class Player : MonoBehaviour
 
     public int MaxAbilityCharge
     {
-        get { return UpgradeManager.Instance != null ? Mathf.Max((int) UpgradeManager.Instance.ModifyAbilityCost(_maxAbilityCharge),10) : 0; }
-        set { _maxAbilityCharge = value; }
-    }   
+        get
+        {
+            if (StatModifierManager.Instance == null)
+                return 0;
+
+            if (AbilityChargeManager.Instance == null)
+                return _maxAbilityCharge;
+
+            return Mathf.Max(
+                AbilityChargeManager.Instance.GetModifiedAbilityCost(_maxAbilityCharge),
+                10
+            );
+        }
+
+        set => _maxAbilityCharge = value;
+    }
 
     public int AbilityCharge
     {
@@ -223,7 +234,7 @@ public class Player : MonoBehaviour
         set
         {
             _currentAbility = value;
-            MaxAbilityCharge = _currentAbility != null ? _currentAbility.abilityBaseCost : 0;
+            MaxAbilityCharge = _currentAbility != null ? _currentAbility.Data.baseCost : 0;
         }
     }
 
@@ -245,6 +256,9 @@ public class Player : MonoBehaviour
         _blockedHits += amount;
         Debug.Log($"Add hit block amount => {amount}");
     }
+
+
+    
 
     
     void OnEnable()
@@ -309,9 +323,21 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.B))
+        if(Input.GetKeyDown(KeyCode.Keypad1))
         {
             HealPlayer(1,true);
+        }
+
+        if(Input.GetKeyDown(KeyCode.Keypad2))
+        {
+            OnPreDamageTaken?.Invoke(1);
+            Health -= 1;
+            OnDamageTaken?.Invoke(1);
+        }
+
+        if(Input.GetKeyDown(KeyCode.Keypad3))
+        {
+            AbilityCharge = MaxAbilityCharge;
         }
 
         goal.transform.position = transform.position;
@@ -332,10 +358,10 @@ public class Player : MonoBehaviour
 
         if (_useEightDirections)
         {
-            if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveUp)) dir += Vector2.up;
-            if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveDown)) dir += Vector2.down;
-            if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveLeft)) dir += Vector2.left;
-            if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveRight)) dir += Vector2.right;
+            if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveUp)) dir += Vector2.up;
+            if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveDown)) dir += Vector2.down;
+            if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveLeft)) dir += Vector2.left;
+            if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveRight)) dir += Vector2.right;
 
             if (dir.sqrMagnitude > 0.1f)
             {
@@ -346,10 +372,10 @@ public class Player : MonoBehaviour
         }
         else
         {
-            if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveUp)) dir = Vector2.up;
-            else if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveDown)) dir = Vector2.down;
-            else if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveLeft)) dir = Vector2.left;
-            else if (InputBindingManager.Instance.GetKeyInput(InputActionType.MoveRight)) dir = Vector2.right;
+            if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveUp)) dir = Vector2.up;
+            else if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveDown)) dir = Vector2.down;
+            else if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveLeft)) dir = Vector2.left;
+            else if (InputBindingManager.Instance.GetKeyHeld(InputActionType.MoveRight)) dir = Vector2.right;
 
             if (dir != Vector2.zero)
             {
@@ -360,14 +386,22 @@ public class Player : MonoBehaviour
 
         goal.GetComponentInChildren<Goal>().SetGoalDirection(dir);
 
+        
+
         // Ability usage
-        if (InputBindingManager.Instance.GetKeyDown(InputActionType.UseAbility) && 
-           FullAbilityCharge
-           && !_lockInput)
+        if(InputBindingManager.Instance.GetKeyDown(InputActionType.UseAbility)) 
         {
-            AbilityCharge -= MaxAbilityCharge;
-            OnAbilityUsed?.Invoke();
-            SpawnAbility();
+            if(_lockInput)
+                return;
+
+            if(PaidAbilityUseManager.Instance.TryConsumePaidUse())
+            {
+                SpawnAbility(false);
+                return;
+            }
+
+            if(FullAbilityCharge)
+                SpawnAbility();
         }
 
         if (playerControlState == PlayerControlState.LaneDodger)
@@ -546,7 +580,7 @@ public class Player : MonoBehaviour
             LastDamageSource = hit.SourceName;
 
         // Damage logic
-        int finalDamage = UpgradeManager.Instance.ModifyDamageTaken(hit.Damage);
+        int finalDamage = StatModifierManager.Instance.ModifyDamageTaken(hit.Damage);
         OnPreDamageTaken?.Invoke(finalDamage);
         Health -= finalDamage;
         OnDamageTaken?.Invoke(finalDamage);
@@ -795,7 +829,7 @@ public class Player : MonoBehaviour
 
     // -------------------------------------
 
-    private void SpawnAbility()
+    private void SpawnAbility(bool consumeAbilityCharge = true)
     {
         // Find the current facing direction the player is allowed to use
         Vector2 snappedDir = GetSnappedDirection(_lastFacingDir, _useEightDirections);
@@ -805,9 +839,15 @@ public class Player : MonoBehaviour
         Quaternion snappedRotation = Quaternion.Euler(0, 0, angle);
 
         // Spawn the ability prefab
-        //currentAbility.transform.rotation = snappedRotation;
-        CurrentAbility.Activate(snappedRotation);
-        //GameObject wave = Instantiate(shockwavePrefab, transform.position, snappedRotation);
+        bool used = CurrentAbility.TryActive(snappedRotation);
+
+        if(used)
+            OnAbilityUsed?.Invoke();
+        else
+            Debug.Log("ABILITY CURRENTLY ACTIVE cant use");
+
+        if(consumeAbilityCharge)
+            AbilityCharge -= MaxAbilityCharge;
     }
 
     /// <summary>
@@ -923,7 +963,7 @@ public class Player : MonoBehaviour
         //bool jumpHeld = InputBindingManager.Instance.GetKeyInput(InputActionType.Jump);
        
 
-        bool jumpHeld = InputBindingManager.Instance.GetKeyInput(InputActionType.Jump);
+        bool jumpHeld = InputBindingManager.Instance.GetKeyHeld(InputActionType.Jump);
 
         // If they release jump while rising, permanently disable hover
         if (!jumpHeld && _hoverActive)

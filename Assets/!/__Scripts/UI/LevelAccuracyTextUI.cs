@@ -43,7 +43,7 @@ public class LiveAccuracyTextUI : MonoBehaviour
             return;
         }
 
-        float accuracy = rm.stats.CurrentLevelAccuracy;
+        float accuracy = rm.roundStats.CurrentLevelAccuracy;
         float percent = accuracy * 100f;
 
         accuracyText.text = $"{prefix}{percent:0}{suffix}";

@@ -176,7 +176,7 @@ public class InputBindingManager : MonoBehaviour
     // ------------------------------------------------------------
     // Public API
     // ------------------------------------------------------------
-    public Key GetKeyName(InputActionType action)
+    public Key GetBoundKey(InputActionType action)
     {
         return bindings.ContainsKey(action) ? bindings[action] : Key.None;
     }
@@ -282,7 +282,46 @@ public class InputBindingManager : MonoBehaviour
         return Keyboard.current[key].wasPressedThisFrame || fallBackKeyDown;
     }
 
-    public bool GetKeyInput(InputActionType action)
+
+    public bool GetKeyUp(InputActionType action)
+    {
+        if (!bindings.TryGetValue(action, out var key))
+            return false;
+
+        if (key == Key.None || Keyboard.current == null)
+            return false;
+
+        // 🔥 BLOCK CONFIRM
+        if (action == InputActionType.Confirm && blockConfirmUntilRelease)
+        {
+            if (!Keyboard.current[key].isPressed)
+                blockConfirmUntilRelease = false;
+
+            return false;
+        }
+
+        bool fallBackKeyUp = false;
+
+        switch (action)
+        {
+            case InputActionType.MoveUp:
+                fallBackKeyUp = Keyboard.current[Key.UpArrow].wasReleasedThisFrame;
+                break;
+            case InputActionType.MoveDown:
+                fallBackKeyUp = Keyboard.current[Key.DownArrow].wasReleasedThisFrame;
+                break;
+            case InputActionType.MoveLeft:
+                fallBackKeyUp = Keyboard.current[Key.LeftArrow].wasReleasedThisFrame;
+                break;
+            case InputActionType.MoveRight:
+                fallBackKeyUp = Keyboard.current[Key.RightArrow].wasReleasedThisFrame;
+                break;
+        }
+
+        return Keyboard.current[key].wasReleasedThisFrame || fallBackKeyUp;
+    }
+
+    public bool GetKeyHeld(InputActionType action)
     {
          if (!bindings.TryGetValue(action, out var key))
         return false;

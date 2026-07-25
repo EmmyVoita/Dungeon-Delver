@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TempAbilityCostMultiplier : IAbilityCostModifier
+public class TempAbilityCostMultiplier : MonoBehaviour//IAbilityCostModifier
 {
     private float amount;
 

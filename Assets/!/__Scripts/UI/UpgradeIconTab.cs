@@ -38,7 +38,7 @@ public class UpgradeIconTab : MonoBehaviour
             Open();
         }
 
-        if(!InputBindingManager.Instance.GetKeyInput(openKey) && _isOpen)
+        if(!InputBindingManager.Instance.GetKeyHeld(openKey) && _isOpen)
         {
             Close();
         }

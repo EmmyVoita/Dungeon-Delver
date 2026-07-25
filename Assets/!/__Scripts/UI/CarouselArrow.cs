@@ -65,7 +65,7 @@ public class CarouselArrow : MonoBehaviour, IPointerClickHandler
 
     private void Update()
     {
-        if(isEnabled && InputBindingManager.Instance.GetKeyInput(inputAction) && !selectManager.IsInputLocked)
+        if(isEnabled && InputBindingManager.Instance.GetKeyHeld(inputAction) && !selectManager.IsInputLocked)
         {
             PlayPressFeedback();
         }

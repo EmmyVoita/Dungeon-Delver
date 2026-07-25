@@ -151,7 +151,8 @@ MonoBehaviour:
   moveEase: 6
   fadeEase: 2
   hdrIntensity: 1
-  text: {fileID: 8929713273964358908}
+  amountText: {fileID: 8929713273964358908}
+  symbolText: {fileID: 0}
   canvasGroup: {fileID: 8311495697902162012}
 --- !u!1 &5825999520831217802
 GameObject:
@@ -218,7 +219,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: aasdadasdasdadaddadadadadd
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 38279ce5ea27c68499c74e01219a1355, type: 2}
   m_sharedMaterial: {fileID: -8852437591962295723, guid: 38279ce5ea27c68499c74e01219a1355, type: 2}

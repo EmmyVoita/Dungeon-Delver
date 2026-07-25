@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class RunStatsTracker : MonoBehaviour
 {
@@ -13,6 +14,23 @@ public class RunStatsTracker : MonoBehaviour
 
     public float RunAccuracy => TotalSpawned == 0 ? 0f : (float)TotalHit / TotalSpawned;
     public float RunCritRate => TotalHit == 0 ? 0f : (float)TotalCrit / TotalHit;
+
+    
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ResetRun();
+    }
 
     public void AddRound(RoundStatsTracker round)
     {

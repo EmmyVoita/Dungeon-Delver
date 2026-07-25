@@ -27,7 +27,7 @@ public class StartupUpgradeInjector : MonoBehaviour
         ApplyStartingUpgrades();
 
         // Force a final recompute AFTER all modifiers are registered
-        UpgradeManager.Instance.RecomputeScoreContext();
+        //UpgradeManager.Instance.RecomputeScoreContext();
     }
 
 

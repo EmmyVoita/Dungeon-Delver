@@ -435,10 +435,10 @@ public class ScoreDisplayView : MonoBehaviour
         switch (kind)
         {
             case ScorePopupKind.NormalHit:
-                return UpgradeManager.Instance.ModifyNormalHitValue(1.0f);
+                return 1.0f;//UpgradeManager.Instance.ModifyNormalHitValue(1.0f);
 
             case ScorePopupKind.CritHit:
-                return UpgradeManager.Instance.ModifyCritHitValue(1.0f);
+                return 1.0f;//UpgradeManager.Instance.ModifyCritHitValue(1.0f);
             case ScorePopupKind.Default:
                 return 1f;
             case ScorePopupKind.Combo:

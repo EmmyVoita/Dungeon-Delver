@@ -516,7 +516,7 @@ public class ArrowSpawner : MonoBehaviour
                                              spawnPos,
                                              endPos);
         
-        RoundManager.Instance.stats.AddSpawned();
+        RoundManager.Instance.roundStats.AddSpawned();
     }
 
     public void TriggerWarning(Vector2 direction, string type)

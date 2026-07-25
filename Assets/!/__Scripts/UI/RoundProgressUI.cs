@@ -16,13 +16,16 @@ public class RoundProgressUI : MonoBehaviour
     private void Update()
     {
         var rm = RoundManager.Instance;
-        if (rm == null || rm.stats.Spawned == 0)
+        if(rm == null)
+            return;
+        
+        if (rm == null || rm.roundStats.Spawned == 0)
         {
             fillImage.fillAmount = 0f;
             return;
         }
 
-        float targetProgress = RoundManager.Instance.stats.LevelProgress;
+        float targetProgress = RoundManager.Instance.roundStats.LevelProgress;
 
         if(Mathf.Approximately(targetProgress, lastTargetProgress))
             return;

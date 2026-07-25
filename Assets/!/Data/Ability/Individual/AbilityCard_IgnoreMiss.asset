@@ -13,11 +13,24 @@ MonoBehaviour:
   m_Name: AbilityCard_IgnoreMiss
   m_EditorClassIdentifier: 
   abilityType: 8
-  baseCost: 30
+  baseCost: 15
   scoreRequirement: 50000
+  baseDuration: 1.2
   abilityName: Flow Shield
   description: 'A temporary shield that keeps your combo from being broken. '
   iconData: {fileID: 11400000, guid: c819d2b6785df874896ae5a1d1715b47, type: 2}
   cardBackground: {fileID: 0}
   iconScale: 2
-  abilityPrefab: {fileID: 9097667531175756686, guid: 3c98cddad26251d4b882b30ac898b3c5, type: 3}
+  activationSound:
+    clip: {fileID: 8300000, guid: 766bc03ff25048e4a982fdf726d9f226, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0.1
+  deactivateSound:
+    clip: {fileID: 0}
+    channel: 0
+    volume: 0
+    pitch: 0
+    pitchVariation: 0
+  abilityPrefab: {fileID: 4192601026187829971, guid: 3c98cddad26251d4b882b30ac898b3c5, type: 3}

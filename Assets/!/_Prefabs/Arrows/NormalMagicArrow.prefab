@@ -58,7 +58,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 8493e6ad193f98346b9d9486f4535466, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 226528568, guid: c859214552cf1394ea960b015028b428, type: 3}
+  m_Sprite: {fileID: -10999407, guid: d793fb4878a65eb499513b87aeb1e835, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -292,22 +292,27 @@ MonoBehaviour:
   health: 1
   catchRule: 0
   flip180: 1
-  sRend: {fileID: 0}
-  baseMaterial: {fileID: 0}
+  sRend: {fileID: 193027958192837250}
+  baseMaterial: {fileID: 2100000, guid: 8493e6ad193f98346b9d9486f4535466, type: 2}
   colorApropertyName: _ColorA
   colorBpropertyName: _ColorB
-  goldenColorA: {r: 0, g: 0, b: 0, a: 0}
-  goldenColorB: {r: 0, g: 0, b: 0, a: 0}
-  recoveryColorA: {r: 0, g: 0, b: 0, a: 0}
-  recoveryColorB: {r: 0, g: 0, b: 0, a: 0}
+  goldenColorA: {r: 1.4980392, g: 0.6323907, b: 0.10599332, a: 1}
+  goldenColorB: {r: 1.9795662, g: 1.2588598, b: 0.1960891, a: 1}
+  recoveryColorA: {r: 0.011764706, g: 0.09411765, b: 0.03529412, a: 1}
+  recoveryColorB: {r: 0.45112416, g: 1.8443025, b: 0.45112416, a: 1}
   arrowHitSound: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
   normalHitPitch: 1
   criticalHitPitch: 1
   directionalPitchFactor: 0
   directionalEQStrength: 0.5
+  killEffect: {fileID: 0}
   _invincible: 0
   _status: 0
   destroyEffect: {fileID: 812096446077587059, guid: 39cfcc1d74ff7ff4eae49039225c3877, type: 3}
+  colorCpropertyName: _ColorC
+  colorDpropertyName: _ColorD
+  goldenColorC: {r: 1.9795662, g: 1.2588598, b: 0.1960891, a: 1}
+  goldenColorD: {r: 1.9795662, g: 1.2588598, b: 0.1960891, a: 1}
 --- !u!1001 &9112137364864987663
 PrefabInstance:
   m_ObjectHideFlags: 0

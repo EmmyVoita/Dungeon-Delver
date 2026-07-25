@@ -15,6 +15,7 @@ public class ProjectileShieldAbility : AbilityBase
 
     public override void Activate(Quaternion rotation)
     {
+        
         if (projectilePrefab == null)
             return;
 

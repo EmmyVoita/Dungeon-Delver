@@ -55,7 +55,7 @@ public class PracticeObstacleController : MonoBehaviour
 
     void Update()
     {
-        if (GameStateManager.Instance.CurrentState == GameState.Practice && InputBindingManager.Instance.GetKeyInput(InputActionType.Back))
+        if (GameStateManager.Instance.CurrentState == GameState.Practice && InputBindingManager.Instance.GetKeyHeld(InputActionType.Back))
         {
             SceneManager.LoadScene(SceneNames.MainMenu);
         }

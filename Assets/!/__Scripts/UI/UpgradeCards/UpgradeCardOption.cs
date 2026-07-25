@@ -18,7 +18,7 @@ public class UpgradeCardOption : ICardOption
 
     public void OnSelected()
     {
-        UpgradeManager.Instance.AddUpgrade(upgrade);
+        //UpgradeManager.Instance.AddUpgrade(upgrade);
 
         /*
         if (UpgradeCardManager.Instance.upgradeIconPrefab == null ||

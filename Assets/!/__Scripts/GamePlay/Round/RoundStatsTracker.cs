@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 public class RoundStatsTracker : MonoBehaviour
 {
@@ -43,6 +45,8 @@ public class RoundStatsTracker : MonoBehaviour
         Player.OnDamageTaken += HandleDamageTaken;
         ComboManager.OnComboBreak += HandleComboBreak;
         ScoreManager.OnScoreAdded += AddScore;
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     void OnDisable()
@@ -51,6 +55,13 @@ public class RoundStatsTracker : MonoBehaviour
         Player.OnDamageTaken -= HandleDamageTaken;
         ComboManager.OnComboBreak -= HandleComboBreak;
         ScoreManager.OnScoreAdded -= AddScore;
+
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Reset();
     }
 
     private void HandleComboBreak(int comboCount, ComboBreakReason reason)

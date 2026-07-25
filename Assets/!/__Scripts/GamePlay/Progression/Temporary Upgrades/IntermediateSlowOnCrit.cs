@@ -24,9 +24,9 @@ public class IntermediateSlowOnCrit : UpgradeBase
             easeOut
         );
 
-        UpgradeManager.Instance.AddTemporaryModifier(listener);
+        StatModifierManager.Instance.AddTemporaryModifier(listener);
 
-        UpgradeManager.Instance.AddTemporaryModifier(
+        StatModifierManager.Instance.AddTemporaryModifier(
             new TempNormalArrowMultiplier(normalArrowMultiplier)
         );
     }

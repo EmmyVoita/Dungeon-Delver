@@ -16,11 +16,16 @@ MonoBehaviour:
   _maxStacks: 999
   upgradeId: 
   cardDecoration: {fileID: 21300000, guid: a8b3bfd76113cec47a85889e616f4654, type: 3}
+  cardDecorationMaterial: {fileID: 0}
   centerIcon: {fileID: 21300000, guid: c82b3f6d50fa8234fa8941c339d5d1b8, type: 3}
   icon: {fileID: 21300000, guid: 2eb57f196fc1298409ed258be56ff639, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Coin Collector
   displayInFooter: 1
-  descriptionTemplate: gain currecny when you perfect a challenge
+  descriptionTemplate: When a challenge appears, there is a {APPEARANCE_PERCENTAGE}
+    chance for it to be golden. If you take no damage, gain {CURRENCY_AMOUNT} currency
+    when you complete it.
+  detailsTemplate: 'This upgrade stacks. Every stack grants you an additional {CURRENCY_AMOUNT}
+    currency. '
   currencyAmount: 25
-  appearancePercentage: 1
+  appearancePercentage: 0.5

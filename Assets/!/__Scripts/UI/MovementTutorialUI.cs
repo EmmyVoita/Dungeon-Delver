@@ -140,7 +140,7 @@ public class MovementTutorialUI : MonoBehaviour
             this.text = text;
             this.parent = parent;
 
-            this.text.text = InputBindingManager.Instance.GetKeyName(actionType).ToString();
+            this.text.text = InputBindingManager.Instance.GetBoundKey(actionType).ToString();
 
             // Create a local looping audio source
             GameObject audioObj = new GameObject($"HoldSound_{actionType}");
@@ -156,7 +156,7 @@ public class MovementTutorialUI : MonoBehaviour
         {
             if (done || fadingOut) return;
 
-            bool isPressed = InputBindingManager.Instance.GetKeyInput(actionType);
+            bool isPressed = InputBindingManager.Instance.GetKeyHeld(actionType);
 
             if (isPressed)
             {

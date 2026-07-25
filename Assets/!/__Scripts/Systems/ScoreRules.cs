@@ -2,14 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Flags]
-public enum ArrowStatus
-{
-    None    = 0,
-    Golden  = 1 << 0,
-    Frozen  = 1 << 1,
-    Recovery = 1 << 2,
-}
 
 
 [System.Serializable]
@@ -49,20 +41,20 @@ public class ScoreRules : MonoBehaviour
         switch(goalType)
         {
             case Goal.GoalType.Normal:
-                float normalWorth = UpgradeManager.Instance.ModifyNormalHitValue(1.0f);
+                float normalWorth = 1.0f;//UpgradeManager.Instance.ModifyNormalHitValue(1.0f);
                 score = score * normalWorth;
                 break;
             case Goal.GoalType.Critical:
-                float critBaseMultiplier = UpgradeManager.Instance.ModifyCritBase(critMultiplier);
-                float critWorth = UpgradeManager.Instance.ModifyCritHitValue(critBaseMultiplier);
+                float critBaseMultiplier = critMultiplier;//UpgradeManager.Instance.ModifyCritBase(critMultiplier);
+                float critWorth = critBaseMultiplier;//UpgradeManager.Instance.ModifyCritHitValue(critBaseMultiplier);
                 score = score * critWorth;
                 break;
             default:
                 return 0; 
         }
 
-        score = UpgradeManager.Instance.ModifyArrowScore(score);
-        score = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(score);
+        //score = UpgradeManager.Instance.ModifyArrowScore(score);
+        //score = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(score);
             
         // ---- status modifiers ----
         ArrowStatus status = arrow.GetStatus();
@@ -82,11 +74,13 @@ public class ScoreRules : MonoBehaviour
                 multiplier *= rule.scoreMultiplier;
         }
 
+        /*
         // 🔑 allow upgrades to modify the result
         foreach (var mod in UpgradeManager.Instance.StatusScoreModifiers)
         {
             multiplier = mod.ModifyStatusMultiplier(status, multiplier);
         }
+        */
 
         return multiplier;
     }
@@ -94,26 +88,26 @@ public class ScoreRules : MonoBehaviour
 
     private float GetNormalArrowTotalModifier()
     {
-        float normalWorth = UpgradeManager.Instance.ModifyNormalHitValue(1.0f);
-        normalWorth = UpgradeManager.Instance.ModifyArrowScore(normalWorth);
-        normalWorth = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(normalWorth);
+        float normalWorth = 1.0f;//UpgradeManager.Instance.ModifyNormalHitValue(1.0f);
+        //normalWorth = UpgradeManager.Instance.ModifyArrowScore(normalWorth);
+        //normalWorth = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(normalWorth);
         
         return normalWorth;
     }
 
     private float GetCritArrowTotalModifier()
     {
-        float critWorth = UpgradeManager.Instance.ModifyCritHitValue(1.0f);
-        critWorth = UpgradeManager.Instance.ModifyArrowScore(critWorth);
-        critWorth = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(critWorth);
+        float critWorth = 1.0f; //UpgradeManager.Instance.ModifyCritHitValue(1.0f);
+        //critWorth = UpgradeManager.Instance.ModifyArrowScore(critWorth);
+        //critWorth = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(critWorth);
         
         return critWorth;
     }
 
     private float GetComboTotalModifier()
     {
-        float comboWorth = UpgradeManager.Instance.ModifyComboScoreMultiplier(1.0f);
-        comboWorth = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(comboWorth);
+        float comboWorth = 1.0f;//UpgradeManager.Instance.ModifyComboScoreMultiplier(1.0f);
+        //comboWorth = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(comboWorth);
         
         return comboWorth;
     }

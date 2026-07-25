@@ -1,24 +1,27 @@
 using UnityEngine;
 using DG.Tweening;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
-using System.Collections;
-
-
 
 public class TimeManager : MonoBehaviour
 {
     public static TimeManager Instance { get; private set; }
 
     public static event Action<float> OnTimeScaleChanged;
-    
 
-    private bool _paused = false;
-    private List<TimeScaleModifier> modifiers = new List<TimeScaleModifier>();
-    public float GetCurrentScale() => CalculateFinalScale();
+    private bool _paused;
 
-    void Awake()
+    private readonly List<TimeScaleModifier> modifiers = new();
+    private readonly HashSet<string> levelModifierIds = new();
+
+    public float GetCurrentScale()
+    {
+        return CalculateFinalScale();
+    }
+
+    private void Awake()
     {
         if (Instance != null && Instance != this)
         {
@@ -32,46 +35,50 @@ public class TimeManager : MonoBehaviour
         ApplyCombinedScale();
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         SceneManager.sceneLoaded += HandleSceneLoaded;
-        
+        GameStateManager.OnStateChanged += HandleStateChanged;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
+        GameStateManager.OnStateChanged -= HandleStateChanged;
     }
 
-    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    private void HandleSceneLoaded(Scene scene,LoadSceneMode mode)
     {
-        Resume();
-        modifiers.Clear();              
-        ApplyCombinedScale();  
+        _paused = false;
+        ClearAllModifiers();
     }
 
-    // ------------------------------
-    // Core Combiner
-    // ------------------------------
+    private void HandleStateChanged(GameState previousState,GameState newState)
+    {
+        if (newState == GameStateManager.LevelEndState)
+            ClearLevelModifiers();
+    }
+
     private void ApplyCombinedScale()
     {
         float scale = CalculateFinalScale();
+
         Time.timeScale = scale;
         OnTimeScaleChanged?.Invoke(scale);
     }
 
     private float CalculateFinalScale()
     {
-        if(_paused) return 0;
-
-        if (modifiers.Count == 0)
-            return 1f;
+        if (_paused)
+            return 0f;
 
         float result = 1f;
 
-        foreach (var mod in modifiers)
+        foreach (TimeScaleModifier mod in modifiers)
         {
-            if (!mod.IsActive) continue;
+            if (mod == null || !mod.IsActive)
+                continue;
+
             result *= mod.Value;
         }
 
@@ -80,27 +87,80 @@ public class TimeManager : MonoBehaviour
 
     public void AddModifier(TimeScaleModifier mod)
     {
-        mod.OnChanged += ApplyCombinedScale; // 🔥 THIS is the missing link
+        if (mod == null)
+            return;
+
+        mod.OnChanged += ApplyCombinedScale;
         modifiers.Add(mod);
+
         ApplyCombinedScale();
     }
 
-    public void AddTemporaryModifier(TimeScaleModifier mod, float duration)
+    public void AddLevelModifier(TimeScaleModifier mod)
     {
-        StartCoroutine(ApplyForDuration(mod,duration));
+        if (mod == null)
+            return;
+
+        AddModifier(mod);
+        levelModifierIds.Add(mod.Id);
+    }
+
+    public void AddTemporaryModifier(TimeScaleModifier mod,float duration)
+    {
+        if (mod == null)
+            return;
+
+        StartCoroutine(
+            ApplyForDuration(mod, duration)
+        );
     }
 
     public void RemoveModifier(string id)
     {
-        foreach (var mod in modifiers)
+        if (string.IsNullOrEmpty(id))
+            return;
+
+        for (int i = modifiers.Count - 1; i >= 0; i--)
         {
-            if (mod.Id == id)
-            {
-                mod.OnChanged -= ApplyCombinedScale; // cleanup
-            }
+            TimeScaleModifier mod = modifiers[i];
+
+            if (mod == null || mod.Id != id)
+                continue;
+
+            mod.OnChanged -= ApplyCombinedScale;
+            modifiers.RemoveAt(i);
         }
 
-        modifiers.RemoveAll(m => m.Id == id);
+        levelModifierIds.Remove(id);
+
+        ApplyCombinedScale();
+    }
+
+    private void ClearLevelModifiers()
+    {
+        if (levelModifierIds.Count == 0)
+            return;
+
+        string[] idsToRemove =
+            new string[levelModifierIds.Count];
+
+        levelModifierIds.CopyTo(idsToRemove);
+
+        foreach (string id in idsToRemove)
+            RemoveModifier(id);
+    }
+
+    private void ClearAllModifiers()
+    {
+        foreach (TimeScaleModifier mod in modifiers)
+        {
+            if (mod != null)
+                mod.OnChanged -= ApplyCombinedScale;
+        }
+
+        modifiers.Clear();
+        levelModifierIds.Clear();
+
         ApplyCombinedScale();
     }
 
@@ -109,25 +169,28 @@ public class TimeManager : MonoBehaviour
         float startValue,
         float targetValue,
         float duration,
-        Ease ease
-    )
+        Ease ease)
     {
-        var mod = new TimeScaleModifier(id, startValue);
+        var mod = new TimeScaleModifier(
+            id,
+            startValue
+        );
+
         AddModifier(mod);
 
         DOTween.To(
-            () => mod.Value,
-            x => mod.SetValue(x),
-            targetValue,
-            duration
-        )
-        .SetEase(ease)
-        .SetUpdate(true);
+                () => mod.Value,
+                x => mod.SetValue(x),
+                targetValue,
+                duration
+            )
+            .SetEase(ease)
+            .SetUpdate(true);
 
         return mod;
     }
 
-    private IEnumerator ApplyForDuration(TimeScaleModifier mod, float duration)
+    private IEnumerator ApplyForDuration(TimeScaleModifier mod,float duration)
     {
         AddModifier(mod);
 

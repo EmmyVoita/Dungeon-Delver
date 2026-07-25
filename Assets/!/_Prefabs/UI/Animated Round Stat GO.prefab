@@ -160,7 +160,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: CRITS   22222
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5bbacf01a2a3d6e4dbba2d388838be94, type: 2}
   m_sharedMaterial: {fileID: 5528336267779230484, guid: 5bbacf01a2a3d6e4dbba2d388838be94, type: 2}

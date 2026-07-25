@@ -6,6 +6,9 @@ public class BounceOnConfirm : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI textElement;
 
+    [Header("Input")]
+    [SerializeField] private InputActionType actionType = InputActionType.Confirm;
+
     [Header("Position Bounce")]
     [SerializeField] private float bounceHeight = 28f;
     [SerializeField] private float moveDuration = 0.12f;
@@ -16,23 +19,46 @@ public class BounceOnConfirm : MonoBehaviour
     [Header("Rotation Jiggle")]
     [SerializeField] private float rotationAmount = 8f;
 
+    [Header("Visibility")]
+    [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private bool hideOnPress = false;
+    [SerializeField] private float hideDelay = 1.0f;
+    [SerializeField] private float fadeDuration = 1.0f;
+    [SerializeField] private bool visibleOnAwake = true;
+
     private RectTransform rect;
     private Vector2 originalPos;
 
     private Sequence bounceSequence;
+    private bool _pressed;
+    private Sequence _hideSequence;
+    private bool _visible;
+
+    
 
     private void Awake()
     {
         rect = GetComponent<RectTransform>();
         originalPos = rect.anchoredPosition;
 
-        string key = InputBindingManager.Instance
-            .GetKeyName(InputActionType.Confirm)
-            .ToString();
+       
 
-        textElement.text = $"[<color=yellow>{key}</color>]!";
+        _pressed = false;
+
+        _visible = visibleOnAwake ? true : false;
 
         BuildSequence();
+    }
+
+    private void Start()
+    {
+        string key = InputBindingManager.Instance.GetBoundKey(actionType).ToString();
+        textElement.text = $"[<color=yellow>{key}</color>]";
+    }
+
+    public void Show()
+    {
+        canvasGroup.DOFade(1,0.5f).OnComplete(() => _visible = true);
     }
 
     private void BuildSequence()
@@ -75,11 +101,28 @@ public class BounceOnConfirm : MonoBehaviour
     }
 
     private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Return))
+    {   
+        if(!_visible) 
+            return;
+
+        if(hideOnPress && _pressed)
+            return;
+
+        if (InputBindingManager.Instance.GetKeyDown(actionType))
         {
             TriggerBounce();
+            _pressed = true;
+
+            if(hideOnPress)
+                Hide();
         }
+    }
+
+    private void Hide()
+    {
+        _hideSequence = DOTween.Sequence();
+
+        _hideSequence.Insert(hideDelay,canvasGroup.DOFade(0,fadeDuration)).OnComplete(() => _visible = false);
     }
 
     public void TriggerBounce()

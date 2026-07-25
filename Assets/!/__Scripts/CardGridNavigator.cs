@@ -32,9 +32,14 @@ public class CardGridNavigator : MonoBehaviour
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private List<GameObject> cards = new();
     [SerializeField] private DescriptionPanelController descriptionPanel;
-    [SerializeField] private TextMeshProUGUI cardName;
     [SerializeField] private CardTitleTooltip titleTooltip;
     [SerializeField] private UIPanelNudge panelNudge;
+    [SerializeField] private TextMeshProUGUI detailsText;
+    [SerializeField] private RectTransform layoutRoot;
+
+    [Header("Key Prompts")]
+    [SerializeField] private List<PromptGameObject> promptObjects;
+
 
     [SerializeField] private int columns = 4;
 
@@ -47,23 +52,46 @@ public class CardGridNavigator : MonoBehaviour
     private int _selectedIndex;
     private bool _isOpen = false;
     private Dictionary<UpgradeBase, UpgradeCardUI> _upgradeCards = new();
+    private readonly Dictionary<KeyPromptType, GameObject> keyPromptLookup = new();
+
+
 
     private void Awake()
     {
+        BuildLookups();
         Close();
     }
 
     private void OnEnable()
     {
         _selectedIndex = 0;
-        //RefreshSelection();
-
         UpgradeCardManager.OnCardPurchased += HandleCardPurchased;
     }
 
     private void OnDisable()
     {
         UpgradeCardManager.OnCardPurchased -= HandleCardPurchased;
+    }
+
+    private void BuildLookups()
+    {
+        keyPromptLookup.Clear();
+
+        foreach (var promptObj in promptObjects)
+        {
+            if (promptObj.obj == null)
+                continue;
+
+            keyPromptLookup[promptObj.keyPrompt] = promptObj.obj;
+        }
+    }
+
+    private void SetAllPromptsActive(bool active)
+    {
+        foreach (var pair in keyPromptLookup)
+        {
+            pair.Value.SetActive(active);
+        }
     }
 
     private void HandleCardPurchased(UpgradeOption upgrade)
@@ -101,7 +129,7 @@ public class CardGridNavigator : MonoBehaviour
 
     private void Update()
     {
-        if(InputBindingManager.Instance.GetKeyDown(openKey) && !_isOpen)
+        if(InputBindingManager.Instance.GetKeyDown(openKey) && !_isOpen && InputFocusManager.CurrentOwner == null)
         {
             Open();
             return;
@@ -141,6 +169,15 @@ public class CardGridNavigator : MonoBehaviour
 
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
             Move(columns);
+
+        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
+        {
+            OpenCardDetails(true);
+        }
+        //else if(!InputBindingManager.Instance.GetKeyUp(InputActionType.Confirm))
+        //{
+        //    OpenCardDetails(false);
+        //}
     }
 
     public void Open()
@@ -161,10 +198,23 @@ public class CardGridNavigator : MonoBehaviour
 
         _selectedIndex = 0;
 
+        SetAllPromptsActive(true);
+
         if(cards.Count == 0) return;
+
+        RebuildCanvas();
 
         ScrollTo(cards[_selectedIndex].GetComponent<RectTransform>());
         RefreshSelection();
+    }
+
+    private void RebuildCanvas()
+    {
+        Canvas.ForceUpdateCanvases();
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(layoutRoot);
+
+        Canvas.ForceUpdateCanvases();
     }
 
 
@@ -184,12 +234,10 @@ public class CardGridNavigator : MonoBehaviour
             .SetEase(Ease.InBack);
 
         _isOpen = false;
+        
+        SetAllPromptsActive(false);
     }
 
-    void CloseImmediate()
-    {
-        _isOpen = false;
-    }
 
     private bool Move(int amount)
     {
@@ -210,6 +258,8 @@ public class CardGridNavigator : MonoBehaviour
 
     private void RefreshSelection()
     {
+        OpenCardDetails(false);
+         
         AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
 
         UpgradeCardUI selectedCardUI = null;
@@ -223,7 +273,6 @@ public class CardGridNavigator : MonoBehaviour
             {
                 selectedCardUI = cardUI;
 
-                cardName.text = cardUI.Option.DisplayName.ToUpper();
                 descriptionPanel.Show($"[<color=#{UIColors.ToHex(UIColors.Yellow)}>${cardUI.Option.Base.Cost.ToString("N0")}</color>] " +
                                         cardUI.GetDescription());
             }
@@ -238,16 +287,6 @@ public class CardGridNavigator : MonoBehaviour
             if(selectedCardUI)
                 titleTooltip.ShowForCard(selectedCardUI.RectTransform, selectedCardUI.Option.DisplayName);
         });
-
-        
-        //StartCoroutine(ShowTooltipNextFrame(selectedCardUI));
-    }
-
-    private IEnumerator ShowTooltipNextFrame(UpgradeCardUI cardUI)
-    {
-        yield return null;
-        Canvas.ForceUpdateCanvases();
-       
     }
 
 
@@ -298,5 +337,30 @@ public class CardGridNavigator : MonoBehaviour
             .DOAnchorPosY(desiredY, 0.2f)
             .SetEase(Ease.OutCubic)
             .OnComplete(() => onComplete?.Invoke());
+    }
+
+    private void OpenCardDetails(bool state)
+    {
+        UpgradeCardUI cardUI = cards[_selectedIndex].GetComponent<UpgradeCardUI>();
+
+        switch(state)
+        {
+            case true:
+                detailsText.text = cardUI.Option.Base.GetDetails();
+                break;
+            case false:
+                detailsText.text = "";
+                break;
+        }
+
+        detailsText.ForceMeshUpdate();
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(
+            detailsText.rectTransform
+        );
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(
+            layoutRoot
+        );
     }
 }

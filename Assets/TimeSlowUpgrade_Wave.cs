@@ -8,7 +8,7 @@ public class TimeSlowUpgrade_Wave : AbilityUpgradeBase
     {
         if (ability is SlowTimeAbility _ability)
         {
-            _ability.EnableExpandingWave();
+            //_ability.EnableExpandingWave();
         }
     }
 

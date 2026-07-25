@@ -15,10 +15,10 @@ public class IntermediateArrowValueSwap: UpgradeBase
 
     public override void Apply()
     {
-        UpgradeManager.Instance.AddTemporaryModifier(
+        StatModifierManager.Instance.AddTemporaryModifier(
             new TempNormalArrowMultiplier(normalArrowMultiplier)
         );
-        UpgradeManager.Instance.AddTemporaryModifier(
+        StatModifierManager.Instance.AddTemporaryModifier(
             new TempCritArrowMultiplier(critArrowMultiplier)
         );
     }

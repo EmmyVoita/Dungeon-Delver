@@ -33,8 +33,19 @@ public class CurrencyManager : MonoBehaviour
     [SerializeField] private TextPopupObject popupPrefab;
     [SerializeField] private float bonusesInterval = 2.0f;
     [SerializeField] private Transform popupTargetSpawnPos;
-
     [SerializeField] private float resetVFXTime = 1f;
+
+
+    [Header("Popup")]
+    [SerializeField] private float popupBatchWindow = 0.15f;
+    [SerializeField] private SoundEffect popupSound;
+    [SerializeField] private RewardStampText stampText;
+
+    private int _pendingPopupAmount;
+    private Coroutine _popupBatchRoutine;
+
+
+
     private float _lastVFXTime;
 
     public int CurrentCurrency { get; private set; }
@@ -83,7 +94,6 @@ public class CurrencyManager : MonoBehaviour
 
         if(silent) return;
 
-        //float playDuration = Mathf.Lerp(minDuration, maxDuration,(float)amount/maxAmount);
 
         // Reset to default visual effect animation when the time between last played exceeds the threshold
         if(Time.time > _lastVFXTime + resetVFXTime)
@@ -97,15 +107,38 @@ public class CurrencyManager : MonoBehaviour
             coinEffect.PlayAccent();
             _lastVFXTime = Time.time;
         }
-        
+
+        QueueCurrencyPopup(amount);
+
+        AudioHelpers.PlaySoundEffect(currencyRewardSound.GetRandom(), transform.position);
+    }
+
+    private void QueueCurrencyPopup(int amount)
+    {
+        _pendingPopupAmount += amount;
+
+        if(_popupBatchRoutine != null)
+            StopCoroutine(_popupBatchRoutine);
+
+        _popupBatchRoutine = StartCoroutine(DisplayPopupAfterWindow());
+    }
+
+    private IEnumerator DisplayPopupAfterWindow()
+    {
+        yield return new WaitForSeconds(popupBatchWindow);
 
         if (popupPrefab != null)
         {
             TextPopupObject popup = Instantiate(popupPrefab, popupTargetSpawnPos.position, Quaternion.identity);
-            popup.Initialize(amount, popupPrefix, popupSuffix);
+            popup.Initialize(_pendingPopupAmount);
+
+            AudioHelpers.PlaySoundEffect(popupSound, popup.transform.position);
         }
 
-        AudioHelpers.PlaySoundEffect(currencyRewardSound.GetRandom(), transform.position);
+        _pendingPopupAmount = 0;
+        _popupBatchRoutine = null;
+
+        
     }
 
     public void AddShopRerolls(int amount, string popupPrefix = null, string popupSuffix = null)
@@ -145,6 +178,7 @@ public class CurrencyManager : MonoBehaviour
     public IEnumerator EndOfRoundSequence()
     {
         AddCurrency(RoundManager.Instance.CurrentLevelReward, "Level Reward");
+        stampText.Play($"Level Cleared!");
 
         yield return new WaitForSeconds(bonusesInterval);
 
@@ -156,7 +190,7 @@ public class CurrencyManager : MonoBehaviour
 
             foreach(var tier in comboRewards)
             {
-                if(RoundManager.Instance.stats.HighestCombo >= tier.comboRequirement)
+                if(RoundManager.Instance.roundStats.HighestCombo >= tier.comboRequirement)
                 {
                     reward = tier.currencyReward;
                     comboRequirement = tier.comboRequirement;
@@ -165,29 +199,34 @@ public class CurrencyManager : MonoBehaviour
 
             if (reward > 0)
             {
-                AddCurrency(reward, $"Combo Bonus x{comboRequirement}");
+                stampText.Play($"Combo x{comboRequirement}");
+                AddCurrency(reward, $"Combo x{comboRequirement}");
                 yield return new WaitForSeconds(bonusesInterval);
             }
         }
       
 
-        if(RoundManager.Instance.stats.PlayerTookNoDamage)
+        if(RoundManager.Instance.roundStats.PlayerTookNoDamage)
         {
-            AddCurrency(tookNoDamage, "Took No Damage");
+            AddCurrency(tookNoDamage, "No Damage");
+            stampText.Play($"No Damage!");
             
             yield return new WaitForSeconds(bonusesInterval);
 
-            AddShopRerolls(tookNoDamageRerolls, "Took No Damage", "Rerolls");
+            AddShopRerolls(tookNoDamageRerolls, "No Damage!", "Rerolls");
             
             yield return new WaitForSeconds(bonusesInterval);
         }
 
 
-        if(RoundManager.Instance.stats.PerfectRound)
+        if(RoundManager.Instance.roundStats.PerfectRound)
         {
             AddCurrency(perfectRound, "Perfect Round");
+            stampText.Play($"Never Missed!");
 
             yield return new WaitForSeconds(bonusesInterval);
         }
+
+        stampText.Hide();
     }
 }

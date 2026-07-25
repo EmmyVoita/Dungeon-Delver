@@ -8,7 +8,6 @@ public class CritsHealAbility : AbilityBase
     public int startRequirement = 3;
     public int requirementStep = 1;
     public float duration = 5f;
-    public SoundEffect deactivateSound;
     private int _critsCounter = 0;
     private int _currentRequiredCrits;
     public Material fillBarMaterial;
@@ -52,6 +51,8 @@ public class CritsHealAbility : AbilityBase
 
     public override void Activate(Quaternion rotation)
     {
+        //duration *= durationModifier;
+        
         _critsCounter = 0;
         _currentRequiredCrits = startRequirement;
         backSprite.color = Color.white;
@@ -63,11 +64,11 @@ public class CritsHealAbility : AbilityBase
     {
         ArrowBase.OnArrowResolved += HandleArrowResolved;
 
-        AudioHelpers.PlaySoundEffect(activateSound, Player.Instance.transform.position);
+        AudioHelpers.PlaySoundEffect(Data.activationSound, Player.Instance.transform.position);
 
         yield return new WaitForSeconds(duration);
 
-        AudioHelpers.PlaySoundEffect(deactivateSound, Player.Instance.transform.position);
+        AudioHelpers.PlaySoundEffect(Data.deactivateSound, Player.Instance.transform.position);
         
         ArrowBase.OnArrowResolved -= HandleArrowResolved;
 

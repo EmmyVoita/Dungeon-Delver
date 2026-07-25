@@ -66,7 +66,7 @@ public class RoundManager : MonoBehaviour
 
     [Header("Runtime")]
   
-    public RoundStatsTracker stats;
+    public RoundStatsTracker roundStats;
     public RunStatsTracker runStats;
   
 
@@ -101,6 +101,8 @@ public class RoundManager : MonoBehaviour
     {
         UpgradeCardManager.UpgradeSelectionComplete += SetupAndStartRound;
         GameStateManager.OnStateChanged += HandleStateChanged;
+       
+
     }
 
     private void OnDisable()
@@ -111,6 +113,7 @@ public class RoundManager : MonoBehaviour
 
     private void Awake()
     {
+       
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -123,8 +126,18 @@ public class RoundManager : MonoBehaviour
         _currentLevelIndex = 0;
         _currentStageIndex = 0;
         _currentLevel = 0;
+
         
-        stats.Reset();
+        
+        
+    }
+
+    private void Start()
+    {
+        runStats = ScoreManager.Instance.RunStatsTracker;
+        roundStats = ScoreManager.Instance.RoundStatsTracker;
+        
+        roundStats.Reset();
         runStats.ResetRun();
         runStats.PrintStats();
     }
@@ -153,6 +166,11 @@ public class RoundManager : MonoBehaviour
                 return;
         #endif  
 
+        if(newState == GameState.DeathSequence)
+        {
+            //runStats.AddRound(stats);
+        }
+
         if(newState == GameState.RunLoad && ObstacleManager.Instance.TestOn != true)
         {
             StartStage(_currentStageIndex);
@@ -177,7 +195,7 @@ public class RoundManager : MonoBehaviour
 
         if(newState == GameState.GameOverTally)
         {
-            runStats.AddRound(stats);
+            runStats.AddRound(roundStats);
         }
     }
 
@@ -193,7 +211,7 @@ public class RoundManager : MonoBehaviour
             yield break;
         }
 
-        stats.Reset();
+        roundStats.Reset();
         runStats.ResetRun();
 
         CountdownUI.Instance.BeginCountdown(() =>
@@ -344,7 +362,7 @@ public class RoundManager : MonoBehaviour
         OnRoundStart?.Invoke();
 
         // Reset stats for the new round
-        stats.Reset();
+        roundStats.Reset();
 
         StageDataObject stage = stages[_currentStageIndex];
 
@@ -439,7 +457,7 @@ public class RoundManager : MonoBehaviour
         yield return StartCoroutine(HandleEndOfRoundTally());
         yield return StartCoroutine(CurrencyManager.Instance.EndOfRoundSequence());
 
-        runStats.AddRound(stats);
+        runStats.AddRound(roundStats);
 
         _currentLevelIndex++;
         _currentLevel++;

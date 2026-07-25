@@ -18,6 +18,7 @@ public class ScoreManager : MonoBehaviour
     [SerializeField] private int highScore;
     [SerializeField] private int totalScore;
     [SerializeField] private RunStatsTracker runStats;
+    [SerializeField] private RoundStatsTracker roundStats;
     public float abilityChargeScorePerUnit = 500f;
 
     private Dictionary<ScoreSource, int> breakdown = new();
@@ -31,6 +32,8 @@ public class ScoreManager : MonoBehaviour
     public int RoundScoreTotal => CalculateTotalScore();
     public int RunScoreTotal => runStats.TotalScore;
     public SaveData SaveData => saveData;
+    public RunStatsTracker RunStatsTracker => runStats;
+    public RoundStatsTracker RoundStatsTracker => roundStats;
 
     private void OnEnable()
     {
@@ -114,8 +117,9 @@ public class ScoreManager : MonoBehaviour
 
     public int AddScore(int amount, ScoreSource source)
     {
-        float multiplier = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(1f);
-        int adjustedAmount = Mathf.RoundToInt(amount * multiplier);
+        //float multiplier = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(1f);
+        //int adjustedAmount = Mathf.RoundToInt(amount * multiplier);
+        int adjustedAmount = Mathf.RoundToInt(amount);
 
         currentScore += Mathf.RoundToInt(adjustedAmount);
         OnScoreUpdated?.Invoke(currentScore);
@@ -231,7 +235,6 @@ public class ScoreManager : MonoBehaviour
 
             records.Add(new UpgradeRecord
             {
-                upgradeId = key.upgradeId,
                 upgradeName = key.displayName,
                 count = val
             });

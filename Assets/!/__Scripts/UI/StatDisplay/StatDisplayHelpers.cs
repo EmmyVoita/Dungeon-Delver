@@ -34,10 +34,17 @@ public static class StatDisplayHelpers
 
     public static StatValue ResolveStatValue(StatRowData data)
     {
-        if(RoundManager.Instance == null || ScoreManager.Instance == null)
+        if(RoundManager.Instance == null || 
+           ScoreManager.Instance == null || 
+           Player.Instance == null || 
+           CurrencyManager.Instance == null ||
+           RoundManager.Instance.runStats == null ||
+           RoundManager.Instance.roundStats == null
+           )
         {
             Debug.LogError("Score Manager or Round Manager Instance can not be null when evaluating display stat for UI");
         }
+
 
         switch (data.statValueType)
         {
@@ -47,8 +54,8 @@ public static class StatDisplayHelpers
                 );
             case StatValueType.Hits:
                 return StatValue.FromRatio(
-                    RoundManager.Instance.stats.Hit,
-                    RoundManager.Instance.stats.Spawned
+                    RoundManager.Instance.roundStats.Hit,
+                    RoundManager.Instance.roundStats.Spawned
                 );
             case StatValueType.RunHits:
                 return StatValue.FromRatio(
@@ -56,9 +63,17 @@ public static class StatDisplayHelpers
                     RoundManager.Instance.runStats.TotalSpawned
                 );
             case StatValueType.RunTotalScore:
-                return StatValue.FromInt(
-                    ScoreManager.Instance.RunScoreTotal
-                );
+                {
+                    Debug.Log($"Entered RunTotalScore case. Data: {data.statValueType}");
+                    Debug.Log($"ScoreManager.Instance: {ScoreManager.Instance}");
+                    Debug.Log("About to read RunScoreTotal");
+
+                    int runScoreTotal = ScoreManager.Instance.RunScoreTotal;
+
+                    Debug.Log($"Successfully read RunScoreTotal: {runScoreTotal}");
+
+                    return StatValue.FromInt(runScoreTotal);
+                }
             case StatValueType.RunHighestCombo:
                 return StatValue.FromInt(
                     RoundManager.Instance.runStats.HighestCombo
@@ -82,11 +97,11 @@ public static class StatDisplayHelpers
                 );
             case StatValueType.DamageTaken:
                 return StatValue.FromInt(
-                    RoundManager.Instance.stats.DamageTaken
+                    RoundManager.Instance.roundStats.DamageTaken
                 );
             case StatValueType.RoundScore:
                 return StatValue.FromInt(
-                    RoundManager.Instance.stats.Score
+                    RoundManager.Instance.roundStats.Score
                 );
             case StatValueType.Currency:
                 return StatValue.FromInt(

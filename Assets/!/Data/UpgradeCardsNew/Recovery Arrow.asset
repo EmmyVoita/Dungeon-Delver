@@ -15,6 +15,9 @@ MonoBehaviour:
   _cost: 1000
   _maxStacks: 999
   upgradeId: recoveryarrow
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 0}
   icon: {fileID: 21300000, guid: 8d342c555a1c05b43bc0414905e098ec, type: 3}
   iconMaterial: {fileID: 2100000, guid: 8b3fb34896e326c4a8fb58bd5ad01864, type: 2}
   displayName: Recovery Arrow
@@ -22,6 +25,7 @@ MonoBehaviour:
   descriptionTemplate: Once per level, taking damage spawns a <color=#9C27B0>recovery</color>
     arrow. Critting it restores <color=#00E676>{RECOVERY_PERCENTAGE}</color> of the
     broken combo
+  detailsTemplate: 
   minComboRequired: 5
   recoveryArrowsGranted: 1
   recoveryPercentage: 0.5

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a67f260796153845afd974335fad89e, type: 3}
+  m_Name: Dragon's Greed
+  m_EditorClassIdentifier: Assembly-CSharp::MoneyDiscountsAbilityCost
+  _cost: 0
+  _maxStacks: 999
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: f7b70b363143acc4ba428af473fac7e6, type: 3}
+  icon: {fileID: 21300000, guid: 2d443a82efa21944b87283be14f7a267, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Hoarder's Cache
+  descriptionTemplate: 'For every {CURRENCY_STEP} currency you have, decrease your
+    ability cost by {ABILITY_COST_AMOUNT}. '
+  detailsTemplate: This upgrade stacks. Your ability cost can not be reduced below
+    10 by this or any combination of upgrades.
+  currencyStep: 500
+  abilityCostAmount: 1

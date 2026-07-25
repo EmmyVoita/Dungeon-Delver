@@ -23,7 +23,7 @@ public class HealOptionUI : MonoBehaviour
         {
             if (Player.Instance.Health < Player.Instance.MaxHealth)
             {
-                healOptionText.text = $"Skip [<color=#FFD700>{InputBindingManager.Instance.GetKeyName(InputActionType.Jump)}</color>] and Heal for 1 health";
+                healOptionText.text = $"Skip [<color=#FFD700>{InputBindingManager.Instance.GetBoundKey(InputActionType.Jump)}</color>] and Heal for 1 health";
             }
             else
             {

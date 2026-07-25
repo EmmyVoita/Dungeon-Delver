@@ -12093,6 +12093,7 @@ MonoBehaviour:
   highScore: 0
   totalScore: 0
   runStats: {fileID: 0}
+  roundStats: {fileID: 0}
   abilityChargeScorePerUnit: 500
 --- !u!4 &697066780
 Transform:
@@ -16618,12 +16619,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3fd664ac5bf93248871b4708bed30e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TextTypewriter
-  beginDelay: 0.5
   textComponent: {fileID: 916688439}
-  fullText: 
-  typeSpeed: 0.015
+  beginDelay: 0.5
+  charactersPerSecond: 100
   castToUpperCase: 0
-  typeSound: {fileID: 8300000, guid: 60fe3dd723d4ea44ea3fe2210626b836, type: 3}
   enableWiggle: 0
   wiggleAmplitude: 5
   wiggleSpeed: 4
@@ -16678,8 +16677,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 32
-  m_fontSizeBase: 32
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

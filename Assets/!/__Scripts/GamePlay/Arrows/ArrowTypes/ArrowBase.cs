@@ -19,14 +19,18 @@ public abstract class ArrowBase : MonoBehaviour
     [SerializeField] private bool flip180 = false;
     [SerializeField] private SpriteRenderer sRend;
     [SerializeField] private Material baseMaterial;
-    [SerializeField] private string colorApropertyName = "_ColorA";
-    [SerializeField] private string colorBpropertyName = "_ColorB";
+    [SerializeField] protected string colorApropertyName = "_ColorA";
+    [SerializeField] protected string colorBpropertyName = "_ColorB";
 
     [Header("Flag Colors")]
-    [ColorUsage(true, true)][SerializeField] private Color goldenColorA;
-    [ColorUsage(true, true)][SerializeField] private Color goldenColorB;
-    [ColorUsage(true, true)][SerializeField] private Color recoveryColorA;
-    [ColorUsage(true, true)][SerializeField] private Color recoveryColorB;
+    [ColorUsage(true, true)][SerializeField] protected Color goldenColorA;
+    [ColorUsage(true, true)][SerializeField] protected Color goldenColorB;
+    [ColorUsage(true, true)][SerializeField] protected Color recoveryColorA;
+    [ColorUsage(true, true)][SerializeField] protected Color recoveryColorB;
+
+    [Header("Slow Flag")]
+    [SerializeField] private float slowFactor = 0.7f;
+    [SerializeField] private float slowDuration = 2f;
 
 
 
@@ -55,11 +59,12 @@ public abstract class ArrowBase : MonoBehaviour
     protected Vector2 _startPos;
     protected Vector2 _endPos;
     private ArrowType _arrowType = ArrowType.Normal;
-    private Material runTimeMaterial;
+    protected Material runTimeMaterial;
 
 
     public bool IsGolden => _status.HasFlag(ArrowStatus.Golden);
     public bool IsRecoveryArrow => _status.HasFlag(ArrowStatus.Recovery);
+    public bool IsTimeSlowArrow => _status.HasFlag(ArrowStatus.TimeSlow);
     public bool Invincible => _invincible;
     public ArrowCatchRule CatchRule => catchRule;
     public bool IsInverse => catchRule == ArrowCatchRule.Avoid;
@@ -157,6 +162,7 @@ public abstract class ArrowBase : MonoBehaviour
 
         if (health <= 0f)
             Die(goalType, hitDirection: hitDirection);
+
     }
 
     public virtual void KillArrow(Goal.GoalType goalType = Goal.GoalType.Miss, bool playKillEffect = false)
@@ -199,6 +205,20 @@ public abstract class ArrowBase : MonoBehaviour
             };
             
             OnArrowResolved?.Invoke(data);  
+        }
+
+        // Recovery Arrows only heal when caught critically.
+        if (goalType == Goal.GoalType.Critical &&
+            HasStatus(ArrowStatus.Recovery))
+        {
+            Player.Instance.HealPlayer(1);
+        }
+
+        if (goalType == Goal.GoalType.Critical &&
+            HasStatus(ArrowStatus.TimeSlow))
+        {
+            TimeScaleModifier timeMod = new TimeScaleModifier("TimeSlowArrow", slowFactor);
+            TimeManager.Instance.AddTemporaryModifier(timeMod, slowDuration);
         }
 
 
@@ -285,7 +305,7 @@ public abstract class ArrowBase : MonoBehaviour
         _arrowType = ArrowType.Editor;
     }
 
-    public void SetRecoveryArrow()
+    public virtual void SetRecoveryArrow()
     {
         AddStatus(ArrowStatus.Recovery);
 
@@ -296,15 +316,29 @@ public abstract class ArrowBase : MonoBehaviour
         runTimeMaterial.SetColor(colorBpropertyName, recoveryColorB);
     }
 
-    public void SetGolden()
+    public virtual void SetTimeSlowArrow()
+    {
+        AddStatus(ArrowStatus.TimeSlow);
+
+        if(!runTimeMaterial) 
+            return;
+
+        runTimeMaterial.SetColor(colorApropertyName, Color.blue);
+        runTimeMaterial.SetColor(colorBpropertyName, Color.purple);
+    }
+
+    public virtual void SetGolden()
     {
         AddStatus(ArrowStatus.Golden);
         
         if(!runTimeMaterial) 
             return;
 
-        runTimeMaterial.SetColor(colorApropertyName, goldenColorA);
-        runTimeMaterial.SetColor(colorBpropertyName, goldenColorB);
+        if(!HasStatus(ArrowStatus.Recovery) && !HasStatus(ArrowStatus.TimeSlow))
+        {
+            runTimeMaterial.SetColor(colorApropertyName, goldenColorA);
+            runTimeMaterial.SetColor(colorBpropertyName, goldenColorB);
+        }
     }
 
 

@@ -117,7 +117,7 @@ public class ObstacleTutorialUI : MonoBehaviour
     {
         
 
-        string keyName = InputBindingManager.Instance.GetKeyName(InputActionType.Jump).ToString();
+        string keyName = InputBindingManager.Instance.GetBoundKey(InputActionType.Jump).ToString();
         typewriter.StartTyping($"Hold [{keyName}] to jump");
 
         yield return new WaitForSeconds(textDisplayTime);

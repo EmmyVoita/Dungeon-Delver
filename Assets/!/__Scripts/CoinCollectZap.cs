@@ -40,8 +40,18 @@ public class CoinCollectZap : ICoinCollectEffect
         return true;
     }
 
-    public ICoinCollectEffect Clone()
+    public IRuntimeModifier Clone()
     {
         return new CoinCollectZap(_currencyRequired, _preventComboBreak, _zapRadius, _zapChance);
+    }
+
+    public void OnDestroy()
+    {
+        
+    }
+
+    public void OnActivate()
+    {
+        
     }
 }

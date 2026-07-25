@@ -10,7 +10,7 @@ public class IntermediateGoldenWave : UpgradeBase
 
     public override void Apply()
     {
-        UpgradeManager.Instance.AddTemporaryModifier(
+        StatModifierManager.Instance.AddTemporaryModifier(
             new GoldenWaveListener()
         );
     }

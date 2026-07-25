@@ -28,6 +28,7 @@ public class RandomQuestionAbility : AbilityBase
 
     public override void Activate(Quaternion rotation)
     {
+        
         if (questionActive || questions.Count == 0)
             return;
 

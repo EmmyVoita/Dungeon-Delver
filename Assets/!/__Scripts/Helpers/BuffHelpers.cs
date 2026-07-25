@@ -42,7 +42,21 @@ public static class BuffHelpers
             effect.AddArrows(addAmount);
         }
 
+        return effect;
+    }
 
+    public static TimeSlowArrowBuff GetOrCreateTimeSlowArrow(int addAmount)
+    {
+        var effect = ArrowEffectManager.Instance.GetEffect<TimeSlowArrowBuff>();
+        if (effect == null)
+        {
+            effect = new TimeSlowArrowBuff(addAmount);
+            ArrowEffectManager.Instance.AddOrExtend(effect);
+        }
+        else
+        {
+            effect.AddArrows(addAmount);
+        }
 
         return effect;
     }

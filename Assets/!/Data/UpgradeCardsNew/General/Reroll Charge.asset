@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fa28d592a2842f4abaaf3d7c3fa697e, type: 3}
+  m_Name: Reroll Charge
+  m_EditorClassIdentifier: 
+  _cost: 100
+  _maxStacks: 999
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 5b25c990c25c5764f9cd50f29fb651bd, type: 3}
+  icon: {fileID: 21300000, guid: 98a892239d937c34babc9fedacb8b054, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Second Roll
+  descriptionTemplate: Gain <color=#00E676>{REFRESH_AMOUNT}</color> card rerolls.
+  detailsTemplate: 
+  refreshAmount: 3
