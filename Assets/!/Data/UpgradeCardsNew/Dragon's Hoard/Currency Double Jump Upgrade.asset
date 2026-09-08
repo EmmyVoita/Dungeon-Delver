@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cb395787c1f1554d9ff9045fe52b7af, type: 3}
+  m_Name: Currency Double Jump Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::CurrencyDoubleJumpUpgrade
+  upgradeId: df311ca8-66bb-4b5b-a423-1779fa0dc831
+  category: 2
+  requiredUpgrades: []
+  baseOfferWeight: 1
+  _cost: 200
+  _maxStacks: 1
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 96111246cfe06c847be88a1820bd54e1, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Fortune's Flight
+  descriptionTemplate: During challenges you can {DJ} at the cost of {CURRENCY_AMOUNT}.
+  detailsTemplate: This upgrade does not stack. This only applies to challenges where
+    you jump. You can not change direction when you double jump.
+  currencyStep: 500
+  weightPerCurrencyStep: 0.5
+  maximumCurrencyWeightBonus: 1.5
+  currencySynergyUpgrades: []
+  weightPerSynergyStack: 0.5
+  currencyAmount: 25

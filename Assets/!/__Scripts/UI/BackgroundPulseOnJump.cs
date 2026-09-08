@@ -31,11 +31,11 @@ public class BackgroundPulseOnJump : MonoBehaviour
         Player.OnJumped -= HandleJump;
     }
 
-    void HandleJump(Vector2 dir)
+    void HandleJump(JumpData data)
     {
         if (!canGrow) return;
 
-        if(dir == Vector2.right) return;
+        if(data.Direction == Vector2.right) return;
 
         // Increase scale smoothly
         currentScale += Vector3.one * growAmount;

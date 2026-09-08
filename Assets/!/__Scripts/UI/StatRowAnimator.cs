@@ -18,13 +18,17 @@ public class StatRowAnimator : MonoBehaviour
     public float punchScale = 1.05f;
     public float punchDuration = 0.25f;
 
-    [SerializeField]private CanvasGroup cg;
-    private RectTransform rt;
+    [SerializeField] private CanvasGroup cg;
+    [SerializeField] private RectTransform rt;
     private Vector2 originalPos;
 
     private void Awake()
-    {
-        rt = transform as RectTransform;
+    {   
+        if(rt == null)
+        {
+            rt = transform as RectTransform;
+        }
+        
 
         if(cg == null)
         {
@@ -39,7 +43,11 @@ public class StatRowAnimator : MonoBehaviour
 
     public void PlayIntro()
     {
+         //Debug.LogError("Play Intro");
         float direction = slideFromLeft ? -1f : 1f;
+
+        rt.DOKill();
+        cg.DOKill();
 
         AudioHelpers.PlayMyClipAtPoint(slideInSound, AudioChannel.SFX, Camera.main.transform.position);
 
@@ -48,42 +56,47 @@ public class StatRowAnimator : MonoBehaviour
         cg.alpha = 0;
 
         // Slide to the real position
-        rt.DOAnchorPos(originalPos, slideDuration)
-          .SetEase(slideEase);
+        rt.DOAnchorPos(originalPos, slideDuration).SetEase(slideEase);
 
         // Fade in
-        cg.DOFade(1f, fadeDuration);
+        cg.alpha = 1;
+        // /cg.DOFade(1f, fadeDuration).SetUpdate(true);
 
         // Little scale bounce
         if (useScalePunch)
         {
             rt.localScale = Vector3.one;
-            rt.DOPunchScale(Vector3.one * (punchScale - 1f), punchDuration, 8, 0.8f);
+            rt.DOPunchScale(Vector3.one * (punchScale - 1f), punchDuration, 8, 0.8f).SetUpdate(true);
         }
     }
 
     public void SnapToFinal()
     {
+        Debug.LogError("Snap To Final");
         rt.anchoredPosition = originalPos;
         cg.alpha = 1f;
     }
 
     public void PlayOutro()
     {
+        Debug.LogError("Playing Outro");
         float direction = slideFromLeft ? 1f : -1f;
+
+        rt.DOKill();
+        cg.DOKill();
 
         // Slide offscreen
         rt.DOAnchorPos(originalPos + new Vector2(slideOffset * direction, 0), slideDuration)
           .SetEase(slideEase);
 
         // Fade out
-        cg.DOFade(0f, fadeDuration);
+        cg.DOFade(0f, fadeDuration).SetUpdate(true);
 
         // Little scale bounce
         if (useScalePunch)
         {
             rt.localScale = Vector3.one;
-            rt.DOPunchScale(Vector3.one * (punchScale - 1f), punchDuration, 8, 0.8f);
+            rt.DOPunchScale(Vector3.one * (punchScale - 1f), punchDuration, 8, 0.8f).SetUpdate(true);
         }
     }
 }

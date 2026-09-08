@@ -14,10 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilityType: 9
   baseCost: 20
-  scoreRequirement: 10000
+  scoreRequirement: 99999999
+  baseDuration: 0
   abilityName: Bloom Shroom
   description: 'Temporarily increases the size of your goal '
   iconData: {fileID: 11400000, guid: 74bd620a6ca6a0e4095b17e0ae5b0541, type: 2}
   cardBackground: {fileID: 0}
   iconScale: 2.25
-  abilityPrefab: {fileID: 4942007064134541510, guid: f812d426350ca3b48889f29d0044ef3b, type: 3}
+  activationSound:
+    clip: {fileID: 0}
+    channel: 0
+    volume: 0
+    pitch: 0
+    pitchVariation: 0
+  deactivateSound:
+    clip: {fileID: 0}
+    channel: 0
+    volume: 0
+    pitch: 0
+    pitchVariation: 0
+  abilityPrefab: {fileID: 0}

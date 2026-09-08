@@ -68,11 +68,10 @@ public class SettingsTabManager : MonoBehaviour
     /// </summary>
     public void MoveTab(int dir)
     {
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
-        
         int newTab = Mathf.Clamp(currentTab + dir, 0, tabs.Count - 1);
         if (newTab != currentTab)
         {
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             currentTab = newTab;
             ActivateTab(currentTab);
         }

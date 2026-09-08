@@ -69,10 +69,13 @@ public class MenuMusicPlayer : MonoBehaviour
 
     private void HandleVolumeUpdated()
     {
-        if (source != null)
-        {
-            source.volume = AudioSettingsManager.Instance.musicVolume;
-        }
+        if (source == null)
+            return;
+
+        fadeTween?.Kill();
+        fadeTween = null;
+
+        source.volume = AudioSettingsManager.GetVolume(AudioChannel.Music);
     }
 
     private void HandleStateChanged(GameState previousState,GameState newState)
@@ -127,7 +130,7 @@ public class MenuMusicPlayer : MonoBehaviour
         fadeTween = DOTween.To(
             () => source.volume,
             v => source.volume = v,
-            AudioSettingsManager.Instance.musicVolume,
+            AudioSettingsManager.GetVolume(AudioChannel.Music),
             fadeInDuration
         );
     }

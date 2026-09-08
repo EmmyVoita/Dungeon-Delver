@@ -7,11 +7,18 @@ public class DamageChallengeUpgrade : UpgradeBase, IDamageModifier
     [SerializeField] private int additionalDamage = 1;
     [SerializeField] private int currencyAmount = 5000;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
-            .Replace("{ADDITIONAL_DAMAGE}", $"<color=#{UIColors.ToHex(UIColors.Red)}>{additionalDamage}</color>")
-            .Replace("{CURRENCY_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{currencyAmount}</color>");
+            .Replace("{DAMAGE}", $"<color=#{UIColors.ToHex(UIColors.Red)}>{additionalDamage}</color>")
+            .Replace("{CURRENCY_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>${currencyAmount}</color>");
+    }
+
+    public override string GetDetails()
+    {
+        return detailsTemplate
+            .Replace("{DAMAGE}", $"<color=#{UIColors.ToHex(UIColors.Red)}>{additionalDamage}</color>")
+            .Replace("{CURRENCY_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>${currencyAmount}</color>");
     }
 
     public override void Apply()

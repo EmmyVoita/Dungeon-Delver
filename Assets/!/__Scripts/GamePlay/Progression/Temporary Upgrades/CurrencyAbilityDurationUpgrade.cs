@@ -1,16 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(
-    menuName = "Intermediate Effects/Ability Duration Upgrade")]
-public class CurrencyAbilityDurationUpgrade : UpgradeBase
+[CreateAssetMenu(menuName = "Intermediate Effects/Ability Duration Upgrade")]
+public class CurrencyAbilityDurationUpgrade : CurrencyWeightedUpgradeBase
 {
-    [SerializeField, Min(1)]
-    private int currencyStep = 200;
-
     [SerializeField, Min(.1f)]
     private float abilityDurationMod = 1.1f;
 
-    public override string GetDescription()
+
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace(
@@ -18,7 +16,7 @@ public class CurrencyAbilityDurationUpgrade : UpgradeBase
                 $"<color=#{UIColors.ToHex(UIColors.Green)}>{(abilityDurationMod- 1):P0}</color>")
             .Replace(
                 "{CURRENCY_STEP}",
-                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{currencyStep:N0}</color>");
+                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>");
     }
 
     public override string GetDetails()
@@ -29,7 +27,7 @@ public class CurrencyAbilityDurationUpgrade : UpgradeBase
                 $"<color=#{UIColors.ToHex(UIColors.Green)}>{(1.0f-abilityDurationMod):P0}</color>")
             .Replace(
                 "{CURRENCY_STEP}",
-                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{currencyStep:N0}</color>");
+                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>");
     }
 
     public override void Apply()
@@ -37,7 +35,7 @@ public class CurrencyAbilityDurationUpgrade : UpgradeBase
         AbilityDurationManager.Instance.RegisterPermanent(
             new CurrencyAbilityDurationModifier(
                 currencyStep,
-                abilityDurationMod));
+                abilityDurationMod), this);
         
     }
 }

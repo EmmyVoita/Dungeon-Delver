@@ -193,6 +193,10 @@ MonoBehaviour:
   moveDuration: 0.12
   scaleAmount: 0.15
   rotationAmount: 8
+  canvasGroup: {fileID: 0}
+  hideOnPress: 0
+  hideDelay: 1
+  fadeDuration: 1
 --- !u!1 &1956526663420897133
 GameObject:
   m_ObjectHideFlags: 0
@@ -237,9 +241,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3da55463a36a704cbb067cc69d9ff88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
-  registerWithManager: 0
+  registerWithManager: 1
   priority: 1
   controlMode: 2
+  addCanvasPopup: 0
   listenForBossActive: 0
   lifetimeMode: 1
   switchPlayerState: 0
@@ -249,13 +254,13 @@ MonoBehaviour:
   shootSoundEffect:
     clip: {fileID: 8300000, guid: 35f2087f655e83240b4bfa7e50a59852, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   spawnDistance: 7
   spawnInterval: 2.5
   spawnCount: 6
+  fireAction: 6
   minFireDelay: 0.25
   unregisterDelay: 18
   directions:
@@ -449,6 +454,7 @@ MonoBehaviour:
   registerWithManager: 1
   priority: 0
   controlMode: 2
+  addCanvasPopup: 1
   listenForBossActive: 0
   lifetimeMode: 0
   switchPlayerState: 1
@@ -458,13 +464,13 @@ MonoBehaviour:
   shootSoundEffect:
     clip: {fileID: 8300000, guid: 35f2087f655e83240b4bfa7e50a59852, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   spawnDistance: 7
   spawnInterval: 1.5
   spawnCount: 1
+  fireAction: 6
   minFireDelay: 0.1
   unregisterDelay: 22
   directions:

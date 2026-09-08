@@ -176,10 +176,10 @@ public class RoundStatsUI : MonoBehaviour
         switch (data.statValueType)
         {
             case StatValueType.TotalScore:
-                return new Vector2Int(ScoreManager.Instance.RoundScoreTotal, -1);
+                return new Vector2Int(ScoreManager.Instance.RoundScore, -1);
 
             case StatValueType.Hits:
-                return new Vector2Int(RoundManager.Instance.roundStats.Hit, RoundManager.Instance.roundStats.Spawned);
+                return new Vector2Int(ScoreManager.Instance.RoundStatsTracker.Hit, ScoreManager.Instance.RoundStatsTracker.Spawned);
 
             default:
                 return Vector2Int.zero;
@@ -202,6 +202,7 @@ public class RoundStatsUI : MonoBehaviour
 
     private IEnumerator PlayBreakdownIntros()
     {
+        /*
         var breakdown = ScoreManager.Instance.GetBreakdown();
 
         for(int i = 0; i < breakdownRowAnimators.Count; i++)
@@ -228,10 +229,11 @@ public class RoundStatsUI : MonoBehaviour
 
             yield return StartCoroutine(WaitOrSkip(individualDisplayDelay));
         }
+        */
 
         if (skipRequested)
         {
-            var roundAccuracy = RoundManager.Instance.roundStats.RoundAccuracy;
+            var roundAccuracy = ScoreManager.Instance.RoundStatsTracker.RoundAccuracy;
             RatingDisplayData chosenImageData = GetRatingForAccuracy(roundAccuracy);
 
             ratingTextObject.text = chosenImageData.ratingText;
@@ -255,7 +257,7 @@ public class RoundStatsUI : MonoBehaviour
             }
 
             // Snap rating instantly
-            var chosenData = GetRatingForAccuracy(RoundManager.Instance.roundStats.RoundAccuracy);
+            var chosenData = GetRatingForAccuracy(ScoreManager.Instance.RoundStatsTracker.RoundAccuracy);
             ratingPresenter.ShowRating(chosenData);
 
             yield break; // ← IMPORTANT
@@ -266,7 +268,7 @@ public class RoundStatsUI : MonoBehaviour
 
     private IEnumerator PlayRatingImageIntro()
     {
-        var roundAccuracy = RoundManager.Instance.roundStats.RoundAccuracy;
+        var roundAccuracy = ScoreManager.Instance.RoundStatsTracker.RoundAccuracy;
         RatingDisplayData chosenData = GetRatingForAccuracy(roundAccuracy);
 
         ratingPresenter.ShowRating(chosenData);

@@ -24,6 +24,7 @@ public class MainMenuOption : MonoBehaviour,
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        //Debug.LogError("POINTER ENTER");
         if(MenuManager.Instance.ActiveMenuLocked) return;
 
         // Ignore if keyboard mode active
@@ -52,10 +53,10 @@ public class MainMenuOption : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        //Debug.LogError("ON POINTER CLICKED");
         if(MenuManager.Instance.ActiveMenuLocked) return;
         
-        if (InputModeManager.Instance.CurrentMode
-            != InputModeManager.InputMode.Mouse)
+        if (InputModeManager.Instance.CurrentMode != InputModeManager.InputMode.Mouse)
             return;
 
         AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);

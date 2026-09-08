@@ -79,8 +79,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IdleHover
   enableHover: 1
   enableSway: 1
-  enableScoreJump: 0
-  scaleOnJump: 0
   hoverAmplitude: 0.1
   hoverDuration: 2
   swayX: 0
@@ -92,13 +90,6 @@ MonoBehaviour:
   swayDurationX: 2.5
   swayDurationY: 2.5
   swayDurationZ: 2.5
-  shakeDuration: 0.15
-  shakeStrength: 4
-  shakeVibrato: 10
-  jumpStrength: 20
-  jumpDuration: 0.25
-  jumpScaleAmount: 1.4
-  jumpTargetTransform: {fileID: 0}
   randomStartDelayMax: 0.5
   durationVariance: 0.3
   amplitudeVariance: 0.05
@@ -179,8 +170,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 366268737
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 2c5be3ee681191a4ea36cad122cc7aa4, type: 3}
@@ -270,8 +261,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 366268737
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -1719256011, guid: 66f54f25104636945a24e51ba1e5169f, type: 3}
@@ -330,9 +321,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f982b47cd14554946806ef89e9b989e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldNodeView
-  sRend: {fileID: 6464725563356424662}
+  randomZOffset: 15
+  nodeImage: {fileID: 0}
   bossIcon: {fileID: 848986584897797487}
-  normalSprite: {fileID: 21300000, guid: 4789338f28a8c854f927e1b5652d7e56, type: 3}
+  normalSprite: {fileID: 931512712, guid: 6732bdcfb8e4cee4dbd494330f5b2f6c, type: 3}
+  completedNormalSprite: {fileID: -1948137603, guid: 6732bdcfb8e4cee4dbd494330f5b2f6c, type: 3}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
   bossSprite: {fileID: 21300000, guid: 4f0c995b15b8c6c4fbb2c62ceef60da6, type: 3}
-  normalColor: {r: 0.79215693, g: 0.9686275, b: 0.9490197, a: 1}
+  completedBossSprite: {fileID: 21300000, guid: 4f0c995b15b8c6c4fbb2c62ceef60da6, type: 3}
   bossColor: {r: 1, g: 1, b: 1, a: 1}
+  animateCompletedNodes: 1
+  popStartScale: 0.65
+  popOvershootScale: 1.2
+  popUpDuration: 0.16
+  settleDuration: 0.12
+  delayPerNode: 0.04

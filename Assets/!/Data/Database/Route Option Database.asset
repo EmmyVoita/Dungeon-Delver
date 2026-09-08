@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6074c5f3b76d5c14c8b0264fde4d0b5e, type: 3}
+  m_Name: Route Option Database
+  m_EditorClassIdentifier: Assembly-CSharp::RouteOptionDatabase
+  routeOptions:
+  - type: 9
+    icon: {fileID: 21300000, guid: d9c23de972c3d094a8f45770f957f53d, type: 3}
+    displayName: Pick Free Card
+    description: Pick a free card from a selection of 3.
+  - type: 6
+    icon: {fileID: 21300000, guid: b06aa62779871dc4aa741a0c4b86c36a, type: 3}
+    displayName: Defense Shop
+    description: Shop with defensive cards such as those that prevent damage
+  - type: 8
+    icon: {fileID: 21300000, guid: 02c7733595393514aa1fbadb45e3730e, type: 3}
+    displayName: Duplicate Card
+    description: Duplicate any card that is below their max stack count.
+  - type: 4
+    icon: {fileID: 21300000, guid: 2d443a82efa21944b87283be14f7a267, type: 3}
+    displayName: Currency Shop
+    description: Shop with cards that grant or help you generate currency
+  - type: 5
+    icon: {fileID: 21300000, guid: cec36a956f014484896a99c7c7e5e04a, type: 3}
+    displayName: General Shop
+    description: A general shop containing all possible cards
+  - type: 2
+    icon: {fileID: 21300000, guid: 7386ef2403d65a74795b2bd09bd98ef0, type: 3}
+    displayName: Ability Shop
+    description: Shop with cards that help you gain ability charge or buff your ability
+      in some way
+  - type: 1
+    icon: {fileID: 21300000, guid: f2d2d66be75f1ea43aeda090e49d34ac, type: 3}
+    displayName: Support Shop
+    description: 'Cards that heal
+
+'
+  - type: 3
+    icon: {fileID: 21300000, guid: de0534b9536432148af18738ea2fa49c, type: 3}
+    displayName: Challenge Shop
+    description: 'Earn rewards for increasing difficulty
+
+'
+  - type: 10
+    icon: {fileID: 21300000, guid: 960ab98c277b8794b916f2f86e8d8a1d, type: 3}
+    displayName: Gamble Reel
+    description: 'Spend currency to spin for rewards including currency, rerolls,
+      health, and free cards.
+
+'
+  - type: 11
+    icon: {fileID: 21300000, guid: 98a892239d937c34babc9fedacb8b054, type: 3}
+    displayName: Shop Utility
+    description: 'A shop that gives rerolls.
+
+'

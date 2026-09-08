@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
   m_Name: Obstacle_RotatingFireGrid
   m_EditorClassIdentifier: 
-  displayName: Rotating Fire Grid
+  displayName: Flaming Grid
   textColor: {r: 0.7176471, g: 0.9411765, b: 0.5372549, a: 1}
   fileName: rotatingfiregrid
   prefab: {fileID: 6116212681190784971, guid: 8e475eb9c3d36e4489135939b65968dd, type: 3}
   icon: {fileID: 0}
-  description: A grid of fireballs rotates around you
+  stageNumber: 3
+  hasBossOverride: 0
+  description: A grid of fireballs rotate around you

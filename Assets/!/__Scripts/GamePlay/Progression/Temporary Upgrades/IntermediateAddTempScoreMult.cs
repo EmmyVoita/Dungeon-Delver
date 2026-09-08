@@ -6,7 +6,7 @@ public class IntermediateAddTempScoreMult : UpgradeBase
     public float tempScoreMultAmount = 0.05f;
     public float goldenValueMultiplier = 2.0f;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{TEMP_SCORE_MULT_AMOUNT}", tempScoreMultAmount.ToString("P0"))
@@ -15,6 +15,7 @@ public class IntermediateAddTempScoreMult : UpgradeBase
 
     public override void Apply()
     {
+        /*
         StatModifierManager.Instance.AddTemporaryModifier(
             new TempArrowScoreMultiplier(tempScoreMultAmount)
         );
@@ -22,5 +23,6 @@ public class IntermediateAddTempScoreMult : UpgradeBase
           StatModifierManager.Instance.AddTemporaryModifier(
             new TempGoldenValueMulti(goldenValueMultiplier - 1)
         );
+        */
     }
 }

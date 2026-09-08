@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8900b39a7c313114fbc2450e9e44b99b, type: 3}
+  m_Name: Extra Route Options Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::ExtraRouteOptionsUpgrade
+  upgradeId: 1b4bbfa4-df9a-489d-98c5-5c739b1d0566
+  category: 7
+  requiredUpgrades: []
+  baseOfferWeight: 1
+  _cost: 200
+  _maxStacks: 2
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Extra Route Option
+  descriptionTemplate: Theres a {CHANCE} chance to have one extra world map route
+    option.
+  detailsTemplate: This upgrade stacks up to 2. Each stack just increases the chance
+    by +{CHANCE} for 1 extra option. It doesn't allow for more than 1 extra option.
+  chance: 0.5

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e380662266e03541960dd77933fecba, type: 3}
+  m_Name: Full Ability Charge Increases Golden Arrow Worth Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::FullAbilityGoldWorthUpgrade
+  upgradeId: 125fda42-14a9-4d14-90ca-023e40ac20bd
+  category: 3
+  requiredUpgrades:
+  - upgrade: {fileID: 11400000, guid: 728c241f50ac3704db83c94cc123409b, type: 2}
+    minimumStacks: 1
+  baseOfferWeight: 1
+  _cost: 200
+  _maxStacks: 999
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Golden Surplus
+  descriptionTemplate: 'While you have fuill ability charge, {GOLDEN_ARROWS} are
+    worth {INCREASE} more. '
+  detailsTemplate: 'This upgrade stacks. Each stack further increases the value of
+    {GOLDEN_ARROWS} by {INCREASE}. '
+  increase: 5
+  addValue: 1

@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61b4c237b2c6da8418f66497c773750c, type: 3}
+  m_Name: Gamble Reward Database
+  m_EditorClassIdentifier: Assembly-CSharp::GambleRewardDatabase
+  rewardPool:
+  - displayName: Nothing
+    icon: {fileID: 5672539530220858884, guid: 6823ec4345f644b8fb80618bd2746203, type: 3}
+    weight: 4.5
+    type: 4
+    amount: 0
+    backgroundColor: {r: 0.4901961, g: 0.57254905, b: 0.61960787, a: 1}
+  - displayName: Currency
+    icon: {fileID: 21300000, guid: cfe8b522ee8d51a4aa98918ea93c8167, type: 3}
+    weight: 3.6
+    type: 0
+    amount: 100
+    backgroundColor: {r: 0.9607844, g: 0.7294118, b: 0.5647059, a: 1}
+  - displayName: Currency
+    icon: {fileID: 21300000, guid: cfe8b522ee8d51a4aa98918ea93c8167, type: 3}
+    weight: 2
+    type: 0
+    amount: 200
+    backgroundColor: {r: 0.9607844, g: 0.7294118, b: 0.5647059, a: 1}
+  - displayName: Currency
+    icon: {fileID: 21300000, guid: cfe8b522ee8d51a4aa98918ea93c8167, type: 3}
+    weight: 1
+    type: 0
+    amount: 500
+    backgroundColor: {r: 0.9607844, g: 0.7294118, b: 0.5647059, a: 1}
+  - displayName: Health
+    icon: {fileID: -428958642, guid: 0c024fba1aa42e348acff967e69ac222, type: 3}
+    weight: 2.4
+    type: 1
+    amount: 1
+    backgroundColor: {r: 0.8078432, g: 0.3372549, b: 0.5176471, a: 1}
+  - displayName: Health
+    icon: {fileID: -428958642, guid: 0c024fba1aa42e348acff967e69ac222, type: 3}
+    weight: 1
+    type: 1
+    amount: 3
+    backgroundColor: {r: 0.8078432, g: 0.3372549, b: 0.5176471, a: 1}
+  - displayName: Reroll
+    icon: {fileID: -2079328328, guid: 7f239c827232d5e42b192d0ad4ee6875, type: 3}
+    weight: 3
+    type: 2
+    amount: 1
+    backgroundColor: {r: 0.40000004, g: 0.8196079, b: 0.5529412, a: 1}
+  - displayName: Reroll
+    icon: {fileID: -2079328328, guid: 7f239c827232d5e42b192d0ad4ee6875, type: 3}
+    weight: 2
+    type: 2
+    amount: 3
+    backgroundColor: {r: 0.40000004, g: 0.8196079, b: 0.5529412, a: 1}
+  - displayName: Free Card
+    icon: {fileID: 21300000, guid: a4e624b09f0d9924ab0c717711ac07c8, type: 3}
+    weight: 1.4
+    type: 3
+    amount: 1
+    backgroundColor: {r: 0.4431373, g: 0.2627451, b: 0.8431373, a: 1}

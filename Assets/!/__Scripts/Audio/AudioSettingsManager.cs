@@ -25,9 +25,14 @@ public class AudioSettingsManager : MonoBehaviour
     [Range(0f, 1f)] public float uiVolume = 1f;
     [Range(0f, 1f)] public float ambienceVolume = 1f;
 
+    [Header("GlobalModifiers")]
+    [Range(0f, 2f)] public float musicVolumeMult = 1f;
+    [Range(0f, 2f)] public float sfxVolumeMult = 1f;
+
 
 
     private string savePath;
+    int _arrowHitSoundIndex = 0;
 
     [System.Serializable]
     private class AudioSettingsData
@@ -37,11 +42,25 @@ public class AudioSettingsManager : MonoBehaviour
         public float sfxVolume;
         public float uiVolume;
         public float ambienceVolume;
+        public int arrowAudioIndex;
     }
+
 
     // ---------------------------
     // Initialization
     // ---------------------------
+
+    private void OnEnable()
+    {
+        PauseMenuNavigator.OnResume += LoadSettings;
+    }
+
+    private void OnDisable()
+    {
+        PauseMenuNavigator.OnResume -= LoadSettings;
+    }
+
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -55,6 +74,8 @@ public class AudioSettingsManager : MonoBehaviour
         savePath = Path.Combine(Application.persistentDataPath, "audioSettings.json");
         LoadSettings();
     }
+
+    
 
     public AudioMixerGroup GetMixerGroup(AudioChannel channel)
     {
@@ -106,8 +127,8 @@ public class AudioSettingsManager : MonoBehaviour
 
         float channelVolume = channel switch
         {
-            AudioChannel.Music => Instance.musicVolume,
-            AudioChannel.SFX => Instance.sfxVolume,
+            AudioChannel.Music => Instance.musicVolume * Instance.musicVolumeMult,
+            AudioChannel.SFX => Instance.sfxVolume * Instance.sfxVolumeMult,
             AudioChannel.UI => Instance.uiVolume,
             AudioChannel.Ambience => Instance.ambienceVolume,
             _ => 1f
@@ -117,7 +138,12 @@ public class AudioSettingsManager : MonoBehaviour
     }
 
 
-
+    public void UpdateSelectedArrowAudio(int index)
+    {
+        _arrowHitSoundIndex = index;
+        AudioLibrary.Instance.SetArrowHitSound(_arrowHitSoundIndex);
+        SaveSettings();
+    }
 
     // ---------------------------
     // Save / Load
@@ -130,7 +156,8 @@ public class AudioSettingsManager : MonoBehaviour
             musicVolume = musicVolume,
             sfxVolume = sfxVolume,
             uiVolume = uiVolume,
-            ambienceVolume = ambienceVolume
+            ambienceVolume = ambienceVolume,
+            arrowAudioIndex = _arrowHitSoundIndex
         };
 
         string json = JsonUtility.ToJson(data, true);
@@ -150,7 +177,9 @@ public class AudioSettingsManager : MonoBehaviour
             sfxVolume = data.sfxVolume;
             uiVolume = data.uiVolume;
             ambienceVolume = data.ambienceVolume;
+            _arrowHitSoundIndex = data.arrowAudioIndex;
 
+            AudioLibrary.Instance.SetArrowHitSound(_arrowHitSoundIndex);
             // Debug.Log($"🔊 Audio settings loaded from {savePath}");
         }
         else
@@ -161,6 +190,10 @@ public class AudioSettingsManager : MonoBehaviour
             sfxVolume = 1f;
             uiVolume = 1f;
             ambienceVolume = 1f;
+            _arrowHitSoundIndex = 0;
+
+            AudioLibrary.Instance.SetArrowHitSound(_arrowHitSoundIndex);
+
             SaveSettings(); // create the file
         }
     }

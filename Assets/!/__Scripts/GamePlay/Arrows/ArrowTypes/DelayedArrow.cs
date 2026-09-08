@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
-using Unity.VisualScripting;
+using UnityEngine.VFX;
+
 
 public class DelayedArrow : ArrowBase
 {
@@ -14,11 +15,28 @@ public class DelayedArrow : ArrowBase
     [Header("Optional")]
     public bool useManualStopDistance = true;
 
+    [Header("Animation")]
+    [SerializeField] private VisualEffect trailEffect;
+    [SerializeField] private SpriteCyclerPerFrameTime spriteAnimator;
+    [SerializeField] private SpriteCyclerPerFrameTime idleSpriteAnimator;
+
+
+    [Header("Trail Colors")]
+    [ColorUsage(true, true)] [SerializeField] private Color trailColorOutter;
+    [ColorUsage(true, true)] [SerializeField] private Color trailColorInner;
+    [ColorUsage(true, true)] [SerializeField] private Color timeTrailColorOutter;
+    [ColorUsage(true, true)] [SerializeField] private Color timeTrailColorInner;
+
+    private static readonly int OutterColor = Shader.PropertyToID("OutterColor");
+    private static readonly int InnerColor = Shader.PropertyToID("InnerColor");
+
     private bool hasStopped = false;
     private Coroutine delayRoutine;
     private float stopTime;
-private float resumeTime;
-private Vector2 stopPos;
+    private float resumeTime;
+    private Vector2 stopPos;
+    private bool _stopped;
+    private bool _resumed;
 
 
 
@@ -39,8 +57,40 @@ private Vector2 stopPos;
         resumeTime = stopTime + delayDuration;
         this._arrivalTime = delayDuration + arrivalTime;
 
-        // ✅ Correct stop position
+
         stopPos = Vector2.Lerp(startPos, endPos, stopRatio);
+
+        trailEffect.Play();
+        spriteAnimator.Play();
+        _stopped = false;
+        _resumed = false;
+    }
+
+    public override void SetGolden()
+    {
+        AddStatus(ArrowStatus.Golden);
+        
+        if(!runTimeMaterial)
+        {
+            Debug.LogError("When trying to set arrow to golden, the runtime material was null");
+            return;
+        } 
+            
+
+        if(!HasStatus(ArrowStatus.Recovery) && !HasStatus(ArrowStatus.Empowered))
+        {
+            runTimeMaterial.SetColor(colorApropertyName, goldenColorA);
+            runTimeMaterial.SetColor(colorBpropertyName, goldenColorB);
+            trailEffect.SetVector4(OutterColor, trailColorOutter);
+            trailEffect.SetVector4(InnerColor, trailColorInner);
+        }
+    }
+
+    public override void SetEmpoweredArrow()
+    {
+        base.SetEmpoweredArrow();
+        trailEffect.SetVector4(OutterColor, timeTrailColorOutter);
+        trailEffect.SetVector4(InnerColor, timeTrailColorInner);
     }
 
     protected override void Update()
@@ -58,11 +108,27 @@ private Vector2 stopPos;
         }
         else if (elapsed < resumeTime)
         {
+            if(!_stopped)
+            {
+                trailEffect.Stop();
+                _stopped = true;
+                spriteAnimator.Stop();
+                idleSpriteAnimator.Restart();
+            }
+
             Debug.Log($"Stop Time => {stopTime}, Resume Time => {resumeTime}, Elapsed => {elapsed}");
             targetPos = stopPos;
         }
         else if(elapsed <= _arrivalTime)
         {
+            if(!_resumed)
+            {
+                trailEffect.Play();
+                _resumed = true;
+                idleSpriteAnimator.Stop();
+                spriteAnimator.Restart();
+            }
+
             float t = Mathf.InverseLerp(resumeTime, _arrivalTime, elapsed);
             targetPos = Vector2.Lerp(stopPos, _endPos, t);
         }

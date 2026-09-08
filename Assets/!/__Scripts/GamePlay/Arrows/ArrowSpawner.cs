@@ -25,6 +25,7 @@ public class ArrowSpawner : MonoBehaviour
         Ignore
     }
 
+    public static event Action<ArrowBase> OnArrowSpawned;
     public static ArrowSpawner Instance { get; private set; }
     public static Action OnClearArrows;
 
@@ -120,7 +121,7 @@ public class ArrowSpawner : MonoBehaviour
 
 
     // --------------------------------------------------
-    public IEnumerator HandleSpawning(TextAsset patternAsset, float bpmModifier = 0f)
+    public IEnumerator HandleSpawning(TextAsset patternAsset)
     {
         IsSpawning = true;
 
@@ -136,7 +137,7 @@ public class ArrowSpawner : MonoBehaviour
         }
 
         stopRequested = false;
-        LoadPattern(patternAsset, bpmModifier);
+        LoadPattern(patternAsset);
 
         Player.Instance.UseEightDirections = useEightDirections;
         spawnCoroutine = StartCoroutine(SpawnFromPattern(GameSessionBootstrap.Config.LevelEditorStartTime));
@@ -172,7 +173,7 @@ public class ArrowSpawner : MonoBehaviour
         OnClearArrows?.Invoke();
     }
 
-    public IEnumerator PlayFromTime(TextAsset patternAsset, float startTime, float bpmModifier = 0f)
+    public IEnumerator PlayFromTime(TextAsset patternAsset, float startTime)
     {
         StopAllSpawning();
         ClearAllArrows();
@@ -181,7 +182,7 @@ public class ArrowSpawner : MonoBehaviour
 
         stopRequested = false;
 
-        LoadPattern(patternAsset, bpmModifier);
+        LoadPattern(patternAsset);
 
         //lastDSPTime = AudioSettings.dspTime;
         //scaledSongTime = startTime;
@@ -196,7 +197,7 @@ public class ArrowSpawner : MonoBehaviour
     }
 
     // --------------------------------------------------
-    public void LoadPattern(TextAsset patternAsset, float bpmModifier = 0f)
+    public void LoadPattern(TextAsset patternAsset)
     {
         patternEvents.Clear();
         useEightDirections = false;
@@ -234,10 +235,9 @@ public class ArrowSpawner : MonoBehaviour
 
         
 
-        Debug.Log($"Using BPM: {fileBPM} (Modifier: {bpmModifier})");
 
         // Use the file BPM if available
-        bpm = fileBPM + fileBPM * bpmModifier;
+        bpm = fileBPM;
         float secondsPerBeat = 60f / bpm;
 
         
@@ -516,7 +516,9 @@ public class ArrowSpawner : MonoBehaviour
                                              spawnPos,
                                              endPos);
         
-        RoundManager.Instance.roundStats.AddSpawned();
+        ScoreManager.Instance.RoundStatsTracker.AddSpawned();
+
+        OnArrowSpawned?.Invoke(arrow.GetComponent<ArrowBase>());
     }
 
     public void TriggerWarning(Vector2 direction, string type)

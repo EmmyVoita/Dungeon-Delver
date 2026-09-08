@@ -28,37 +28,70 @@ public class CardTitleTooltip : MonoBehaviour
     [SerializeField] private float paddingY = 16f;
 
     private Sequence _sequence;
+    private bool _open = false;
+    private RectTransform _target;
+    public bool IsOpen => _open;
 
     private void Awake()
     {
         HideInstant();
     }
 
-    public void ShowForCard(RectTransform cardRect, string title)
+
+
+    public void ShowForCard(RectTransform cardRect = null, string title = "")
     {
+        _target = cardRect;
+        _open = true;
         _sequence?.Kill();
 
         titleText.text = title;
 
-        tooltipRoot.position = cardRect.position + (Vector3)offset;
+        if(cardRect)
+            tooltipRoot.position = cardRect.position + (Vector3)offset;
+        else
+            tooltipRoot.anchoredPosition += offset;
+
         tooltipRoot.localScale = Vector3.zero;
         canvasGroup.alpha = 0f;
 
+        SetTitle(title);
+
         _sequence = DOTween.Sequence();
+
+        // Make the entire sequence ignore Time.timeScale.
+        _sequence.SetUpdate(true);
+
         _sequence.AppendInterval(showDelay);
+
         _sequence.AppendCallback(() =>
         {
-            AudioHelpers.PlaySoundEffect(appearSound, Camera.main.transform.position);
+            AudioHelpers.PlaySoundEffect(
+                appearSound,
+                Camera.main.transform.position
+            );
         });
+
         _sequence.Append(canvasGroup.DOFade(1f, fadeInTime));
+
         _sequence.Join(tooltipRoot.DOScale(popScale, fadeInTime).SetEase(Ease.OutBack));
+
         _sequence.Append(tooltipRoot.DOScale(1f, 0.08f));
-        
+    }
 
-        
+    private void LateUpdate()
+    {
+        if(_target == null)
+            return;
 
-    
-        SetTitle(title);
+        UpdatePosition();
+    }
+
+    private void UpdatePosition()
+    {
+        Vector3 worldPosition = _target.position + (Vector3)offset;
+
+        transform.position = worldPosition;
     }
 
     public void SetTitle(string title)
@@ -96,10 +129,15 @@ public class CardTitleTooltip : MonoBehaviour
 
     public void Hide()
     {
+        _open = false;
         _sequence?.Kill();
+
         _sequence = DOTween.Sequence();
-        _sequence.Append(canvasGroup.DOFade(0f, fadeOutTime));
-        _sequence.Join(tooltipRoot.DOScale(0.85f, fadeOutTime));
+        _sequence.SetUpdate(true);
+
+        _sequence.Append(canvasGroup.DOFade(0f,fadeOutTime));
+
+        _sequence.Join(tooltipRoot.DOScale(0.85f,fadeOutTime));
     }
 
     public void HideInstant()

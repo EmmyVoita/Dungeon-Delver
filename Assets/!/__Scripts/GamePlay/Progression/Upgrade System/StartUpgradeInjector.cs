@@ -33,7 +33,7 @@ public class StartupUpgradeInjector : MonoBehaviour
 
     private void ApplyStartingUpgrades()
     {
-        var cardManager = UpgradeCardManager.Instance;
+        var cardManager = ShopManager.Instance;
 
         if (cardManager == null)
         {

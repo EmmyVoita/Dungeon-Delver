@@ -12,6 +12,7 @@ public class SlowTimeAbilityObject : AbilityEffectBase
     [Header("Slow Time Settings")]
     public VisualEffect slowTimeEffect;
     public float slowFactor = 0.5f; // Slow down to 50% speed
+    public float additionalTimeFromArrow = 0.2f;
 
     [Header("Visual Effect")]
     public SpriteRenderer spinSprite;       // assign the child sprite
@@ -23,6 +24,9 @@ public class SlowTimeAbilityObject : AbilityEffectBase
     [SerializeField] private bool slowTime = false;
     [SerializeField] private float slowTimeDone = 0;
 
+    [Header("Audio")]
+    [SerializeField] private SoundEffect critcalSEf;
+
     public bool useExpandingWave = false;
     public GameObject schockwavePrefab;
     public int maxCountForFullRange = 10;
@@ -30,60 +34,73 @@ public class SlowTimeAbilityObject : AbilityEffectBase
     public float maxRange = 10f;
 
     private Coroutine spinRoutine;
-    private int arrowsCaught = 0;
+    private int _arrowsCaught = 0;
+    private int _criticalArrowsCaught = 0;
     private TimeScaleModifier _slowTimeModifier;
+
+
+    private bool HasCurrencyUpgrade => Context.UpgradeCount >= 1;
+    private bool HasDurationUpgrade => Context.UpgradeCount >= 2;
 
     
     void OnEnable()
     {
-        ArrowBase.OnArrowResolved += HandleArrowDeath;
+        ArrowBase.OnArrowResolved += HandleArrowResolved;
     }
 
     void OnDisable()
     {
-        ArrowBase.OnArrowResolved -= HandleArrowDeath;
-    }
-
-    void HandleArrowDeath(ArrowResolvedData data)
-    {
-        arrowsCaught++;
+        ArrowBase.OnArrowResolved -= HandleArrowResolved;
     }
 
     public override void Activate(AbilityEffectContext context)
     {
+        _arrowsCaught = 0;
+        _criticalArrowsCaught = 0;
+
         base.Activate(context);
         BeginSlowTime();
     }
 
-
-    
-
-    Action onFadeComplete
+    void HandleArrowResolved(ArrowResolvedData data)
     {
-        get
+        if(!slowTime)
+            return;
+
+        if(data.goalType == Goal.GoalType.Miss)
+            return;
+
+        if(data.goalType == Goal.GoalType.Critical)
         {
-            return () =>
-            {
-                // Spawn shockwave effect
-                if (schockwavePrefab != null && useExpandingWave)
-                {
-                    float t = Mathf.Clamp01(arrowsCaught / (float)maxCountForFullRange);
-                    float radius = Mathf.Lerp(minRange, maxRange, t);
-                    GameObject shockwave = Instantiate(schockwavePrefab, Player.Instance.transform.position, Quaternion.identity);
-                    var sw = shockwave.GetComponent<ShockwaveEffect>();
-                    if (sw != null)
-                        sw.Initialize(radius);
-                    // Optionally, you can set properties on the shockwave here, e.g., scale based on arrowsCaught
-                    Destroy(this.gameObject);
-                }
-            };
+            _criticalArrowsCaught++;
+
+            if(HasCurrencyUpgrade)
+                GrantAbilityCurrency();
+
+            if(HasDurationUpgrade)
+                ExtendSlowTime();
         }
     }
+
+  
+    private void GrantAbilityCurrency()
+    {
+        int reward = Mathf.RoundToInt(1 * Mathf.Pow(_criticalArrowsCaught, 1.25f));
+        CurrencyManager.Instance.AddCurrency(reward, "Ability");
+    }
+
+    private void ExtendSlowTime()
+    {
+        slowTimeDone += additionalTimeFromArrow;
+    }
+
+
 
 
 
     void Update()
     {
+        
         if (slowTime && Time.unscaledTime >= slowTimeDone)
         {
             slowTime = false;
@@ -118,7 +135,7 @@ public class SlowTimeAbilityObject : AbilityEffectBase
     void BeginSlowTime()
     {
         if (slowTimeEffect != null)
-            slowTimeEffect.SendEvent("OnPlay");
+            slowTimeEffect.Play();
 
         if (_slowTimeModifier != null)
         {
@@ -200,7 +217,7 @@ public class SlowTimeAbilityObject : AbilityEffectBase
         yield return FadeOutAndStop();
     }
 
-    private IEnumerator FadeOutAndStop(Action onComplete = null)
+    private IEnumerator FadeOutAndStop()
     {
         if (spinSprite == null)
             yield break;
@@ -233,8 +250,35 @@ public class SlowTimeAbilityObject : AbilityEffectBase
         // Optional: reattach to the player hierarchy afterward
         spinSprite.transform.SetParent(Player.Instance.transform);
 
-        onComplete?.Invoke();
+        //if(HasCurrencyUpgrade)
+        //    GrantAbilityCurrency();
 
         EndEffect();
     }
 }
+
+
+
+    /*
+    Action onFadeComplete
+    {
+        get
+        {
+            return () =>
+            {
+                // Spawn shockwave effect
+                if (schockwavePrefab != null && useExpandingWave)
+                {
+                    float t = Mathf.Clamp01(arrowsCaught / (float)maxCountForFullRange);
+                    float radius = Mathf.Lerp(minRange, maxRange, t);
+                    GameObject shockwave = Instantiate(schockwavePrefab, Player.Instance.transform.position, Quaternion.identity);
+                    var sw = shockwave.GetComponent<ShockwaveEffect>();
+                    if (sw != null)
+                        sw.Initialize(radius);
+                    // Optionally, you can set properties on the shockwave here, e.g., scale based on arrowsCaught
+                    Destroy(this.gameObject);
+                }
+            };
+        }
+    }
+    */

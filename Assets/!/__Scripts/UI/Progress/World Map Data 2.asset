@@ -14,38 +14,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldMapData
   nodes:
   - index: 0
-    gridPosition: {x: -3, y: 0.5}
+    gridPosition: {x: -3.75, y: 1}
     isBoss: 0
   - index: 1
-    gridPosition: {x: -1, y: 0.5}
+    gridPosition: {x: -1.25, y: 1}
     isBoss: 0
   - index: 2
-    gridPosition: {x: 1, y: 0.5}
+    gridPosition: {x: 1.25, y: 1}
     isBoss: 0
   - index: 3
-    gridPosition: {x: 3, y: 0.5}
+    gridPosition: {x: 3.75, y: 1}
     isBoss: 1
   - index: 4
-    gridPosition: {x: 3, y: -1.5}
+    gridPosition: {x: 3.75, y: -1.5}
     isBoss: 0
   - index: 5
-    gridPosition: {x: 1, y: -1.5}
+    gridPosition: {x: 1.25, y: -1.5}
     isBoss: 0
   - index: 6
-    gridPosition: {x: -1, y: -1.5}
+    gridPosition: {x: -1.25, y: -1.5}
     isBoss: 0
   - index: 7
-    gridPosition: {x: -3, y: -1.5}
+    gridPosition: {x: -3.75, y: -1.5}
     isBoss: 1
   - index: 8
-    gridPosition: {x: -3, y: -3.5}
+    gridPosition: {x: -3.75, y: -4}
     isBoss: 0
   - index: 9
-    gridPosition: {x: -1, y: -3.5}
+    gridPosition: {x: -1.25, y: -4}
     isBoss: 0
   - index: 10
-    gridPosition: {x: 1, y: -3.5}
+    gridPosition: {x: 1.25, y: -4}
     isBoss: 0
   - index: 11
-    gridPosition: {x: 3, y: -3.5}
+    gridPosition: {x: 3.75, y: -4}
     isBoss: 1

@@ -15,9 +15,9 @@ MonoBehaviour:
   abilityType: 2
   baseCost: 25
   scoreRequirement: 0
-  baseDuration: 2.5
+  baseDuration: 3.5
   abilityName: Lazy Hour
-  description: Slows time for a brief period
+  description: 'Breifly slows time by <color=#6EE68C>50%</color> for {DURATION} seconds '
   iconData: {fileID: 11400000, guid: cbeb5c7753649734f9f3a143c3bc5ae1, type: 2}
   cardBackground: {fileID: 0}
   iconScale: 1.75

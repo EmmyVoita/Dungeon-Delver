@@ -11,7 +11,7 @@ public class MouseInputMenuOption : BaseSettingOption
 
     private void Start()
     {
-        keyText.text = InputModeManager.Instance.AllowMouseInput ? onState : offState;
+        //keyText.text = InputModeManager.Instance.AllowMouseInput ? onState : offState;
     }
 
     public override void AdjustValue(int direction)
@@ -31,11 +31,11 @@ public class MouseInputMenuOption : BaseSettingOption
 
     public override void OnActivate()
     {
-        bool newState = !InputModeManager.Instance.AllowMouseInput;
+        //bool newState = !InputModeManager.Instance.AllowMouseInput;
 
-        InputModeManager.Instance.AllowMouseInput = newState;
+        //InputModeManager.Instance.AllowMouseInput = newState;
 
-        StartCoroutine(UpdateTextNextFrame(newState));
+        //StartCoroutine(UpdateTextNextFrame(newState));
     }
 
     IEnumerator UpdateTextNextFrame(bool state)

@@ -3,22 +3,39 @@ using TMPro;
 using System;
 using System.Collections;
 using UnityEditor;
+using DG.Tweening;
 
 public class CountdownUI : MonoBehaviour
 {
     public static CountdownUI Instance { get; private set; }
 
+    [Header("References")]
     [SerializeField] private TextMeshProUGUI countdownText;
+    [SerializeField] private RectTransform textRect;
+    [SerializeField] private CountdownHandController handController;
+
+    [Header("Timing")]
     [SerializeField] private float startDelay = 2f;
-    [SerializeField] private float interval = 1f;
-    [SerializeField] private string finalText = "GO!";
+
+    [Header("Audio")]
     [SerializeField] private SoundEffect countdownBeep;
     [SerializeField] private SoundEffect finalBeep;
     [SerializeField] private float beepPitchIncrement = 0.1f;
-    [SerializeField] private CountdownHandController handController;
+    [SerializeField] private float beepVolumeIncrement = 0.1f;
+    
+    [Header("Text Animation")]
+    [SerializeField] private Ease popInEase = Ease.OutBack;
+    [SerializeField] private Ease popOutEase = Ease.InBack;
+    [SerializeField] private Ease rotationEase = Ease.OutSine;
+    [SerializeField] private float randomRotation = 15f;
+    [SerializeField] private float rotateDuration = 0.2f;
+    [SerializeField] private float scaleInDuration = 0.15f;
+    [SerializeField] private float scaleOutDuration = 0.15f;
+    [SerializeField] private float textHoldDuration = 0.25f;
 
     private Coroutine currentRoutine;
     private bool isCounting = false;
+    private Sequence _NumberSequence;
 
     void Awake()
     {
@@ -26,6 +43,7 @@ public class CountdownUI : MonoBehaviour
         Instance = this;
 
         countdownText.text = "";
+        textRect.localScale = Vector3.zero;
     }
 
     /// <summary>
@@ -55,7 +73,8 @@ public class CountdownUI : MonoBehaviour
         isCounting = false;
         currentRoutine = null;
         countdownText.text = "";
-        countdownText.gameObject.SetActive(false);
+        textRect.localScale = Vector3.zero;
+
         Debug.Log("killing Countdown");
         onComplete?.Invoke();
     }
@@ -70,7 +89,7 @@ public class CountdownUI : MonoBehaviour
         }
 
         isCounting = true;
-        countdownText.gameObject.SetActive(false); // optional: no text
+        //countdownText.gameObject.SetActive(false); // optional: no text
 
         // 🔥 HAND DRIVES EVERYTHING NOW
         //yield return StartCoroutine(handController.PlayCountdownRoutine());
@@ -83,8 +102,31 @@ public class CountdownUI : MonoBehaviour
         {
             yield return new WaitUntil(() => !OverlayManager.Instance.IsPaused);
             float pitchMult = 1.0f + i * beepPitchIncrement;
-            AudioHelpers.PlaySoundEffect(countdownBeep,transform.position,pitchMult);
-            yield return new WaitForSecondsRealtime(0.5f);
+            AudioHelpers.PlaySoundEffect(countdownBeep,transform.position,pitchMult, volumeScalar: 1f + beepVolumeIncrement * i);
+
+            countdownText.text = $"{3-i}";
+            textRect.localScale = Vector3.zero;
+
+            _NumberSequence?.Kill();
+            _NumberSequence = DOTween.Sequence();
+            _NumberSequence.SetUpdate(true);
+
+
+            _NumberSequence.Append(textRect.DOScale(1.2f, scaleInDuration).SetEase(popInEase));
+
+            _NumberSequence.Join(countdownText.DOFade(1f, 0.1f));
+
+            float angleZ = i % 2 == 0 ? randomRotation : -randomRotation;
+            _NumberSequence.Join(textRect.DORotate(new Vector3(0,0,angleZ), rotateDuration)
+                                 .SetEase(rotationEase));
+
+            _NumberSequence.AppendInterval(textHoldDuration);
+
+            _NumberSequence.Append(textRect.DOScale(0, scaleOutDuration).SetEase(popOutEase));
+            _NumberSequence.Join(countdownText.DOFade(0f, 0.1f));
+
+            yield return _NumberSequence.WaitForCompletion();
+
             i++;
         }
 
@@ -93,4 +135,6 @@ public class CountdownUI : MonoBehaviour
 
         onComplete?.Invoke();
     }
+
+
 }

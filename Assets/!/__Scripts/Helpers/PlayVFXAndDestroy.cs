@@ -10,6 +10,7 @@ public class PlayVFXAndDestroy : MonoBehaviour
 
     [Tooltip("VFX event name to trigger")]
     public string playEventName = "OnPlay";
+    public bool useCallEvent = true;
 
     [Header("Stop Settings")]
     [SerializeField] private float stopAfterTime = 5f;
@@ -62,7 +63,10 @@ public class PlayVFXAndDestroy : MonoBehaviour
 
         foreach (var effect in vfx)
         {
-            effect.SendEvent(playEventName);
+            if(useCallEvent)
+                effect.SendEvent(playEventName);
+            else
+                effect.Play();
         }
         StartCoroutine(StopAndDestroy());
     }

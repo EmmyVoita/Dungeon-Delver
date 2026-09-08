@@ -65,7 +65,7 @@ public class CarouselArrow : MonoBehaviour, IPointerClickHandler
 
     private void Update()
     {
-        if(isEnabled && InputBindingManager.Instance.GetKeyHeld(inputAction) && !selectManager.IsInputLocked)
+        if(isEnabled && InputBindingManager.Instance.GetKeyHeld(inputAction) && !selectManager.CanProcessInput)
         {
             PlayPressFeedback();
         }
@@ -148,9 +148,11 @@ public class CarouselArrow : MonoBehaviour, IPointerClickHandler
     {
         Debug.Log("OnPointerClick");
         
-        if (InputModeManager.Instance.CurrentMode
-            != InputModeManager.InputMode.Mouse)
+        if (InputModeManager.Instance == null ||
+            InputModeManager.Instance.CurrentMode != InputModeManager.InputMode.Mouse)
+        {
             return;
+        }
 
         OnCarouselArrowClicked?.Invoke(carosuelDirection);
 

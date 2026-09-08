@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DamageSaveManager : MonoBehaviour
+public class DamageSaveManager : RuntimeModifierManager<IDamageSave>
 {
     public static DamageSaveManager Instance;
 
@@ -13,16 +13,57 @@ public class DamageSaveManager : MonoBehaviour
     [SerializeField] private GameObject normalProcEffect;
     [SerializeField] private GameObject currencyProcEffect;
 
+    [Header("Shields")]
+    [SerializeField] private SoundEffect ignoreMissSoundEffect;
+    [SerializeField] private GameObject ignoreMissVFXPrefab;
 
-    private bool _initialized;
-    private List<IDamageSave> _damageSaves;
-    private List<IDamageSave> _renewingDamageSaves;
 
+    private List<GameObject> _activeShieldObjects = new();
 
-    private void OnDisable()
+    public void CreateShieldVisual(GameObject shieldPrefab)
     {
-        GameStateManager.OnStateChanged -= HandleStateChanged;
-        Player.OnProcessHit -= HandleProcessHit;
+        if (shieldPrefab != null)
+        {
+            GameObject shieldObject = Instantiate(shieldPrefab, Player.Instance.transform.position,Quaternion.identity);
+            shieldObject.transform.localScale = Vector3.one * (1f + _activeShieldObjects.Count * .2f);
+            shieldObject.transform.SetParent(Player.Instance.transform);
+            _activeShieldObjects.Add(shieldObject);
+        }
+    }
+
+    public void ClearTopShield()
+    {
+        GameObject shield = _activeShieldObjects[^1];
+        _activeShieldObjects.RemoveAt(_activeShieldObjects.Count - 1);
+        Destroy(shield);
+    }
+
+    public void ClearAllSheilds()
+    {
+        for(int i = 0; i < _activeShieldObjects.Count; i++)
+        {
+            Destroy(_activeShieldObjects[i]);
+        }
+
+        _activeShieldObjects.Clear();
+    }
+
+    private void BreakShield()
+    {
+        AudioHelpers.PlaySoundEffect(ignoreMissSoundEffect, Camera.main.transform.position);
+
+        if (ignoreMissVFXPrefab != null)
+        {
+            Instantiate(
+                ignoreMissVFXPrefab,
+                Player.Instance.transform.position,
+                Quaternion.identity
+            );
+        }
+
+        GameObject shield = _activeShieldObjects[^1];
+        _activeShieldObjects.RemoveAt(_activeShieldObjects.Count - 1);
+        Destroy(shield);
     }
 
     private void Awake()
@@ -34,119 +75,128 @@ public class DamageSaveManager : MonoBehaviour
         }
 
         Instance = this;
-
-        _damageSaves = new();
-        _renewingDamageSaves = new();
     }
 
-    private void Initialize()
+    protected override void Subscribe()
     {
-        if (_initialized)
-            return;
-
-        _initialized = true;
-
-        GameStateManager.OnStateChanged += HandleStateChanged;
         Player.OnProcessHit += HandleProcessHit;
     }
 
+    protected override void Unsubscribe()
+    {
+        Player.OnProcessHit -= HandleProcessHit;
+        base.Unsubscribe();
+    }
 
-    // Remove temporary at the end of the round;
-    private void HandleStateChanged(GameState previousState, GameState newState)
+    private void Update()
+    {
+        RemoveExpiredShields();
+    }
+
+    private void RemoveExpiredShields()
+    {
+        for (int i = activeModifiers.Count - 1; i >= 0; i--)
+        {
+            RuntimeModifierEntry<IDamageSave> entry = activeModifiers[i];
+
+            if (!entry.Modifier.HasExpired())
+                continue;
+
+            ExpireModifier(entry);
+
+            // Remove corresponding shield visual.
+            ClearTopShield();
+        }
+    }
+
+    protected override void OnGameStateChanged(GameState previousState, GameState newState)
     {
         if(newState == GameStateManager.LevelStartState)
-        {
-            foreach(IDamageSave item in _renewingDamageSaves)
-            {
-                Debug.Log("Adding renewing death save item");
-                _damageSaves.Add(item.Clone());
-            }
-        }
+            CreateShields();
 
         if(newState == GameStateManager.LevelEndState)
-        {
-            RemoveTemporary();
-        }
+            ClearAllSheilds();
     }
 
-    public void RegisterRenewing(IDamageSave upgrade)
+    public void RegisterGeneral(IDamageSave modifier)
     {
+        if (modifier == null)
+            return;
+
         Initialize();
 
-        _renewingDamageSaves.Add(upgrade);
+        RuntimeModifierEntry<IDamageSave> entry = new RuntimeModifierEntry<IDamageSave>(
+                modifier,
+                null,
+                removeCardWhenExpired: true
+            );
 
-        Debug.Log($"Adding death save upgrade \n"+
-                  $"Priority => {upgrade.Priority} \n" +
-                  $"Remove at level end => {upgrade.RemoveAtLevelEnd} \n");
+        AddActiveModifier(entry);
+
+        if(modifier.ShieldPrefab)
+            CreateShieldVisual(modifier.ShieldPrefab);
     }
 
 
-    public void Register(IDamageSave upgrade)
+    private void HandleProcessHit(HitData hit)
     {
-        Initialize();
-
-        _damageSaves.Add(upgrade);
-
-        Debug.Log($"Adding death save upgrade \n"+
-                  $"Priority => {upgrade.Priority} \n" +
-                  $"Remove at level end => {upgrade.RemoveAtLevelEnd} \n");
-
-    }
-
-    private void  HandleProcessHit(HitData hit)
-    {
-        Debug.Log($"Death Saves Active: {_damageSaves.Count}");
-
         if(!PullDamageSave(hit.Damage))
             return;
 
         AudioHelpers.PlaySoundEffect(procSoundEffect, Player.Instance.transform.position);
         ScreenShakeManager.Instance.Shake(screenShakeData);
+    }
 
-        //if(procEffect != null)
-            //Instantiate(procEffect, Player.Instance.transform.position,Quaternion.identity);
+
+    // We create the shields in order of priority because then we dont have to about assining
+    // them to their IDamageSave object. When we take damage we just sort by priority then check
+    // If the current damage save has a shield object prefab and if it does, break it.
+    private void CreateShields()
+    {
+        if (activeModifiers.Count <= 0)
+            return;
+
+        activeModifiers.Sort((x, y) => y.Modifier.Priority.CompareTo(x.Modifier.Priority));
+        activeModifiers.Reverse();
+
+        for (int i = 0; i < activeModifiers.Count; i++)
+        {
+            RuntimeModifierEntry<IDamageSave> damageSave = activeModifiers[i];
+            if(damageSave.Modifier.ShieldPrefab != null)
+            {
+                CreateShieldVisual(damageSave.Modifier.ShieldPrefab);
+            }
+        }
     }
 
     private bool PullDamageSave(int damage)
     {
-        if(_damageSaves.Count <= 0)
+        if (activeModifiers.Count <= 0)
             return false;
 
-        _damageSaves.Sort((x,y) => y.Priority.CompareTo(x.Priority));
+        activeModifiers.Sort((x, y) => y.Modifier.Priority.CompareTo(x.Modifier.Priority));
 
-        for(int i = 0; i < _damageSaves.Count; i++)
+        for (int i = 0; i < activeModifiers.Count; i++)
         {
-            IDamageSave damageSave = _damageSaves[i];
+            RuntimeModifierEntry<IDamageSave> damageSave = activeModifiers[i];
 
-            if(!damageSave.CanPreventDamage(damage))
+            if (!damageSave.Modifier.CanPreventDamage(damage))
                 continue;
 
-            
-            damageSave.PreventDamage(damage);
-            _damageSaves.RemoveAt(i);
-            HandleDamageSaveVisuals(damageSave);
+            damageSave.Modifier.PreventDamage(damage);
+
+            if(damageSave.Modifier.ShieldPrefab != null)
+                BreakShield();
+
+
+            HandleDamageSaveVisuals(damageSave.Modifier);
+
+            ExpireModifier(damageSave);
+
             return true;
         }
 
         return false;
-    }
-
-    private void RemoveTemporary()
-    {
-        List<IDamageSave> savesToRemove = new();
-
-        foreach(IDamageSave item in _damageSaves)
-        {
-            if(item.RemoveAtLevelEnd)
-            {
-                savesToRemove.Add(item);
-            }
-        }
-
-        foreach(IDamageSave item in savesToRemove)
-        {
-            _damageSaves.Remove(item);
-        }
     }
 
     private void HandleDamageSaveVisuals(IDamageSave save)

@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
   m_Name: Obstacle_HardLaneDodger
   m_EditorClassIdentifier: 
-  displayName: Hard Lane Dodger
+  displayName: Fire Barrage + Tossing Bones Combo
   textColor: {r: 0.7176471, g: 0.9411765, b: 0.5372549, a: 1}
   fileName: hardlanedodger
   prefab: {fileID: 6769059283685959404, guid: 1cdd1e73ae8369e48993cece5d606a91, type: 3}
   icon: {fileID: 0}
-  description: hard
+  stageNumber: 3
+  hasBossOverride: 1
+  description: 'Fireballs fire horizontally across the screen. At the same time bones
+    are tossed up that arc across the screen. '

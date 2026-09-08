@@ -15,12 +15,14 @@ public class CurrencyDisplay : MonoBehaviour
     [SerializeField] private SoundEffect finishSound;
     [SerializeField] private float pitchStep = 0.025f;
     [SerializeField] private int pitchIndex = 0;
+    [SerializeField] private float roundActiveVolume = 0.15f;
     
 
     private float _lastSoundTime;
 
     private Tween _currencyTween;
     private int _displayedCurrency;
+    private float _tallyVolumeMod = 1.0f;
 
 
 
@@ -29,8 +31,11 @@ public class CurrencyDisplay : MonoBehaviour
         CurrencyManager.OnCurrencyChanged += HandleCurrencyChanged;
         GameStateManager.OnStateChanged += HandleStateChanged;
 
-        _displayedCurrency = CurrencyManager.Instance.CurrentCurrency;
-        RefreshText();
+        if(CurrencyManager.Instance != null)
+        {
+            _displayedCurrency = CurrencyManager.Instance.CurrentCurrency;
+            RefreshText();
+        }
     }
 
     private void OnDisable()
@@ -48,6 +53,8 @@ public class CurrencyDisplay : MonoBehaviour
         //LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)transform);
 
         //if(!runLogicStates.Contains(currentState)) return;
+
+        _tallyVolumeMod = currentState == GameStateManager.LevelStartState ? roundActiveVolume : 1.0f;
 
         _displayedCurrency = CurrencyManager.Instance.CurrentCurrency;
 
@@ -86,11 +93,15 @@ public class CurrencyDisplay : MonoBehaviour
                                       1.0f + pitchIndex * pitchStep :  
                                       1.0f - pitchIndex * pitchStep;
 
-                    AudioHelpers.PlaySoundEffect(
-                        currencyTallySound,
-                        transform.position,
-                        pitchMult
-                    );
+                    if(_tallyVolumeMod != 0)
+                    {
+                        AudioHelpers.PlaySoundEffect(
+                            currencyTallySound,
+                            transform.position,
+                            pitchMult,
+                            volumeScalar: _tallyVolumeMod
+                        );
+                    }
 
                     pitchIndex++;
                 }

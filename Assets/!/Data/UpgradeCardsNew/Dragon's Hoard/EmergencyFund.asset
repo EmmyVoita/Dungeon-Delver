@@ -12,19 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54662e7133a30b34c9c51ba0715bbae2, type: 3}
   m_Name: EmergencyFund
   m_EditorClassIdentifier: Assembly-CSharp::CurrencyDeathSaveUpgrade
-  _cost: 0
+  upgradeId: 49be98a4-9ae0-45be-8280-992d18837208
+  category: 2
+  requiredUpgrades: []
+  baseOfferWeight: 0.25
+  _cost: 300
   _maxStacks: 1
+  duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
-  centerIcon: {fileID: 21300000, guid: 36813569040090f47a1a80b1c3574b5f, type: 3}
-  icon: {fileID: 21300000, guid: b06aa62779871dc4aa741a0c4b86c36a, type: 3}
+  centerIcon: {fileID: 21300000, guid: 2f372692bc0cfed468058d413803a63b, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Emergency Fund
-  descriptionTemplate: 'Once per level, If damage would reduce you below 1 health,
-    lose {COST} currency instead and heal {HEAL_AMOUNT} health.
+  descriptionTemplate: 'Once per level, If damage would reduce you below {HEALTH},
+    lose {COST} instead and heal {HEAL_AMOUNT} health.
 
 '
   detailsTemplate: This upgrade does not stack. It can only be triggered once per
     level.
+  currencyStep: 500
+  weightPerCurrencyStep: 0.5
+  maximumCurrencyWeightBonus: 1.5
+  currencySynergyUpgrades:
+  - {fileID: 11400000, guid: 2558bce9561ab584fb7d9760afb2ca10, type: 2}
+  weightPerSynergyStack: 0.5
   healAmount: 3
-  cost: 500
+  cost: 250

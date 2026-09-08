@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
   m_Name: Obstacle_ArcAxe
   m_EditorClassIdentifier: 
-  displayName: Arc Axe
+  displayName: Tossing Bones
   textColor: {r: 0.7176471, g: 0.9411765, b: 0.5372549, a: 1}
   fileName: arcaxe
   prefab: {fileID: 7452298568174148011, guid: 1448f7a66f5142d4e8bc098bcfd08886, type: 3}
   icon: {fileID: 0}
-  description: tossing axes
+  stageNumber: 3
+  hasBossOverride: 1
+  description: Bones are tossed up that arc across the screen.

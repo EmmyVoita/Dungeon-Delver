@@ -8,6 +8,6 @@ public enum InputActionType
     Jump,
     Confirm,
     Back,
-    Interact,
+    Reroll,
     ViewUpgrades
 }

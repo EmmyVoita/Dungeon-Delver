@@ -7,6 +7,7 @@ public class BounceBombSpawner : ChallengeBase
 {
     [Header("References")]
     [SerializeField] private GameObject bounceObject;
+    [SerializeField] private DirectionArrow arrow;
 
     [Header("Inscribed")]
     [SerializeField] private Vector2 spawnPosition;
@@ -34,6 +35,11 @@ public class BounceBombSpawner : ChallengeBase
         _bombObj = Instantiate(bounceObject, spawnPosition, Quaternion.identity);
 
         BounceBomb bomb = _bombObj.GetComponent<BounceBomb>();
+
+        arrow.Initialize(
+            Player.Instance.transform,
+            _bombObj.transform
+        );
 
         if(!bomb)
         {

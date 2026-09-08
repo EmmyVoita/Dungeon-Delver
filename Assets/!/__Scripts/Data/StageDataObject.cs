@@ -6,6 +6,7 @@ public class StageDataObject : ScriptableObject
 {
     public string stageName;
     public AudioClip musicClip;
+    public MainBackgroundData backgroundData;
 
     [Header("Level Settings")]
     public int levelsToPlay = 2;

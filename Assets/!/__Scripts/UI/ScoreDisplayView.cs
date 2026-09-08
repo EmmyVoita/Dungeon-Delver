@@ -73,7 +73,9 @@ public class ScoreDisplayView : MonoBehaviour
 
     
     
-    
+    private bool IsTutorial => GameSceneLoader.PendingConfig != null ?
+                               GameSceneLoader.PendingConfig.Mode == GameMode.Tutorial :
+                               false;
 
 
     private void OnEnable()
@@ -95,12 +97,12 @@ public class ScoreDisplayView : MonoBehaviour
 
     private void HandleStateChanged(GameState previous, GameState newState)
     {
-        if(newState == GameState.UpgradeSelection)
+        if(newState == GameState.RoundReward)
         {
-            MoveTo(upgradeSelectionPosition);
+            //MoveTo(upgradeSelectionPosition);
 
-            scoreText.alignment = TextAlignmentOptions.Center;
-            scoreText.fontSize = 112;
+           // scoreText.alignment = TextAlignmentOptions.Center;
+            //scoreText.fontSize = 112;
         }
         else
         {
@@ -122,6 +124,9 @@ public class ScoreDisplayView : MonoBehaviour
 
     private void Awake()
     {
+        if(IsTutorial)
+            enabled = false;
+
         RectTransform rect = scoreText.rectTransform;
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -255,8 +260,6 @@ public class ScoreDisplayView : MonoBehaviour
                     .DOScaleY(1f, scaleDuration * 1.2f)
                     .SetEase(Ease.OutBack)
             );
-
-            BackgroundVisualManager.FlareBottom();
 
           
             _accentPitchIndex++;

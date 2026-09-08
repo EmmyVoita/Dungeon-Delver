@@ -16,13 +16,13 @@ public class UpgradeSelectionHealUI : MonoBehaviour
     private void OnEnable()
     {
         GameStateManager.OnStateChanged += HandleStateChanged;
-        UpgradeCardManager.OnCardPurchased += HandleCardPurchased;
+        ShopManager.OnCardPurchased += HandleCardPurchased;
     }
 
     private void OnDisable()
     {
         GameStateManager.OnStateChanged -= HandleStateChanged;
-        UpgradeCardManager.OnCardPurchased -= HandleCardPurchased;
+        ShopManager.OnCardPurchased -= HandleCardPurchased;
     }
 
     private void HandleStateChanged(GameState previousState, GameState newState)
@@ -30,7 +30,7 @@ public class UpgradeSelectionHealUI : MonoBehaviour
         RefreshText();
     }
 
-    private void HandleCardPurchased(UpgradeOption upgrade)
+    private void HandleCardPurchased(UpgradeBase upgrade)
     {
         Debug.Log("HandleCardPurchased");
         RefreshText();

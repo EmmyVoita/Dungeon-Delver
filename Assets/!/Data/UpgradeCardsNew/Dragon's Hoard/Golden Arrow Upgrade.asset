@@ -12,12 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 522f280fbc610cc45874fce83996cfbe, type: 3}
   m_Name: Golden Arrow Upgrade
   m_EditorClassIdentifier: Assembly-CSharp::GoldenArrowUpgrade
-  _cost: 0
+  upgradeId: e21ac7c4-684e-48e6-b14b-5a7258e6a0f9
+  category: 3
+  requiredUpgrades: []
+  baseOfferWeight: 1.5
+  _cost: 200
   _maxStacks: 2
+  duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
   centerIcon: {fileID: 21300000, guid: 4705d16a6c07bff4ba57490aab161ee9, type: 3}
-  icon: {fileID: 21300000, guid: 2d443a82efa21944b87283be14f7a267, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Golden Combo
   descriptionTemplate: Every {COMBO_REQUIRED} combo, transform {ARROWS_GRANTED} arrows

@@ -1,16 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(
-    menuName = "Intermediate Effects/Money Discounts Ability Cost")]
-public class MoneyDiscountsAbilityCost : UpgradeBase
+[CreateAssetMenu( menuName = "Intermediate Effects/Money Discounts Ability Cost")]
+public class MoneyDiscountsAbilityCost : CurrencyWeightedUpgradeBase
 {
-    [SerializeField, Min(1)]
-    private int currencyStep = 200;
-
     [SerializeField, Min(0)]
     private int abilityCostAmount = 1;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace(
@@ -18,7 +15,7 @@ public class MoneyDiscountsAbilityCost : UpgradeBase
                 $"<color=#{UIColors.ToHex(UIColors.Green)}>{abilityCostAmount:N0}</color>")
             .Replace(
                 "{CURRENCY_STEP}",
-                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{currencyStep:N0}</color>");
+                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>");
     }
 
     public override string GetDetails()
@@ -29,7 +26,7 @@ public class MoneyDiscountsAbilityCost : UpgradeBase
                 $"<color=#{UIColors.ToHex(UIColors.Green)}>{abilityCostAmount:N0}</color>")
             .Replace(
                 "{CURRENCY_STEP}",
-                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{currencyStep:N0}</color>");
+                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>");
     }
 
     public override void Apply()
@@ -37,7 +34,7 @@ public class MoneyDiscountsAbilityCost : UpgradeBase
         AbilityChargeManager.Instance.RegisterPermanent(
             new CurrencyAbilityCostUpgrade(
                 currencyStep,
-                abilityCostAmount));
+                abilityCostAmount), this);
         
     }
 }

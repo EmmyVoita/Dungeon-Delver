@@ -50,11 +50,11 @@ public class AbilityUnlockManager : MonoBehaviour
 
             foreach(AbilityData ability in abilityDatabase.abilities)
             {
-                Debug.Log($"Highscore => {ScoreManager.Instance.HighScore}, score required => {ability.scoreRequirement}");
+                Debug.Log($"Highscore => {ScoreManager.Instance.HighScore()}, score required => {ability.scoreRequirement}");
                 records.Add(new AbilityUnlockRecord()
                 {
                     abilityType = ability.abilityType,
-                    unlocked = ScoreManager.Instance.HighScore >= ability.scoreRequirement,
+                    unlocked = ScoreManager.Instance.HighScore() >= ability.scoreRequirement,
                     presented = ability.scoreRequirement == 0 ? true : false
                 });
             }
@@ -76,7 +76,7 @@ public class AbilityUnlockManager : MonoBehaviour
             records.Add(new AbilityUnlockRecord()
             {
                 abilityType = abilityDatabase.abilities[i].abilityType,
-                unlocked = ScoreManager.Instance.HighScore >= abilityDatabase.abilities[i].scoreRequirement,
+                unlocked = ScoreManager.Instance.HighScore() >= abilityDatabase.abilities[i].scoreRequirement,
                 presented = _saveData.records[i].presented
             });
         }
@@ -152,21 +152,14 @@ public class AbilityUnlockManager : MonoBehaviour
     {
         foreach (AbilityData ability in abilityDatabase.abilities)
         {
-            bool exists = _saveData.records.Any(
-                r => r.abilityType == ability.abilityType
-            );
+            bool exists = _saveData.records.Any(r => r.abilityType == ability.abilityType);
 
             if (!exists)
             {
-                Debug.Log($"Adding missing ability record: {ability.name}");
-
                 _saveData.records.Add(new AbilityUnlockRecord()
                 {
                     abilityType = ability.abilityType,
-                    unlocked =
-                        ScoreManager.Instance.HighScore
-                        >= ability.scoreRequirement,
-
+                    unlocked = ScoreManager.Instance.HighScore() >= ability.scoreRequirement,
                     presented = ability.scoreRequirement == 0
                 });
             }

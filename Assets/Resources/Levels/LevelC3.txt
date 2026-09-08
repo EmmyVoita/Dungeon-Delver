@@ -13,7 +13,7 @@
 7.5,arrow,down,6,normalarrow
 8,arrow,up,6,normalarrow
 9,arrow,up,6,normalarrow
-9,arrow,left,8,delayedarrow
+9,arrow,left,10,delayedarrow
 10,arrow,up,6,normalarrow
 12,arrow,up,6,normalarrow
 12.5,arrow,right,6,normalarrow
@@ -49,7 +49,7 @@
 55,arrow,right,6,normalarrow
 55.5,arrow,right,6,normalarrow
 56,arrow,up,6,normalarrow
-56,arrow,left,8,delayedarrow
+56,arrow,left,10,delayedarrow
 57,arrow,right,6,normalarrow
 59,arrow,down,6,normalarrow
 60,arrow,right,6,normalarrow
@@ -72,12 +72,12 @@
 99.5,arrow,right,6,normalarrow
 100,arrow,up,6,normalarrow
 100.5,arrow,left,6,normalarrow
-100.5,arrow,down,8,delayedarrow
+100.5,arrow,down,10,delayedarrow
 101,arrow,left,6,normalarrow
 101.5,arrow,up,6,normalarrow
 102,arrow,right,6,normalarrow
 103,arrow,right,6,normalarrow
-103,arrow,left,8,delayedarrow
+103,arrow,left,10,delayedarrow
 104,arrow,down,6,normalarrow
 106,arrow,up,6,normalarrow
 107,arrow,right,6,normalarrow
@@ -92,7 +92,7 @@
 112.25,arrow,right,6,normalarrow
 112.5,arrow,right,6,normalarrow
 113,arrow,up,6,normalarrow
-114,arrow,left,8,delayedarrow
+114,arrow,left,10,delayedarrow
 114,arrow,up,6,normalarrow
 114.25,arrow,up,6,normalarrow
 114.5,arrow,up,6,normalarrow
@@ -100,7 +100,7 @@
 115.5,arrow,up,6,normalarrow
 116.5,arrow,right,6,normalarrow
 117,arrow,up,6,normalarrow
-117.5,arrow,right,8,delayedarrow
+117.5,arrow,right,10,delayedarrow
 118,arrow,up,6,normalarrow
 118.25,arrow,up,6,normalarrow
 118.5,arrow,up,6,normalarrow

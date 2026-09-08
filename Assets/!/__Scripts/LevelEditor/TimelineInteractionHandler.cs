@@ -9,7 +9,8 @@ public class TimelineInteractionHandler :
 {
     public void OnPointerMove(PointerEventData e)
     {
-        if (!TimelineToolController.Instance.IsAddArrowMode)
+        if (!TimelineToolController.Instance.IsAddArrowMode && 
+            !TimelineToolController.Instance.IsAddChallengeMode)
             return;
 
         LevelTimelineUI.Instance.UpdatePlacementFromCursor(e);
@@ -17,33 +18,49 @@ public class TimelineInteractionHandler :
 
     public void OnPointerDown(PointerEventData e)
     {
-        Debug.Log("TimelineInteractionHandler: OnPointerDown");
-        if (!TimelineToolController.Instance.IsAddArrowMode)
+        switch(TimelineToolController.Instance.CurrentTool)
         {
-            Debug.Log("TimelineInteractionHandler: Not in AddArrowMode, ignoring click");
-            return;
-        }
-            
+            case TimelineTool.AddArrow:
 
-        if (e.button == PointerEventData.InputButton.Left)
-        {
-            Debug.Log("TimelineInteractionHandler: Confirming arrow placement");
-            LevelTimelineUI.Instance.ConfirmArrowPlacement(
-                LevelTimelineUI.Instance.CurrentPlacementTime
-            );
-            e.Use();
-        }
-        else
-        {
-            // Right-click / middle-click cancels
-            TimelineToolController.Instance.ExitTool();
-            e.Use();
+                if (e.button == PointerEventData.InputButton.Left)
+                {
+                    PlayAudio();
+                    LevelTimelineUI.Instance.ConfirmArrowPlacement(LevelTimelineUI.Instance.CurrentPlacementTime);
+                }
+                else
+                    TimelineToolController.Instance.ExitTool();
+
+                e.Use();
+                break;
+
+            case TimelineTool.AddChallenge:
+
+                if (e.button == PointerEventData.InputButton.Left)
+                {
+                    PlayAudio();
+                    LevelTimelineUI.Instance.ConfirmChallengePlacement(LevelTimelineUI.Instance.CurrentPlacementTime);
+                }
+                else
+                    TimelineToolController.Instance.ExitTool();
+
+                e.Use();
+                break;
+
+            default:
+            Debug.Log("TimelineInteractionHandler: Not in AddArrowMode, ignoring click");
+            break;
         }
     }
 
+    private void PlayAudio()
+    {
+         AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, Camera.main.transform.position);
+    } 
+
     public void OnPointerExit(PointerEventData e)
     {
-        if (TimelineToolController.Instance.IsAddArrowMode)
+        if (TimelineToolController.Instance.IsAddArrowMode ||
+            TimelineToolController.Instance.IsAddChallengeMode)
         {
             LevelTimelineUI.Instance.ShowPlacementMarker(false);
         }

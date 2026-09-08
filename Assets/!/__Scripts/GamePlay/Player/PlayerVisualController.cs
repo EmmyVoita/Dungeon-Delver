@@ -1,5 +1,55 @@
 using UnityEngine;
 
+
+public class PlayerVisualController : MonoBehaviour
+{
+    [SerializeField] private SpriteRenderer spriteRenderer;
+
+    [Header("Directional Sprites")]
+    [SerializeField] private Sprite upSprite;
+    [SerializeField] private Sprite downSprite;
+    [SerializeField] private Sprite leftSprite;
+    [SerializeField] private Sprite rightSprite;
+
+    private Vector2 _lastDirection = Vector2.zero;
+
+    private void Update()
+    {
+        if (Player.Instance == null)
+            return;
+
+        Vector2 direction = Player.Instance.LastFacingDirection;
+
+        if (direction == _lastDirection)
+            return;
+
+        _lastDirection = direction;
+
+        UpdateSprite(direction);
+    }
+
+    private void UpdateSprite(Vector2 direction)
+    {
+        // Pick whichever axis has the larger magnitude.
+        // This also works if the player ever uses 8-direction input.
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+        {
+            spriteRenderer.sprite =
+                direction.x > 0
+                    ? rightSprite
+                    : leftSprite;
+        }
+        else
+        {
+            spriteRenderer.sprite =
+                direction.y > 0
+                    ? upSprite
+                    : downSprite;
+        }
+    }
+}
+
+/*
 public class PlayerVisualController : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer spriteRenderer;
@@ -26,6 +76,7 @@ public class PlayerVisualController : MonoBehaviour
 
     private void HandleStateChanged(PlayerControlState state)
     {
+        
         switch (state)
         {
             case PlayerControlState.Normal:
@@ -40,5 +91,7 @@ public class PlayerVisualController : MonoBehaviour
                 spriteRenderer.sprite = lockedShooterSprite;
                 break;
         }
+        
     }
 }
+*/

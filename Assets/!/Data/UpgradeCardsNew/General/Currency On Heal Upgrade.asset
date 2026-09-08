@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bceafca393bd6f543ae59d046972b925, type: 3}
+  m_Name: Currency On Heal Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::CurrencyOnHealUpgrade
+  upgradeId: 7bb3cf3c-ed34-4b34-b18b-7e2c47f900a3
+  category: 3
+  requiredUpgrades: []
+  baseOfferWeight: 1.1
+  _cost: 150
+  _maxStacks: 2
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: f7a0d8a1b06371f409649348182c85d0, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Lucky Brew
+  descriptionTemplate: Each time you heal for at least {HEAL_AMOUNT}, gain {CURRENCY}.
+  detailsTemplate: This upgrade stacks up to {MAX_STACKS}.
+  currencyAmount: 25
+  healAmountRequired: 1

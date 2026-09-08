@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,6 +12,8 @@ public class RoundStatsTracker : MonoBehaviour
     public int Crit { get; private set; }
     public int DamageTaken { get; private set; }
     public int HighestCombo { get; private set; }
+    public int AbilityUsed { get; private set; }
+    public int AbilityCharge { get; private set; }
 
     public float RoundAccuracy => Spawned == 0 ? 0f : (float)Hit / Spawned;
     public bool PerfectRound => Spawned > 0 && Hit == Spawned;
@@ -45,6 +48,9 @@ public class RoundStatsTracker : MonoBehaviour
         Player.OnDamageTaken += HandleDamageTaken;
         ComboManager.OnComboBreak += HandleComboBreak;
         ScoreManager.OnScoreAdded += AddScore;
+        Player.OnAbilityUsed += AddAbilityUse;
+        Player.OnAbilityChargeChanged += AddAbilityCharge;
+
 
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
@@ -55,6 +61,8 @@ public class RoundStatsTracker : MonoBehaviour
         Player.OnDamageTaken -= HandleDamageTaken;
         ComboManager.OnComboBreak -= HandleComboBreak;
         ScoreManager.OnScoreAdded -= AddScore;
+        Player.OnAbilityUsed -= AddAbilityUse;
+        Player.OnAbilityChargeChanged -= AddAbilityCharge;
 
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
@@ -63,6 +71,8 @@ public class RoundStatsTracker : MonoBehaviour
     {
         Reset();
     }
+
+ 
 
     private void HandleComboBreak(int comboCount, ComboBreakReason reason)
     {
@@ -77,6 +87,17 @@ public class RoundStatsTracker : MonoBehaviour
     public void AddScore(int amount)
     {
         Score += amount;
+    }
+
+    public void AddAbilityUse()
+    {
+        AbilityUsed += 1;
+    }
+
+    public void AddAbilityCharge(int previous, int attemptedDelta, int appliedDelta)
+    {
+        if(appliedDelta > 0)
+            AbilityCharge += appliedDelta;
     }
 
     public void RegisterArrow(ArrowResolvedData data)
@@ -101,6 +122,8 @@ public class RoundStatsTracker : MonoBehaviour
         Missed = 0;
         DamageTaken = 0;
         HighestCombo = 0;
+        AbilityUsed = 0;
+        AbilityCharge = 0;
     }
 
     public void AddSpawned(int count = 1)

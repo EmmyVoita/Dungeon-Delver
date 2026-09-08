@@ -25,7 +25,7 @@ public class RecoveryArrowUpgrade : UpgradeBase
         RecoveryArrowManager.Instance.AddRecoveryArrow(this);
     }
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{MIN_COUNT_REQUIRED}", minComboRequired.ToString())

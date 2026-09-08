@@ -17,5 +17,7 @@ MonoBehaviour:
   fileName: movingrotatingrings
   prefab: {fileID: 7320925074914897176, guid: ca0257cdc76d54f4ab293fcdf6dd8dbd, type: 3}
   icon: {fileID: 0}
-  description: 'Multiple rings of different sizes with spikes on them move horizontally
-    across the screen. Jump multiple times around the spikes. '
+  stageNumber: 2
+  hasBossOverride: 1
+  description: 'Multiple rings with damaging spikes move horizontally across the
+    screen. Jump multiple times around the spikes to dodge them. '

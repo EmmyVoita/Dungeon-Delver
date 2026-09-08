@@ -113,7 +113,7 @@ public class GameStatsUI : MonoBehaviour
 
     private IEnumerator PlayBreakdownIntros()
     {
-        RoundManager.Instance?.runStats.PrintStats();
+        ScoreManager.Instance.RunStatsTracker.PrintStats();
 
         for (int i = 0; i < _rowAnimators.Count; i++)
         {

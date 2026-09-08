@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aab220a00fcba3449fce6be9243d490, type: 3}
+  m_Name: Ability Arrow Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::AbilityArrowUpgrade
+  upgradeId: f4b33114-e621-4876-9543-b62bff6d699e
+  category: 4
+  requiredUpgrades: []
+  baseOfferWeight: 1
+  _cost: 200
+  _maxStacks: 999
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Ability Arrow
+  descriptionTemplate: Arrows have a {SPAWN_CHANCE} chance to become an {EMPOWERED_ARROW}.
+    Critting an {EMPOWERED_ARROW} activates your ability for free.
+  detailsTemplate: 'This upgrade stacks. Each stack further increases the spawn chance
+    by {SPAWN_CHANCE}. '
+  spawnChance: 0.01

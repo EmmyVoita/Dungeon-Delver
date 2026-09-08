@@ -17,7 +17,8 @@ MonoBehaviour:
   fileName: bigfallingbreakable
   prefab: {fileID: 9155887667063378824, guid: a7dabb23c6264a14a894990ca1f359b3, type: 3}
   icon: {fileID: 0}
-  description: Breakable objects fall towards the player periodically. Shoot the
-    objects to break them. Broken objects fire projectiles which must be jumped over.
-    In addition there is a giant breakable object that must be shot repeatedly before
-    it hits the player.
+  stageNumber: 2
+  hasBossOverride: 0
+  description: 'Breakable objects fall towards the player periodically. Shoot the
+    objects to break them. Broken objects fire projectiles to dodge. In addition,
+    at the same time, there is a giant breakable that must be destroyed. '

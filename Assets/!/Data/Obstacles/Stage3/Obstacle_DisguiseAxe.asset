@@ -17,4 +17,5 @@ MonoBehaviour:
   fileName: disguiseaxegame
   prefab: {fileID: 6769059283685959404, guid: 6a4881c8cf6d69946aa7bbf42ffaba77, type: 3}
   icon: {fileID: 0}
+  stageNumber: 3
   description: sine wave

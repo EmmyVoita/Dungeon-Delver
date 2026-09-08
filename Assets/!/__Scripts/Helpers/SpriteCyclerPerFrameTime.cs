@@ -14,7 +14,7 @@ public class SpriteCyclerPerFrameTime : MonoBehaviour
 
     private int _currentFrame = 0;
     private float _timer = 0f;
-    private bool _isPlaying = true;
+    private bool _isPlaying = false;
 
     private void Awake()
     {
@@ -24,15 +24,7 @@ public class SpriteCyclerPerFrameTime : MonoBehaviour
             Stop();
     }
 
-    public void Reset()
-    {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        _currentFrame = 0;
-        _timer = 0f;
 
-        if (frames != null && frames.Length > 0 && spriteRenderer != null)
-            spriteRenderer.sprite = frames[0];
-    }
 
     private void OnValidate()
     {
@@ -86,11 +78,17 @@ public class SpriteCyclerPerFrameTime : MonoBehaviour
         }
     }
 
-    // Optional helpers
+
     public void Play()
     {
-        
         _isPlaying = true;
+
+        if (spriteRenderer != null &&
+            frames != null &&
+            frames.Length > 0)
+        {
+            spriteRenderer.sprite = frames[_currentFrame];
+        }
     }
 
     public void Stop()
@@ -100,7 +98,15 @@ public class SpriteCyclerPerFrameTime : MonoBehaviour
 
     public void Restart()
     {
-        Reset();
+        _currentFrame = 0;
+        _timer = 0f;
         _isPlaying = true;
+
+        if (spriteRenderer != null &&
+            frames != null &&
+            frames.Length > 0)
+        {
+            spriteRenderer.sprite = frames[0];
+        }
     }
 }

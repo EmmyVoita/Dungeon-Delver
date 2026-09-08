@@ -18,6 +18,7 @@ public class FallingBreakableSpawner : ChallengeBase
         AllDestroyed,
         Timer
     }
+    [SerializeField] private bool addCanvasPopup = true;
     [SerializeField] private bool listenForBossActive = false;
     [SerializeField] private LifetimeMode lifetimeMode = LifetimeMode.SelfManaged;
     [SerializeField] private bool switchPlayerState = true;
@@ -32,6 +33,7 @@ public class FallingBreakableSpawner : ChallengeBase
     public int spawnCount = 4;
 
     [Header("Shooting Settings")]
+    public InputActionType fireAction = InputActionType.Confirm;
     public float minFireDelay = 0.4f;
     private float nextAllowedFireTime = 0f;
     private int lastDirectionIndex = -1;
@@ -207,18 +209,32 @@ public class FallingBreakableSpawner : ChallengeBase
     protected override void OnDestroy()
     {
         base.OnDestroy();
+        
+        if(addCanvasPopup)
+            GameplayUIController.Instance.HideInputPopup();
+
         ForceKillAll();
     }
 
     public override void Begin(object config = null)
     {
         base.Begin();
+
+        if(addCanvasPopup)
+            GameplayUIController.Instance.ShowInputPopup(fireAction, 
+                                                        false,
+                                                        prefixText: "[",
+                                                        suffixText: "]",
+                                                        Color.yellow);
         StartCoroutine(SpawnRoutine());
     }
 
     public override void End()
     {
         base.End();
+
+        if(addCanvasPopup)
+            GameplayUIController.Instance.HideInputPopup();
         Destroy(gameObject);
     }
 }

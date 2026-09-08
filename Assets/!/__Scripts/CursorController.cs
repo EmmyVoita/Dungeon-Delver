@@ -32,34 +32,6 @@ public class CursorController : MonoBehaviour
         //Cursor.visible = false;
     }
 
-    /*
-    private void Update()
-    {
-        Vector2 localPoint;
-
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvas.transform as RectTransform,
-            Input.mousePosition,
-            canvas.worldCamera,
-            out localPoint
-        );
-
-        if (smoothFollow)
-        {
-            cursorRect.localPosition = Vector2.SmoothDamp(
-                cursorRect.localPosition,
-                localPoint,
-                ref velocity,
-                1f / followSpeed
-            );
-        }
-        else
-        {
-            cursorRect.localPosition = localPoint;
-            cursorVisibleRect.localPosition = localPoint;
-        }
-    }
-    */
     
     private void Update()
     {

@@ -17,4 +17,6 @@ MonoBehaviour:
   fileName: horizontalbeam
   prefab: {fileID: 6654523266709301360, guid: d808d695cb172a74b84be5bd44e2603a, type: 3}
   icon: {fileID: 0}
-  description: Horizontal laser that fires after a short delay
+  stageNumber: 1
+  hasBossOverride: 1
+  description: A horizontal laser fires after a short delay.

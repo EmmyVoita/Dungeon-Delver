@@ -18,7 +18,6 @@ public class HealOnFullAbilityBar : UpgradeEffectBase
 
     private void HandleAbilityFilled()
     {
-        Debug.Log("💫 Heal On Full Ability Bar Activated!");
         Player.Instance.HealPlayer(healthAmount);
     }
     

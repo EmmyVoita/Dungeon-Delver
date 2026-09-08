@@ -9,6 +9,7 @@ public class PlayerDeathEffects : MonoBehaviour
     [SerializeField] private SpriteRenderer playerSrend;
     [SerializeField] private Transform heart;
     [SerializeField] private VisualEffect rainbowBurst;
+    [SerializeField] private string onPlayEvent = "OnPlay";
 
     [Header("Timing")]
     [SerializeField] private float scaleDuration = 0.35f;
@@ -92,7 +93,9 @@ public class PlayerDeathEffects : MonoBehaviour
         Sequence seq = DOTween.Sequence();
 
         if (rainbowBurst != null)
-                rainbowBurst.Play();
+        {
+            rainbowBurst.SendEvent(onPlayEvent);
+        }
 
         // Heart grows
         seq.Append(

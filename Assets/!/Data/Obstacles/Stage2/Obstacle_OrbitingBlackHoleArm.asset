@@ -17,5 +17,7 @@ MonoBehaviour:
   fileName: orbitingblackholearm
   prefab: {fileID: 1590390418113845902, guid: 405ec5f70d63f324595e1b3c5e05497e, type: 3}
   icon: {fileID: 0}
-  description: An object rotates around the player. This object has a rotating arm,
-    which the player must jump to dodge.
+  stageNumber: 2
+  hasBossOverride: 0
+  description: An object rotates around the player. This object has an arm of damaging
+    spikes which rotates around it.

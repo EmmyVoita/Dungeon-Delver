@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 263579585914177324}
   - component: {fileID: 448539986581811807}
   - component: {fileID: 526128509702738997}
-  - component: {fileID: -5324957223953014125}
   m_Layer: 0
   m_Name: VE_DirectionalGoalEffect
   m_TagString: Untagged
@@ -27,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 812096446077587059}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -44,8 +43,8 @@ VisualEffect:
   m_GameObject: {fileID: 812096446077587059}
   m_Enabled: 1
   m_Asset: {fileID: 8926484042661614526, guid: d53e12b85a56e6b4fb85b4ee6f40c4fd, type: 3}
-  m_InitialEventName: OnPlay
-  m_InitialEventNameOverriden: 0
+  m_InitialEventName: 
+  m_InitialEventNameOverriden: 1
   m_StartSeed: 0
   m_ResetSeedOnPlay: 1
   m_AllowInstancing: 1
@@ -56,7 +55,7 @@ VisualEffect:
       - m_Value: 2.25
         m_Name: Size
         m_Overridden: 1
-      - m_Value: 0.2
+      - m_Value: 0
         m_Name: Spawn Radius
         m_Overridden: 1
       - m_Value: 0.75
@@ -68,10 +67,10 @@ VisualEffect:
       - m_Value: 1
         m_Name: Min Speed
         m_Overridden: 1
-      - m_Value: 0.75
+      - m_Value: 0.4
         m_Name: Cone_topRadius
         m_Overridden: 1
-      - m_Value: 0.1
+      - m_Value: 0.2
         m_Name: Cone_baseRadius
         m_Overridden: 1
       - m_Value: 2
@@ -80,29 +79,32 @@ VisualEffect:
       - m_Value: 5
         m_Name: RotationSpeed
         m_Overridden: 1
+      - m_Value: 0.5
+        m_Name: Cone_height
+        m_Overridden: 1
     m_Vector2f:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 0, y: 0.5, z: 0}
+      - m_Value: {x: 0, y: 0, z: 0}
         m_Name: Cone_transform_position
         m_Overridden: 1
-      - m_Value: {x: 0, y: 0, z: -90}
+      - m_Value: {x: 0, y: 0, z: 0}
         m_Name: Cone_transform_angles
         m_Overridden: 1
     m_Vector4f:
       m_Array:
-      - m_Value: {x: 0.7490196, y: 0.7490196, z: 0.7490196, w: 1}
+      - m_Value: {x: 1.4980392, y: 1.4980392, z: 1.4980392, w: 1}
         m_Name: Main Color
         m_Overridden: 1
     m_Uint:
       m_Array: []
     m_Int:
       m_Array:
-      - m_Value: 8
+      - m_Value: 4
         m_Name: Min Particle Count
         m_Overridden: 1
-      - m_Value: 12
+      - m_Value: 6
         m_Name: Max Particle Count
         m_Overridden: 1
     m_Matrix4x4f:
@@ -206,22 +208,6 @@ VFXRenderer:
   m_SortingLayer: -1
   m_SortingOrder: -100
   m_MaskInteraction: 0
---- !u!114 &-5324957223953014125
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 812096446077587059}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1ac467f0417cb34986189b4098653fd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vfx:
-  - {fileID: 448539986581811807, guid: 1e19465e3eee00d49818de76cc4a55bb, type: 3}
-  playEventName: OnPlay
-  safetyLifetime: 5
 --- !u!1 &5437969112031451050
 GameObject:
   m_ObjectHideFlags: 0

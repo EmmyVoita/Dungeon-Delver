@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: LevelA1
   m_EditorClassIdentifier: Assembly-CSharp::LevelDataObject
   _levelFile: {fileID: 4900000, guid: cca5fa091a3332246b7d792cf404cd21, type: 3}
-  _baseCurrencyReward: 100
+  _baseCurrencyReward: 200

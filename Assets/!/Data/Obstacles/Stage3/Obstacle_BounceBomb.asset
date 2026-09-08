@@ -12,9 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
   m_Name: Obstacle_BounceBomb
   m_EditorClassIdentifier: 
-  displayName: Bounce Bomb
+  displayName: Bomb Defusal
   textColor: {r: 0.7176471, g: 0.9411765, b: 0.5372549, a: 1}
   fileName: bouncebomb
   prefab: {fileID: 3757429306712134590, guid: 15d7e47e67766534e98a9d13b11030c8, type: 3}
   icon: {fileID: 0}
-  description: 
+  stageNumber: 3
+  hasBossOverride: 0
+  description: A bomb spawns that must be hit repeatedly to prevent it from exploding.
+    If the bomb does it explode, it spawns a ring of tracking fireballs. The fireballs
+    are easier to dodge the more the bomb was hit.

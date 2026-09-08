@@ -22,7 +22,7 @@ public class PlayerOrbitingShieldsAbility : AbilityBase
     private void Update()
     {
         // Wait for launch input if shield already spawned
-        if (awaitingLaunch && InputBindingManager.Instance.GetKeyDown(InputActionType.UseAbility))
+        if (InputBindingManager.Instance.GetKeyDown(InputActionType.UseAbility))
         {
             orbitingShield.LaunchAllShields();
             awaitingLaunch = false; // reset

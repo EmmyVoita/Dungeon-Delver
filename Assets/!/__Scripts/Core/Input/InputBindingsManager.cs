@@ -27,21 +27,6 @@ public class InputBindingManager : MonoBehaviour
         { Key.DownArrow, "↓" }
     };
 
-    // Define which actions are exclusive with each other
-    private static readonly HashSet<InputActionType> MovementGroup = new()
-    {
-        InputActionType.MoveUp,
-        InputActionType.MoveDown,
-        InputActionType.MoveLeft,
-        InputActionType.MoveRight
-    };
-
-    // Confirm & Back cannot share a key
-    private static readonly HashSet<InputActionType> NavigationGroup = new()
-    {
-        InputActionType.Confirm,
-        InputActionType.Back
-    };
 
     private static readonly HashSet<Key> ForbiddenKeys = new()
     {
@@ -67,6 +52,26 @@ public class InputBindingManager : MonoBehaviour
 
     private string FilePath => Path.Combine(Application.persistentDataPath, FileName);
 
+    private readonly HashSet<InputActionType> blockedUntilRelease = new();
+
+    public void BlockUntilRelease(InputActionType action)
+    {
+        blockedUntilRelease.Add(action);
+    }
+
+    private bool IsBlocked(InputActionType action, Key key)
+    {
+        if (!blockedUntilRelease.Contains(action))
+            return false;
+
+        // Once the physical key has been released,
+        // allow this action again.
+        if (!Keyboard.current[key].isPressed)
+            blockedUntilRelease.Remove(action);
+
+        return true;
+    }
+
     // ------------------------------------------------------------
     // Initialization
     // ------------------------------------------------------------
@@ -79,17 +84,29 @@ public class InputBindingManager : MonoBehaviour
         LoadBindings();
     }
 
+    private void UpdateBlockedInputs()
+    {
+        if (Keyboard.current == null)
+            return;
+
+        blockedUntilRelease.RemoveWhere(action =>
+        {
+            if (!bindings.TryGetValue(action, out Key key))
+                return true;
+
+            return !Keyboard.current[key].isPressed;
+        });
+    }
+
     void Update()
     {
+        UpdateBlockedInputs();
+
         if (GetKeyDown(InputActionType.Confirm))
-        {
             OnConfirmPressed?.Invoke();
-        }
 
         if (GetKeyDown(InputActionType.Jump))
-        {
-              OnJumpPressed?.Invoke();
-        }
+            OnJumpPressed?.Invoke();
     }
 
     // ------------------------------------------------------------
@@ -114,7 +131,7 @@ public class InputBindingManager : MonoBehaviour
         bindings[InputActionType.Jump] = Key.Space;
         bindings[InputActionType.Confirm] = Key.Enter;
         bindings[InputActionType.Back] = Key.Escape;
-        bindings[InputActionType.Interact] = Key.R;
+        bindings[InputActionType.Reroll] = Key.R;
         bindings[InputActionType.ViewUpgrades] = Key.Tab;
     }
 
@@ -191,55 +208,22 @@ public class InputBindingManager : MonoBehaviour
 
     public bool TrySetKey(InputActionType action, Key newKey)
     {
-        // ------------------------------------------------------------
-        // 0. Forbidden keys
-        // ------------------------------------------------------------
+        // Forbidden keys
         if (ForbiddenKeys.Contains(newKey))
             return false;
 
-        // ------------------------------------------------------------
-        // 1. Movement group — all actions here must have unique keys
-        // ------------------------------------------------------------
-        if (MovementGroup.Contains(action))
+        // No two actions can share the same key
+        foreach (var pair in bindings)
         {
-            foreach (var pair in bindings)
+            if (pair.Key != action && pair.Value == newKey)
             {
-                if (MovementGroup.Contains(pair.Key) &&
-                    pair.Key != action &&
-                    pair.Value == newKey)
-                {
-                    return false; // conflict in WASD
-                }
-            }
-
-            //any of the movement keys cannot be bound to the confrim key
-            Key confirmKey;
-            bindings.TryGetValue(InputActionType.Confirm, out confirmKey);
-            if(newKey == confirmKey)
                 return false;
-        }
-
-        // ------------------------------------------------------------
-        // 2. Navigation group — Confirm & Back cannot share keys
-        // ------------------------------------------------------------
-        if (NavigationGroup.Contains(action))
-        {
-            foreach (var pair in bindings)
-            {
-                if (NavigationGroup.Contains(pair.Key) &&
-                    pair.Key != action &&
-                    pair.Value == newKey)
-                {
-                    return false; // Confirm clash with Back OR Back clash with Confirm
-                }
             }
         }
 
-        // ------------------------------------------------------------
-        // 3. All rules passed → apply binding
-        // ------------------------------------------------------------
         bindings[action] = newKey;
         SaveBindings();
+
         return true;
     }
 
@@ -252,14 +236,8 @@ public class InputBindingManager : MonoBehaviour
         if (key == Key.None || Keyboard.current == null)
             return false;
 
-        // 🔥 BLOCK CONFIRM
-        if (action == InputActionType.Confirm && blockConfirmUntilRelease)
-        {
-            if (!Keyboard.current[key].isPressed)
-                blockConfirmUntilRelease = false;
-
+        if (blockedUntilRelease.Contains(action))
             return false;
-        }
 
         bool fallBackKeyDown = false;
 
@@ -291,14 +269,8 @@ public class InputBindingManager : MonoBehaviour
         if (key == Key.None || Keyboard.current == null)
             return false;
 
-        // 🔥 BLOCK CONFIRM
-        if (action == InputActionType.Confirm && blockConfirmUntilRelease)
-        {
-            if (!Keyboard.current[key].isPressed)
-                blockConfirmUntilRelease = false;
-
+        if (blockedUntilRelease.Contains(action))
             return false;
-        }
 
         bool fallBackKeyUp = false;
 
@@ -331,14 +303,6 @@ public class InputBindingManager : MonoBehaviour
             
         return Keyboard.current[key].isPressed;
     }
-
-   private bool blockConfirmUntilRelease = false;
-
-    public void BlockConfirmUntilRelease()
-    {
-        blockConfirmUntilRelease = true;
-    }
-
 
 
 }

@@ -169,7 +169,7 @@ public class ScoreTallyController : MonoBehaviour
                     break;
             }
 
-            int finalAddedScore = ScoreManager.Instance.AddScore(added,type == TallyType.Combo ? ScoreSource.Combo : ScoreSource.Bonus);
+            int finalAddedScore = ScoreManager.Instance.AddScore(added);
 
             OnTallyTick?.Invoke(new TallyTick
             {

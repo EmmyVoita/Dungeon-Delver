@@ -17,5 +17,7 @@ MonoBehaviour:
   fileName: horizontalshooter
   prefab: {fileID: 8931257001343916097, guid: 6b311ee74c8739d4b994d94738695cef, type: 3}
   icon: {fileID: 0}
-  description: Horizontal swords shoot that towards the player after a delay. Jump
+  stageNumber: 1
+  hasBossOverride: 0
+  description: Horizontal swords shoot out towards the player after a delay. Jump
     through a gap to dodge it.

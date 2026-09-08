@@ -15,7 +15,7 @@ public class ChallengeRewardManager : RuntimeModifierManager<IChallengeReward>
     private Tween _borderTween; 
 
 
-    private List<IChallengeReward> _rewardsRolledToBeActive;
+    private List<RuntimeModifierEntry<IChallengeReward>> _rewardsRolledToBeActive;
 
 
     private void Awake()
@@ -48,20 +48,23 @@ public class ChallengeRewardManager : RuntimeModifierManager<IChallengeReward>
 
     public void RegisterOrStackCurrencyReward(
         int currencyReward,
+        UpgradeBase upgradeBase,
         int maxUses = 999,
         float appearancePercentage = 1f)
     {
         Initialize();
 
-        CurrencyChallengeReward existingReward =
-            renewingModifiers
-                .OfType<CurrencyChallengeReward>()
-                .FirstOrDefault();
+        RuntimeModifierEntry<IChallengeReward> existingRewardEntry = permanentModifiers
+                .FirstOrDefault(entry => entry.Modifier is CurrencyChallengeReward);
 
-        if (existingReward != null)
+        if (existingRewardEntry?.Modifier is CurrencyChallengeReward existingReward)
         {
             existingReward.AddStack();
             return;
+        }
+        else
+        {
+            //Debug.LogError("CurrencyChallengeReward existing not found so creating another");
         }
 
         CurrencyChallengeReward newReward = new(
@@ -70,7 +73,7 @@ public class ChallengeRewardManager : RuntimeModifierManager<IChallengeReward>
             appearancePercentage
         );
 
-        RegisterRenewing(newReward);
+        RegisterPermanent(newReward, upgradeBase);
     }
 
     // We include a variable within the IChallengeReward interface for the chance that the effect triggers
@@ -109,21 +112,19 @@ public class ChallengeRewardManager : RuntimeModifierManager<IChallengeReward>
 
         bool grantedAny = false;
 
-        _rewardsRolledToBeActive.Sort(
-            (x, y) => y.Priority.CompareTo(x.Priority)
-        );
+        _rewardsRolledToBeActive.Sort((x, y) => y.Modifier.Priority.CompareTo(x.Modifier.Priority));
 
         for (int i = 0; i < _rewardsRolledToBeActive.Count; i++)
         {
-            IChallengeReward reward = _rewardsRolledToBeActive[i];
+            RuntimeModifierEntry<IChallengeReward> reward = _rewardsRolledToBeActive[i];
 
-            if (!reward.ShouldGrantReward(damage))
+            if (!reward.Modifier.ShouldGrantReward(damage))
                 continue;
 
-            bool granted = reward.GrantReward(damage);
+            bool granted = reward.Modifier.GrantReward(damage);
             grantedAny |= granted;
 
-            if (reward.UsesRemaining <= 0)
+            if (reward.Modifier.UsesRemaining <= 0)
                 activeModifiers.Remove(reward);
         }
 
@@ -146,9 +147,9 @@ public class ChallengeRewardManager : RuntimeModifierManager<IChallengeReward>
 
         for (int i = activeModifiers.Count - 1; i >= 0; i--)
         {
-            IChallengeReward reward = activeModifiers[i];
+            RuntimeModifierEntry<IChallengeReward> reward = activeModifiers[i];
 
-            if (UnityEngine.Random.value <= reward.AppearancePercentage)
+            if (UnityEngine.Random.value <= reward.Modifier.AppearancePercentage)
             {
                 _rewardsRolledToBeActive.Add(reward);
             }

@@ -3,12 +3,13 @@ using UnityEngine;
 
 
 [CreateAssetMenu(menuName = "Upgrades/Paid Ability Use")]
-public class PaidAbilityUseUpgrade : UpgradeBase
+public class PaidAbilityUseUpgrade : CurrencyWeightedUpgradeBase
 {
+    [Header("Upgrade Settings")]
     [SerializeField] private int usesPerLevel = 1;
     [SerializeField] private int currencyCost = 50;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{USES_PER_LEVEL}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{usesPerLevel:N0}</color>")

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3341773694086323555}
   - component: {fileID: 1961112151924723959}
+  - component: {fileID: 8720649801171302554}
   m_Layer: 0
   m_Name: AnimatedContainer
   m_TagString: Untagged
@@ -58,7 +59,20 @@ MonoBehaviour:
   useScalePunch: 1
   punchScale: 1.05
   punchDuration: 0.25
-  cg: {fileID: 0}
+  cg: {fileID: 8720649801171302554}
+  rt: {fileID: 3341773694086323555}
+--- !u!225 &8720649801171302554
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568837164392264327}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2057603141450579878
 GameObject:
   m_ObjectHideFlags: 0

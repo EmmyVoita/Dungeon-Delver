@@ -42,7 +42,7 @@ public class WishingWellController : MonoBehaviour
     [Header("References")]
     [SerializeField] private GameObject wellParent;
     [SerializeField] private float closeDelay;
-    [SerializeField] private BounceOnConfirm bounceText;
+    //[SerializeField] private InputPopup bounceText;
 
     [Header("Input")]
     [SerializeField] private InputActionType tossKey = InputActionType.Confirm;
@@ -70,10 +70,6 @@ public class WishingWellController : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.I))
-        {
-            PlaySequence();
-        }
 
         if(_canTossCoin && InputFocusManager.HasFocus(this) && InputBindingManager.Instance.GetKeyDown(tossKey))
         {
@@ -100,17 +96,22 @@ public class WishingWellController : MonoBehaviour
 
         _isPlaying = true;
 
-        UpgradeCardManager.Instance.HideUpgradeUI();
+        ShopManager.Instance.HideUpgradeUI();
 
         InputFocusManager.Claim(this);
 
         StartCoroutine(InputStartDelay());
 
-        bounceText.Show();
+        //bounceText.Show();
     }
 
     private IEnumerator InputStartDelay()
     {
+        GameplayUIController.Instance.ShowInputPopup(tossKey,
+                                                     false,
+                                                     "[",
+                                                     "]",
+                                                     Color.yellow);
         yield return new WaitForSeconds(0.2f);
         _canTossCoin = true;
     }
@@ -192,6 +193,8 @@ public class WishingWellController : MonoBehaviour
 
     private IEnumerator RevealRewardRoutine(RewardDefinition reward)
     {
+        GameplayUIController.Instance.HideInputPopup();
+        
         yield return new WaitForSeconds(rewardRevealDelay);
 
         
@@ -305,7 +308,7 @@ public class WishingWellController : MonoBehaviour
     {
         wellParent.SetActive(false);
 
-        UpgradeCardManager.Instance.ShowUpgradeUI();
+        ShopManager.Instance.ShowUpgradeUI();
 
         InputFocusManager.Release(this);
     }

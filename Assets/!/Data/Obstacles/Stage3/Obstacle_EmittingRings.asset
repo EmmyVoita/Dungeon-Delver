@@ -17,6 +17,7 @@ MonoBehaviour:
   fileName: emitterrings
   prefab: {fileID: 281900086567773288, guid: 21135d94207f1c74e8f4195649fad0fc, type: 3}
   icon: {fileID: 0}
+  stageNumber: 3
   description: 'Find the safe spot
 
 '

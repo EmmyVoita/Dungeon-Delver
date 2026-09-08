@@ -155,7 +155,19 @@ public class ShrinkingRingObstacle : MonoBehaviour
 
         // Damage player
         if (Player.Instance != null)
-            Player.Instance.DamageSelf(dEf);
+        {
+            HitData hit = new()
+            {
+                Damage = dEf.damage,
+                AbilityDamage = dEf.abilityChargeDamage,
+                SourceName = dEf.sourceName,
+                Arrow = null,
+                PlayHitSound = dEf.playHitSound
+            };
+            
+            Player.Instance.ProcessHit(hit);
+        }
+            
 
         AudioHelpers.PlaySoundEffect(failSound, Camera.main.transform.position);
 

@@ -4,10 +4,14 @@ using TMPro;
 using DG.Tweening;
 using System;
 using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
-public class UpgradeCardUI : MonoBehaviour
+public class UpgradeCardUI : MonoBehaviour, IPointerClickHandler
 {
+    public static event Action<UpgradeCardUI> OnCardClicked;
+
     [Header("UI References")]
     [SerializeField] private Image backgroundImage;
     [SerializeField] private Image outlineImage;
@@ -15,8 +19,10 @@ public class UpgradeCardUI : MonoBehaviour
     [SerializeField] private RectTransform stackBadgePanel;
     [SerializeField] private Image cardDecorationImage;
     [SerializeField] private Image soldIcon;
+    [SerializeField] private CardTitleTooltip soldTitle;
     [SerializeField] private List<Image> subIconImages;
     [SerializeField] private TextMeshProUGUI stackText;
+    [SerializeField] private RectTransform coverRect;
     
 
     [Header("Animation Settings")]
@@ -36,15 +42,18 @@ public class UpgradeCardUI : MonoBehaviour
 
 
     [Header("Purchased")]
+    [SerializeField] private string soldStatement = "Sold!";
     [SerializeField] private string tintPropertyName = "_Tint";
     [SerializeField] private Color purchasedColor = Color.grey;
+    [SerializeField] private bool hideSoldPopupOnUnfocus = true;
+    [SerializeField] private float cleanUpDelay = 0.1f;
 
 
 
     [SerializeField] private RectTransform movementRect;
     private Vector3 originalScale;
     private Tween currentTween;
-    private Tween idleWobbleTween;
+    private Sequence idleSequence;
 
 
     private string descriptionText;
@@ -53,9 +62,19 @@ public class UpgradeCardUI : MonoBehaviour
     private List<Material> _runtimeIconMaterials = new();
     private Material _runtimeBannerMaterial;
 
-    public UpgradeOption Option { get; private set; }
+    public UpgradeBase Base { get; private set; }
     public RectTransform RectTransform { get; private set; }
 
+    private UpgradeCategoryDatabase _categoryDatabase;
+    private int _stack;
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button != PointerEventData.InputButton.Left)
+            return;
+
+        OnCardClicked?.Invoke(this);
+    }
 
     private void Awake()
     {
@@ -68,12 +87,12 @@ public class UpgradeCardUI : MonoBehaviour
         }
 
         stackText.text = "";
-        outlineImage.DOFade(0,0f);
+        outlineImage.DOFade(0,0f).SetUpdate(true);
 
         RectTransform = GetComponent<RectTransform>();
 
         stackBadgePanel.gameObject.SetActive(false);
-        soldIcon.gameObject.SetActive(false);
+        soldTitle.Hide();
     }
 
     private void Update()
@@ -84,7 +103,7 @@ public class UpgradeCardUI : MonoBehaviour
 
    void OnDestroy()
     {
-        idleWobbleTween?.Kill();
+        idleSequence?.Kill();
         currentTween?.Kill();
 
         DOTween.Kill(movementRect);
@@ -108,16 +127,19 @@ public class UpgradeCardUI : MonoBehaviour
     // -------------------------
     public string GetDescription() => descriptionText != null ? descriptionText : "";
 
-    public void Setup(UpgradeOption option)
+    public void Setup(UpgradeBase option, UpgradeCategoryDatabase database, bool useCanAppear = false)
     {
+        _categoryDatabase = database;
+        _stack = 1;
+
         foreach(Image iconImage in subIconImages)
         {
             if (iconImage != null)
             {
-                iconImage.sprite = option.Icon;
+                iconImage.sprite = option.GetCategoryIcon(_categoryDatabase);
 
                 if(iconImage.material == null)
-                    iconImage.material = option.Base.iconMaterial;
+                    iconImage.material = option.iconMaterial;
             }
 
             if (iconImage != null && iconImage.material != null)
@@ -128,11 +150,11 @@ public class UpgradeCardUI : MonoBehaviour
             }
         }
 
-        if (mainIconImage != null && option.CenterIcon != null)
+        if (mainIconImage != null && option.centerIcon != null)
         {
-            mainIconImage.sprite = option.CenterIcon;
+            mainIconImage.sprite = option.centerIcon;
             mainIconImage.SetNativeSize();
-            mainIconImage.material = option.Base.iconMaterial;
+            mainIconImage.material = option.iconMaterial;
         }
 
         if (mainIconImage != null && mainIconImage.material != null)
@@ -142,103 +164,159 @@ public class UpgradeCardUI : MonoBehaviour
             mainIconImage.material = mat;
         }
 
-        if(cardDecorationImage != null && option.CardDecoration != null)
+        if(cardDecorationImage != null && option.cardDecoration != null)
         {
-            cardDecorationImage.sprite = option.CardDecoration;
+            cardDecorationImage.sprite = option.cardDecoration;
             
-            if(option.Base.cardDecorationMaterial != null)
+            if(option.cardDecorationMaterial != null)
             {
-                Material mat = Instantiate(option.Base.cardDecorationMaterial);
+                Material mat = Instantiate(option.cardDecorationMaterial);
                 _runtimeIconMaterials.Add(mat);
                 cardDecorationImage.material = mat;
             }
         }
         
-        descriptionText = option.Description;
+        descriptionText = option.GetDescription();
 
-        Option = option;
+        Base = option;
+
+        if(!Base.CanAppear() && useCanAppear)
+            coverRect.gameObject.SetActive(true);
+        else
+            coverRect.gameObject.SetActive(false);
     }
 
-    public void SetStackBadge(int stackCount)
+    public void ShowDrawPercentage()
     {
-        stackBadgePanel.gameObject.SetActive(stackCount > 0 ? true : false);
-        stackText.text = $"x{stackCount}";
+        stackBadgePanel.gameObject.SetActive(true);
+
+        float totalWeight = ShopManager.Instance.GetTotalDrawPoolWeight();
+
+        if (totalWeight <= 0f)
+        {
+            stackText.text = "0.0%";
+            return;
+        }
+
+        float drawChance = Base.GetOfferWeight() / totalWeight;
+
+        stackText.text = $"{drawChance * 100f:F1}%";
     }
+
+    public void AddStack(int amount)
+    {
+        _stack += amount;
+
+        if(_stack > 1)
+        {
+            stackBadgePanel.gameObject.SetActive(true);
+            stackText.text = $"x{_stack}";
+        }
+        else
+        {
+            stackBadgePanel.gameObject.SetActive(false);
+        }
+    }
+
+    public void SetStackAmount(int amount)
+    {
+        _stack = amount;
+
+        if(_stack > 1)
+        {
+            stackBadgePanel.gameObject.SetActive(true);
+            stackText.text = $"x{_stack}";
+        }
+        else
+        {
+            stackBadgePanel.gameObject.SetActive(false);
+        }
+    }
+
 
     public void SetPurchased()
     {
         _purchased = true;
-        soldIcon.gameObject.SetActive(true);
-        /*
-        _runtimeCardMaterial?.SetColor(tintPropertyName, purchasedColor);
 
-        foreach(Material mat in _runtimeIconMaterials)
+        Sequence seq = DOTween.Sequence();
+        seq.AppendInterval(0.5f);
+        seq.OnComplete(() =>
         {
-            mat?.SetColor(tintPropertyName,purchasedColor);
-        }
-        
-        _runtimeBannerMaterial?.SetColor(tintPropertyName,purchasedColor);
-        */
+            soldTitle.ShowForCard(title: soldStatement);
+        });
     }
 
 
     // -------------------------
-    public void SetHighlighted(bool isHighlighted, bool playShake = true, bool useOutline = false)
+    public void SetHighlighted(bool isHighlighted, bool playShake = true, bool useOutline = false, bool playIdle = true)
     {
         if (movementRect == null || !gameObject.activeInHierarchy) return;
 
         currentTween?.Kill();
-        idleWobbleTween?.Kill();
+        idleSequence?.Kill();
         outlineImage?.DOKill();
 
 
         if(isHighlighted && useOutline)
         {
-            outlineImage.DOFade(1,0.05f);
+            outlineImage.DOFade(1,0.05f).SetUpdate(true);
         }
         else
         {
-            outlineImage.DOFade(0,0.05f);
+            outlineImage.DOFade(0,0.05f).SetUpdate(true);
         }
 
         if (isHighlighted)
         {
+            if(hideSoldPopupOnUnfocus)
+            {
+                if (_purchased)
+                    soldTitle.ShowForCard(title: soldStatement);
+                else
+                    soldTitle.Hide();
+            }
+            
             Sequence seq = DOTween.Sequence();
+            seq.SetUpdate(true);
 
-            // Slight scale-up
             seq.Append(movementRect.DOScale(originalScale * hoverScale, scaleDuration).SetEase(Ease.OutBack));
 
-            if(playShake)
+            if (playShake)
             {
-                // Custom shake pattern
                 seq.Append(movementRect.DOLocalRotate(new Vector3(0, 0, -shakeAngle), shakeDuration * 0.25f).SetEase(Ease.OutQuad));
                 seq.Append(movementRect.DOLocalRotate(new Vector3(0, 0, shakeReturnAngle), shakeDuration * 0.25f).SetEase(Ease.OutQuad));
                 seq.Append(movementRect.DOLocalRotate(new Vector3(0, 0, -shakeReturnAngle * 0.5f), shakeDuration * 0.25f).SetEase(Ease.InOutQuad));
                 seq.Append(movementRect.DOLocalRotate(Vector3.zero, shakeDuration * 0.25f).SetEase(Ease.OutBack));
 
                 seq.AppendInterval(idleStartDelay);
-
-                
-                seq.OnComplete(() =>
-                {
-                    if (movementRect == null) return;
-
-                    idleWobbleTween = DOTween.Sequence()
-                        .Append(movementRect.DOScale(originalScale * (hoverScale + wobbleScaleOffset), wobbleDuration / 2).SetEase(Ease.InOutSine))
-                        .Join(movementRect.DOLocalRotate(new Vector3(0, 0, wobbleRotation), wobbleDuration / 2).SetEase(Ease.InOutSine))
-                        .Append(movementRect.DOScale(originalScale * (hoverScale - wobbleScaleOffset), wobbleDuration / 2).SetEase(Ease.InOutSine))
-                        .Join(movementRect.DOLocalRotate(new Vector3(0, 0, -wobbleRotation), wobbleDuration / 2).SetEase(Ease.InOutSine))
-                        .SetLoops(-1, LoopType.Yoyo);
-                });
             }
+
+            seq.OnComplete(() =>
+            {
+                if(!playIdle)
+                    return;
+
+                if (movementRect == null)
+                    return;
+
+                idleSequence = DOTween.Sequence();
+
+                idleSequence.Append(movementRect.DOScale(originalScale * (hoverScale + wobbleScaleOffset), wobbleDuration / 2f).SetEase(Ease.InOutSine).SetUpdate(true));
+                idleSequence.Join(movementRect.DOLocalRotate(new Vector3(0, 0, wobbleRotation), wobbleDuration / 2f).SetEase(Ease.InOutSine).SetUpdate(true));
+                idleSequence.Append(movementRect.DOScale(originalScale * (hoverScale - wobbleScaleOffset), wobbleDuration / 2f).SetEase(Ease.InOutSine).SetUpdate(true));
+                idleSequence.Join(movementRect.DOLocalRotate(new Vector3(0, 0, -wobbleRotation), wobbleDuration / 2f).SetEase(Ease.InOutSine).SetUpdate(true));
+                idleSequence.SetLoops(-1, LoopType.Yoyo);
+            });
 
             currentTween = seq;
         }
         else
         {
-            if (movementRect == null) return;
-            movementRect.DOScale(originalScale, scaleDuration).SetEase(Ease.InOutSine);
-            movementRect.DOLocalRotate(Vector3.zero, 0.25f).SetEase(Ease.OutSine);
+            if(hideSoldPopupOnUnfocus)
+                soldTitle.Hide();
+
+            movementRect.DOScale(originalScale, scaleDuration).SetEase(Ease.InOutSine).SetUpdate(true);
+            movementRect.DOLocalRotate(Vector3.zero, 0.25f).SetEase(Ease.OutSine).SetUpdate(true);
         }
     }
 
@@ -253,16 +331,16 @@ public class UpgradeCardUI : MonoBehaviour
             
 
         currentTween?.Kill();
-        idleWobbleTween?.Kill();
+        idleSequence?.Kill();
 
         Sequence seq = DOTween.Sequence();
 
         // Step 1: Quick pop
-        seq.Append(movementRect.DOScale(originalScale * (hoverScale + 0.15f), 0.12f).SetEase(Ease.OutQuad));
+        seq.Append(movementRect.DOScale(originalScale * (hoverScale + 0.15f), 0.12f).SetEase(Ease.OutQuad).SetUpdate(true));
 
         // Step 3: Settle back down
-        seq.Append(movementRect.DOScale(originalScale * (hoverScale - 0.05f), 0.15f).SetEase(Ease.InOutQuad));
-        seq.Join(movementRect.DOLocalRotate(new Vector3(0, 0, UnityEngine.Random.Range(-5f, 5f)), 0.2f).SetEase(Ease.OutSine));
+        seq.Append(movementRect.DOScale(originalScale * (hoverScale - 0.05f), 0.15f).SetEase(Ease.InOutQuad).SetUpdate(true));
+        seq.Join(movementRect.DOLocalRotate(new Vector3(0, 0, UnityEngine.Random.Range(-5f, 5f)), 0.2f).SetEase(Ease.OutSine).SetUpdate(true));
 
 
         // Step 5: Completion + restart idle wobble
@@ -273,11 +351,11 @@ public class UpgradeCardUI : MonoBehaviour
             Debug.Log("✅ Completed select animation sequence for card.");
 
             // Start idle wobble again (separate tween)
-            idleWobbleTween = DOTween.Sequence()
-                .Append(movementRect.DOScale(originalScale * (hoverScale + 0.02f), 0.6f).SetEase(Ease.InOutSine))
-                .Join(movementRect.DOLocalRotate(new Vector3(0, 0, 3f), 0.6f).SetEase(Ease.InOutSine))
-                .Append(movementRect.DOScale(originalScale * (hoverScale - 0.02f), 0.6f).SetEase(Ease.InOutSine))
-                .Join(movementRect.DOLocalRotate(new Vector3(0, 0, -3f), 0.6f).SetEase(Ease.InOutSine))
+            idleSequence = DOTween.Sequence()
+                .Append(movementRect.DOScale(originalScale * (hoverScale + 0.02f), 0.6f).SetEase(Ease.InOutSine).SetUpdate(true))
+                .Join(movementRect.DOLocalRotate(new Vector3(0, 0, 3f), 0.6f).SetEase(Ease.InOutSine).SetUpdate(true))
+                .Append(movementRect.DOScale(originalScale * (hoverScale - 0.02f), 0.6f).SetEase(Ease.InOutSine).SetUpdate(true))
+                .Join(movementRect.DOLocalRotate(new Vector3(0, 0, -3f), 0.6f).SetEase(Ease.InOutSine).SetUpdate(true))
                 .SetLoops(-1, LoopType.Yoyo);
 
             onComplete?.Invoke();
@@ -285,5 +363,14 @@ public class UpgradeCardUI : MonoBehaviour
 
         seq.Play();
         currentTween = seq;
+    }
+
+    public IEnumerator CleanUp()
+    {
+        if(_purchased)
+        {
+            soldTitle.Hide();
+            yield return new WaitForSeconds(cleanUpDelay);
+        }
     }
 }

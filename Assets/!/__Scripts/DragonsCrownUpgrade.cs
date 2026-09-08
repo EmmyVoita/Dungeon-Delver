@@ -5,7 +5,7 @@ public class DragonsCrownUpgrade : UpgradeBase
 {
     public int healAmount = 1;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{HEAL_AMOUNT}", healAmount.ToString("N0"));
@@ -13,7 +13,7 @@ public class DragonsCrownUpgrade : UpgradeBase
 
     public override void Apply()
     {
-        DeathSaveManager.Instance.RegisterRenewing(new CurrencyDeathSave(healAmount, 500, true));
+        //DeathSaveManager.Instance.RegisterRenewing(new CurrencyDeathSave(healAmount, 500, true));
     }
 
 }

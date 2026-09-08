@@ -9,13 +9,14 @@ public class Player : MonoBehaviour
 {
     public static Player Instance { get; private set; }
     public static event System.Action OnJumpInput;
-    public static event System.Action<Vector2> OnJumped;
+    public static event System.Action<JumpData> OnJumped;
     public static event System.Action OnAbilityFilled;
     public static event System.Action<int, int, int> OnAbilityChargeChanged;
     //public static event System.Action OnMaxAbilityChargeChanged;
     public static event System.Action OnAbilityUsed;
     public static event System.Action<int> OnDamageTaken;
     public static event System.Action<int, bool> OnHeal;
+    public static event System.Action<int> OnHealthChanged;
     public static event System.Action OnMaxHealthChanged;
     public static event System.Action<HitData> OnProcessHit;
     public static event System.Action<int> OnPreDamageTaken;
@@ -132,6 +133,9 @@ public class Player : MonoBehaviour
     private bool _invincible;
     private float invincibileDone = 0;
     private int _blockedHits = 0;
+    private const float _healAudioMinInterval = 0.1f;
+    private float _healAudioTime = 0;
+    private float _abilityFullyChargedTime = float.NegativeInfinity;
 
     public PlayerControlState playerControlState { get; private set; } = PlayerControlState.Normal;
     public string LastDamageSource { get; private set; } = "Unknown";
@@ -145,7 +149,7 @@ public class Player : MonoBehaviour
     public bool AbilityChargeLocked { get; set; } = false;
     public bool CanJump => playerControlState == PlayerControlState.Shooter || playerControlState ==  PlayerControlState.BasicJump;
     public bool CanTakeDamage => GameStateEffectManager.PlayerDamageAllowed && !DevCheats.Invincible;
-
+    public float TimeSinceAbilityFullyCharged=> Time.time - _abilityFullyChargedTime;
 
   
     public bool Invincible
@@ -169,7 +173,11 @@ public class Player : MonoBehaviour
     public int Health
     {
         get { return _health; }
-        set { _health = value; }
+        set 
+        { 
+            OnHealthChanged?.Invoke(value - _health);
+            _health = value; 
+        }
     }
 
     public int MaxHealth
@@ -223,6 +231,7 @@ public class Player : MonoBehaviour
             {
                 AudioHelpers.PlaySoundEffect(abilityChargedSoundEffect, Camera.main.transform.position);
                 OnAbilityFilled?.Invoke();
+                _abilityFullyChargedTime = Time.time;
             }
         }
     }
@@ -282,10 +291,26 @@ public class Player : MonoBehaviour
             Health = MaxHealth;
         }
 
+        if(newState == GameStateManager.LevelEndState)
+        {
+            if(GameSessionBootstrap.Config.EndOfRoundHealModifier != 0)
+                HealPlayer(GameSessionBootstrap.Config.EndOfRoundHealModifier);
+        }
+
+        if(newState == GameStateManager.LevelStartState)
+        {
+            AbilityCharge += (int)(MaxAbilityCharge * GameSessionBootstrap.Config.StartingAbilityCharge);
+        }
+
         if(GameStateEffectManager.ShowPlayer)
             Show();
         else
             Hide();
+
+        if(newState == GameState.DeathSequence)
+        {
+           goal.SetActive(false); 
+        }
     }
 
     void Show()
@@ -319,6 +344,7 @@ public class Player : MonoBehaviour
         Health = 0;
         _centerPosition = transform.position; // cache original center
         _rb = GetComponent<Rigidbody2D>();
+        _healAudioTime = 0;
     }
 
     void Update()
@@ -420,15 +446,25 @@ public class Player : MonoBehaviour
                 return;
             }
 
-       
+
 
             // Normal jump path
-            if (CanJump && !_isJumping)
+            if (CanJump)
             {
-                PerformJump(dir);
+                // So, for an upgrade where the player can spend currency to double jump
+                // I need to ask for when the player inputs jump when they are already jumping.
+                // Along with that, I need to pass the direction that the player previously jumped.
+                // I need this information so that we can make sure that the player's double jump
+                // doesn't jump in a different direction than their starting direction.
+                // To make this general im going to pass the previous jump direction and the 
+                // requested jump direction.
+
+                if(!_isJumping)
+                    PerformJump(dir);
+                else
+                    OnJumped?.Invoke(new JumpData(_jumpAxis, JumpType.Extra));
             }
         }
-        
     }
 
     void FixedUpdate()
@@ -436,7 +472,7 @@ public class Player : MonoBehaviour
         ApplySmartGravity();
     }
 
-    void PerformJump(Vector2 dir)
+    public void PerformJump(Vector2 dir)
     {
         //UIToast.Show("Performing Jump", 1);
         AudioHelpers.PlayMyClipAtPoint(boostSound, AudioChannel.SFX, Camera.main.transform.position);
@@ -459,7 +495,7 @@ public class Player : MonoBehaviour
 
         AudioHelpers.PlayClipWithVariation(jumpSound, AudioChannel.SFX, Camera.main.transform.position, basePitch: jumpPitch, pitchRange: 0.1f);
 
-        OnJumped?.Invoke(inputDir);
+        OnJumped?.Invoke(new JumpData(dir, JumpType.Normal));
     }
 
     void OnTriggerEnter2D(Collider2D coll)
@@ -516,7 +552,9 @@ public class Player : MonoBehaviour
         ProcessHit(hit);
     }
 
-    private void ProcessHit(HitData hit)
+
+
+    public void ProcessHit(HitData hit)
     {
         OnProcessHit?.Invoke(hit);
 
@@ -566,10 +604,12 @@ public class Player : MonoBehaviour
 
     private void ApplyAbilityDamage(HitData hit)
     {
-        if(hit.AbilityDamage > 0)
+        int finalDamage = StatModifierManager.Instance.ModifyAbilityDamageTaken(hit.AbilityDamage) + GameSessionBootstrap.Config.AdditionalAbilityDamage;
+        
+        if(finalDamage > 0)
         {
+            AbilityCharge -= finalDamage;
             AudioHelpers.PlaySoundEffect(abilityChargeDamageSoundEffect, transform.position);
-            AbilityCharge -= hit.AbilityDamage;
         }
     }
 
@@ -580,7 +620,7 @@ public class Player : MonoBehaviour
             LastDamageSource = hit.SourceName;
 
         // Damage logic
-        int finalDamage = StatModifierManager.Instance.ModifyDamageTaken(hit.Damage);
+        int finalDamage = StatModifierManager.Instance.ModifyDamageTaken(hit.Damage) + GameSessionBootstrap.Config.AdditionalDamageModifier;
         OnPreDamageTaken?.Invoke(finalDamage);
         Health -= finalDamage;
         OnDamageTaken?.Invoke(finalDamage);
@@ -599,6 +639,7 @@ public class Player : MonoBehaviour
     {
         if(Health <= 0 && GameStateEffectManager.PlayerDeathAllowed)
         {
+            goal.SetActive(false);
             GameStateManager.Instance.SetState(GameState.DeathSequence);
         }
     }
@@ -612,56 +653,6 @@ public class Player : MonoBehaviour
         Squish();
     }
 
-    public void DamageSelf(DamageEffect dEf, ArrowBase arrow = null)
-    {
-        
-
-        //if(!GameStateEffectManager.PlayerDamageAllowed)
-            //return;
-
-        // Play Hit sound
-        if (dEf.playHitSound && (!Invincible || playAudioWhenInvincible))
-            AudioHelpers.PlaySoundEffect(damageSoundEffect, transform.position);
-
-        
-
-        // If we hit an arrow, we kill the arrow
-        if (arrow != null) arrow.KillArrow();
-
-        if (DevCheats.Invincible)
-            return;
-
-        if (_blockedHits > 0)
-        {
-            _blockedHits--;
-
-            // optional feedback
-            SetInvincible(0.15f);
-
-            if (arrow != null)
-                arrow.KillArrow();
-
-            Debug.Log("Blocked hit !");
-
-            OnPreDamageTaken?.Invoke(0);
-
-            return;
-        }
-
-        
-
-        // Handle death case
-        if (Health <= 0 && GameStateEffectManager.PlayerDeathAllowed)
-        {
-            GameStateManager.Instance.SetState(GameState.DeathSequence);
-        }
-
-        
-
-        
-
-        Squish();
-    }
 
 
     public void ShootProjectile(PlayerProjectile projectilePrefab)
@@ -764,12 +755,14 @@ public class Player : MonoBehaviour
     {
         int previousHealth = Health;
 
-        Health = Mathf.Min(MaxHealth, Health + amount);
+        int finalAmount = amount + GameSessionBootstrap.Config.AdditionalHealingModifier;
+
+        Health = Mathf.Min(MaxHealth, Health + finalAmount);
 
         int actualHealing = Health - previousHealth;
         bool wasFullHealth = previousHealth >= MaxHealth;
 
-        OnHeal?.Invoke(amount, wasFullHealth);
+        OnHeal?.Invoke(finalAmount, wasFullHealth);
 
         if (useEffects && actualHealing > 0)
         {
@@ -784,13 +777,17 @@ public class Player : MonoBehaviour
 
         if (healEffect != null)
             healEffect.SendEvent("OnPlay");
-            //healEffect.Play();
 
-        AudioHelpers.PlayMyClipAtPoint(
-            healSound,
-            AudioChannel.SFX,
-            Camera.main.transform.position
-        );
+        if(Time.time - _healAudioTime >= _healAudioMinInterval)
+        {
+            AudioHelpers.PlayMyClipAtPoint(
+                healSound,
+                AudioChannel.SFX,
+                Camera.main.transform.position
+            );
+
+            _healAudioTime = Time.time;
+        }
     }
 
 
@@ -822,14 +819,27 @@ public class Player : MonoBehaviour
         if (AbilityChargeLocked)
             return;
         AbilityCharge += _abilityChargeGain;
-        Debug.Log($"⚡ Gained {_abilityChargeGain} ability charge from crit catch!");
+    }
+
+    public void OnNormalCatch()
+    {
+        if (AbilityChargeLocked)
+            return;
+        
+        // roll for gaining ability charge from the run modifier
+        if(GameSessionBootstrap.Config.NormalArrowAbilityChargeRoll == 0)
+            return;
+
+        bool addAbilityCharge = Random.value <= GameSessionBootstrap.Config.NormalArrowAbilityChargeRoll;
+
+        if(addAbilityCharge)
+            AbilityCharge += _abilityChargeGain;
     }
 
  
-
     // -------------------------------------
 
-    private void SpawnAbility(bool consumeAbilityCharge = true)
+    public void SpawnAbility(bool consumeAbilityCharge = true)
     {
         // Find the current facing direction the player is allowed to use
         Vector2 snappedDir = GetSnappedDirection(_lastFacingDir, _useEightDirections);
@@ -844,7 +854,7 @@ public class Player : MonoBehaviour
         if(used)
             OnAbilityUsed?.Invoke();
         else
-            Debug.Log("ABILITY CURRENTLY ACTIVE cant use");
+            return;
 
         if(consumeAbilityCharge)
             AbilityCharge -= MaxAbilityCharge;

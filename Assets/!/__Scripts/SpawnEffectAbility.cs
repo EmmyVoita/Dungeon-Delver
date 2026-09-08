@@ -15,16 +15,11 @@ public class SpawnEffectAbility : AbilityBase
             return;
         }
 
-        Vector3 position =
-            spawnAtPlayer && Player.Instance != null
-                ? Player.Instance.transform.position
-                : Vector3.zero;
+        Vector3 position = spawnAtPlayer && Player.Instance != null
+                            ? Player.Instance.transform.position
+                            : Vector3.zero;
 
-        AbilityEffectBase effect = Instantiate(
-            effectPrefab,
-            position,
-            rotation
-        );
+        AbilityEffectBase effect = Instantiate(effectPrefab,position,rotation);
 
         // Listen before activating in case the effect ends immediately.
         effect.OnEffectEnded += HandleEffectEnded;
@@ -33,7 +28,8 @@ public class SpawnEffectAbility : AbilityBase
 
         effect.Activate(new AbilityEffectContext
         {
-            Duration = duration
+            Duration = duration,
+            UpgradeCount = UpgradeCount
         });
     }
 

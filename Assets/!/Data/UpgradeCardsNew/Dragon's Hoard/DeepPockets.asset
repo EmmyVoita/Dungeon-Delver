@@ -12,15 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 459eed877e37640478c01aa1eacba558, type: 3}
   m_Name: DeepPockets
   m_EditorClassIdentifier: Assembly-CSharp::CurrencyDamageSaveUpgrade
-  _cost: 0
+  upgradeId: e37d19c4-7835-4783-9b32-43774fc381f8
+  category: 2
+  requiredUpgrades: []
+  baseOfferWeight: 1
+  _cost: 200
   _maxStacks: 1
+  duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
   centerIcon: {fileID: 21300000, guid: f1b53de0266640b4698473d371c1175c, type: 3}
-  icon: {fileID: 21300000, guid: b06aa62779871dc4aa741a0c4b86c36a, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Deep Pockets
-  descriptionTemplate: The first time you would take damage each level, lose 50 currency
-    instead
+  descriptionTemplate: The first time you would take damage each level, lose {COST}
+    instead.
   detailsTemplate: This upgrade does not stack.
-  currencyRequired: 100
+  currencyStep: 500
+  weightPerCurrencyStep: 0.5
+  maximumCurrencyWeightBonus: 1.5
+  currencySynergyUpgrades:
+  - {fileID: 11400000, guid: 728c241f50ac3704db83c94cc123409b, type: 2}
+  - {fileID: 11400000, guid: 410d2474a2f65674380a20955d7c2d1c, type: 2}
+  - {fileID: 11400000, guid: 0289a62a88104d945878a5b01e01cccc, type: 2}
+  - {fileID: 11400000, guid: 0289a62a88104d945878a5b01e01cccc, type: 2}
+  weightPerSynergyStack: 0.25
+  currencyRequired: 50
+  shieldPrefab: {fileID: 6998217769083237475, guid: 97fb358e6e869db41973cc2835f04374, type: 3}

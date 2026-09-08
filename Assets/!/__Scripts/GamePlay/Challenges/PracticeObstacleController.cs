@@ -7,8 +7,6 @@ public class PracticeObstacleController : MonoBehaviour
     [Header("Test")]
     [SerializeField] private ChallengeTestMode testMode = ChallengeTestMode.Off;
     [SerializeField] private GameObject defaultChallenge;
-    [SerializeField] private BossDefinition testBossDefintion;
-
 
 
     [Header("Settings")]
@@ -35,9 +33,12 @@ public class PracticeObstacleController : MonoBehaviour
         if(testMode == ChallengeTestMode.RepeatOnStart)
             GameStateManager.Instance.SetState(GameState.Practice);
 
-        if (testBossDefintion != null)
+        //Debug.LogError($"Obstacle mode => {GameSessionBootstrap.Config.Mode}");
+
+        if(GameSessionBootstrap.Config.Mode == GameMode.ObstaclePracticeBoss)
         {
-            BossManager.Instance.StartBoss();//testBossDefintion);
+            
+            BossManager.Instance.StartBoss();
         }
     }
 
@@ -45,10 +46,7 @@ public class PracticeObstacleController : MonoBehaviour
     {
         if(newState == GameState.Practice)
         {
-            // 2️⃣ After delay, remove simulated obstacle and spawn real one
             StartCoroutine(InitialSpawnRoutine());
-
-            //Player.Instance.UseEightDirections = GameSessionBootstrap.Config.DirectionMode == JumpDirectionMode.EightDirectional;  
         }
     }
 
@@ -57,6 +55,7 @@ public class PracticeObstacleController : MonoBehaviour
     {
         if (GameStateManager.Instance.CurrentState == GameState.Practice && InputBindingManager.Instance.GetKeyHeld(InputActionType.Back))
         {
+            SceneEntryContext.EntryType = SceneEntryType.ReturnFromPractice;
             SceneManager.LoadScene(SceneNames.MainMenu);
         }
     }

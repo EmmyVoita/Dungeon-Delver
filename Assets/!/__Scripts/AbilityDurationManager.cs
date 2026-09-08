@@ -1,7 +1,6 @@
 using UnityEngine;
 
-public class AbilityDurationManager
-    : RuntimeModifierManager<IAbilityDurationModifier>
+public class AbilityDurationManager : RuntimeModifierManager<IAbilityDurationModifier>
 {
     public static AbilityDurationManager Instance { get; private set; }
 
@@ -22,9 +21,16 @@ public class AbilityDurationManager
 
         SortActiveModifiers();
 
-        foreach (IAbilityDurationModifier modifier in activeModifiers)
+        for (int i = 0; i < activeModifiers.Count; i++)
         {
-            currentDuration = modifier.ModifyDuration(currentDuration);
+            RuntimeModifierEntry<IAbilityDurationModifier> entry =
+                activeModifiers[i];
+
+            if (entry?.Modifier == null)
+                continue;
+
+            currentDuration =
+                entry.Modifier.ModifyDuration(currentDuration);
         }
 
         return Mathf.Max(0f, currentDuration);

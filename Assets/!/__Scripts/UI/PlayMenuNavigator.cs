@@ -12,12 +12,20 @@ public class PlayMenuNavigator : BaseMenu
 {
     public static PlayMenuNavigator Instance { get; private set; }
     public static Action OnHoverChanged;
-    public static Action OnMenuAbilitySelected;
 
 
     [Header("References")]
     [SerializeField] private StartOptionsNavigator startOptions;
     [SerializeField] private AbilityUnlockManager unlockManager;
+    [SerializeField] private UIPanelNudge panelNudge;
+    [SerializeField] private GameSpeedOption gameSpeedOption;
+    [SerializeField] private RunModifierMenuNavigator runModifiers;
+   
+    [SerializeField] private PlayPagesController playPagesController;
+
+    [Header("Key Prompts")]
+    [SerializeField] private List<KeyPrompt> keyPrompts;
+    [SerializeField] private KeyPromptController keyPromptController;
 
 
     [Header("Transition Settings")]
@@ -60,14 +68,32 @@ public class PlayMenuNavigator : BaseMenu
 
     private void OnEnable()
     {
+        StartOptionsNavigator.OnStartSelected += HandleStartSelected;
         CarouselArrow.OnCarouselArrowClicked += HanldeCarouselArrowClicked;
         AbilityCardMouseHandler.OnAbilityCardClicked += HandleAbilityCardClicked;
     }
 
     private void OnDisable()
     {
+        StartOptionsNavigator.OnStartSelected -= HandleStartSelected;
         CarouselArrow.OnCarouselArrowClicked -= HanldeCarouselArrowClicked;
         AbilityCardMouseHandler.OnAbilityCardClicked -= HandleAbilityCardClicked;
+    }
+
+    private void HandleStartSelected()
+    {
+        if(!IsActive)
+            return;
+
+        MenuManager.Instance.RequestMenuTransition(MenuState.RunModifiers);
+
+        /*
+        GameSceneLoader.PendingConfig = new GameSceneConfig(GameMode.StandardRun,0,null);
+
+        RunModifierManager.Instance.ApplyModifiers();
+
+        SceneManager.LoadScene(SceneNames.ArrowGameScene);
+        */
     }
 
     private void HandleAbilityCardClicked(AbilityData data)
@@ -87,7 +113,7 @@ public class PlayMenuNavigator : BaseMenu
         AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
     }
 
-    private void Awake()
+    protected override void Awake()
     {
         if (Instance != null && Instance != this)
         {
@@ -95,10 +121,13 @@ public class PlayMenuNavigator : BaseMenu
             return;
         }
         Instance = this;
+
+        base.Awake();
     }
 
     private void Update()
     {
+       
         // Smooth slide effect
         if (cardContainer != null)
         {
@@ -109,13 +138,83 @@ public class PlayMenuNavigator : BaseMenu
             );
         }
 
-        if (lockInput || _currentCards.Count == 0 || !isActive) return;
+        if (_currentCards.Count == 0) 
+            return;
 
+        if(!CanProcessInput || InputFocusManager.CurrentOwner != null || playPagesController.IsTransitioning)
+            return;
+
+        if(HandleBackInput())
+            return;
+
+        if(HandleSelectInput())
+            return;
+
+        //if(HandleRunModifierInput())
+            //return;
+
+        HandleNaviagation();
+    }
+
+
+    // Input Handling
+    // -------------------------------------------------------------------------------------------------------
+
+    private bool HandleRunModifierInput()
+    {
+        if(!InputBindingManager.Instance.GetKeyDown(InputActionType.Jump))
+            return false;
+
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select,Camera.main.transform.position);
+        InputBindingManager.Instance.BlockUntilRelease(InputActionType.Jump);
+        //playPagesController.ShowChallengeSelect();
+
+        playPagesController.ShowPage(PlayPagesController.PlayPage.ChallengeSelect, ()=>
+        {
+            runModifiers.OnOpen();
+        });
+        
+        return true;
+    }
+
+    private bool HandleBackInput()
+    {
+        if (!InputBindingManager.Instance.GetKeyDown(InputActionType.Back))
+            return false;
+
+        MenuManager.Instance.RequestMenuTransition(backState);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.back,transform.position);
+
+        return true;
+    }
+
+    private bool HandleSelectInput()
+    {
+        if (!InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
+            return false;
+
+        panelNudge.NudgeDown();
+
+        if (ScoreManager.Instance.HighScore() >= _currentCards[_selectedIndex].Card.scoreRequirement)
+        {
+            SelectAbility(_currentCards[_selectedIndex].Card);
+        }
+        else
+        {
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
+        }
+
+        return true;
+    }
+
+    private void HandleNaviagation()
+    {
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveLeft))
         {
             _selectedIndex = (_selectedIndex - 1 + _currentCards.Count) % _currentCards.Count;
             OnHoverChanged?.Invoke();
             HighlightCard();
+            panelNudge.NudgeLeft();
             AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveRight))
@@ -123,24 +222,8 @@ public class PlayMenuNavigator : BaseMenu
             _selectedIndex = (_selectedIndex + 1) % _currentCards.Count;
             OnHoverChanged?.Invoke();
             HighlightCard();
+            panelNudge.NudgeRight();
             AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
-        }
-        else if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
-        {
-            if (ScoreManager.Instance.HighScore >= _currentCards[_selectedIndex].Card.scoreRequirement)
-            {
-                SelectAbility(_currentCards[_selectedIndex].Card);
-            }
-            else
-            {
-                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
-            }
-        }
-        else if (InputBindingManager.Instance.GetKeyDown(InputActionType.Back))
-        {
-            MenuManager.Instance.RequestMenuTransition(backState);
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.back, transform.position);
-            OnMenuAbilitySelected?.Invoke();
         }
     }
 
@@ -148,12 +231,7 @@ public class PlayMenuNavigator : BaseMenu
     public override void OnOpen()
     {
         base.OnOpen();
-
-        //if (backgroundDimmer != null)
-        //    backgroundDimmer.FadeIn();
-
-        if (descriptionBox != null)
-            descriptionBox.gameObject.SetActive(true);
+        keyPromptController.PushPrompts(keyPrompts);
 
         // Clear old
         foreach (Transform child in cardParent)
@@ -213,18 +291,13 @@ public class PlayMenuNavigator : BaseMenu
         ScreenDimmerManager.Instance.AddDimSource("PlayScreen");
 
         OnHoverChanged?.Invoke();
+
+        playPagesController.ShowAbilitySelect();
     }
 
     public override void OnClose()
     {
-        base.OnClose();
-
-
-       // if (backgroundDimmer != null)
-        //    backgroundDimmer.FadeOut();
-
-        if (descriptionBox != null)
-            descriptionBox.gameObject.SetActive(false);
+        keyPromptController.PopPrompts();
 
         // Clear cards
         foreach (Transform child in cardParent)
@@ -235,6 +308,8 @@ public class PlayMenuNavigator : BaseMenu
         _currentCards.Clear();
 
         ScreenDimmerManager.Instance.RemoveDimSource("PlayScreen");
+
+        base.OnClose();
     }
 
 
@@ -310,9 +385,9 @@ public class PlayMenuNavigator : BaseMenu
 
             if (isSelected && descriptionTypewriter != null)
             {
-                if (ScoreManager.Instance.HighScore >= _currentCards[i].Card.scoreRequirement)
+                if (ScoreManager.Instance.HighScore() >= _currentCards[i].Card.scoreRequirement)
                 {
-                    string description = _currentCards[i].Card != null ? _currentCards[i].Card.description : "No card description found";
+                    string description = _currentCards[i].Card != null ? _currentCards[i].Card.GetFormattedDescription() : "No card description found";
                     descriptionTypewriter.StartTyping(description);
                 } 
                 else
@@ -346,17 +421,14 @@ public class PlayMenuNavigator : BaseMenu
 
     private void SelectAbility(AbilityData card)
     {
-        lockInput = true;
-
         if (card == null)
         {
             Debug.LogError("No ability card selected!");
             return;
         }
 
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
-        //if (backgroundDimmer != null)
-        //    backgroundDimmer.FadeOut();
+        //AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
+  
 
         AbilityCardUI cardUI = _currentCards[_selectedIndex];
         if (cardUI == null)
@@ -365,8 +437,18 @@ public class PlayMenuNavigator : BaseMenu
             return;
         }
 
-        Debug.Log("Selecting ability: " + card.abilityName);
-        cardUI.PlaySelectAnimation(() => FinishSelection(card));
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select,Camera.main.transform.position);
+        InputBindingManager.Instance.BlockUntilRelease(InputActionType.Jump);
+
+        playPagesController.ShowPage(PlayPagesController.PlayPage.ChallengeSelect, ()=>
+        {
+            runModifiers.OnOpen();
+        });
+
+        FinishSelection(card);
+
+        //Debug.Log("Selecting ability: " + card.abilityName);
+        //cardUI.PlaySelectAnimation(() => FinishSelection(card));
     }
 
     private void FinishSelection(AbilityData card)
@@ -394,9 +476,9 @@ public class PlayMenuNavigator : BaseMenu
             GameMode.StandardRun,
             0,
             null);
+        
 
-
-        startOptions.Open(GameMode.StandardRun, SceneNames.ArrowGameScene);
-        lockInput = true;
+        //MenuManager.Instance.RequestMenuTransition(MenuState.RunModifiers);
+       // startOptions.Open(GameMode.StandardRun, SceneNames.ArrowGameScene);
     }
 }

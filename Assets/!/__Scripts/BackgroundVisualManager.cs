@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using DG.Tweening;
 using UnityEngine;
 
@@ -6,118 +9,92 @@ public class BackgroundVisualManager : MonoBehaviour
 {
     public static event Action OnFlareBottomRequested;
 
+    [SerializeField] private List<StageDataObject> stages;
+
     [Header("Textures")]
-    public Texture2D defaultBackground;
-    public Texture2D worldMapBackground;
-    public Texture2D gameOverBackground;
+    [SerializeField] private MainBackgroundData defaultBackgroundData;
 
     [Header("Colors")]
     public Color defaultColor;
     public Color worldMapColor;
     public Color gameOverColor;
 
+    [Header("Material References")]
     public Material mat;
-    public string texturePropertyName = "_MainTexture";
+    public string mainTexturePropertyName = "_MainTexture";
+    public string secondaryTexturePropertyName = "_SecondaryTexture";
+
+    public string mainTilingPropertyName = "_Tiling";
+    public string secondaryTilingPropertyName = "_SecondaryTiling";
+
+    public string mainSpeedPropertyName = "_Speed";
+    public string secondarySpeedPropertyName = "_SecondarySpeed";
+
+    public string mainDirectionPropertyName = "_Direction";
+    public string secondaryDirectionPropertyName = "_SecondaryDirection";
+
+
+
     public string colorPropertyName = "_Color";
     public string bottomGradientName = "_GradientEdge2";
-    public float defaultGradientEdge = 0.23f;
-    public float flaredGradientEdge = 0.3f;
-    public float flareDuration = 0.5f;
+
+    private bool _useSimpleBackground;
+
+    
 
     private void OnEnable()
     {
-        SetTexture(defaultBackground);
-        SetColor(defaultColor);
-        
-        GameStateManager.OnStateChanged += HandleStateChanged;
-        OnFlareBottomRequested += HandleFlareBottom;
+        BackgroundPreference.OnBackgroundPreferenceChanged += HandlePreferenceChanged;
     }
 
     private void OnDisable()
     {
-        GameStateManager.OnStateChanged -= HandleStateChanged;
-        OnFlareBottomRequested -= HandleFlareBottom;
+        BackgroundPreference.OnBackgroundPreferenceChanged -= HandlePreferenceChanged;
     }
 
-    public static void FlareBottom()
+    private void HandlePreferenceChanged()
     {
-        OnFlareBottomRequested?.Invoke();
+        _useSimpleBackground = BackgroundPreference.UseSimpleBackground;
+        if(_useSimpleBackground)
+            ChangeDefaultBackground(defaultBackgroundData);
+        else
+            PickRandomBackground();
     }
 
-    private void HandleFlareBottom()
+    public void PickRandomBackground()
     {
-        mat.DOKill();
-
-        float value = defaultGradientEdge;
-
-
-        DOTween.To(
-            () => value,
-            x =>
-            {
-                value = x;
-                mat.SetFloat(bottomGradientName, value);
-            },
-            flaredGradientEdge,
-            flareDuration
-        )
-        .SetEase(Ease.OutQuad)
-        .OnComplete(() =>
-        {
-            DOTween.To(
-                () => value,
-                x =>
-                {
-                    value = x;
-                    mat.SetFloat(bottomGradientName, value);
-                },
-                defaultGradientEdge,
-                flareDuration * 1.5f
-            )
-            .SetEase(Ease.OutBack);
-        });
+        StageDataObject stageData = stages.GetRandom();
+        ChangeDefaultBackground(stageData.backgroundData);
     }
 
-    private void HandleStateChanged(GameState previousState, GameState newState)
+    public void SetDefaultBackground()
     {
-        switch(newState)
-        {
-            case GameState.WorldMapView:
-                SetTexture(worldMapBackground);
-                SetColor(worldMapColor);
-                break;
-            case GameState.WorldMapViewEnd:
-                SetTexture(worldMapBackground);
-                SetColor(worldMapColor);
-                break;
-            case GameState.GameOverTally:
-                SetTexture(gameOverBackground);
-                SetColor(gameOverColor);
-                break;
-            case GameState.GameOverResults:
-                SetTexture(gameOverBackground);
-                SetColor(gameOverColor);
-                break;
-            default:
-                SetTexture(defaultBackground);
-                SetColor(defaultColor);
-                break;
-        }
+        ChangeDefaultBackground(defaultBackgroundData);
+    }
+
+
+    public void ChangeDefaultBackground(MainBackgroundData backgroundData)
+    {
+        mat.SetTexture(mainTexturePropertyName, backgroundData.mainBackground);
+        mat.SetTexture(secondaryTexturePropertyName, backgroundData.secondaryBackground);
+
+        mat.SetVector(mainTilingPropertyName, backgroundData.mainTiling);
+        mat.SetVector(secondaryTilingPropertyName, backgroundData.secondaryTiling);
+
+        mat.SetFloat(mainSpeedPropertyName, backgroundData.mainSpeed);
+        mat.SetFloat(secondarySpeedPropertyName, backgroundData.secondarySpeed);
+
+        mat.SetVector(mainDirectionPropertyName, backgroundData.mainDirection);
+        mat.SetVector(secondaryDirectionPropertyName, backgroundData.secondaryDirection);
     }
 
     private void SetTexture(Texture2D texture)
     {
-        mat.SetTexture(texturePropertyName, texture);
+        mat.SetTexture(mainTexturePropertyName, texture);
     }
 
     private void SetColor(Color color)
     {
         mat.SetColor(colorPropertyName, color);
-    }
-
-    private void OnDestroy()
-    {
-        SetTexture(defaultBackground);
-        SetColor(defaultColor);
     }
 }

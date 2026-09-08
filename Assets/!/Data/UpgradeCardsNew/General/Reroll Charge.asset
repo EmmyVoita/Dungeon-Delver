@@ -12,14 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fa28d592a2842f4abaaf3d7c3fa697e, type: 3}
   m_Name: Reroll Charge
   m_EditorClassIdentifier: 
+  upgradeId: 303c700f-35ab-466d-b928-68913c829f12
+  category: 7
+  requiredUpgrades: []
+  baseOfferWeight: 1
   _cost: 100
   _maxStacks: 999
+  duration: 3
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
   centerIcon: {fileID: 21300000, guid: 5b25c990c25c5764f9cd50f29fb651bd, type: 3}
-  icon: {fileID: 21300000, guid: 98a892239d937c34babc9fedacb8b054, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Second Roll
-  descriptionTemplate: Gain <color=#00E676>{REFRESH_AMOUNT}</color> card rerolls.
+  descriptionTemplate: Gain {REFRESH_AMOUNT} shop rerolls.
   detailsTemplate: 
+  rerollSynergyUpgrades: []
+  weightPerSynergyStack: 0.5
+  maximumRerollsWeightBonus: 0.4
+  startingWeighingRerollsAt: 3
   refreshAmount: 3

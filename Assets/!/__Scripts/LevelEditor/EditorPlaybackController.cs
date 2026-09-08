@@ -2,6 +2,13 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 
+using System.Collections;
+using UnityEngine.Networking;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class EditorPlaybackController : MonoBehaviour
 {
     public static EditorPlaybackController Instance { get; private set; }
@@ -16,16 +23,16 @@ public class EditorPlaybackController : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private AudioSource musicSource;
-    [SerializeField] private AudioClip editorMusic;
+    
+    
 
-    public AudioClip LevelEditorTestMusic => editorMusic;
+    
 
-
-
+    private AudioClip _editorMusic;
     private float currentTime = 0f;        // current playback time in SECONDS           
     private List<EditorSimulatedArrow> simulatedArrows = new();
 
-
+    public AudioClip LevelEditorTestMusic => _editorMusic;
     public float SpawnDistance => arrowSpawner.SpawnDistance;
     public float CurrentTime => currentTime;
     public bool SuppressSimulationAudio { get; private set; }
@@ -35,6 +42,8 @@ public class EditorPlaybackController : MonoBehaviour
         if (Instance == this)
             Instance = null;
     }
+
+
 
 
     void Awake()
@@ -47,9 +56,17 @@ public class EditorPlaybackController : MonoBehaviour
 
         Instance = this;
 
-        musicSource.clip = editorMusic;
+        musicSource.clip = _editorMusic;
         musicSource.playOnAwake = false;
         musicSource.loop = true;
+
+        if(TestSession.levelMusic != null)
+            _editorMusic = TestSession.levelMusic;
+    }
+
+    void Start()
+    {
+        TimeManager.Instance.ClearAllModifiers();
     }
 
 
@@ -81,6 +98,111 @@ public class EditorPlaybackController : MonoBehaviour
 
     }
 
+    public void SelectMusicFile()
+    {
+    #if UNITY_EDITOR
+        string path = EditorUtility.OpenFilePanel(
+            "Select Level Music",
+            "",
+            "wav,mp3,ogg"
+        );
+
+        if (string.IsNullOrEmpty(path))
+            return;
+
+        StartCoroutine(LoadMusicFile(path));
+    #else
+        Debug.LogWarning(
+            "The built-in file picker is only available inside the Unity Editor."
+        );
+    #endif
+    }
+
+    private IEnumerator LoadMusicFile(string path)
+    {
+        AudioType audioType = GetAudioType(path);
+
+        if (audioType == AudioType.UNKNOWN)
+        {
+            Debug.LogError($"Unsupported audio file: {path}");
+            yield break;
+        }
+
+        string url = "file://" + path;
+
+        using UnityWebRequest request =UnityWebRequestMultimedia.GetAudioClip(url,audioType);
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"Failed to load music: {request.error}");
+
+            yield break;
+        }
+
+        AudioClip clip =DownloadHandlerAudioClip.GetContent(request);
+
+        if (clip == null)
+        {
+            Debug.LogError("Loaded audio clip was null.");
+
+            yield break;
+        }
+
+        SetEditorMusic(clip);
+
+        Debug.Log($"Loaded level editor music: {clip.name}");
+    }
+
+    private AudioType GetAudioType(string path)
+    {
+        string extension =System.IO.Path.GetExtension(path).ToLowerInvariant();
+
+        switch (extension)
+        {
+            case ".wav":
+                return AudioType.WAV;
+
+            case ".mp3":
+                return AudioType.MPEG;
+
+            case ".ogg":
+                return AudioType.OGGVORBIS;
+
+            default:
+                return AudioType.UNKNOWN;
+        }
+    }
+
+    private void SetEditorMusic(AudioClip clip)
+    {
+        if (clip == null)
+            return;
+
+        bool wasPlaying = isPlaying;
+
+        musicSource.Stop();
+
+        _editorMusic = clip;
+        musicSource.clip = clip;
+
+        // Make sure our current timeline position is valid
+        // for the newly loaded song.
+        currentTime = Mathf.Clamp(
+            currentTime,
+            0f,
+            Mathf.Max(0f, clip.length - 0.01f)
+        );
+
+        SyncMusicToTime();
+
+        if (wasPlaying)
+        {
+            musicSource.pitch = playSpeed;
+            musicSource.Play();
+        }
+    }
 
 
     // Build / rebuild simulation arrows 
@@ -185,7 +307,7 @@ public class EditorPlaybackController : MonoBehaviour
     public void Play()
     {
         isPlaying = true;
-        if (editorMusic != null)
+        if (_editorMusic != null)
         {
             musicSource.time = currentTime;
             musicSource.pitch = playSpeed;

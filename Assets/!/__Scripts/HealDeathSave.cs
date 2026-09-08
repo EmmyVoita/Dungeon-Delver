@@ -1,6 +1,6 @@
 public class HealDeathSave : IDeathSave
 {
-    public int Priority => 0;
+    public int Priority => 100;
     public bool RemoveAtLevelEnd => true;
     
     private int _healAmount = 1;
@@ -21,8 +21,18 @@ public class HealDeathSave : IDeathSave
         return true;
     }
 
-    public IDeathSave Clone()
+    public IRuntimeModifier Clone()
     {
         return new HealDeathSave(_healAmount);
+    }
+
+    public void OnActivate()
+    {
+        
+    }
+
+    public void OnDestroy()
+    {
+        
     }
 }

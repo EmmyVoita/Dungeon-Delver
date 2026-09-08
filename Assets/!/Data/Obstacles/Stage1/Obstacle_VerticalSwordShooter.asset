@@ -17,5 +17,7 @@ MonoBehaviour:
   fileName: verticalshooter
   prefab: {fileID: 8931257001343916097, guid: 48c548d7c103b1a41b02cc8edef6831e, type: 3}
   icon: {fileID: 0}
-  description: Vertical swords shoot that towards the player after a delay. Jump
-    through a gap to dodge it.
+  stageNumber: 1
+  hasBossOverride: 0
+  description: Vertical swords shoot out towards the player after a delay. Jump through
+    a gap to dodge it.

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c8f7a2b063da8e4bb314fffe28ed715, type: 3}
+  m_Name: Golden Arrow Ability Charge Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::GoldenArrowAbilityChargeUpgrade
+  upgradeId: dc90885f-5005-4999-8e6e-a7c362224372
+  category: 4
+  requiredUpgrades:
+  - upgrade: {fileID: 11400000, guid: 728c241f50ac3704db83c94cc123409b, type: 2}
+    minimumStacks: 1
+  baseOfferWeight: 1
+  _cost: 200
+  _maxStacks: 999
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 9187fbe8e7d539f48b9f3c98e91d2b67, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Arcane Gold
+  descriptionTemplate: Catching a golden arrow grants {AMOUNT} bonus ability charge.
+  detailsTemplate: 
+  amount: 1

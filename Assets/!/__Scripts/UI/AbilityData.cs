@@ -31,4 +31,36 @@ public class AbilityData : ScriptableObject
 
     [Header("Runtime")]
     public AbilityBase abilityPrefab;
+
+    public virtual string GetFormattedDescription()
+    {
+        return FormatText(description);
+    }
+
+    protected virtual void AddReplacements(Dictionary<string, string> replacements)
+    {
+        replacements["{DURATION}"] =
+            $"<color=#{UIColors.ToHex(UIColors.Yellow)}>" +
+            $"{baseDuration}</color>";
+    }
+
+    protected string FormatText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return string.Empty;
+
+        Dictionary<string, string> replacements = new();
+
+        AddReplacements(replacements);
+
+        foreach (KeyValuePair<string, string> replacement in replacements)
+        {
+            text = text.Replace(
+                replacement.Key,
+                replacement.Value
+            );
+        }
+
+        return text;
+    }
 }

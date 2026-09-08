@@ -39,6 +39,9 @@ public class CurrencyVFXController : MonoBehaviour
             visualEffect.SetFloat(lifetimeProperty, lifetime);
         */
 
+        if(currencyAmount < minCurrency)
+            return;
+
         int particleAmount = (int) Mathf.Lerp(
             minCoins,
             maxCoins,

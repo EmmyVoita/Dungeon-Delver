@@ -38,8 +38,8 @@ public static class StatDisplayHelpers
            ScoreManager.Instance == null || 
            Player.Instance == null || 
            CurrencyManager.Instance == null ||
-           RoundManager.Instance.runStats == null ||
-           RoundManager.Instance.roundStats == null
+           ScoreManager.Instance.RoundStatsTracker == null ||
+           ScoreManager.Instance.RunStatsTracker  == null
            )
         {
             Debug.LogError("Score Manager or Round Manager Instance can not be null when evaluating display stat for UI");
@@ -50,17 +50,17 @@ public static class StatDisplayHelpers
         {
             case StatValueType.TotalScore:
                 return StatValue.FromInt(
-                    RoundManager.Instance.runStats.TotalScore
+                    ScoreManager.Instance.RunStatsTracker.TotalScore
                 );
             case StatValueType.Hits:
                 return StatValue.FromRatio(
-                    RoundManager.Instance.roundStats.Hit,
-                    RoundManager.Instance.roundStats.Spawned
+                    ScoreManager.Instance.RoundStatsTracker.Hit,
+                   ScoreManager.Instance.RoundStatsTracker.Spawned
                 );
             case StatValueType.RunHits:
                 return StatValue.FromRatio(
-                    RoundManager.Instance.runStats.TotalHit,
-                    RoundManager.Instance.runStats.TotalSpawned
+                    ScoreManager.Instance.RunStatsTracker.TotalHit,
+                    ScoreManager.Instance.RunStatsTracker.TotalSpawned
                 );
             case StatValueType.RunTotalScore:
                 {
@@ -76,38 +76,69 @@ public static class StatDisplayHelpers
                 }
             case StatValueType.RunHighestCombo:
                 return StatValue.FromInt(
-                    RoundManager.Instance.runStats.HighestCombo
+                    ScoreManager.Instance.RunStatsTracker.HighestCombo
                 );
             case StatValueType.RunDamageTaken:
                 return StatValue.FromInt(
-                    RoundManager.Instance.runStats.TotalDamageTaken
+                    ScoreManager.Instance.RunStatsTracker.TotalDamageTaken
                 );
             case StatValueType.CauseOfDeath:
-                return StatValue.FromString(
-                    Player.Instance.LastDamageSource
-                );
+                {
+                    return RoundManager.Instance.GameComplete ? StatValue.FromString("You Win!") : 
+                                                                StatValue.FromString($"Killed by {Player.Instance.LastDamageSource}");
+                }
             case StatValueType.LevelIndex:
                 return StatValue.FromString(
                     RoundManager.Instance.LevelIndex
                 );
             case StatValueType.RunCritRate:
-                int critPercent = Mathf.RoundToInt(RoundManager.Instance.runStats.RunCritRate * 100f);
+                int critPercent = Mathf.RoundToInt(ScoreManager.Instance.RunStatsTracker.RunCritRate * 100f);
                 return StatValue.FromPercent(
                     critPercent
                 );
             case StatValueType.DamageTaken:
                 return StatValue.FromInt(
-                    RoundManager.Instance.roundStats.DamageTaken
+                    ScoreManager.Instance.RoundStatsTracker.DamageTaken
                 );
             case StatValueType.RoundScore:
                 return StatValue.FromInt(
-                    RoundManager.Instance.roundStats.Score
+                    ScoreManager.Instance.RoundStatsTracker.Score
                 );
             case StatValueType.Currency:
                 return StatValue.FromInt(
                     CurrencyManager.Instance.CurrentCurrency
                 );
 
+            default:
+                return StatValue.FromString("Unknown Stat Row Data");
+        }
+    }
+
+    public static StatValue ResolveRunRecordStatValue(StatRowData data, RunRecord runRecord)
+    {
+        switch (data.statValueType)
+        {
+            case StatValueType.RunHits:
+                return StatValue.FromRatio(runRecord.totalHit, runRecord.totalSpawned);
+            case StatValueType.RunTotalScore:
+                return StatValue.FromInt(runRecord.score);
+            case StatValueType.RunHighestCombo:
+                return StatValue.FromInt(runRecord.highestCombo);
+            case StatValueType.RunDamageTaken:
+                return StatValue.FromInt(runRecord.damageTaken);
+            case StatValueType.CauseOfDeath:
+                return StatValue.FromString(runRecord.causeOfDeath);
+                    /*
+                    return RoundManager.Instance.GameComplete ? StatValue.FromString("You Win!") : 
+                                                                StatValue.FromString($"Killed by {Player.Instance.LastDamageSource}");
+                    */
+            case StatValueType.LevelIndex:
+                return StatValue.FromString(runRecord.levelIndex);
+            case StatValueType.RunCritRate:
+                int critPercent = Mathf.RoundToInt(runRecord.critAccuracy * 100f);
+                return StatValue.FromPercent(critPercent);
+            case StatValueType.Currency:
+                return StatValue.FromInt(runRecord.totalCurrency);
             default:
                 return StatValue.FromString("Unknown Stat Row Data");
         }

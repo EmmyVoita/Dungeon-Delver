@@ -22,12 +22,20 @@ public class Goal : MonoBehaviour
     [SerializeField] private List<PlayerControlState> showWindowVisuals;
    
 
+    [Header("Critcal Catch")]
+    [SerializeField] private VisualEffect critCatchEffect;
+    [SerializeField] private VisualEffect goldenCatchEffect;
+    [Tooltip("VFX event name to trigger")]
+    public string playEventName = "OnPlay";
+
 
     [Header("Visual / Audio")]
     [SerializeField] private AudioClip goalSound;
     [SerializeField] private AudioClip goalCritSound;
     //[SerializeField] private ParticleSystem critCatchEffect;
-    [SerializeField] private VisualEffect critCatchEffect;
+    
+    
+    
     [SerializeField] private float flashDuration = 0.5f;
     //[SerializeField] private Sprite defaultGoalSprite;
     //[SerializeField] private Sprite normalCatchGoalSprite;
@@ -107,6 +115,7 @@ public class Goal : MonoBehaviour
 
     private void HandleControlStateChanged(PlayerControlState newState)
     {
+        if(spriteMat)
         spriteMat.SetColor("_Color", Color.white);
     }
 
@@ -236,8 +245,17 @@ public class Goal : MonoBehaviour
             else
                 popupKind = ScorePopupKind.CritHit;
 
-            if (critCatchEffect != null)
-                critCatchEffect.Play();
+            if(arrow.HasStatus(ArrowStatus.Golden))
+            {
+                if (goldenCatchEffect != null)
+                    goldenCatchEffect.SendEvent(playEventName);
+            }
+            else
+            {
+                if (critCatchEffect != null)
+                    critCatchEffect.SendEvent(playEventName);
+            }
+           
 
             Player.Instance.OnCriticalCatch();
         }
@@ -246,9 +264,11 @@ public class Goal : MonoBehaviour
             goalType = GoalType.Normal;
             score = ScoreRules.Instance.CalculateScore(arrow, goalType);
             popupKind = ScorePopupKind.NormalHit;
+
+            Player.Instance.OnNormalCatch();
         }
 
-        int finalAddedScore = ScoreManager.Instance.AddScore(score, ScoreSource.BaseArrow);
+        int finalAddedScore = ScoreManager.Instance.AddScore(score);
 
         ScoreEvents.OnScorePopupRequested?.Invoke(
             finalAddedScore,
@@ -259,9 +279,18 @@ public class Goal : MonoBehaviour
         PlayImpactShake();
     }
 
-    private void ResolveInverseArrowCaught(ArrowBase arrow, DamageEffect damageEffect)
+    private void ResolveInverseArrowCaught(ArrowBase arrow, DamageEffect dEf)
     {
-        Player.Instance.DamageSelf(damageEffect,arrow);
+        HitData hit = new()
+        {
+            Damage = dEf.damage,
+            AbilityDamage = dEf.abilityChargeDamage,
+            SourceName = dEf.sourceName,
+            Arrow = null,
+            PlayHitSound = dEf.playHitSound
+        };
+        
+        Player.Instance.ProcessHit(hit);
     }
 
 

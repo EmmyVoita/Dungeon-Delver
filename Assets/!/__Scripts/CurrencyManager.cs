@@ -43,13 +43,43 @@ public class CurrencyManager : MonoBehaviour
 
     private int _pendingPopupAmount;
     private Coroutine _popupBatchRoutine;
+    private bool _startingCurrencyInitalized = false;
 
+    private readonly List<CurrencyScaleModifier> modifiers = new();
 
 
     private float _lastVFXTime;
+    private int _totalCurrency;
 
     public int CurrentCurrency { get; private set; }
     public int PreviousCurrency { get; private set; }
+
+    public int TotalCurrency => _totalCurrency;
+
+    
+      private void OnEnable()
+    {
+        RunLifecycle.OnRunAbandoned += HandleRunAbandoned;
+        GameStateManager.OnStateChanged += HandleStateChanged;
+    }
+
+    private void OnDisable()
+    {
+        RunLifecycle.OnRunAbandoned -= HandleRunAbandoned;
+        GameStateManager.OnStateChanged -= HandleStateChanged;
+    }
+
+    private void HandleStateChanged(GameState previousState, GameState newState)
+    {
+        if(newState == GameStateManager.LevelStartState && !_startingCurrencyInitalized)
+        {
+            if(GameSessionBootstrap.Config.StartingCurrency > 0)
+            {
+                AddCurrency(GameSessionBootstrap.Config.StartingCurrency,"Run Modifier");
+                _startingCurrencyInitalized = true;
+            }
+        }
+    }
 
     private void Awake()
     {
@@ -62,7 +92,10 @@ public class CurrencyManager : MonoBehaviour
         Instance = this;
 
         _lastVFXTime = float.MinValue;
+        _totalCurrency = 0;
+        _startingCurrencyInitalized = false;
     }
+
 
     private void Update()
     {
@@ -78,40 +111,6 @@ public class CurrencyManager : MonoBehaviour
         OnCurrencyChanged?.Invoke(CurrentCurrency);
     }
 
-    public void AddCurrency(int amount, string popupPrefix = null, string popupSuffix = null, bool silent = false)
-    {
-        if (amount <= 0)
-            return;
-
-        PreviousCurrency = CurrentCurrency;
-
-        CurrentCurrency += amount;
-
-        OnCurrencyAdded?.Invoke(amount);
-        OnCurrencyChanged?.Invoke(CurrentCurrency);
-
-        Debug.Log($"ADDED CURRENCY => {amount}");
-
-        if(silent) return;
-
-
-        // Reset to default visual effect animation when the time between last played exceeds the threshold
-        if(Time.time > _lastVFXTime + resetVFXTime)
-        {
-            //Reset
-            coinEffect.Play(amount);
-            _lastVFXTime = Time.time;
-        }
-        else
-        {
-            coinEffect.PlayAccent();
-            _lastVFXTime = Time.time;
-        }
-
-        QueueCurrencyPopup(amount);
-
-        AudioHelpers.PlaySoundEffect(currencyRewardSound.GetRandom(), transform.position);
-    }
 
     private void QueueCurrencyPopup(int amount)
     {
@@ -120,10 +119,10 @@ public class CurrencyManager : MonoBehaviour
         if(_popupBatchRoutine != null)
             StopCoroutine(_popupBatchRoutine);
 
-        _popupBatchRoutine = StartCoroutine(DisplayPopupAfterWindow());
+        _popupBatchRoutine = StartCoroutine(DisplayPopupAfterWindow(_pendingPopupAmount));
     }
 
-    private IEnumerator DisplayPopupAfterWindow()
+    private IEnumerator DisplayPopupAfterWindow(int amount)
     {
         yield return new WaitForSeconds(popupBatchWindow);
 
@@ -138,7 +137,7 @@ public class CurrencyManager : MonoBehaviour
         _pendingPopupAmount = 0;
         _popupBatchRoutine = null;
 
-        
+  
     }
 
     public void AddShopRerolls(int amount, string popupPrefix = null, string popupSuffix = null)
@@ -151,7 +150,7 @@ public class CurrencyManager : MonoBehaviour
             popup.Initialize(tookNoDamageRerolls, popupPrefix, popupSuffix);
         }
 
-        AudioHelpers.PlaySoundEffect(rewardSound, transform.position);
+        //AudioHelpers.PlaySoundEffect(rewardSound, transform.position);
     }
 
     public bool TrySpendCurrency(int amount)
@@ -178,6 +177,7 @@ public class CurrencyManager : MonoBehaviour
     public IEnumerator EndOfRoundSequence()
     {
         AddCurrency(RoundManager.Instance.CurrentLevelReward, "Level Reward");
+        //AddShopRerolls(RoundManager.Instance.CurrentLevelRerollReward, "Rerolls");
         stampText.Play($"Level Cleared!");
 
         yield return new WaitForSeconds(bonusesInterval);
@@ -190,7 +190,7 @@ public class CurrencyManager : MonoBehaviour
 
             foreach(var tier in comboRewards)
             {
-                if(RoundManager.Instance.roundStats.HighestCombo >= tier.comboRequirement)
+                if(ScoreManager.Instance.RoundStatsTracker.HighestCombo >= tier.comboRequirement)
                 {
                     reward = tier.currencyReward;
                     comboRequirement = tier.comboRequirement;
@@ -206,12 +206,14 @@ public class CurrencyManager : MonoBehaviour
         }
       
 
-        if(RoundManager.Instance.roundStats.PlayerTookNoDamage)
+        if(ScoreManager.Instance.RoundStatsTracker.PlayerTookNoDamage)
         {
             AddCurrency(tookNoDamage, "No Damage");
             stampText.Play($"No Damage!");
             
             yield return new WaitForSeconds(bonusesInterval);
+
+            PlayRerollPopup(tookNoDamageRerolls);
 
             AddShopRerolls(tookNoDamageRerolls, "No Damage!", "Rerolls");
             
@@ -219,7 +221,7 @@ public class CurrencyManager : MonoBehaviour
         }
 
 
-        if(RoundManager.Instance.roundStats.PerfectRound)
+        if(ScoreManager.Instance.RoundStatsTracker.PerfectRound)
         {
             AddCurrency(perfectRound, "Perfect Round");
             stampText.Play($"Never Missed!");
@@ -227,6 +229,97 @@ public class CurrencyManager : MonoBehaviour
             yield return new WaitForSeconds(bonusesInterval);
         }
 
+        int runModifierRerolls = GameSessionBootstrap.Config != null ? GameSessionBootstrap.Config.RerollsToGrant : 0;
+
+        if(runModifierRerolls > 0)
+        {
+            stampText.Play($"Run Modifier!");
+            PlayRerollPopup(runModifierRerolls);
+            AddShopRerolls(runModifierRerolls, "Run Modifier!", "Rerolls");
+            yield return new WaitForSeconds(bonusesInterval);
+        }
+            
+
         stampText.Hide();
+    }
+
+    public void PlayRerollPopup(int amount)
+    {
+        if (popupPrefab != null)
+        {
+            TextPopupObject popup = Instantiate(popupPrefab, popupTargetSpawnPos.position, Quaternion.identity);
+            popup.Initialize(amount,suffix:" REROLLS");
+
+            AudioHelpers.PlaySoundEffect(popupSound, popup.transform.position);
+        }
+    }
+
+    // Currency Calculation
+    //---------------------------------------------------------------------------------------------
+    
+    public void AddCurrency(int amount, string popupPrefix = null, string popupSuffix = null, bool silent = false)
+    {
+        if (amount <= 0)
+            return;
+
+        int adjustedAmount = Mathf.FloorToInt(amount * CalculateFinalScale());
+
+        PreviousCurrency = CurrentCurrency;
+        CurrentCurrency += adjustedAmount;
+
+        OnCurrencyAdded?.Invoke(adjustedAmount);
+        OnCurrencyChanged?.Invoke(CurrentCurrency);
+
+        // Reset to default visual effect animation when the time between last played exceeds the threshold
+        if(Time.time > _lastVFXTime + resetVFXTime)
+        {
+            //Reset
+            coinEffect.Play(adjustedAmount);
+            _lastVFXTime = Time.time;
+        }
+        else
+        {
+            //coinEffect.PlayAccent();
+            _lastVFXTime = Time.time;
+        }
+
+        QueueCurrencyPopup(adjustedAmount);
+
+        AudioHelpers.PlaySoundEffect(currencyRewardSound.GetRandom(), transform.position);
+
+        _totalCurrency += adjustedAmount;
+    }
+
+    public void AddCurrencyModifier(CurrencyScaleModifier mod)
+    {
+        if (mod == null)
+            return;
+
+        modifiers.Add(mod);
+    }
+
+    private void ClearModifiers()
+    {
+        modifiers.Clear();
+    }
+
+    private float CalculateFinalScale()
+    {
+        float result = 1f;
+
+        foreach (CurrencyScaleModifier mod in modifiers)
+        {
+            if (mod == null || !mod.IsActive)
+                continue;
+
+            result *= mod.Value;
+        }
+
+        return Mathf.Max(result,0f);
+    }
+
+    private void HandleRunAbandoned()
+    {
+        ClearModifiers();
     }
 }

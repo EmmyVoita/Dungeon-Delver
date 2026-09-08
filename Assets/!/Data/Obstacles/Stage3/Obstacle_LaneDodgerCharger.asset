@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
   m_Name: Obstacle_LaneDodgerCharger
   m_EditorClassIdentifier: 
-  displayName: Lane Dodger Charger
+  displayName: Homing Fireballs
   textColor: {r: 0.7176471, g: 0.9411765, b: 0.5372549, a: 1}
   fileName: lanedodgercharger
   prefab: {fileID: 1284808866172475107, guid: 101abcc3a2d4d2d458e660a0918cb829, type: 3}
   icon: {fileID: 0}
-  description: 
+  stageNumber: 3
+  hasBossOverride: 1
+  description: 'Tracking fireballs fire peridocially at the player. Their spawn rate
+    speeds up over time. '

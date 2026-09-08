@@ -1,15 +1,30 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using TMPro;
+using System.Collections.Generic;
 
 public class WorldMapController : MonoBehaviour
 {
+
+    [Header("References")]
+    [SerializeField] private TextMeshProUGUI titleText;
+    [SerializeField] private TextTypewriter typewriter;
+    [SerializeField] private KeyPromptController promptController;
+    [SerializeField] private WorldMapRouteSelector routeSelector;
+    [SerializeField] private RectTransform worldMapRootRect;
+    
+
+
+
     [SerializeField] private bool useStateChange = false;
     //[SerializeField] private GameObject background;
     [SerializeField] private SoundEffect moveSound;
     [SerializeField] private bool test = false;
-    [SerializeField] private WorldMapView mapView;
-    [SerializeField] private Transform playerMarker;
+    //[SerializeField] private WorldMapView mapView;
+    [SerializeField] private WorldMapViewer mapView;
+    [SerializeField] private RectTransform playerMarker;
+    [SerializeField] private bool animateMarker;
 
     [Header("Movement")]
     [SerializeField] private float moveDuration = 0.6f;
@@ -20,6 +35,9 @@ public class WorldMapController : MonoBehaviour
     [SerializeField] private float leanDuration = 0.2f;
     [SerializeField] private float returnDuration = 0.3f;
 
+    [Header("Key Prompts")]
+    [SerializeField] private List<KeyPrompt> keyPrompts;
+
 
     [SerializeField] private SoundEffect toggleDisplaySound;
 
@@ -28,17 +46,27 @@ public class WorldMapController : MonoBehaviour
     private Tween rotateTween;
     private Coroutine displaySequence;
 
+    public RectTransform WorldMapRootRect => worldMapRootRect;
+
+  
+
     private void OnEnable()
     {
         GameStateManager.OnStateChanged += HandleStateChanged;
-        GameStatsUI.OnStatsTallyComplete += HandleTallyComplete;
+        //GameStatsUI.OnStatsTallyComplete += HandleTallyComplete;
     }
 
     private void OnDisable()
     {
         GameStateManager.OnStateChanged -= HandleStateChanged;
-        GameStatsUI.OnStatsTallyComplete -= HandleTallyComplete;
+        //GameStatsUI.OnStatsTallyComplete -= HandleTallyComplete;
     }
+
+    private void Awake()
+    {
+        WorldMapRootRect.gameObject.SetActive(false);
+    }
+
 
     private void HandleTallyComplete()
     {
@@ -59,33 +87,46 @@ public class WorldMapController : MonoBehaviour
 
         if(newState != GameState.WorldMapView && newState != GameState.WorldMapViewEnd)
         {
-            mapView.Clear();
-            HideMarker();
+            //promptController.PopPrompts();
+            if(mapView)
+                mapView.Clear();
+            if(animateMarker)
+                HideMarker();
         }   
+
+        if(newState == GameState.WorldMapViewEnd)
+        {
+            promptController.PushPrompts(keyPrompts);
+        }
 
         
 
         if (newState == GameState.WorldMapView && previousState != GameState.Paused)
         {
-            mapView.Build();
-
-            if(useStateChange)
+            WorldMapRootRect.gameObject.SetActive(true);
+            //canvasGroup.alpha = 1;
+            typewriter.StartTyping(RoundManager.Instance.CurrentStageName, () =>
             {
-                if (displaySequence != null)
+                mapView.Build(()=>
                 {
-                    StopCoroutine(displaySequence);
-                    displaySequence = null;
-                }
+                    if(useStateChange)
+                    {
+                        if (displaySequence != null)
+                        {
+                            StopCoroutine(displaySequence);
+                            displaySequence = null;
+                        }
 
-                displaySequence = StartCoroutine(DisplaySequence());
-            }
+                        displaySequence = StartCoroutine(DisplaySequence());
+                    }
+                });
+            });
         }
     }
 
     private void HideMarker()
     {
         playerMarker.gameObject.SetActive(false);
-        //AudioHelpers.PlaySoundEffect(toggleDisplaySound, transform.position);
     }
 
     private void ShowMarker()
@@ -94,37 +135,69 @@ public class WorldMapController : MonoBehaviour
         AudioHelpers.PlaySoundEffect(toggleDisplaySound, transform.position);
     }
 
+    /*
     private IEnumerator DisplaySequence()
     {
-        //background.SetActive(true);
-        
-        Debug.LogWarning("Current Index -> " + CurrentIndex);
         SetStartNode(Mathf.Max(CurrentIndex - 1,0));
 
-        
-        
         yield return new WaitForSeconds(1.0f);
 
         ShowMarker();
 
         yield return new WaitForSeconds(1.0f);
 
-        MoveToNode(CurrentIndex);
+        Tween movement = MoveToNode(CurrentIndex);
 
         AudioHelpers.PlaySoundEffect(moveSound, transform.position);
 
-        yield return new WaitForSeconds(0.25f);
+        if(movement != null)
+            yield return movement.WaitForCompletion();
+        
+        yield return new WaitForSeconds(0.5f);
 
-      
+        routeSelector.Open();
+    }
+    */
 
-        yield return new WaitForSeconds(3.0f);
+    private IEnumerator DisplaySequence()
+    {
+        int startIndex = Mathf.Max(CurrentIndex - 1, 0);
 
-        if(!test)
+        SetStartNode(startIndex);
+
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        if(animateMarker)
         {
-            GameStateManager.Instance.SetState(GameState.UpgradeSelection);
-            //GameStateManager.Instance.RequestStateChange(GameState.UpgradeSelection);
-        } 
-        //background.SetActive(false);
+            //ShowMarker();
+
+            //yield return new WaitForSecondsRealtime(0.5f);
+        }
+     
+
+        //Tween movement = MoveToNode(CurrentIndex);
+
+        AudioHelpers.PlaySoundEffect(
+            moveSound,
+            transform.position
+        );
+
+        //if (movement != null)
+            //yield return movement.WaitForCompletion();
+
+        yield return new WaitForSecondsRealtime(0.15f);
+
+        Tween scrollTween = mapView.ScrollToNode(CurrentIndex);
+
+        if (scrollTween != null)
+            yield return scrollTween.WaitForCompletion();
+
+        yield return new WaitForSecondsRealtime(0.25f);
+
+        if(animateMarker)
+        ShowMarker();
+
+        routeSelector.Open();
     }
 
     private int CurrentIndex =>
@@ -141,7 +214,7 @@ public class WorldMapController : MonoBehaviour
         var node = mapView.GetNode(index);
         if (node == null) return;
 
-        playerMarker.position = node.transform.position;
+        //playerMarker.position = node.transform.position;
     }
 
     private IEnumerator FinishSequence()
@@ -150,10 +223,12 @@ public class WorldMapController : MonoBehaviour
         GameStateManager.Instance.SetState(GameState.WorldMapViewEnd);
     }
 
-    public void MoveToNode(int index)
+    public Tween MoveToNode(int index)
     {
         var node = mapView.GetNode(index);
-        if (node == null) return;
+
+        if (node == null)
+            return null;
 
         currentIndex = index;
 
@@ -161,30 +236,60 @@ public class WorldMapController : MonoBehaviour
         Vector3 target = node.transform.position;
         Vector3 dir = (target - start).normalized;
 
-        // Kill existing tweens (important)
         moveTween?.Kill();
         rotateTween?.Kill();
 
-        // --- MOVE ---
-        moveTween = playerMarker.DOMove(target, moveDuration)
+        bool movingToNextStage =
+            RoundManager.Instance != null &&
+            RoundManager.Instance.IsAdvancingToNextStage;
+        
+        bool titleUpdated = false;
+
+        moveTween = playerMarker
+            .DOMove(target, moveDuration)
             .SetEase(moveEase)
-            .OnComplete(()=>
-             {
-                StartCoroutine(FinishSequence());
-             });
+            .OnComplete(() =>
+            {
+                if (!movingToNextStage || titleUpdated)
+                    return;
 
-        // --- LEAN ---
-        float lean = dir.x * maxLeanAngle; // left/right tilt
+                if (moveTween.ElapsedPercentage() >= 0.65f)
+                {
+                    titleUpdated = true;
 
-        // Quick lean toward direction
+                    UpdateStageTitle(
+                        RoundManager.Instance.NextStageName
+                    );
+                }
+            });
+
+        float lean = dir.x * maxLeanAngle;
+
         rotateTween = playerMarker
-            .DORotate(new Vector3(0, 0, -lean), leanDuration)
+            .DORotate(
+                new Vector3(0, 0, -lean),
+                leanDuration
+            )
             .SetEase(Ease.OutQuad)
             .OnComplete(() =>
             {
-                // Return to neutral after movement
-                playerMarker.DORotate(Vector3.zero, returnDuration)
+                playerMarker
+                    .DORotate(Vector3.zero, returnDuration)
                     .SetEase(Ease.OutCubic);
             });
+
+        return moveTween;
+    }
+
+    private void UpdateStageTitle(string stageName)
+    {
+        if (typewriter != null)
+        {
+            typewriter.StartTyping(stageName);
+        }
+        else if (titleText != null)
+        {
+            titleText.text = stageName;
+        }
     }
 }

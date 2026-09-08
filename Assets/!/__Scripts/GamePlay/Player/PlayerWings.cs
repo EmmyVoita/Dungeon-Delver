@@ -5,8 +5,8 @@ using UnityEngine.VFX;
 
 public class PlayerWings : MonoBehaviour
 {
-    [SerializeField] private ParticleSystem activatePS;
     [SerializeField] private VisualEffect activateVE;
+    [SerializeField] private string playEventName = "OnPlay";
 
     [Header("Wing Sprites")]
     [SerializeField] private SpriteRenderer wingRenderer;
@@ -22,47 +22,57 @@ public class PlayerWings : MonoBehaviour
 
     private Coroutine flapRoutine;
     private Tween fadeTween;
+    private Tween scaleTween;
 
     public void ShowWings()
     {
-        // If already visible or fading in, skip
+        fadeTween?.Kill();
+        scaleTween?.Kill();
+
+        transform.localScale = Vector3.one;
+
+        // If already fully visible after cancelling any hide animation,
+        // there's nothing else to do.
         if (wingRenderer.enabled && wingRenderer.color.a > 0.95f)
             return;
 
-        fadeTween?.Kill();
         wingRenderer.enabled = true;
 
-        // Instantly set visible
         Color c = wingRenderer.color;
         c.a = 1f;
         wingRenderer.color = c;
 
-        if (activatePS != null)
-            activatePS.Play();
-
-        if(activateVE != null)
-            activateVE.Play();
+        if (activateVE != null)
+            activateVE.SendEvent(playEventName);
     }
 
     public void HideWings()
     {
+        fadeTween?.Kill();
+        scaleTween?.Kill();
+
         fadeTween = wingRenderer.DOFade(0f, fadeOutDuration)
             .SetEase(Ease.InSine)
             .OnComplete(() =>
             {
                 wingRenderer.enabled = false;
 
-                // Reset alpha for next ShowWings()
                 Color c = wingRenderer.color;
                 c.a = 1f;
                 wingRenderer.color = c;
+
+                fadeTween = null;
             });
 
-        // Optional: fold a little as it fades (adds nice motion)
         if (foldScale)
         {
-            transform.DOScaleX(0.7f, fadeOutDuration).SetEase(Ease.InSine)
-                .OnComplete(() => transform.localScale = Vector3.one);
+            scaleTween = transform.DOScaleX(0.7f, fadeOutDuration)
+                .SetEase(Ease.InSine)
+                .OnComplete(() =>
+                {
+                    transform.localScale = Vector3.one;
+                    scaleTween = null;
+                });
         }
     }
 

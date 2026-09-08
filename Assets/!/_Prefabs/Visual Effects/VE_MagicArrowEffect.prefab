@@ -50,6 +50,9 @@ MonoBehaviour:
   - {fileID: 5506380206657309375}
   - {fileID: 1001236814366835014}
   playEventName: OnPlay
+  useCallEvent: 0
+  stopAfterTime: 5
+  stopEventName: OnStop
   safetyLifetime: 5
 --- !u!1 &3192469925954927115
 GameObject:

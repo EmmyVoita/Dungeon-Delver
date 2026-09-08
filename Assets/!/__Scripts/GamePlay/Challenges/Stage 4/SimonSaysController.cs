@@ -200,14 +200,14 @@ public class SimonSaysController : MonoBehaviour
         }
     }
 
-    void HandlePlayerInput(Vector2 inputDir)
+    void HandlePlayerInput(JumpData data)
     {
         if (!inputEnabled || playerProgress >= currentSequence.Count)
             return;
 
-        if (inputDir == currentSequence[playerProgress])
+        if (data.Direction == currentSequence[playerProgress])
         {
-            float pitch = pitchMap[inputDir];
+            float pitch = pitchMap[data.Direction];
              AudioHelpers.PlayMyClipAtPoint(
                 beepSound, 
                 AudioChannel.SFX, 
@@ -216,7 +216,7 @@ public class SimonSaysController : MonoBehaviour
             );
             //audioSource.PlayOneShot(beepSound);
             playerProgress++;
-            lightMap[inputDir].PlayGlowRotate();
+            lightMap[data.Direction].PlayGlowRotate();
 
             if (playerProgress == currentSequence.Count)
                 StartCoroutine(HandleSuccess());

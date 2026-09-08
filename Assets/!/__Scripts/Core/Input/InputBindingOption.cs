@@ -124,7 +124,7 @@ public class InputBindingOption : BaseSettingOption
                         // Key is invalid → show feedback
                         keyDisplay.text = "X";
                         keyDisplay.color = Color.red;
-                        yield return new WaitForSeconds(0.2f);
+                        yield return new WaitForSecondsRealtime(0.2f);
 
                         keyDisplay.text = "_";
                         keyDisplay.color = Color.yellow;

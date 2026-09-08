@@ -4,6 +4,7 @@ using UnityEngine;
 public class TimeSlowUpgrade_Wave : AbilityUpgradeBase
 {
 
+    /*
     public override void ApplyToAbility(AbilityBase ability)
     {
         if (ability is SlowTimeAbility _ability)
@@ -11,6 +12,6 @@ public class TimeSlowUpgrade_Wave : AbilityUpgradeBase
             //_ability.EnableExpandingWave();
         }
     }
-
+    */
 
 }

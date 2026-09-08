@@ -12,15 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 497a73d3a2b0c3e4ca1f896016f06294, type: 3}
   m_Name: Heal And Ability Charge
   m_EditorClassIdentifier: Assembly-CSharp::IntermediateHealAndAbilityChargeSO
-  _cost: 100
+  upgradeId: d91b0e85-685a-4768-9bf6-81bd5ffa0dde
+  category: 1
+  requiredUpgrades: []
+  baseOfferWeight: 1
+  _cost: 75
   _maxStacks: 999
+  duration: 3
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
   centerIcon: {fileID: 21300000, guid: 9c5f33756140dcf4cb89aea4ee29e340, type: 3}
-  icon: {fileID: 21300000, guid: f2d2d66be75f1ea43aeda090e49d34ac, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Power Up
   descriptionTemplate: Heal for <color=#00E676>{HEAL_AMOUNT}</color> health now,
-    and start the next level with full ability charge
+    and start the next level with {FULL_ABILITY_CHARGE}.
   detailsTemplate: 
+  healthSynergyUpgrades:
+  - {fileID: 11400000, guid: 82cecb827185bd245a2af515ed5f3d9a, type: 2}
+  weightPerSynergyStack: 0.5
+  maximumHealthWeightBonus: 3.5
+  startingWeighingHealthAt: 10
   healAmount: 1

@@ -12,8 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 103c4e3f201af744b8611f2ab9a4de29, type: 3}
   m_Name: Stage3Data
   m_EditorClassIdentifier: Assembly-CSharp::StageDataObject
-  stageName: Stage C
+  stageName: Cinder Court
   musicClip: {fileID: 8300000, guid: b0d2fbbfcadc6844ab5ee67d55827f3b, type: 3}
+  backgroundData:
+    mainBackground: {fileID: 2800000, guid: c9b2eaa5ecfa8964db3492b15f654af5, type: 3}
+    secondaryBackground: {fileID: 2800000, guid: 120953413ec73ab4cbd56c4cfe8eff0e, type: 3}
+    mainSpeed: 1.5
+    secondarySpeed: 3.5
+    mainTiling: {x: 1.8, y: 5.4}
+    secondaryTiling: {x: 8, y: 5}
+    mainDirection: {x: -1, y: 1}
+    secondaryDirection: {x: 5, y: 2}
   levelsToPlay: 3
   levelFiles:
   - {fileID: 11400000, guid: 6ea77bc6f76fb3c469bc5e6d1761f087, type: 2}

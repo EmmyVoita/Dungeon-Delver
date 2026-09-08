@@ -17,14 +17,16 @@ public abstract class ArrowBase : MonoBehaviour
 
     [Header("Sprite")]
     [SerializeField] private bool flip180 = false;
-    [SerializeField] private SpriteRenderer sRend;
+    [SerializeField] protected SpriteRenderer sRend;
     [SerializeField] private Material baseMaterial;
     [SerializeField] protected string colorApropertyName = "_ColorA";
     [SerializeField] protected string colorBpropertyName = "_ColorB";
 
     [Header("Flag Colors")]
-    [ColorUsage(true, true)][SerializeField] protected Color goldenColorA;
-    [ColorUsage(true, true)][SerializeField] protected Color goldenColorB;
+    [SerializeField] protected Color goldenColorA;
+    [SerializeField] protected Color goldenColorB;
+    [SerializeField] protected Color empoweredColorA;
+    [SerializeField] protected Color empoweredColorB;
     [ColorUsage(true, true)][SerializeField] protected Color recoveryColorA;
     [ColorUsage(true, true)][SerializeField] protected Color recoveryColorB;
 
@@ -36,6 +38,7 @@ public abstract class ArrowBase : MonoBehaviour
 
     [Header("Audio Base Settings")]
     [SerializeField] private AudioClip arrowHitSound;
+    [SerializeField] private float audioVolume = 1.0f;
     [SerializeField] private float normalHitPitch = 1.0f;
     [SerializeField] private float criticalHitPitch = 1.2f;
     [Range(0f, 1f),SerializeField] private float directionalPitchFactor = 1f;
@@ -64,7 +67,7 @@ public abstract class ArrowBase : MonoBehaviour
 
     public bool IsGolden => _status.HasFlag(ArrowStatus.Golden);
     public bool IsRecoveryArrow => _status.HasFlag(ArrowStatus.Recovery);
-    public bool IsTimeSlowArrow => _status.HasFlag(ArrowStatus.TimeSlow);
+    public bool IsTimeSlowArrow => _status.HasFlag(ArrowStatus.Empowered);
     public bool Invincible => _invincible;
     public ArrowCatchRule CatchRule => catchRule;
     public bool IsInverse => catchRule == ArrowCatchRule.Avoid;
@@ -215,10 +218,11 @@ public abstract class ArrowBase : MonoBehaviour
         }
 
         if (goalType == Goal.GoalType.Critical &&
-            HasStatus(ArrowStatus.TimeSlow))
+            HasStatus(ArrowStatus.Empowered))
         {
-            TimeScaleModifier timeMod = new TimeScaleModifier("TimeSlowArrow", slowFactor);
-            TimeManager.Instance.AddTemporaryModifier(timeMod, slowDuration);
+            Player.Instance.SpawnAbility(false);
+            //TimeScaleModifier timeMod = new TimeScaleModifier("TimeSlowArrow", slowFactor);
+            //TimeManager.Instance.AddTemporaryModifier(timeMod, slowDuration);
         }
 
 
@@ -263,6 +267,14 @@ public abstract class ArrowBase : MonoBehaviour
     {
         float directionPitch = GetDirectionPitch(_direction) * directionalPitchFactor;
 
+        if(arrowHitSound == null)
+        {
+            ArrowHitSoundData soundData = AudioLibrary.Instance.ArrowHitSoundData;
+            normalHitPitch = soundData.normalHitPitch;
+            criticalHitPitch = soundData.critcalHitPitch;
+            arrowHitSound = soundData.arrowHitSound;
+        }
+
         float pitch =
             goalType == Goal.GoalType.Critical
                 ? criticalHitPitch
@@ -270,12 +282,13 @@ public abstract class ArrowBase : MonoBehaviour
 
         pitch += directionPitch;
 
+    
         AudioHelpers.PlayDirectionalArrowHit(
             arrowHitSound,
             transform.position,
             _direction,
             pitch,
-            1f,
+            AudioSettingsManager.GetVolume(AudioChannel.SFX) * audioVolume,
             directionalEQStrength
         );
     }
@@ -316,15 +329,15 @@ public abstract class ArrowBase : MonoBehaviour
         runTimeMaterial.SetColor(colorBpropertyName, recoveryColorB);
     }
 
-    public virtual void SetTimeSlowArrow()
+    public virtual void SetEmpoweredArrow()
     {
-        AddStatus(ArrowStatus.TimeSlow);
+        AddStatus(ArrowStatus.Empowered);
 
         if(!runTimeMaterial) 
             return;
 
-        runTimeMaterial.SetColor(colorApropertyName, Color.blue);
-        runTimeMaterial.SetColor(colorBpropertyName, Color.purple);
+        runTimeMaterial.SetColor(colorApropertyName, empoweredColorA);
+        runTimeMaterial.SetColor(colorBpropertyName, empoweredColorB);
     }
 
     public virtual void SetGolden()
@@ -334,7 +347,7 @@ public abstract class ArrowBase : MonoBehaviour
         if(!runTimeMaterial) 
             return;
 
-        if(!HasStatus(ArrowStatus.Recovery) && !HasStatus(ArrowStatus.TimeSlow))
+        if(!HasStatus(ArrowStatus.Recovery) && !HasStatus(ArrowStatus.Empowered))
         {
             runTimeMaterial.SetColor(colorApropertyName, goldenColorA);
             runTimeMaterial.SetColor(colorBpropertyName, goldenColorB);

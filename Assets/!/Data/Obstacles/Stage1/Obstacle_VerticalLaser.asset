@@ -17,4 +17,6 @@ MonoBehaviour:
   fileName: verticalbeam
   prefab: {fileID: 6654523266709301360, guid: 0a6ff83186c91c140b530035473b63fe, type: 3}
   icon: {fileID: 0}
-  description: Vertical laser that fires after a short delay
+  stageNumber: 1
+  hasBossOverride: 1
+  description: A vertical laser fires after a short delay.

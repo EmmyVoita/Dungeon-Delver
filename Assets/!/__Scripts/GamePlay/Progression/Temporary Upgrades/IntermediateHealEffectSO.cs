@@ -9,7 +9,7 @@ public class IntermediateHealEffectSO : UpgradeBase
 
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
-        if(newState == GameState.UpgradeSelection && previousState != newState)
+        if(newState == GameState.RoundReward && previousState != newState)
         {
             Debug.Log("HEALING PLAYER");
             Player.Instance.HealPlayer(finishHealAmount);
@@ -17,7 +17,7 @@ public class IntermediateHealEffectSO : UpgradeBase
         }
     }
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{HEAL_AMOUNT}", immediateHealAmount.ToString("N0"))

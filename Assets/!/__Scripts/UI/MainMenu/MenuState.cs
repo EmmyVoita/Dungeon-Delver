@@ -7,5 +7,7 @@ public enum MenuState
     Practice,
     LeaderBoard,
     Tutorial,
-    Exit
+    Exit,
+    Pause,
+    RunModifiers
 }

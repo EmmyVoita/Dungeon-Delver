@@ -12,15 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 563406577342fa74eb8a4ab04e191633, type: 3}
   m_Name: Heal Well
   m_EditorClassIdentifier: Assembly-CSharp::HealWell
-  _cost: 100
+  upgradeId: 49ef5ade-b78f-4bcb-9a7f-371b234fd2f3
+  category: 1
+  requiredUpgrades: []
+  baseOfferWeight: 0
+  _cost: 150
   _maxStacks: 999
+  duration: 3
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
   centerIcon: {fileID: 21300000, guid: 79eb922753fd4c64a8036abf25e0c950, type: 3}
-  icon: {fileID: 21300000, guid: f2d2d66be75f1ea43aeda090e49d34ac, type: 3}
   iconMaterial: {fileID: 0}
-  displayName: Healing Fountain
-  descriptionTemplate: Toss a coin into the wishing well to restore health
+  displayName: Wishing Coin
+  descriptionTemplate: Toss a coin into the wishing well to restore health.
   detailsTemplate: 'Restores:
 
     1 Health (40%)
@@ -31,6 +35,10 @@ MonoBehaviour:
     (20%)
 
     4 Health (10%)'
+  healthSynergyUpgrades: []
+  weightPerSynergyStack: 0.25
+  maximumHealthWeightBonus: 3.5
+  startingWeighingHealthAt: 10
   rewards:
   - rewardType: 0
     amount: 1

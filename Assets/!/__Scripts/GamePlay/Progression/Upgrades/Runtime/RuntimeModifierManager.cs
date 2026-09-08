@@ -1,12 +1,19 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class RuntimeModifierManager<TModifier> : MonoBehaviour
     where TModifier : class, IRuntimeModifier
 {
-    protected readonly List<TModifier> activeModifiers = new();
-    protected readonly List<TModifier> renewingModifiers = new();
-    protected readonly List<TModifier> permanentModifiers = new();
+    protected readonly List<RuntimeModifierEntry<TModifier>> activeModifiers = new();
+    protected readonly List<RuntimeModifierEntry<TModifier>> renewingModifiers = new();
+    protected readonly List<RuntimeModifierEntry<TModifier>> permanentModifiers = new();
+
+    /// <summary>
+    /// Fired when a one-level modifier expires and its inventory card
+    /// should be removed.
+    /// </summary>
+    public static event Action<UpgradeBase> OnUpgradeExpired;
 
     private bool _initialized;
 
@@ -41,12 +48,21 @@ public abstract class RuntimeModifierManager<TModifier> : MonoBehaviour
         GameState newState)
     {
         if (newState == GameStateManager.LevelStartState)
+        {
             RestoreRenewingModifiers();
+        }
 
         if (newState == GameStateManager.LevelEndState)
+        {
             RemoveTemporaryModifiers();
+        }
 
         OnGameStateChanged(previousState, newState);
+
+        if(newState == GameState.DeathSequence)
+        {
+            ClearAllModifiers();
+        }
     }
 
     protected virtual void OnGameStateChanged(
@@ -56,71 +72,118 @@ public abstract class RuntimeModifierManager<TModifier> : MonoBehaviour
     }
 
     /// <summary>
-    /// Adds a temporary modifier that is removed at the end of the level.
+    /// Adds a temporary modifier that is removed at level end.
+    /// Its inventory card is also removed when it expires.
     /// </summary>
-    public virtual void Register(TModifier modifier)
+    public virtual void Register(
+        TModifier modifier,
+        UpgradeBase sourceUpgrade)
     {
         if (modifier == null)
             return;
 
         Initialize();
-        AddActiveModifier(modifier);
+
+        RuntimeModifierEntry<TModifier> entry =
+            new RuntimeModifierEntry<TModifier>(
+                modifier,
+                sourceUpgrade,
+                removeCardWhenExpired: true
+            );
+
+        AddActiveModifier(entry);
     }
 
     /// <summary>
-    /// Adds a modifier template that is cloned into the active list
-    /// at the beginning of every level.
+    /// Adds a modifier template that creates a fresh active modifier
+    /// at the beginning of each level.
+    /// Its inventory card remains between levels.
     /// </summary>
-    public virtual void RegisterRenewing(TModifier modifier)
+    public virtual void RegisterRenewing(
+        TModifier modifier,
+        UpgradeBase sourceUpgrade)
     {
         if (modifier == null)
             return;
 
         Initialize();
 
-        renewingModifiers.Add(modifier);
+        RuntimeModifierEntry<TModifier> entry =
+            new RuntimeModifierEntry<TModifier>(
+                modifier,
+                sourceUpgrade,
+                removeCardWhenExpired: false
+            );
+
+        renewingModifiers.Add(entry);
     }
 
     /// <summary>
     /// Adds a modifier immediately and keeps it active between levels.
+    /// Its inventory card remains.
     /// </summary>
-    public virtual void RegisterPermanent(TModifier modifier)
+    public virtual void RegisterPermanent(
+        TModifier modifier,
+        UpgradeBase sourceUpgrade)
     {
         if (modifier == null)
             return;
 
         Initialize();
 
-        permanentModifiers.Add(modifier);
+        RuntimeModifierEntry<TModifier> entry =
+            new RuntimeModifierEntry<TModifier>(
+                modifier,
+                sourceUpgrade,
+                removeCardWhenExpired: false
+            );
 
-        AddActiveModifier(modifier);
+        permanentModifiers.Add(entry);
+        AddActiveModifier(entry);
     }
 
     protected virtual void RestoreRenewingModifiers()
     {
-        foreach (TModifier modifier in renewingModifiers)
+        foreach (RuntimeModifierEntry<TModifier> template in renewingModifiers)
         {
-            TModifier clone = modifier.Clone() as TModifier;
+            TModifier clone = template.Modifier.Clone() as TModifier;
 
-            if (clone != null)
-                AddActiveModifier(modifier);
+            if (clone == null)
+                continue;
+
+            RuntimeModifierEntry<TModifier> activeEntry =
+                new RuntimeModifierEntry<TModifier>(
+                    clone,
+                    template.SourceUpgrade,
+                    removeCardWhenExpired: false
+                );
+
+            AddActiveModifier(activeEntry);
         }
-
-        SortActiveModifiers();
     }
 
     protected virtual void RemoveTemporaryModifiers()
     {
-        foreach(TModifier modifier in activeModifiers)
+        for (int i = activeModifiers.Count - 1; i >= 0; i--)
         {
-            modifier.OnDestroy();
+            RuntimeModifierEntry<TModifier> entry = activeModifiers[i];
+
+            // Permanent modifiers stay active and keep their runtime state.
+            if (permanentModifiers.Contains(entry))
+                continue;
+
+            entry.Modifier.OnDestroy();
+            activeModifiers.RemoveAt(i);
+
+            // Renewing modifier instances end each level, but their
+            // inventory cards remain because they return next level.
+            if (entry.RemoveCardWhenExpired &&
+                entry.SourceUpgrade != null)
+            {
+                ShopManager.Instance.RemoveUpgrade(entry.SourceUpgrade);
+                //OnUpgradeExpired?.Invoke(entry.SourceUpgrade);
+            }
         }
-
-        activeModifiers.Clear();
-
-        // Permanent modifiers use the same runtime instance,
-        // so their internal state is preserved between levels.
-        activeModifiers.AddRange(permanentModifiers);
 
         SortActiveModifiers();
     }
@@ -128,32 +191,76 @@ public abstract class RuntimeModifierManager<TModifier> : MonoBehaviour
     protected void SortActiveModifiers()
     {
         activeModifiers.Sort(
-            (a, b) => b.Priority.CompareTo(a.Priority)
+            (a, b) =>
+                b.Modifier.Priority.CompareTo(a.Modifier.Priority)
         );
     }
 
-    // Helper Method for adding an active modifier
-    protected virtual void AddActiveModifier(TModifier modifier)
+    protected virtual void AddActiveModifier(
+    RuntimeModifierEntry<TModifier> entry)
     {
-        if (modifier == null)
+        if (entry == null || entry.Modifier == null)
             return;
 
-        activeModifiers.Add(modifier);
+        activeModifiers.Add(entry);
 
-        OnModifierActivated(modifier);
-        
-        modifier.OnActivate();
+        OnModifierActivated(entry.Modifier);
+
+        entry.Modifier.OnActivate();
 
         SortActiveModifiers();
     }
 
     protected virtual void OnModifierActivated(TModifier modifier)
     {
-        
     }
+
+    protected void ExpireModifier(RuntimeModifierEntry<TModifier> entry)
+    {
+        if (entry == null)
+            return;
+
+        entry.Modifier.OnDestroy();
+        activeModifiers.Remove(entry);
+
+        if (entry.RemoveCardWhenExpired &&
+            entry.SourceUpgrade != null)
+        {
+            ShopManager.Instance.RemoveUpgrade(entry.SourceUpgrade);
+        }
+    }
+
+    protected virtual void OnDestroy()
+    {
+        Unsubscribe();
+
+        DestroyAllModifiers();
+    }
+
+    protected void DestroyAllModifiers()
+    {
+        foreach (var entry in activeModifiers)
+        {
+            entry.Modifier?.OnDestroy();
+        }
+
+        activeModifiers.Clear();
+
+        // If these contain SEPARATE modifier instances,
+        // destroy those too.
+        permanentModifiers.Clear();
+        renewingModifiers.Clear();
+        activeModifiers.Clear();
+    }
+
 
     public virtual void ClearAllModifiers()
     {
+        foreach (RuntimeModifierEntry<TModifier> entry in activeModifiers)
+        {
+            entry.Modifier.OnDestroy();
+        }
+
         activeModifiers.Clear();
         renewingModifiers.Clear();
         permanentModifiers.Clear();

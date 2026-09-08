@@ -70,7 +70,7 @@ public class ObstacleTutorialUI : MonoBehaviour
         _starsCollected++;
     }
 
-    void HandlePlayerJump(Vector2 dir)
+    void HandlePlayerJump(JumpData data)
     {
         return;
 
@@ -85,7 +85,7 @@ public class ObstacleTutorialUI : MonoBehaviour
         // --- Phase 1: Learn jump directions ---
         if (!_tutorialComplete)
         {
-            Vector2 snapped = SnapToCardinal(dir);
+            Vector2 snapped = SnapToCardinal(data.Direction);
 
             if (!_completedJumps.Contains(snapped))
             {

@@ -139,7 +139,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slowTimeEffect: {fileID: 3967248374897181812}
-  slowFactor: 0.65
+  slowFactor: 0.5
   spinSprite: {fileID: 736623091069038292}
   targetAlpha: 0.05
   fadeDuration: 0.3

@@ -5,7 +5,7 @@ public class IntermediateGoldenMulti : UpgradeBase
 {
     public float goldenValueMultiplier = 2.0f;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{GOLDEN_VALUE_MULTIPLIER}", (goldenValueMultiplier-1).ToString("P0"));
@@ -13,8 +13,10 @@ public class IntermediateGoldenMulti : UpgradeBase
 
     public override void Apply()
     {
+        /*
         StatModifierManager.Instance.AddTemporaryModifier(
             new TempGoldenValueMulti(goldenValueMultiplier - 1)
         );
+        */
     }
 }

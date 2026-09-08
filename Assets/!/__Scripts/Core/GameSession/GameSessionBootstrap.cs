@@ -1,8 +1,13 @@
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameSessionBootstrap : MonoBehaviour
 {
     public static GameSceneConfig Config { get; private set; }
+    public InventoryBase startInventory;
+    public GameObject inventoryRoot;
+    public KeyPromptController keyPromptController;
 
     private void Awake()
     {
@@ -10,10 +15,13 @@ public class GameSessionBootstrap : MonoBehaviour
 
         GameSceneLoader.PendingConfig = null; // prevent leakage
 
+        
     }
 
     private void Start()
     {
+        if(inventoryRoot != null)
+            inventoryRoot.SetActive(false);
         ApplySessionConfig();
     }
 
@@ -23,7 +31,7 @@ public class GameSessionBootstrap : MonoBehaviour
         switch (Config.Mode)
         {
             case GameMode.StandardRun:
-                GameStateManager.Instance.SetStateForceUpdate(GameState.RunIntro);
+                StartCoroutine(HandleStartingInventory());
                 break;
 
             case GameMode.ObstaclePractice:
@@ -45,5 +53,40 @@ public class GameSessionBootstrap : MonoBehaviour
                 Debug.LogError($"Config mode when loading the game session was incorrect => {Config.Mode}");
                 break;
         }
+
+        RunStateManager.Instance.AddGuaranteedWorldMapOptions(Config.AdditionalRewardRoutes);
+    }
+
+    private IEnumerator HandleStartingInventory()
+    {
+        if(Config.CardsToGrant == 0)
+        {
+            GameStateManager.Instance.SetStateForceUpdate(GameState.RunIntro);
+            yield break;
+        }
+
+        inventoryRoot.SetActive(true);
+
+        ShopManager.Instance.GrantRandomCards(Config.CardsToGrant);
+        
+        bool complete = false;
+
+        void HandleComplete(bool state)
+        {
+            if(state == false)
+                complete = true;
+        }
+
+        startInventory.TryOpen(keyPromptController);
+
+        InventoryBase.OnInventoryStateChanged += HandleComplete;
+
+        yield return new WaitUntil(() => complete);
+
+        InventoryBase.OnInventoryStateChanged -= HandleComplete;
+
+        inventoryRoot.SetActive(false);
+
+        GameStateManager.Instance.SetStateForceUpdate(GameState.RunIntro);
     }
 }

@@ -5,5 +5,5 @@ public enum ArrowStatus
     Golden  = 1 << 0,
     Frozen  = 1 << 1,
     Recovery = 1 << 2,
-    TimeSlow = 1 << 3
+    Empowered = 1 << 3
 }

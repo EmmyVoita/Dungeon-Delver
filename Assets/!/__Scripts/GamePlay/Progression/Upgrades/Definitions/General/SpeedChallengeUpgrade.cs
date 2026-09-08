@@ -7,15 +7,18 @@ public class SpeedChallengeUpgrade : UpgradeBase
     [SerializeField] private int currencyAmount = 3000;
     [SerializeField] private float modifier;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
-            .Replace("{SCORE_AMOUNT}", currencyAmount.ToString("N0"))
-            .Replace("{TIME_SCALE}", (-(1-modifier)).ToString("P0"));
+            .Replace("{CURRENCY}", $"<color=#{UIColors.ToHex(UIColors.Green)}>${currencyAmount}</color>")
+            .Replace("{TIME_SCALE}", $"<color=#{UIColors.ToHex(UIColors.Red)}>{(-(1-modifier)).ToString("P0")}</color>");
     }
 
-    private void OnDisable()
+    public override string GetDetails()
     {
+        return detailsTemplate
+            .Replace("{CURRENCY}", $"<color=#{UIColors.ToHex(UIColors.Green)}>${currencyAmount}</color>")
+            .Replace("{TIME_SCALE}", $"<color=#{UIColors.ToHex(UIColors.Red)}>{(-(1-modifier)).ToString("P0")}</color>");
     }
 
     public override void Apply()
@@ -28,6 +31,6 @@ public class SpeedChallengeUpgrade : UpgradeBase
             modifier
         );
 
-        TimeManager.Instance.AddLevelModifier(timeModifier);
+        TimeManager.Instance.AddLevelModifier(timeModifier,this);
     }
 }

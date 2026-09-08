@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using DG.Tweening;
+using UnityEngine.VFX;
 
 public class DurableArrow : ArrowBase
 {
@@ -21,6 +23,19 @@ public class DurableArrow : ArrowBase
     [SerializeField] private int hitsTaken = 0;
     [SerializeField] private float invincibleDone = 0;
 
+    [Header("Animation")]
+    [SerializeField] private VisualEffect trailEffect;
+
+    [Header("Trail Colors")]
+    [ColorUsage(true, true)] [SerializeField] private Color goldTrailColorOutter;
+    [ColorUsage(true, true)] [SerializeField] private Color goldTrailColorInner;
+
+    [ColorUsage(true, true)] [SerializeField] private Color timeTrailColorOutter;
+    [ColorUsage(true, true)] [SerializeField] private Color timeTrailColorInner;
+
+    private static readonly int OutterColor = Shader.PropertyToID("OutterColor");
+    private static readonly int InnerColor = Shader.PropertyToID("InnerColor");
+
     private Coroutine bounceRoutine;
 
     private float bounceStartTime;
@@ -28,11 +43,21 @@ public class DurableArrow : ArrowBase
     private Vector2 bounceStartPos;
     private float bounceDistance;
     private bool isBouncing = false;
+    private bool _isBouncingToMid = false;
 
+    private float BounceMidTime => bounceStartTime + (bounceEndTime - bounceStartTime) / 2f;
 
 
     protected override void Update()
     {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Debug.Log("MANUAL VFX START");
+
+            trailEffect.Reinit();
+            trailEffect.Play();
+        }
+
         if (_invincible && Time.time > invincibleDone)
             _invincible = false;
 
@@ -54,6 +79,14 @@ public class DurableArrow : ArrowBase
 
             SmoothTranslate(targetPos);
 
+            if(elapsed >= BounceMidTime && _isBouncingToMid)
+            {
+                trailEffect.Reinit();
+                trailEffect.Play();
+                _isBouncingToMid = false;
+            }
+
+
             if (elapsed >= bounceEndTime)
             {
                 isBouncing = false;
@@ -71,6 +104,38 @@ public class DurableArrow : ArrowBase
         base.Update();
     }
 
+    private void Squish()
+    {
+        sRend.transform.DOKill();
+
+        sRend.transform.localScale = Vector3.one;
+
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(
+            sRend.transform.DOScale(
+                new Vector3(0.5f, 1.6f, 1f), // squash X, stretch Y
+                0.06f
+            )
+        );
+
+        seq.Append(
+            sRend.transform.DOScale(
+                new Vector3(1.15f, 0.85f, 1f), // overshoot opposite
+                0.08f
+            )
+            .SetEase(Ease.OutQuad)
+        );
+
+        seq.Append(
+            sRend.transform.DOScale(
+                Vector3.one,
+                0.15f
+            )
+            .SetEase(Ease.OutBack)
+        );
+    }
+
 
     public override void Init(Vector2 direction, float speed, float spawnTime, float arrivalTime, Vector3 startPos, Vector3 endPos)
     {
@@ -80,25 +145,37 @@ public class DurableArrow : ArrowBase
         float duration = bounceTimeBeats * secondsPerBeat;
 
         float secondArrivalTime = arrivalTime + duration;
-        /*
-        float totalDistance = Vector2.Distance(startPos, endPos);
 
-        float clampedStopDistance = Mathf.Min(totalDistance - stopDistance, totalDistance);
-        float stopRatio = clampedStopDistance / totalDistance;
-
-        stopTime = Mathf.Lerp(spawnTime, arrivalTime, stopRatio);
-
-        float secondsPerBeat = 60f / ArrowSpawner.Instance.ActiveBPM;
-        float delayDuration = delayBeats * secondsPerBeat;
-
-        resumeTime = stopTime + delayDuration;
-        this.arrivalTime = delayDuration + arrivalTime;
-
-        // ✅ Correct stop position
-        stopPos = Vector2.Lerp(startPos, endPos, stopRatio);
-        */
+        trailEffect.Play();
     }
 
+    public override void SetGolden()
+    {
+        AddStatus(ArrowStatus.Golden);
+        
+        if(!runTimeMaterial)
+        {
+            Debug.LogError("When trying to set arrow to golden, the runtime material was null");
+            return;
+        } 
+            
+
+        if(!HasStatus(ArrowStatus.Recovery) && !HasStatus(ArrowStatus.Empowered))
+        {
+            runTimeMaterial.SetColor(colorApropertyName, goldenColorA);
+            runTimeMaterial.SetColor(colorBpropertyName, goldenColorB);
+            trailEffect.SetVector4(OutterColor, goldTrailColorOutter);
+            trailEffect.SetVector4(InnerColor, goldTrailColorInner);
+        }
+    }
+
+    public override void SetEmpoweredArrow()
+    {
+        base.SetEmpoweredArrow();
+
+        trailEffect.SetVector4(OutterColor, timeTrailColorOutter);
+        trailEffect.SetVector4(InnerColor, timeTrailColorInner);
+    }
 
     public override void OnArrowHit(float damage = 1f,
                                     Goal.GoalType goalType = Goal.GoalType.Normal,
@@ -114,7 +191,8 @@ public class DurableArrow : ArrowBase
         }
         else
         {
-
+            Squish();
+            trailEffect.Stop();
             _invincible = true;
             invincibleDone = Time.time + invincibilityDuration;
 
@@ -138,63 +216,8 @@ public class DurableArrow : ArrowBase
                 : _speed * (duration * 0.5f);
 
             isBouncing = true;
+            _isBouncingToMid = true;
 
         }
     }
-
-    /*
-    private IEnumerator BounceParabola()
-    {
-        // --- 1. Setup timing from BPM ---
-        float bpm = (ArrowSpawner.Instance != null) ? ArrowSpawner.Instance.ActiveBPM : 120f;
-        float secondsPerBeat = 60f / bpm;
-        float duration = bounceTimeBeats * secondsPerBeat;
-        if (duration <= 0f)
-            duration = 0.25f;
-
-        // --- 2. Setup distances ---
-        Vector3 startPos = transform.position;
-
-        // direction: from ArrowBase, normalized already in Fire()
-        Vector3 awayDir = (Vector3)direction.normalized;  // away from the player
-        float distance;
-
-        if (maxBounceDistance > 0f)
-        {
-            distance = maxBounceDistance;
-        }
-        else
-        {
-            // Roughly: how far it would go in half the duration at this speed
-            distance = speed * (duration * 0.5f);
-        }
-
-        // Stop physics while we manually control the position
-        rb.linearVelocity = Vector2.zero;
-
-        float t = 0f;
-
-        while (t < 1f)
-        {
-            t += Time.deltaTime / duration;
-            float u = Mathf.Clamp01(t);
-
-            // Parabola 0 → 1 → 0 (like jump arc in 1D)
-            float h = 4f * u * (1f - u);
-
-            // Move away then back along the same line
-            transform.position = startPos + awayDir * (h * distance);
-
-            yield return null;
-        }
-
-        // Snap back to exact start (in case of tiny float drift)
-        transform.position = startPos;
-
-        // Restore normal motion: back toward the player / center
-        rb.linearVelocity = -direction * speed;
-
-        bounceRoutine = null;
-    }
-    */
 }

@@ -17,5 +17,7 @@ MonoBehaviour:
   fileName: movingspikes
   prefab: {fileID: 5506234237567304645, guid: e9965c6160608c0478c3e5407d4a8c22, type: 3}
   icon: {fileID: 0}
-  description: Moving spikes move back and forth across the screen. Jump between
-    them to dodge them.
+  stageNumber: 2
+  hasBossOverride: 1
+  description: Moving damaging spikes move back and forth across the screen. Jump
+    between them to dodge them.

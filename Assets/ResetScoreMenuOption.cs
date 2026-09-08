@@ -23,7 +23,7 @@ public class ResetScoreMenuOption : BaseSettingOption
     public override void OnActivate()
     {
         AudioHelpers.PlayMyClipAtPoint(resetSound, AudioChannel.SFX, Camera.main.transform.position);
-        ScoreManager.Instance.ResetHighScore();
+        ScoreManager.Instance.ResetSaveData();
         unlockManager.DeleteSaveFile();
     }
 }

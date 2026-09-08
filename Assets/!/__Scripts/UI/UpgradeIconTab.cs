@@ -9,7 +9,7 @@ public class UpgradeIconTab : MonoBehaviour
 {
     [Header("Core")]
     [SerializeField] private RectTransform rect;
-    [SerializeField] private InputActionType openKey = InputActionType.Interact;
+    [SerializeField] private InputActionType openKey = InputActionType.Reroll;
 
     [Header("Slide Animation")]
     [SerializeField] private float hiddenX = -300f;

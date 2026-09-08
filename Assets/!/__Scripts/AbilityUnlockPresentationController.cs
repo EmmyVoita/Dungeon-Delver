@@ -25,7 +25,8 @@ public class AbilityUnlockPresentationController : MonoBehaviour
         // Navigate to the ability select page;
         MenuManager.Instance.RequestMenuTransition(MenuState.Play);
 
-        selectManager.SetInputLocked(true);
+        //selectManager.IsActive = false;
+        InputFocusManager.Claim(this);
 
 
         yield return new WaitForSeconds(2.0f);
@@ -45,7 +46,7 @@ public class AbilityUnlockPresentationController : MonoBehaviour
         yield return new WaitForSeconds(2.0f);
 
         // UnLock player input
-        selectManager.SetInputLocked(false);
+        InputFocusManager.Release(this);
     }
 
     private IEnumerator PlaySingleUnlock(AbilityType unlock)

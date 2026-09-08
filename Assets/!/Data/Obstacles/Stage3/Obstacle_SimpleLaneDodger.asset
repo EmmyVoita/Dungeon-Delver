@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
   m_Name: Obstacle_SimpleLaneDodger
   m_EditorClassIdentifier: 
-  displayName: Simple Lane Dodger
+  displayName: Fireball Barrage
   textColor: {r: 0.7176471, g: 0.9411765, b: 0.5372549, a: 1}
   fileName: simplelanedodger
   prefab: {fileID: 6769059283685959404, guid: 6fc66c19dfa52d6449a67fbd004629e0, type: 3}
   icon: {fileID: 0}
-  description: 
+  stageNumber: 3
+  hasBossOverride: 1
+  description: Fireballs fire horizontally across the screen. Navigate up and down
+    to weave through them.

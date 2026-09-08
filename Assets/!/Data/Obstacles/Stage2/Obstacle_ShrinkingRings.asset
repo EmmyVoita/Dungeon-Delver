@@ -17,5 +17,7 @@ MonoBehaviour:
   fileName: shrinkingrings
   prefab: {fileID: 2876227516044993260, guid: 96ea9857e22397b458d2bffd3c3d58b5, type: 3}
   icon: {fileID: 0}
-  description: Rings of damaging spikes that shrink towards the player. Jump through
-    the gaps.
+  stageNumber: 2
+  hasBossOverride: 1
+  description: Rings of damaging spikes shrink towards the player. Each ring has
+    a gap to jump through.

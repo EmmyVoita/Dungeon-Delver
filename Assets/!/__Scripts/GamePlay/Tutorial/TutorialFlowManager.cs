@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 /// <summary>
 /// Central controller that sequences Movement, Obstacle, and Ability tutorials.
@@ -24,6 +25,12 @@ public class TutorialFlowManager : MonoBehaviour
     public float transitionStartDelay = 0.75f;
     private AudioSource audioSource;
 
+    [Header("Menu Transition")]
+    [SerializeField] private Material transitionMaterial;
+    [SerializeField] private string transitionPropertyName = "_TransitionValue";
+    [SerializeField] private float targetValue = 1;
+    [SerializeField] private float duration = 0.5f;
+
     private void OnEnable()
     {
         GameStateManager.OnStateChanged += HandleStateChanged;
@@ -32,6 +39,15 @@ public class TutorialFlowManager : MonoBehaviour
     private void OnDisable()
     {
         GameStateManager.OnStateChanged -= HandleStateChanged;
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Keypad9))
+        {
+            StopAllCoroutines();
+            StartCoroutine(FinishTutorial());
+        }
     }
 
     private void HandleStateChanged(GameState previousState, GameState newState)
@@ -93,6 +109,14 @@ public class TutorialFlowManager : MonoBehaviour
     private IEnumerator FinishTutorial()
     {
         yield return new WaitForSeconds(finalTransitionDelay);
+
+        
+
+        transitionMaterial.DOFloat(targetValue,transitionPropertyName, duration);
+
+        SceneEntryContext.EntryType = SceneEntryType.ReturnFromTutorial;
+
+        yield return new WaitForSeconds(duration);
 
         // Example: Load main game scene
         Time.timeScale = 1f;

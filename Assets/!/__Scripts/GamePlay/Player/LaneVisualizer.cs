@@ -91,8 +91,10 @@ public class LaneVisualizer : MonoBehaviour
 
             GameObject line = Instantiate(laneLinePrefab, transform);
             line.transform.localPosition = new Vector3(0, y, 0);
-            line.transform.localScale = new Vector3(widthScale,1,1);
 
+            LaneLineObject comp = line.GetComponent<LaneLineObject>();
+            comp.Initialize(widthScale);
+            
             activeLines.Add(line);
         }
     }

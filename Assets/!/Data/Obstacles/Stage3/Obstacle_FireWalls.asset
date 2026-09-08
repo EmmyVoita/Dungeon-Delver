@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
   m_Name: Obstacle_FireWalls
   m_EditorClassIdentifier: 
-  displayName: Fire Walls
+  displayName: Fireball Waves
   textColor: {r: 0.7176471, g: 0.9411765, b: 0.5372549, a: 1}
   fileName: firewalls
   prefab: {fileID: 4641581749460450171, guid: e31adfd713e5fa5479a2994c1ec3cd87, type: 3}
   icon: {fileID: 0}
-  description: move walls fire
+  stageNumber: 3
+  hasBossOverride: 0
+  description: Firewalls fire horizontally across the screen. Navigate up and down
+    to weave through them.

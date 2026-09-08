@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public static class CoroutineHelpers
@@ -26,20 +27,17 @@ public static class CoroutineHelpers
         }
     }
 
-    public static IEnumerator WaitForConfirm(GameState requiredState)
+    public static IEnumerator WaitForConfirm(GameState requiredState, bool requireNoFocus)
     {
         bool confirmed = false;
 
         void Handler()
         {
-            //Debug.Log("Input recieved in coroutine helper function waitforconfirm");
-
-            if (GameStateManager.Instance.CurrentState == requiredState)
+            if(requireNoFocus && InputFocusManager.CurrentOwner != null)
+                return;
+                
+            if(GameStateManager.Instance.CurrentState == requiredState)
                 confirmed = true;
-            else
-            {
-                //Debug.Log("Input recieved but not right state");
-            }
         }
 
         InputBindingManager.OnConfirmPressed += Handler;
@@ -47,19 +45,20 @@ public static class CoroutineHelpers
         // Wait until confirmed
         yield return new WaitUntil(() => confirmed);
 
-        //Debug.LogError("Wait until condition met");
-
         // Always clean up
         InputBindingManager.OnConfirmPressed -= Handler;
     }
-
-    public static IEnumerator WaitForJump(GameState requiredState)
+    
+    public static IEnumerator WaitForJump(GameState requiredState, bool requireNoFocus)
     {
         bool confirmed = false;
 
         void Handler()
         {
-            if (GameStateManager.Instance.CurrentState == requiredState)
+            if(requireNoFocus && InputFocusManager.CurrentOwner != null)
+                return;
+                
+            if(GameStateManager.Instance.CurrentState == requiredState)
                 confirmed = true;
         }
 

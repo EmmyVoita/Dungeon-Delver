@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fdc28d0108ef714c98c05b991cf9bf3, type: 3}
+  m_Name: Death Save
+  m_EditorClassIdentifier: Assembly-CSharp::IntermediateDeathSave
+  upgradeId: 81a8f26d-2aa0-4520-8c6c-7ad27d943ccf
+  category: 2
+  requiredUpgrades: []
+  baseOfferWeight: 0.2
+  _cost: 50
+  _maxStacks: 999
+  duration: 1
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 31ac4335845c11a438f0cedf068864d0, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Second Chance
+  descriptionTemplate: 'If you were to die, instead heal once for {HEAL_AMOUNT} health. '
+  detailsTemplate: This upgrade stacks with other death saving effects. This card
+    will have a higher priority than other effects, so it will be used first.
+  healthSynergyUpgrades: []
+  weightPerSynergyStack: 0.5
+  maximumHealthWeightBonus: 3
+  startingWeighingHealthAt: 4
+  healAmount: 4

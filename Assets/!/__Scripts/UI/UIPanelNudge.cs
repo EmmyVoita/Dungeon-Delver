@@ -36,6 +36,16 @@ public class UIPanelNudge : MonoBehaviour
         Nudge(Vector2.right, -rotationAmount);
     }
 
+    public void NudgeUp()
+    {
+        Nudge(Vector2.up, 0);
+    }
+
+    public void NudgeDown()
+    {
+        Nudge(Vector2.down, 0);
+    }
+
     private void Nudge(Vector2 direction, float angle)
     {
         _sequence?.Kill();
@@ -47,18 +57,22 @@ public class UIPanelNudge : MonoBehaviour
 
         _sequence.Append(
             target.DOAnchorPos(_startPos + direction * moveDistance, moveDuration)
-                  .SetEase(Ease.OutQuad));
+                  .SetEase(Ease.OutQuad)
+                  .SetUpdate(true));
 
         _sequence.Join(
             target.DOLocalRotate(new Vector3(0, 0, angle), moveDuration)
-                  .SetEase(Ease.OutQuad));
+                  .SetEase(Ease.OutQuad)
+                  .SetUpdate(true));
 
         _sequence.Append(
             target.DOAnchorPos(_startPos, returnDuration)
-                  .SetEase(Ease.OutBack));
+                  .SetEase(Ease.OutBack)
+                  .SetUpdate(true));
 
         _sequence.Join(
             target.DOLocalRotate(Vector3.zero, returnDuration)
-                  .SetEase(Ease.OutBack));
+                  .SetEase(Ease.OutBack)
+                  .SetUpdate(true));
     }
 }

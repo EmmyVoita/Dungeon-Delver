@@ -29,12 +29,13 @@ public class GameOverCardSummary : MonoBehaviour
 
     private void BuildSummary()
     {
-        foreach(var kvp in UpgradeCardManager.Instance.AllChosenCards)
+        foreach(var kvp in ShopManager.Instance.AllPurchasedCards)
         {
+            
             var upgrade = kvp.Key;
             int count = kvp.Value;
 
-            Sprite icon = upgrade.icon;
+            Sprite icon = upgrade.centerIcon;
 
             GameObject item = Instantiate(ItemPrefab,transform.position, Quaternion.identity, parentTransform);
             if (item.TryGetComponent(out GameOverUpgradeIcon upgradeIcon))

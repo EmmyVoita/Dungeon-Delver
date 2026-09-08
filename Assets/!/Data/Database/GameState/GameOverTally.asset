@@ -19,5 +19,5 @@ MonoBehaviour:
   allowPause: 0
   showScoreUI: 0
   allowPlayerDeath: 0
-  showPlayer: 1
+  showPlayer: 0
   allowMouseInput: 0

@@ -33,7 +33,8 @@ public class MainMenuHighscoreText : MonoBehaviour
 
         List<RunRecord> topRuns = LeaderBoardMenuNavigator.GetTopRunsForAbility(targetType, saveData, 1);
         
-        int highscore = topRuns[0].score;
+        
+        int highscore = topRuns.Count != 0 ? topRuns[0].score : 0;
 
         highscoreText.text = prefix + highscore.ToString("N0");
     }

@@ -8,12 +8,15 @@ public class ObstacleListMenuOption : PracticeMenuOption, IPointerClickHandler
     public static event Action<PracticeMenuOption> OnObstacleListOptionClick;
     private ObstacleTypeDefinition obstacle;
     private TextMeshProUGUI text;
+    private PracticeObstacleOption _visual;
+
+    public ObstacleTypeDefinition Obstacle => obstacle;
     //public Color exitColor = Color.white;
 
     public void Setup(ObstacleTypeDefinition def)
     {
         obstacle = def;
-        text = GetComponent<TextMeshProUGUI>();
+        text = GetComponentInChildren<TextMeshProUGUI>();
         text.color = obstacle.textColor;
     }
 
@@ -22,18 +25,26 @@ public class ObstacleListMenuOption : PracticeMenuOption, IPointerClickHandler
         OnObstacleListOptionClick?.Invoke(this);
     }
 
+    
+
     public override void OnEnter()
     {
         base.OnEnter();
-        text.color = Color.yellow;
-        text.transform.localScale = Vector3.one * 1.2f;
+
+        if (_visual == null)
+            _visual = GetComponent<PracticeObstacleOption>();
+
+        _visual?.SetSelected(true);
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        text.color = obstacle.textColor;
-        text.transform.localScale = Vector3.one;
+
+        if (_visual == null)
+            _visual = GetComponent<PracticeObstacleOption>();
+
+        _visual?.SetSelected(false);
     }
 
     public override void HandleDirectionalInput(Vector2 input)
@@ -45,10 +56,6 @@ public class ObstacleListMenuOption : PracticeMenuOption, IPointerClickHandler
 
     public override void OnConfirm()
     {
-        GameSceneLoader.PendingConfig = new GameSceneConfig(
-            GameMode.ObstaclePractice,
-            0,
-            PracticeMenuNavigator.Instance.CurrentObstacle
-        );
+
     }
 }

@@ -7,7 +7,7 @@ public class AbilityOverflowToScore : UpgradeBase, IActivatableUpgrade
     public int scorePerOverflow = 500;
     public SoundEffect bonusSound;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{SCORE_PER_OVERFLOW}", scorePerOverflow.ToString("N0"));
@@ -32,7 +32,7 @@ public class AbilityOverflowToScore : UpgradeBase, IActivatableUpgrade
         {
             int overflow = attemptedDelta;
             int score = overflow * scorePerOverflow;
-            int finalAddedScore = ScoreManager.Instance.AddScore(score, ScoreSource.Bonus);
+            int finalAddedScore = ScoreManager.Instance.AddScore(score);
             
             ScoreEvents.OnScorePopupRequested?.Invoke(
                 finalAddedScore,

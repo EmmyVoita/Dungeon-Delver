@@ -44,29 +44,6 @@ public class CoinCollectEffectsManager : RuntimeModifierManager<ICoinCollectEffe
         );
     }
 
-    /*
-    private bool PullCurrencyEffect(int amount)
-    {
-        if( activeModifiers.Count <= 0)
-            return false;
-
-         activeModifiers.Sort((x,y) => y.Priority.CompareTo(x.Priority));
-
-        for(int i = 0; i <  activeModifiers.Count; i++)
-        {
-            ICoinCollectEffect effect =  activeModifiers[i];
-
-            if(!effect.CanTriggerEffect(amount))
-                continue;
-
-            
-            effect.TriggerEffect(amount);
-            return true;
-        }
-
-        return false;
-    } 
-    */
 
     private bool TriggerCurrencyEffects(int amount)
     {
@@ -77,15 +54,15 @@ public class CoinCollectEffectsManager : RuntimeModifierManager<ICoinCollectEffe
 
         for (int i = 0; i < activeModifiers.Count; i++)
         {
-            ICoinCollectEffect effect = activeModifiers[i];
+            RuntimeModifierEntry<ICoinCollectEffect> effect = activeModifiers[i];
 
             if (effect == null)
                 continue;
 
-            if (!effect.CanTriggerEffect(amount))
+            if (!effect.Modifier.CanTriggerEffect(amount))
                 continue;
 
-            if (effect.TriggerEffect(amount))
+            if (effect.Modifier.TriggerEffect(amount))
                 anyEffectTriggered = true;
         }
 

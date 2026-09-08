@@ -54,7 +54,8 @@ public class StatTextAnimator : MonoBehaviour
                 break;
         }
 
-        targetText.gameObject.SetActive(true);
+        if(targetText)
+            targetText.gameObject.SetActive(true);
 
         if (shouldSkip != null && shouldSkip())
         {

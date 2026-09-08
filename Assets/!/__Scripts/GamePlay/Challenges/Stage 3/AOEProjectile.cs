@@ -121,8 +121,16 @@ public class AOEProjectile : MonoBehaviour
         {
             if (hit.CompareTag("Player"))
             {
-                Player.Instance.DamageSelf(dEf);
-                // damage player
+                HitData hitData = new()
+                {
+                    Damage = dEf.damage,
+                    AbilityDamage = dEf.abilityChargeDamage,
+                    SourceName = dEf.sourceName,
+                    Arrow = null,
+                    PlayHitSound = dEf.playHitSound
+                };
+                
+                Player.Instance.ProcessHit(hitData);
             }
         }
 

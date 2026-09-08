@@ -24,7 +24,7 @@ public class RefreshIconController : MonoBehaviour
 
     private void HandleGameStateChanged(GameState prev, GameState current)
     {
-        if (current == GameState.UpgradeSelection)
+        if (current == GameState.RoundReward)
         {
             RefreshUI();
         }

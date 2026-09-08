@@ -30,9 +30,9 @@ public class MusicChallengeController : MonoBehaviour
         mainTween?.Kill();
 
         mainTween = DOTween.To(
-            () => AudioSettingsManager.Instance.musicVolume,
+            () => AudioSettingsManager.GetVolume(AudioChannel.Music),
             v => music.SetMainVolume(v),
-            fadedVolumeMult * AudioSettingsManager.Instance.musicVolume,
+            fadedVolumeMult * AudioSettingsManager.GetVolume(AudioChannel.Music),
             fadeOutDuration
         );
     }
@@ -45,9 +45,9 @@ public class MusicChallengeController : MonoBehaviour
         mainTween?.Kill();
 
         mainTween = DOTween.To(
-            () => fadedVolumeMult * AudioSettingsManager.Instance.musicVolume,
+            () => fadedVolumeMult * AudioSettingsManager.GetVolume(AudioChannel.Music),
             v => music.SetMainVolume(v),
-            AudioSettingsManager.Instance.musicVolume,
+            AudioSettingsManager.GetVolume(AudioChannel.Music),
             fadeInDuration
         );
     }

@@ -8,7 +8,7 @@ public class ScoreForCritWindowCost : UpgradeBase, ICritWindowModifier, ICritHit
     public float CritHitValueMultiplier = 1.5f;
     public float NormalHitValueMultiplier = 0.5f;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{CRIT_WINDOW_MULTIPLIER}", (critWindowMultiplier - 1).ToString("P0"))

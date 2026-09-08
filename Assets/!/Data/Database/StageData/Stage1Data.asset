@@ -12,8 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 103c4e3f201af744b8611f2ab9a4de29, type: 3}
   m_Name: Stage1Data
   m_EditorClassIdentifier: Assembly-CSharp::StageDataObject
-  stageName: Stage A
+  stageName: Violet Rift
   musicClip: {fileID: 8300000, guid: d1882828bdb679f4088254a129cca18e, type: 3}
+  backgroundData:
+    mainBackground: {fileID: 2800000, guid: 72567c6f5932fad4fa3c5c68eefa5141, type: 3}
+    secondaryBackground: {fileID: 2800000, guid: ba22ee4e05b99db4e98041c1ab71def4, type: 3}
+    mainSpeed: 1.5
+    secondarySpeed: 3.5
+    mainTiling: {x: 1.8, y: 5.4}
+    secondaryTiling: {x: 1.8, y: 5.4}
+    mainDirection: {x: -1, y: 1}
+    secondaryDirection: {x: 5, y: 1}
   levelsToPlay: 3
   levelFiles:
   - {fileID: 11400000, guid: 59b2bf03644d260418766bc21344c84d, type: 2}

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f57ad42a475659340a03e2496840f866, type: 3}
+  m_Name: Ability Upgrade 2
+  m_EditorClassIdentifier: Assembly-CSharp::AbilityUpgrade1
+  upgradeId: 5cfd3812-445f-42a4-826e-d4a4b0b28c43
+  category: 4
+  requiredUpgrades:
+  - upgrade: {fileID: 11400000, guid: 60e006e4db3f46c40a1599853909f04a, type: 2}
+    minimumStacks: 1
+  baseOfferWeight: 1
+  _cost: 200
+  _maxStacks: 1
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Ability Upgrade Tier 2
+  descriptionTemplate: Upgrade your ability.
+  detailsTemplate: 
+  upgradeTier: 2

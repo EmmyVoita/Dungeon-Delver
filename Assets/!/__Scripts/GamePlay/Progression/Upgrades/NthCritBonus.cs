@@ -15,7 +15,7 @@ public class NthCritBonus : UpgradeBase, IActivatableUpgrade
 
     public SoundEffect bonusSound;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{CRITS_REQUIRED}", critsRequired.ToString())
@@ -50,7 +50,7 @@ public class NthCritBonus : UpgradeBase, IActivatableUpgrade
             AudioHelpers.PlaySoundEffect(bonusSound, Camera.main.transform.position);
 
             int finalAddedScore =
-                ScoreManager.Instance.AddScore(bonusScore, ScoreSource.Bonus);
+                ScoreManager.Instance.AddScore(bonusScore);
 
             ScoreEvents.OnScorePopupRequested?.Invoke(
                 finalAddedScore,

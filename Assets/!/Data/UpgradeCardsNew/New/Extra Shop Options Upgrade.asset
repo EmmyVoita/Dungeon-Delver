@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e5a619c751648e4087a75d849abf021, type: 3}
+  m_Name: Extra Shop Options Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::ExtraShopOptionsUpgrade
+  upgradeId: 91263a39-8a61-4760-9675-dc6d30544cda
+  category: 7
+  requiredUpgrades: []
+  baseOfferWeight: 1
+  _cost: 300
+  _maxStacks: 1
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Extra Shop Option
+  descriptionTemplate: When you open a shop of any category you have a {CHANCE} chance
+    to have an extra option.
+  detailsTemplate: This upgrade does not stack.
+  chance: 0.33

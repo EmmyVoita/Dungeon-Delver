@@ -36,6 +36,7 @@ public class GameWinAnimation : MonoBehaviour
     [SerializeField] private Transform playerRoot;
     [SerializeField] private Transform background;
     [SerializeField] private List<SpriteCyclerPerFrameTime> spriteAnimators;
+    [SerializeField] private RectTransform gameOverRootRect;
 
     [Header("Main Slide")]
     [SerializeField] private Ease slideEase;
@@ -44,7 +45,38 @@ public class GameWinAnimation : MonoBehaviour
     [SerializeField] private float slideDuration = 5f;
     [SerializeField] private float slideUpDelay = 3f;
 
+    [Header("Player Charge")]
+    [SerializeField] private float pulseStartDelay = 1f;
+    [SerializeField] private float pulse1Scale = 1.15f;
+    [SerializeField] private float pulse2Scale = 1.25f;
+    [SerializeField] private float pulse3Scale = 1.4f;
+    [SerializeField] private float pulseDuration = 0.2f;
+    [SerializeField] private float pulseDelay = 0.2f;
 
+    [Header("Launch")]
+    [SerializeField] private float launchDelay = 0.15f;
+    [SerializeField] private float launchMoveDelay = 0.15f;
+    [SerializeField] private float launchY = 10f;
+    [SerializeField] private float launchDuration = 1.2f;
+    [SerializeField] private float launchSpins = 3f;
+
+    [Header("Confetti")]
+    [SerializeField] private int confettiAmount = 3;
+    [SerializeField] private float confettiInterval = 0.75f;
+
+    [Header("Visual Effects")]
+    [SerializeField] private VisualEffect chargeEffect;
+    [SerializeField] private VisualEffect launchEffect;
+    [SerializeField] private VisualEffect burstEffect;
+    [SerializeField] private List<VisualEffect> starEffects;
+
+    [Header("Audio")]
+    [SerializeField] private float pulsePitchStep = 0.1f;
+    [SerializeField] private SoundEffect pulseSound;
+    [SerializeField] private SoundEffect launchSound;
+    [SerializeField] private SoundEffect softChime;
+
+    /*
     [Header("Hand Movement")]
     [SerializeField] private Vector3 handStartPosition = new Vector3(0,-5,0);
     [SerializeField] private float handMoveY = 5f;
@@ -61,11 +93,12 @@ public class GameWinAnimation : MonoBehaviour
     [SerializeField] private SoundEffect handMove;
 
     [Header("Visual Effect")]
-    [SerializeField] private List<VisualEffect> starEffects;
+    
+    */
 
     private Coroutine _animCoroutine;
     private Vector3 _backgroundBasPos;
-    
+    private float _currentPitchStep;
 
     private void OnEnable()
     {
@@ -83,12 +116,12 @@ public class GameWinAnimation : MonoBehaviour
 
     private void Update()
     {
-        /*
+        
         if(Input.GetKeyDown(KeyCode.M))
         {
             GameStateManager.Instance.SetStateForceUpdate(GameState.GameWin);
         }
-        */
+        
     }
 
     private void HandleStateChanged(GameState previousState, GameState newState)
@@ -129,6 +162,7 @@ public class GameWinAnimation : MonoBehaviour
         }
     }
 
+    /*
     IEnumerator MoveStepped(
     Transform target,
     float distance,
@@ -150,7 +184,9 @@ public class GameWinAnimation : MonoBehaviour
             yield return new WaitForSeconds(stepTime);
         }
     }
+    */
 
+    /*
     private IEnumerator AnimSequence()
     {
         background.position = _backgroundBasPos;
@@ -163,10 +199,10 @@ public class GameWinAnimation : MonoBehaviour
 
         foreach(SpriteCyclerPerFrameTime animator in spriteAnimators)
         {
-            animator.Reset();
+            animator.Restart();
         }
         
-        //Player.Instance.SetPlayerControlState(PlayerControlState.BasicJump);
+
         Player.Instance.wings.ShowWings();
         Player.Instance.goal.GetComponentInChildren<Goal>().sRend.enabled = false;
 
@@ -207,75 +243,120 @@ public class GameWinAnimation : MonoBehaviour
         handObject.transform.DOMoveY(slideHandMoveY, slideDuration).SetEase(slideEase);
         background.DOMoveY(slideBackgroundMoveY, slideDuration).SetEase(slideEase);
 
-        //starGlow.gameObject.SetActive(false);
-        //Player.Instance.Health = 0;
-        //playerContainer.position = new Vector3(0f,6f,0f);
-        //healthVisuals.Glow = false;
-
-        //yield return new WaitForSeconds(startDelay);
-        // Make everything light up
-        // first make the energy star light up maybe play a clunk sound
-        //AudioHelpers.PlaySoundEffect(clunkSound, transform.position);
-
-        
-
         ScreenShakeRequest ssRequest = new ScreenShakeRequest(duration: 1.0f,
                                                                 magnitude: 0.1f,
                                                                 direction: Vector2.up,
                                                                 directional: true,
                                                                 unscaled: true);
 
-        //ScreenShakeManager.Instance.Shake(ssRequest);
-
-        //starGlow.gameObject.SetActive(true);
-
         yield return new WaitForSeconds(slideDuration + 1.0f);
 
         GameStateManager.Instance.SetState(GameState.GameOverTally);
+    }
+    */
 
-        //
+    private IEnumerator AnimSequence()
+    {
+        playerRoot.position = Vector3.zero;
+        playerRoot.localScale = Vector3.one;
+        playerRoot.localRotation = Quaternion.identity;
 
-        //
+        Player.Instance.wings.ShowWings();
+        Player.Instance.goal.GetComponentInChildren<Goal>().sRend.enabled = false;
 
-        //yield return new WaitForSeconds(secondClunkDelay);
+        HoverAndSway hoverComp = playerRoot.GetComponentInChildren<HoverAndSway>();
+        hoverComp.enabled = true;
 
-        // then fill the health bar
-        //yield return StartCoroutine(FillHealthBar());
+        AudioHelpers.PlaySoundEffect(softChime, Player.Instance.transform.position);
 
-        //yield return new WaitForSeconds(0.25f);
-        //healthVisuals.Glow = true;
-        //ScreenShakeManager.Instance.Shake(ssRequest);
-        //AudioHelpers.PlaySoundEffect(clunkSound, transform.position, secondClunkPitchIncrease);
+        foreach(VisualEffect effect in starEffects)
+        {
+            effect.Play();
+        }
 
-
+        yield return new WaitForSeconds(pulseStartDelay);
 
         
 
-       
+        yield return PulsePlayer(pulse1Scale);
+        yield return new WaitForSeconds(pulseDelay);
 
-        //yield return new WaitForSeconds(playerIntroDelay);
+        yield return PulsePlayer(pulse2Scale);
+        yield return new WaitForSeconds(pulseDelay);
 
-        // then maybe play like a powering up sound?
-         //
-        //yield return StartCoroutine(MovePlayer());
+        yield return PulsePlayer(pulse3Scale);
 
-        //AudioHelpers.PlaySoundEffect(thudSound, transform.position);
+        hoverComp.enabled = false;
 
-        //ScreenShakeManager.Instance.Shake(ssRequest);
+        // Anticipation squash.
+        yield return playerRoot.DOScale(new Vector3(1.25f, 0.7f, 1f), 0.12f)
+            .SetEase(Ease.OutQuad)
+            .WaitForCompletion();
 
-        /*
-        if(landParticleEffect != null)
+        
+
+        yield return new WaitForSeconds(launchDelay);
+
+        launchEffect?.Play();
+
+        AudioHelpers.PlaySoundEffect(launchSound, Player.Instance.transform.position);
+
+        Sequence launch = DOTween.Sequence();
+
+        launch.Append(playerRoot.DOScale(new Vector3(0.8f, 1.25f, 1f), 0.08f));
+
+        launch.Append(playerRoot.DOMoveY(launchY, launchDuration)
+            .SetEase(Ease.InCubic));
+
+        launch.Insert(launchMoveDelay, playerRoot.DORotate(
+            new Vector3(0f, 360f * launchSpins, 0f),
+            launchDuration,
+            RotateMode.FastBeyond360
+        ).SetEase(Ease.InQuad));
+        
+        launch.Join(background.DOMoveY(slideBackgroundMoveY, slideDuration).SetEase(slideEase).OnComplete(() =>
+        {   
+            gameOverRootRect.gameObject.SetActive(true);
+            GameStateManager.Instance.SetState(GameState.GameOverTally);
+        }));
+
+        yield return launch.WaitForCompletion();
+
+        burstEffect.transform.position = playerRoot.position;
+        burstEffect?.Play();
+
+        for(int i = 0; i < confettiAmount; i++)
         {
-            Instantiate(landParticleEffect, playerContainer.position, Quaternion.identity);
+            ConfettiEffect.TriggerConfetti();
+            yield return new WaitForSeconds(confettiInterval);
         }
+        
 
-        yield return new WaitForSeconds(1.5f);
+        
+        
 
-        GameStateManager.Instance.SetState(GameState.RunLoad);
+        //AudioHelpers.PlaySoundEffect(softChime, transform.position);
 
-        // then drop the player in and play screen shape with another cluck sound when they fall and hit the center.
-        // I think here we have a falling sound and then the thud sound
-        */
+        //yield return new WaitForSeconds(0.75f);
+
+        
+    }
+
+    private IEnumerator PulsePlayer(float targetScale)
+    {
+        Sequence pulse = DOTween.Sequence();
+
+        chargeEffect?.Play();
+
+        float pitchMult = 1.0f + _currentPitchStep;
+        AudioHelpers.PlaySoundEffect(pulseSound, Player.Instance.transform.position, pitchMult);
+
+        pulse.Append(playerRoot.DOScale(targetScale, pulseDuration * 0.5f).SetEase(Ease.OutQuad));
+        pulse.Append(playerRoot.DOScale(1f, pulseDuration * 0.5f).SetEase(Ease.InOutQuad));
+
+        _currentPitchStep += pulsePitchStep;
+
+        yield return pulse.WaitForCompletion();
     }
 
     /*

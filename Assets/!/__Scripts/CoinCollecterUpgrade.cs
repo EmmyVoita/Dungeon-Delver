@@ -6,7 +6,7 @@ public class CoinCollectorUpgrade : UpgradeBase
     public int currencyAmount = 25;
     public float appearancePercentage = 0.25f;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{CURRENCY_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{currencyAmount.ToString("N0")}</color>")
@@ -22,7 +22,7 @@ public class CoinCollectorUpgrade : UpgradeBase
 
     public override void Apply()
     {
-        ChallengeRewardManager.Instance.RegisterOrStackCurrencyReward(currencyAmount, appearancePercentage: appearancePercentage);
+        ChallengeRewardManager.Instance.RegisterOrStackCurrencyReward(currencyAmount,  this, 999, appearancePercentage: appearancePercentage);
         //ChallengeRewardManager.Instance.RegisterRenewing(new CurrencyChallengeReward(currencyAmount,appearancePercentage:appearancePercentage));
     }
 }

@@ -3,6 +3,9 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using DG.Tweening;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class MainMenuNavigator : BaseMenu
 {
@@ -20,6 +23,14 @@ public class MainMenuNavigator : BaseMenu
     [SerializeField] private Color defaultColor = Color.white;
     [SerializeField] private float selectedScale = 1.2f;
     [SerializeField] private float transitionSpeed = 8f;
+
+    [Header("Menu Transition")]
+    [SerializeField] private Material transitionMaterial;
+    [SerializeField] private string transitionPropertyName = "_TransitionValue";
+    [SerializeField] private float targetValue = 0;
+    [SerializeField] private float transitionStartValue = 1;
+    [SerializeField] private float duration = 0.5f;
+    [SerializeField] private float inputDelay = 0.1f;
 
 
     [Header("Dynamic")]
@@ -71,11 +82,25 @@ public class MainMenuNavigator : BaseMenu
     private void OnEnable()
     {
         MainMenuOption.OnMainMenuOptionClicked += HandleOptionClicked;
+        StartOptionsNavigator.OnStartSelected += HandleStartSelected;
+        InputModeManager.OnInputModeChanged += HandleInputModeChanged;
     }
 
     private void OnDisable()
     {
         MainMenuOption.OnMainMenuOptionClicked -= HandleOptionClicked;
+        StartOptionsNavigator.OnStartSelected -= HandleStartSelected;
+        InputModeManager.OnInputModeChanged -= HandleInputModeChanged;
+    }
+
+    private void HandleInputModeChanged(InputModeManager.InputMode inputMode)
+    {
+        ResetVisuals();
+
+        if(inputMode == InputModeManager.InputMode.Keyboard)
+        {
+            UpdateVisuals();
+        }
     }
 
     private void HandleOptionClicked(int index)
@@ -87,38 +112,87 @@ public class MainMenuNavigator : BaseMenu
     private void Start()
     {
         SelectedIndex = 0;
+
+        InputFocusManager.Clear();
+        
+        switch (SceneEntryContext.EntryType)
+        {
+            case SceneEntryType.ReturnFromTutorial:
+                StartCoroutine(ReturnFromTutorialSequence());
+                break;
+            case SceneEntryType.ReturnFromPractice:
+                MenuManager.Instance.OpenMenu(MenuState.Practice);
+                break;
+            default:
+                EnableInput();
+                break;
+        }
+
+        SceneEntryContext.Clear();
     }
+
+    private IEnumerator ReturnFromTutorialSequence()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        // Make sure we're actually starting at the covered state.
+        transitionMaterial.SetFloat(transitionPropertyName,transitionStartValue);
+
+        Tween tween = transitionMaterial
+            .DOFloat(targetValue,transitionPropertyName,duration)
+            .SetEase(Ease.Linear)
+            .SetUpdate(true);
+
+        yield return tween.WaitForCompletion();
+
+        yield return new WaitForSeconds(inputDelay);
+
+        OnOpen();
+    }
+
+    private void EnableInput()
+    {
+        
+    }
+
 
     private void Update()
     {
-        if (lockInput || !isActive) return;
+        if(!CanProcessInput)
+            return;
+
+        if(InputFocusManager.CurrentOwner != null)
+            return;
 
         HandleInput();
-        AnimateSelection();
+
+        if (InputModeManager.Instance.CurrentMode ==
+            InputModeManager.InputMode.Keyboard)
+        {
+            AnimateSelection();
+        }
     }
 
 
 
     public override void OnOpen()
     {
-        base.OnOpen();
-
-        lockInput = false;
         SelectedIndex = 0;
 
-        if (options == null || options.Length == 0)
-        {
-            Debug.LogError("MainMenuNavigator: 'options' is empty or not assigned.");
-            return;
-        }
-
         UpdateVisuals();
+
+        base.OnOpen();
+
+      
+
+        //Debug.LogError("MAIN MENU OPENING");
     }
 
     public override void OnClose()
     {
-
+        options[SelectedIndex].transform.localScale = Vector3.one;
         SelectedIndex = -1;
+
         base.OnClose();
     }
 
@@ -132,7 +206,7 @@ public class MainMenuNavigator : BaseMenu
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
-            _selectedIndex = (_selectedIndex - 1 + options.Length) % options.Length;
+            SelectedIndex = (SelectedIndex - 1 + options.Length) % options.Length;
             AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
             UpdateVisuals();
         }
@@ -165,6 +239,19 @@ public class MainMenuNavigator : BaseMenu
         }
     }
 
+    private void ResetVisuals()
+    {
+        for (int i = 0; i < options.Length; i++)
+        {
+            Transform optionTransform = options[i].transform;
+
+            optionTransform.DOKill();
+
+            options[i].color = defaultColor;
+            optionTransform.localScale = Vector3.one;
+        }
+    }
+
 
 
     private MenuState GetTargetState(int targetIndex)
@@ -175,11 +262,21 @@ public class MainMenuNavigator : BaseMenu
         return menuOptionTransitions[targetIndex];
     }
 
+    private void HandleStartSelected()
+    {
+        if(isActive)
+        {
+            GameSceneLoader.PendingConfig = new GameSceneConfig(GameMode.Tutorial,0,null);
+            SceneManager.LoadScene(SceneNames.TutorialScene);
+        }
+    }
+
     void ActivateOption()
     {
         MenuState targetState = GetTargetState(SelectedIndex);
 
-        lockInput = true;
+        if(targetState != MenuState.Tutorial)
+            isActive = false;
 
         switch (targetState)
         {

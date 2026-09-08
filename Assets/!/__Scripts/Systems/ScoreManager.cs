@@ -2,6 +2,9 @@ using UnityEngine;
 using System;
 using System.IO;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using System.Linq;
+using NUnit.Framework.Interfaces;
 
 public class ScoreManager : MonoBehaviour
 {
@@ -12,39 +15,46 @@ public class ScoreManager : MonoBehaviour
     public static event Action<int> OnScoreUpdated;
     public static event Action<Color> OnScoreFlashColor;
     public static event Action<int> OnHighScoreUpdated;
-
     
-    [SerializeField] private int currentScore;
-    [SerializeField] private int highScore;
-    [SerializeField] private int totalScore;
+    [Header("References")]
     [SerializeField] private RunStatsTracker runStats;
     [SerializeField] private RoundStatsTracker roundStats;
+
+    
+    private int _currentScore;
+    private int _overideHighScore;
+    //private int _roundTotalScore;
+    
     public float abilityChargeScorePerUnit = 500f;
 
-    private Dictionary<ScoreSource, int> breakdown = new();
+    private readonly List<ScoreScaleModifier> modifiers = new();
 
-    public IReadOnlyDictionary<ScoreSource, int> GetBreakdown()
-        => breakdown;
 
     private SaveData saveData;
     private string saveFilePath;
 
-    public int RoundScoreTotal => CalculateTotalScore();
+    //public int RoundScoreTotal => CalculateTotalScore();
+    public int CurrentScore => _currentScore;
     public int RunScoreTotal => runStats.TotalScore;
     public SaveData SaveData => saveData;
     public RunStatsTracker RunStatsTracker => runStats;
     public RoundStatsTracker RoundStatsTracker => roundStats;
 
+    public int RoundScore => roundStats.Score;
+
     private void OnEnable()
     {
         GameStateManager.OnStateChanged += HandleGameStateChange;
+        RunLifecycle.OnRunAbandoned += HandleRunAbandoned;
     }
 
     private void OnDisable()
     {
         GameStateManager.OnStateChanged -= HandleGameStateChange;
+        RunLifecycle.OnRunAbandoned -= HandleRunAbandoned;
     }
 
+ 
 
 
     void Awake()
@@ -59,90 +69,28 @@ public class ScoreManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         saveFilePath = Path.Combine(Application.persistentDataPath, "saveData.json");
-        LoadData();
+
+        ResetStats();
+        LoadSaveData();
     }
 
-    private void Update()
-    {
-      
-    }
+
 
     private void HandleGameStateChange(GameState previous, GameState newState)
     {
         if(newState == GameState.RunLoad)
-        {
-            ResetScore();
-        }
+            ResetStats();
 
-        if (previous == GameState.RoundResultsExit && newState != GameState.RoundResultsExit)
+        if(newState == GameState.GameOverTally)
         {
-            ResetBreakdown();
-        }
-
-        if(newState == GameState.GameOverResults)
-        {
+            RunStatsTracker.AddRound(roundStats);
             SaveRunRecord();
         }
     }
 
-    public bool TrySpendScore(int amount)
-    {
-        if (currentScore < amount)
-            return false;
 
-        currentScore -= amount;
+  
 
-        OnScoreUpdated?.Invoke(currentScore);
-
-        OnScoreAdded?.Invoke(-amount);
-
-        return true;
-    }
-
-    public void ResetBreakdown()
-    {
-        breakdown.Clear();
-        //totalScore = 0;
-    }
-
-    public int CalculateTotalScore()
-    {
-        totalScore = 0;
-        foreach (var entry in breakdown)
-        {
-            totalScore += entry.Value;
-        }
-        return totalScore;
-    }
-
-    public int AddScore(int amount, ScoreSource source)
-    {
-        //float multiplier = UpgradeManager.Instance.ModifyGlobalScoreMultiplier(1f);
-        //int adjustedAmount = Mathf.RoundToInt(amount * multiplier);
-        int adjustedAmount = Mathf.RoundToInt(amount);
-
-        currentScore += Mathf.RoundToInt(adjustedAmount);
-        OnScoreUpdated?.Invoke(currentScore);
-
-        OnScoreAdded?.Invoke(adjustedAmount);
-
-
-        if (!breakdown.ContainsKey(source))
-            breakdown[source] = 0;
-
-        breakdown[source] += adjustedAmount;
-
-        if (currentScore > highScore)
-        {
-            highScore = currentScore;
-            saveData.highScore = highScore;
-            SaveDataToFile();
-
-            OnHighScoreUpdated?.Invoke(highScore);
-        }
-
-        return adjustedAmount;
-    }
 
     public void FlashScoreColor(Color flashColor)
     {
@@ -150,78 +98,58 @@ public class ScoreManager : MonoBehaviour
         OnScoreFlashColor?.Invoke(flashColor);
     }
 
-    public void SetHighScore(int newHighScore)
+
+
+    private void ResetStats()
     {
-        highScore = newHighScore;
-        saveData.highScore = highScore;
-        SaveDataToFile();
-        OnHighScoreUpdated?.Invoke(highScore);
+        RoundStatsTracker.Reset();
+        RunStatsTracker.ResetRun();
+        RunStatsTracker.PrintStats();
     }
 
-    public void ResetHighScore()
+    
+    public void SaveRunRecord()
     {
-        highScore = 0;
-        saveData.highScore = highScore;
-        SaveDataToFile();
-        OnHighScoreUpdated?.Invoke(highScore);
-    }
+        // Find the run stats tracker if it is not assigned
+        if(runStats == null)
+           runStats = FindAnyObjectByType<RunStatsTracker>();
 
-    public void SaveCurrentScore()
-    {
-        // Add current score to total (if you track cumulative points)
-        saveData.totalScore += currentScore;
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
 
-        // Save high score if necessary
-        if (currentScore > highScore)
+        string causeOfDeath = RoundManager.Instance.GameComplete ? "Game Win" : $"Killed by {Player.Instance.LastDamageSource}";
+
+        // A run records stores the 
+        RunRecord record = new RunRecord
         {
-            highScore = currentScore;
-            saveData.highScore = highScore;
-            OnHighScoreUpdated?.Invoke(highScore);
-        }
+            score = runStats.TotalScore,
+            abilityUsed = AbilitySelection.SelectedAbility,
+            upgrades = ConvertUpgrades(ShopManager.Instance.AllPurchasedCards),
+            damageTaken = runStats.TotalDamageTaken,
+            highestCombo = runStats.HighestCombo,
+            accuracy = runStats.RunAccuracy,
+            critAccuracy = runStats.RunCritRate,
+            noDamageRun = runStats.TotalDamageTaken == 0,
+            timestamp = DateTime.Now.ToString("o"),
+            causeOfDeath = causeOfDeath,
+            levelIndex = RoundManager.Instance.LevelIndex,
+            totalCurrency = CurrencyManager.Instance.TotalCurrency,
+            totalHit = RunStatsTracker.TotalHit,
+            totalSpawned = RunStatsTracker.TotalSpawned,
+            totalAbilityCharge = runStats.TotalAbilityCharge,
+            totalAbilityUsed = runStats.TotalAbilityUsed,
+            totalcrit = runStats.TotalCrit,
+            totalRerollsGained = runStats.RerollsGained,
+            totalRerollsUsed = runStats.RerollsUsed,
+            totalHealthHealed = runStats.TotalHealthHealed,
+            totalShopsVisited = runStats.TotalShopsVisited
+        };
 
-        // Save everything to disk
+        // add the record to our list of records that we store in a json file
+        saveData.records.Add(record);
+
         SaveDataToFile();
-
-        // Reset current run score for next play
-        currentScore = 0;
-
-        Debug.Log($"💾 Score saved and reset. HighScore: {highScore}, TotalScore: {saveData.totalScore}");
-    }
-
-
-    public void ResetScore() => currentScore = 0;
-
-    public int CurrentScore => currentScore;
-    public int HighScore => highScore;
-    public int TotalScore => totalScore;
-
-    // -----------------------------
-    // 🔄 Save / Load Logic
-    // -----------------------------
-    private void LoadData()
-    {
-        if (File.Exists(saveFilePath))
-        {
-            string json = File.ReadAllText(saveFilePath);
-            saveData = JsonUtility.FromJson<SaveData>(json);
-            highScore = saveData.highScore;
-            totalScore = saveData.totalScore;
-
-
-            Debug.Log($"Loaded High Score: {highScore}");
-        }
-        else
-        {
-            saveData = new SaveData();
-            highScore = 0;
-        }
-    }
-
-    private void SaveDataToFile()
-    {
-        string json = JsonUtility.ToJson(saveData, true);
-        File.WriteAllText(saveFilePath, json);
-        Debug.Log($"Saved High Score to {saveFilePath}");
     }
 
     private List<UpgradeRecord> ConvertUpgrades(Dictionary<UpgradeBase, int> chosenCards)
@@ -235,6 +163,7 @@ public class ScoreManager : MonoBehaviour
 
             records.Add(new UpgradeRecord
             {
+                upgradeId = key.UpgradeID,
                 upgradeName = key.displayName,
                 count = val
             });
@@ -243,47 +172,218 @@ public class ScoreManager : MonoBehaviour
         return records;
     }
 
-    
-    public void SaveRunRecord()
+    private void SaveDataToFile()
     {
-        if(runStats == null)
+        string json = JsonUtility.ToJson(saveData, true);
+        File.WriteAllText(saveFilePath, json);
+        Debug.Log($"Saved High Score to => {saveFilePath}");
+    }
+
+    public void LoadSaveData()
+    {
+        if (File.Exists(saveFilePath))
         {
-           runStats = FindAnyObjectByType<RunStatsTracker>();
+            string json = File.ReadAllText(saveFilePath);
+            saveData = JsonUtility.FromJson<SaveData>(json);
         }
-
-        RunRecord record = new RunRecord
+        else
         {
-            score = currentScore,
-            abilityUsed = AbilitySelection.SelectedAbility,
-            upgrades = ConvertUpgrades(UpgradeCardManager.Instance.AllChosenCards),
-            damageTaken = runStats.TotalDamageTaken,
-            highestCombo = runStats.HighestCombo,
-            accuracy = runStats.RunAccuracy,
-            critAccuracy = runStats.RunCritRate,
-            noDamageRun = runStats.TotalDamageTaken == 0,
-            timestamp = DateTime.Now.ToString("o") 
-        };
+            saveData = new SaveData();
+        }
+    }
 
-        Debug.Log(record.ToString());
+    public void ResetSaveData()
+    {
+        _overideHighScore = -1;
 
-        saveData.leaderboard.Add(record);
-
-        // update derived stats 
-        saveData.timesPlayed++;
-
-        saveData.totalScore += record.score;
-
-        if (record.score > saveData.highScore)
-            saveData.highScore = record.score;
+        saveData = new SaveData();
 
         SaveDataToFile();
     }
 
-    public SaveData GetSaveData()
+    public void OverideHighScore(int amount)
     {
-        string json = File.ReadAllText(saveFilePath);
-        saveData = JsonUtility.FromJson<SaveData>(json);
-        return saveData;
+        _overideHighScore = amount;
     }
-    
+
+    public int HighScore(AbilityType abilityType = AbilityType.None)
+    {
+        if(_overideHighScore != -1)
+            return _overideHighScore;
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        if(abilityType == AbilityType.None)
+            return saveData.records.Max(h => h.score);
+        else
+            return saveData.records.Where(a => a.abilityUsed == abilityType).Max(h => h.score);
+    }
+
+    public int TotalAbilityUsed(AbilityType abilityType = AbilityType.None)
+    {
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        if(abilityType == AbilityType.None)
+            return saveData.records.Sum(i => i.totalAbilityUsed);
+        else
+            return saveData.records.Where(a => a.abilityUsed == abilityType).Sum(i => i.totalAbilityUsed);
+    }
+
+    public int HighestCombo(AbilityType abilityType = AbilityType.None)
+    {
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        if(abilityType == AbilityType.None)
+            return saveData.records.Max(i => i.highestCombo);
+        else
+            return saveData.records.Where(a => a.abilityUsed == abilityType).Sum(i => i.highestCombo);
+    }
+
+    public int TotalAbilityCharge(AbilityType abilityType = AbilityType.None)
+    {
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        if(abilityType == AbilityType.None)
+            return saveData.records.Sum(i => i.totalAbilityCharge);
+        else
+            return saveData.records.Where(a => a.abilityUsed == abilityType).Sum(i => i.totalAbilityCharge);
+    }
+
+    public int TotalCrits()
+    {
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        return saveData.records.Sum(i => i.totalcrit);
+    }
+
+    public int TotalRerollsUsed()
+    {
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        return saveData.records.Sum(i => i.totalRerollsUsed);
+    }
+
+    public int TotalCurrencyGained()
+    {
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        return saveData.records.Sum(i => i.totalCurrency);
+    }
+
+    public int TotalCardsGained()
+    {
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        return saveData.records.Sum(i => i.CardCount);
+    }
+
+    public int TotalHealing()
+    {
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        return saveData.records.Sum(i => i.totalHealthHealed);
+    }
+
+    public int TotalShopsVisited()
+    {
+        // in case the savedata isn't already loaded, load it
+        if(saveData == null)
+            LoadSaveData();
+
+        if(saveData.records.Count == 0)
+            return 0;
+
+        return saveData.records.Sum(i => i.totalShopsVisited);
+    }
+
+    // Score Calculation
+    //---------------------------------------------------------------------------------------------
+    public int AddScore(int amount)
+    {
+        int adjustedAmount = Mathf.RoundToInt(amount * CalculateFinalScale());
+
+        _currentScore += adjustedAmount;
+
+        OnScoreUpdated?.Invoke(_currentScore);
+        OnScoreAdded?.Invoke(adjustedAmount);
+
+        return adjustedAmount;
+    }
+
+    public void AddScoreModifier(ScoreScaleModifier mod)
+    {
+        if (mod == null)
+            return;
+
+        modifiers.Add(mod);
+    }
+
+    private void ClearModifiers()
+    {
+        modifiers.Clear();
+    }
+
+    private float CalculateFinalScale()
+    {
+        float result = 1f;
+
+        foreach (ScoreScaleModifier mod in modifiers)
+        {
+            if (mod == null || !mod.IsActive)
+                continue;
+
+            result *= mod.Value;
+        }
+
+        return Mathf.Max(result,0f);
+    }
+
+    private void HandleRunAbandoned()
+    {
+        ClearModifiers();
+    }
 }

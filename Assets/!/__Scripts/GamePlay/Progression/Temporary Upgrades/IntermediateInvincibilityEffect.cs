@@ -12,7 +12,7 @@ public class IntermediateInvincibilityEffect : UpgradeBase
         GameStateManager.OnStateChanged -= HandleStateChanged;
     }
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{INVINCIBLE_DURATION}", invincibleDuration.ToString("N0"));
@@ -31,7 +31,7 @@ public class IntermediateInvincibilityEffect : UpgradeBase
 
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
-        if(newState == GameState.UpgradeSelection && previousState != newState)
+        if(newState == GameState.RoundReward && previousState != newState)
         {
             Player.OnAbilityUsed -= HandleAbilityUsed;
             GameStateManager.OnStateChanged -= HandleStateChanged;

@@ -1,6 +1,7 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem.XR.Haptics;
 public class GameStateManager : MonoBehaviour
 {
     public static GameStateManager Instance { get; private set; }
@@ -12,6 +13,10 @@ public class GameStateManager : MonoBehaviour
 
     public static GameState LevelStartState => GameState.RoundActive;
     public static GameState LevelEndState => GameState.RoundResultsTally;
+    public static GameState PostRoundRewardState => GameState.PreRoundCountdown;
+    public bool InGameOverState => CurrentState == GameState.GameOverTally ||
+                                      CurrentState == GameState.DeathSequence || 
+                                      CurrentState == GameState.GameOverResults;
 
     public static event Action<GameState, GameState> OnStateChanged;
 

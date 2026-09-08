@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CurrencyGainSequenceManager : RuntimeModifierManager<ICurrencyGainSequenceEffect>
+public class CurrencyGainSequenceManager
+    : RuntimeModifierManager<ICurrencyGainSequenceEffect>
 {
     public static CurrencyGainSequenceManager Instance { get; private set; }
 
-    private readonly Dictionary<ICurrencyGainSequenceEffect, GainTracker> _trackers = new();
+    private readonly Dictionary<ICurrencyGainSequenceEffect, GainTracker>
+        _trackers = new();
 
     private class GainTracker
     {
@@ -38,8 +40,12 @@ public class CurrencyGainSequenceManager : RuntimeModifierManager<ICurrencyGainS
     {
         float currentTime = Time.time;
 
-        foreach (ICurrencyGainSequenceEffect effect in activeModifiers)
+        foreach (
+            RuntimeModifierEntry<ICurrencyGainSequenceEffect> entry
+            in activeModifiers)
         {
+            ICurrencyGainSequenceEffect effect = entry.Modifier;
+
             if (effect == null)
                 continue;
 
@@ -66,14 +72,17 @@ public class CurrencyGainSequenceManager : RuntimeModifierManager<ICurrencyGainS
         GainTracker tracker,
         float currentTime)
     {
-        while (tracker.gainTimes.Count > 0 &&
-               currentTime - tracker.gainTimes.Peek() > effect.TimeWindow)
+        while (
+            tracker.gainTimes.Count > 0 &&
+            currentTime - tracker.gainTimes.Peek() > effect.TimeWindow)
         {
             tracker.gainTimes.Dequeue();
         }
     }
 
-    private static void ConsumeRequiredGains(ICurrencyGainSequenceEffect effect, GainTracker tracker)
+    private static void ConsumeRequiredGains(
+        ICurrencyGainSequenceEffect effect,
+        GainTracker tracker)
     {
         for (int i = 0; i < effect.RequiredInstances; i++)
         {
@@ -84,7 +93,8 @@ public class CurrencyGainSequenceManager : RuntimeModifierManager<ICurrencyGainS
         }
     }
 
-    protected override void OnModifierActivated(ICurrencyGainSequenceEffect modifier)
+    protected override void OnModifierActivated(
+        ICurrencyGainSequenceEffect modifier)
     {
         if (!_trackers.ContainsKey(modifier))
             _trackers.Add(modifier, new GainTracker());

@@ -17,5 +17,7 @@ MonoBehaviour:
   fileName: fallingbreakable
   prefab: {fileID: 4801304789887433351, guid: 4f9683f851f226c4580214bb0d36b466, type: 3}
   icon: {fileID: 0}
+  stageNumber: 2
+  hasBossOverride: 1
   description: Breakable objects fall towards the player periodically. Shoot the
-    objects to break them. Broken objects fire projectiles which must be jumped over.
+    objects to break them. Broken objects fire projectiles to dodge.

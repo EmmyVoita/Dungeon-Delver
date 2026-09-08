@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a5d355beaa0e0748a360c1b7d44ecb0, type: 3}
+  m_Name: Ability Damage Challenge Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::AbilityDamageChallengeUpgrade
+  upgradeId: 0ca14ac3-15d7-4028-a93c-221243201e91
+  category: 6
+  requiredUpgrades: []
+  baseOfferWeight: 0.3
+  _cost: 0
+  _maxStacks: 999
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: d4e5253fe91a3144096f856bc68e1c25, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Energy Leak
+  descriptionTemplate: 'Gain {CURRENCY_AMOUNT} now, and lose damage {ABILITY_DAMAGE}
+    ability charge when you take damage. If you don''t have enough ability charge,
+    then you will take {HEALTH_DAMAGE} damage. '
+  detailsTemplate: This upgrade does stack. Each stack further increases the ability
+    damage you take by  {ABILITY_DAMAGE} and health damage by {HEALTH_DAMAGE}.  If
+    you have multiple, all of them will expire at the end of the level.
+  additionalHealthDamage: 1
+  additionalAbilityDamage: 20
+  currencyAmount: 400

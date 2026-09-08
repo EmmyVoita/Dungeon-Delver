@@ -67,6 +67,9 @@ public class PaidAbilityUseManager : MonoBehaviour
         if (!CanUsePaidAbility)
             return false;
 
+        if(Player.Instance.AbilityCharge >= Player.Instance.MaxAbilityCharge)
+            return false;
+
         if (!CurrencyManager.Instance.TrySpendCurrency(_currencyCost))
             return false;
 

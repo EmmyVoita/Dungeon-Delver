@@ -12,31 +12,11 @@ public class UpgradeCardOption : ICardOption
     }
 
     public UpgradeBase UpgradeData => upgrade;
-    public Sprite Icon => upgrade.icon;
     public string DisplayName => upgrade.displayName;
     public string Description => upgrade.GetDescription();
 
     public void OnSelected()
     {
-        //UpgradeManager.Instance.AddUpgrade(upgrade);
-
-        /*
-        if (UpgradeCardManager.Instance.upgradeIconPrefab == null ||
-            UpgradeCardManager.Instance.upgradeIconParent == null)
-        {
-            Debug.LogError("Upgrade icon prefab or parent missing!");
-            return;
-        }
-
-        GameObject iconObj = GameObject.Instantiate(
-            UpgradeCardManager.Instance.upgradeIconPrefab,
-            UpgradeCardManager.Instance.upgradeIconParent
-        );
-        
-
-        iconObj.GetComponent<UpgradeIconUI>().Initialize(upgrade);
-        */
-
-        UpgradeCardManager.Instance.MarkCardSelected(upgrade);
+        ShopManager.Instance.MarkCardSelected(upgrade);
     }
 }

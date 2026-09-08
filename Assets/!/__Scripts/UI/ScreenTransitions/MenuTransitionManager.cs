@@ -18,6 +18,9 @@ public class MenuTransitionManager : MonoBehaviour
     private bool isPlaying;
     private Dictionary<(MenuState, MenuState), MenuStateTransitionSequence> sequenceLookup;
     private MenuState pendingState;
+
+    public bool CanStartTransition => !isPlaying;
+    public bool IsPlayingTransition => isPlaying;
     
     void Awake()
     {
@@ -42,19 +45,29 @@ public class MenuTransitionManager : MonoBehaviour
         currentValue = 0f;
     }
 
-    public void PlayTransition(MenuState from, MenuState to)
+    public bool PlayTransition(MenuState from, MenuState to)
     {
-        pendingState = to;
+        if (isPlaying)
+        {
+            Debug.LogWarning(
+                $"Ignored transition {from} -> {to} because another transition is playing."
+            );
+
+            return false;
+        }
 
         if (sequenceLookup.TryGetValue((from, to), out var sequence))
         {
+            pendingState = to;
             PlaySequence(sequence);
+            return true;
         }
-        else
-        {
-            MenuManager.Instance.TransitionToMenu(to);
-            Debug.LogWarning($"No transition for {from} → {to}");
-        }
+
+        MenuManager.Instance.TransitionToMenu(to);
+
+        Debug.LogWarning($"No transition for {from} -> {to}");
+
+        return true;
     }
 
 
@@ -62,7 +75,6 @@ public class MenuTransitionManager : MonoBehaviour
 
     private void PlaySequence(MenuStateTransitionSequence sequence)
     {
-        if (isPlaying) return;
         isPlaying = true;
 
         currentSequence?.Kill();

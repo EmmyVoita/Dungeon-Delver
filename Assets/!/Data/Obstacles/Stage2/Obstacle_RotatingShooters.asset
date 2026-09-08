@@ -17,5 +17,6 @@ MonoBehaviour:
   fileName: blackholeemitter
   prefab: {fileID: 3391935150060319693, guid: 75c59221f73110145bb9ad959b2a2e8e, type: 3}
   icon: {fileID: 0}
-  description: Objects rotate around the player. Periodically they shoot at the player.
-    Jump to dodge them.
+  stageNumber: 2
+  hasBossOverride: 0
+  description: Objects rotate and periodically shoot damaging spikes at the player.

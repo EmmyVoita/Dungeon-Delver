@@ -48,13 +48,12 @@ public class AbilityChargeManager : RuntimeModifierManager<IAbilityCostModifier>
     {
         float currentCost = baseCost;
 
-        activeModifiers.Sort(
-            (a, b) => b.Priority.CompareTo(a.Priority)
-        );
+        SortActiveModifiers();
 
-        foreach (IAbilityCostModifier modifier in activeModifiers)
+        foreach (RuntimeModifierEntry<IAbilityCostModifier> entry
+                in activeModifiers)
         {
-            currentCost = modifier.ModifyCost(currentCost);
+            currentCost = entry.Modifier.ModifyCost(currentCost);
         }
 
         return Mathf.RoundToInt(currentCost);

@@ -31,11 +31,11 @@
 19,arrow,down,6,normalarrow
 19.5,arrow,left,6,normalarrow
 20,arrow,up,6,normalarrow
-20,arrow,right,8,delayedarrow
+20,arrow,right,10,delayedarrow
 21,arrow,up,6,normalarrow
 23,arrow,down,6,normalarrow
 24,arrow,left,6,normalarrow
-25,arrow,up,8,delayedarrow
+25,arrow,up,10,delayedarrow
 25,arrow,left,6,normalarrow
 26,arrow,left,6,normalarrow
 28,arrow,down,6,normalarrow
@@ -63,11 +63,11 @@
 84.5,arrow,left,6,normalarrow
 85,arrow,up,6,normalarrow
 85.5,arrow,up,6,normalarrow
-86,arrow,down,8,delayedarrow
+86,arrow,down,10,delayedarrow
 86,arrow,up,6,normalarrow
 86.5,arrow,right,6,normalarrow
 86.75,arrow,right,6,normalarrow
-88,arrow,left,8,delayedarrow
+88,arrow,left,10,delayedarrow
 89,arrow,down,6,normalarrow
 89.25,arrow,down,6,normalarrow
 91,arrow,up,6,normalarrow
@@ -82,7 +82,7 @@
 95.5,arrow,right,6,normalarrow
 96,arrow,left,6,normalarrow
 96.5,arrow,down,6,normalarrow
-97,arrow,right,8,delayedarrow
+97,arrow,right,10,delayedarrow
 97,arrow,down,6,normalarrow
 97.5,arrow,up,6,normalarrow
 98,arrow,left,6,normalarrow
@@ -103,7 +103,7 @@
 138,arrow,up,6,normalarrow
 138.5,arrow,down,6,normalarrow
 138.75,arrow,down,6,normalarrow
-139,arrow,up,8,delayedarrow
+139,arrow,up,10,delayedarrow
 139.5,arrow,left,6,normalarrow
 140,arrow,left,6,normalarrow
 142,arrow,down,6,normalarrow
@@ -112,7 +112,7 @@
 143.5,arrow,right,6,normalarrow
 143.75,arrow,right,6,normalarrow
 144,arrow,right,6,normalarrow
-144.5,arrow,left,8,delayedarrow
+144.5,arrow,left,10,delayedarrow
 144.5,arrow,up,6,normalarrow
 145,arrow,down,6,normalarrow
 145.25,arrow,down,6,normalarrow
@@ -125,7 +125,7 @@
 149,arrow,left,6,normalarrow
 149.5,arrow,right,6,normalarrow
 150,arrow,left,6,normalarrow
-150,arrow,up,8,delayedarrow
+150,arrow,up,10,delayedarrow
 151,arrow,down,6,normalarrow
 151.25,arrow,down,6,normalarrow
 151.5,arrow,right,6,normalarrow
@@ -154,7 +154,7 @@
 205,arrow,left,6,normalarrow
 205.5,arrow,left,6,normalarrow
 206,arrow,down,6,normalarrow
-206,arrow,up,8,delayedarrow
+206,arrow,up,10,delayedarrow
 206.5,arrow,left,6,normalarrow
 207,arrow,left,6,normalarrow
 207.5,arrow,left,6,normalarrow
@@ -165,7 +165,7 @@
 210.5,arrow,down,6,normalarrow
 211,arrow,right,6,normalarrow
 211.5,arrow,down,6,normalarrow
-212,arrow,left,8,delayedarrow
+212,arrow,left,10,delayedarrow
 212,arrow,up,6,normalarrow
 212.5,arrow,up,6,normalarrow
 213,arrow,up,6,normalarrow
@@ -186,7 +186,7 @@
 220,arrow,left,6,normalarrow
 220.5,arrow,right,6,normalarrow
 221,arrow,up,6,normalarrow
-221.5,arrow,left,8,delayedarrow
+221.5,arrow,left,10,delayedarrow
 221.5,arrow,down,6,normalarrow
 222,arrow,right,6,normalarrow
 222.5,arrow,right,6,normalarrow

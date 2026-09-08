@@ -7,7 +7,7 @@ public class PerfectScoreReward : UpgradeBase, IActivatableUpgrade
     public int bonusScore = 10000;
     public AudioClip bonusSound;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{BONUS_SCORE}", bonusScore.ToString());
@@ -26,10 +26,10 @@ public class PerfectScoreReward : UpgradeBase, IActivatableUpgrade
 
     private void HandleGameState(GameState previous, GameState current)
     {
-        if (current == GameState.RoundResultsTally && previous != GameState.RoundResultsTally && RoundManager.Instance.roundStats.PerfectRound)
+        if (current == GameState.RoundResultsTally && previous != GameState.RoundResultsTally && ScoreManager.Instance.RoundStatsTracker.PerfectRound)
         {
             AudioHelpers.PlayMyClipAtPoint(bonusSound, AudioChannel.SFX, Camera.main.transform.position);
-            ScoreManager.Instance.AddScore(bonusScore, ScoreSource.Bonus);
+            ScoreManager.Instance.AddScore(bonusScore);
         }
     }
 }

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c34d9a8e2b0e921449d94ccda0776256, type: 3}
+  m_Name: New Ability Shield Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::AbilityShieldUpgrade
+  upgradeId: 99bad7b7-a48a-4809-95f1-f14a11f846fb
+  category: 2
+  requiredUpgrades: []
+  baseOfferWeight: 1
+  _cost: 200
+  _maxStacks: 999
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Ability Shield
+  descriptionTemplate: When you use your ability gain a shield that lasts for {DURATION}
+    seconds.
+  detailsTemplate: 
+  shieldDuration: 5
+  shieldPrefab: {fileID: 6998217769083237475, guid: 377ef4cdfaf8e0f478c67c15d5c22119, type: 3}

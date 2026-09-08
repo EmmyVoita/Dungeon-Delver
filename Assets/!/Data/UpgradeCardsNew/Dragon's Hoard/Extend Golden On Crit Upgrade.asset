@@ -12,17 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab5af2b75d541ff41bebc981d6aec5de, type: 3}
   m_Name: Extend Golden On Crit Upgrade
   m_EditorClassIdentifier: 
-  _cost: 0
+  upgradeId: bb6f911a-876f-4b77-a843-4895da44a7f0
+  category: 3
+  requiredUpgrades:
+  - upgrade: {fileID: 11400000, guid: 728c241f50ac3704db83c94cc123409b, type: 2}
+    minimumStacks: 1
+  baseOfferWeight: 2.5
+  _cost: 300
   _maxStacks: 1
+  duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
   centerIcon: {fileID: 21300000, guid: 130f0774902be9f4295dd8970ff362a0, type: 3}
-  icon: {fileID: 21300000, guid: 2d443a82efa21944b87283be14f7a267, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Golden Sprout
-  descriptionTemplate: Successfully critting a <color=#9C27B0>golden</color> arrow
-    grants <color=#00E676>{ARROWS_PER_CRIT}</color> additional <color=#9C27B0>golden</color>
-    arrows, up to <color=#FFD700>{MAX_STACK}</color>.
+  descriptionTemplate: Successfully critting a {GOLDEN_ARROW} grants {ARROWS_PER_CRIT}
+    additional {GOLDEN_ARROW}, up to <color=#FFD700>{MAX_STACK}</color>.
   detailsTemplate: This upgrade does not stack.
   maxStack: 3
   arrowsPerCrit: 1

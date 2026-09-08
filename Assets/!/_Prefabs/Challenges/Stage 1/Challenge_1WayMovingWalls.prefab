@@ -51,7 +51,6 @@ MonoBehaviour:
   spawnBeep:
     clip: {fileID: 8300000, guid: 44459bfd1738cc2479d043b1f7168f49, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 0.8
     pitchVariation: 0
@@ -144,7 +143,6 @@ MonoBehaviour:
   shiftStartSound:
     clip: {fileID: 0}
     channel: 0
-    affectedByTimeScale: 0
     volume: 0
     pitch: 0
     pitchVariation: 0
@@ -169,14 +167,12 @@ MonoBehaviour:
   fireSound:
     clip: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tickSound:
     clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0

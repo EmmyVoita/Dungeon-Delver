@@ -22,6 +22,6 @@ public class UnlockAllMenuOption : BaseSettingOption
     public override void OnActivate()
     {
         AudioHelpers.PlayMyClipAtPoint(resetSound, AudioChannel.SFX, Camera.main.transform.position);
-        ScoreManager.Instance.SetHighScore(9999999);
+        ScoreManager.Instance.OverideHighScore(9999999);
     }
 }

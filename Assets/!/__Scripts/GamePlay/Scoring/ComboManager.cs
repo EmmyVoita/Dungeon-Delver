@@ -86,7 +86,7 @@ public class ComboManager : MonoBehaviour
     [SerializeField] private SoundEffect ignoreMissSoundEffect;
     [SerializeField] private GameObject ignoreMissVFXPrefab;
     [SerializeField] private GameObject shieldPrefab;
-    private int _ignoreNextMissCount = 0;
+    public int _ignoreNextMissCount = 0;
 
 
     private int comboCount;

@@ -8,5 +8,7 @@ public class ObstacleTypeDefinition : ScriptableObject
     public string fileName;
     public GameObject prefab;
     public Sprite icon;        // optional for UI
+    public int stageNumber;
+    public bool hasBossOverride;
     [TextArea] public string description;
 }

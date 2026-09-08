@@ -25,13 +25,13 @@ public class CanvasGroupFadeOnMenuState : MonoBehaviour
         {
             canvasGroup.interactable = true;
             canvasGroup.blocksRaycasts = true;
-            canvasGroup.DOFade(1,fadeInDuration);
+            canvasGroup.DOFade(1,fadeInDuration).SetUpdate(true);
         }
         else
         {
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
-            canvasGroup.DOFade(0,fadeOutDuration);
+            canvasGroup.DOFade(0,fadeOutDuration).SetUpdate(true);
         }
     }
 }

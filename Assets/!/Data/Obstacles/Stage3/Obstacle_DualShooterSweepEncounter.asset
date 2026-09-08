@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
   m_Name: Obstacle_DualShooterSweepEncounter
   m_EditorClassIdentifier: 
-  displayName: Dual Shooter Sweep Encounter
+  displayName: Laser Crossfire
   textColor: {r: 0.7176471, g: 0.9411765, b: 0.5372549, a: 1}
   fileName: dualshootersweepencounter
   prefab: {fileID: 2955812548639351706, guid: 5e3d0fdd63427d84aa4d63ff52c6b513, type: 3}
   icon: {fileID: 0}
-  description: 
+  stageNumber: 3
+  hasBossOverride: 0
+  description: Navigate vertically while two enemies attack from opposite sides.
+    Dodge fireballs from the left and a sweeping laser from the right.

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db6fa1bb419fe6b418ba32663d8dcda7, type: 3}
+  m_Name: RoundHealModifier
+  m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
+  displayName: Regen
+  description: At the end of each round heal for +1 health.
+  icon: {fileID: -1477887677, guid: 88d76b0b15dabe949804a049add3668d, type: 3}
+  summaryName: Round Heal
+  summaryIcon: {fileID: -1477887677, guid: 88d76b0b15dabe949804a049add3668d, type: 3}
+  type: 7
+  category: 0
+  minValue: 0
+  maxValue: 3
+  step: 1
+  scoreMultiplierPerStep: 0
+  valueSuffix: 

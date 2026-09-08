@@ -11,11 +11,12 @@ public class StatModifierManager : MonoBehaviour
 
     public static event Action<string, bool> OnUpgradeStateChanged;
     public static Action<string, float> OnUpgradeRechargeProgress;
-    private readonly List<object> temporaryModifiers = new();
+    private readonly List<UpgradeBase> temporaryModifiers = new();
 
 
     private readonly List<IAbilityCostModifier> abilityCostMods = new();
     private readonly List<IDamageModifier> damageMods = new();
+    private readonly List<IAbilityDamageModifier> abilityDamageMods = new();
 
 
     private void Awake()
@@ -41,7 +42,7 @@ public class StatModifierManager : MonoBehaviour
         }
     }
 
-    public void AddTemporaryModifier(object modifier)
+    public void AddTemporaryModifier(UpgradeBase modifier)
     {
         if (modifier == null)
             return;
@@ -50,7 +51,7 @@ public class StatModifierManager : MonoBehaviour
         temporaryModifiers.Add(modifier);
     }
 
-    public void RemoveTemporaryModifier(object modifier)
+    public void RemoveTemporaryModifier(UpgradeBase modifier)
     {
         if (modifier == null) return;
 
@@ -63,23 +64,30 @@ public class StatModifierManager : MonoBehaviour
         if (temporaryModifiers.Count == 0)
             return;
 
-        foreach (var mod in temporaryModifiers)
-            UnregisterModifier(mod);
+        foreach (UpgradeBase modifier in temporaryModifiers)
+        {
+            UnregisterModifier(modifier);
+
+            if (ShopManager.Instance != null)
+                ShopManager.Instance.RemoveUpgrade(modifier);
+        }
 
         temporaryModifiers.Clear();
     }
 
 
-    private void RegisterModifier(object modifier)
+    private void RegisterModifier(UpgradeBase modifier)
     {
         if (modifier is IAbilityCostModifier acm) abilityCostMods.Add(acm);
         if (modifier is IDamageModifier dm) damageMods.Add(dm);
+        if (modifier is IAbilityDamageModifier adm) abilityDamageMods.Add(adm);
     }
 
-    private void UnregisterModifier(object modifier)
+    private void UnregisterModifier(UpgradeBase modifier)
     {
         if (modifier is IAbilityCostModifier acm) abilityCostMods.Remove(acm);
         if (modifier is IDamageModifier dm) damageMods.Remove(dm);
+        if (modifier is IAbilityDamageModifier adm) abilityDamageMods.Remove(adm);
     }
 
 
@@ -88,6 +96,14 @@ public class StatModifierManager : MonoBehaviour
         float cost = baseCost;
         foreach (var mod in abilityCostMods)
             cost = mod.ModifyCost(cost);
+        return cost;
+    }
+
+    public int ModifyAbilityDamageTaken(int baseCost)
+    {
+        int cost = baseCost;
+        foreach (var mod in abilityDamageMods)
+            cost = mod.ModifyAbilityDamageTaken(cost);
         return cost;
     }
 

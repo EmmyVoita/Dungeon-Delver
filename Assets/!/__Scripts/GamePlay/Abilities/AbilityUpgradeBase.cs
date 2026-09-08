@@ -1,8 +1,11 @@
 using UnityEngine;
 
-public abstract class AbilityUpgradeBase : ScriptableObject
+
+[System.Serializable]
+public class AbilityUpgradeBase
 {
-    public string upgradeName;
+    public Sprite icon;
+    public string displayName;
     public string description;
-    public abstract void ApplyToAbility(AbilityBase ability);
+    public string details;
 }

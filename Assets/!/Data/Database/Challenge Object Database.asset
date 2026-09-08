@@ -14,14 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ChallengeObjectDatabase
   challenges:
   - {fileID: 11400000, guid: 2c0466ae463b8d44ab8fc58b599f98a4, type: 2}
-  - {fileID: 11400000, guid: e662aaadd82eac546b35d2bed81efac7, type: 2}
   - {fileID: 11400000, guid: 239a393ea1c3b704fb8cdcea213d9ded, type: 2}
   - {fileID: 11400000, guid: c4ada385955b4f943b29cdbb5dc80500, type: 2}
-  - {fileID: 11400000, guid: 2229cb2e7c76e8a4f8983ea1fbec4116, type: 2}
   - {fileID: 11400000, guid: a99222124a3a526478adc807ac89bdeb, type: 2}
   - {fileID: 11400000, guid: 4c93423afee914d4b86689aadd889f67, type: 2}
   - {fileID: 11400000, guid: 5cfffc1b2e18615418bf2d57449ff879, type: 2}
-  - {fileID: 11400000, guid: 59d6f2d6b6f73b846a90d9a03b4f4f68, type: 2}
   - {fileID: 11400000, guid: 43fdffcecd408354c847c7160a1f7e59, type: 2}
   - {fileID: 11400000, guid: eb335a84680b11b499fc8549b744ce57, type: 2}
   - {fileID: 11400000, guid: 1724a809abc8dff498a106542a57b820, type: 2}
@@ -39,9 +36,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9ad3c94ade77b0d4d846d618f39cc267, type: 2}
   - {fileID: 11400000, guid: 9fb1d225589104643aba0bf64fca96ff, type: 2}
   - {fileID: 11400000, guid: 18375f9fec826bf4191ad49803d8ac85, type: 2}
-  - {fileID: 11400000, guid: 49751ba305ab88d49b73b47163f84233, type: 2}
   - {fileID: 11400000, guid: 9d6f5f7746d1ac44dac024ddc37de819, type: 2}
-  - {fileID: 11400000, guid: dbc30cbbecaaa2a41aed7bff74fe99c9, type: 2}
   - {fileID: 11400000, guid: 3262cdf2fc86d41499b7ebb580c2a286, type: 2}
   - {fileID: 11400000, guid: eb3d878f4c5cc6c43b3e2c88a4ecbf81, type: 2}
   - {fileID: 11400000, guid: 6e80920ecca1f4f479fc8c2e291a1ead, type: 2}

@@ -11,7 +11,6 @@ public class UpgradeOption
 
     public Sprite CardDecoration => effect.cardDecoration;
     public Sprite CenterIcon => effect.centerIcon;
-    public Sprite Icon => effect.icon;
     public string DisplayName => effect.displayName;
     public string Description => effect.GetDescription();
     public UpgradeBase Base => effect;

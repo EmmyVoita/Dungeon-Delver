@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.InputSystem.LowLevel;
 
 public class InputModeManager : MonoBehaviour
 {
@@ -10,43 +8,44 @@ public class InputModeManager : MonoBehaviour
 
     public enum InputMode
     {
-        Mouse, 
+        Mouse,
         Keyboard
     }
 
     public static event Action<InputMode> OnInputModeChanged;
 
-    private const string PREF_KEY = "mouseInput_mode"; // 1 = on, 0 = off
-    private const bool DEFAULT_MOUSE_INPUT = false;
+    public InputMode CurrentMode { get; private set; } =
+        InputMode.Keyboard;
 
+    [SerializeField]
+    private List<InputActionType> keyboardInputs;
 
-    public InputMode CurrentMode {get; private set;} = InputMode.Keyboard;
-
-    
-    [SerializeField] private List<InputActionType> keyboardInputs; 
-
+    [Header("Mouse Detection")]
+    [SerializeField]
+    private float mouseMoveThreshold = 2f;
 
     [Header("Dynamic")]
-    [SerializeField] private Vector3 _lastMousePosition; 
-    [SerializeField] private bool _allowMouseInput = false;
+    [SerializeField]
+    private Vector3 _lastMousePosition;
 
-    public bool AllowMouseInput
+    private void Awake()
     {
-        get => _allowMouseInput;
-        set
+        if (Instance != null && Instance != this)
         {
-            _allowMouseInput = value;
-
-            PlayerPrefs.SetInt(
-                PREF_KEY,
-                value ? 1 : 0
-            );
-
-            PlayerPrefs.Save();
-
-            if (!value)
-                SetInputMode(InputMode.Keyboard);
+            Destroy(gameObject);
+            return;
         }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        _lastMousePosition = Input.mousePosition;
+
+        // Start in keyboard mode.
+        CurrentMode = InputMode.Keyboard;
+        CursorController.Instance?.ShowCursor(false);
+
+        Cursor.visible = false;
     }
 
     private void OnEnable()
@@ -57,95 +56,78 @@ public class InputModeManager : MonoBehaviour
     private void OnDisable()
     {
         GameStateManager.OnStateChanged -= HandleStateChanged;
-        
     }
-
-    private void HandleStateChanged(GameState previousState, GameState newState)
-    {
-        if(GameStateEffectManager.AllowMouseInput && AllowMouseInput)
-        {
-            SetInputMode(InputMode.Mouse);
-        }
-        else
-        {
-            SetInputMode(InputMode.Keyboard);
-        }
-    }
-    
-
-    private void Awake()
-    {
-        if(Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-
-        DontDestroyOnLoad(gameObject);
-
-        _lastMousePosition = Input.mousePosition;
-
-        //Cursor.visible = false;
-    }   
-
-
-    private void Start()
-    {
-        _allowMouseInput =
-            PlayerPrefs.GetInt(
-                PREF_KEY,
-                DEFAULT_MOUSE_INPUT ? 1 : 0
-            ) == 1;
-
-        SetInputMode(
-            _allowMouseInput
-                ? InputMode.Mouse
-                : InputMode.Keyboard
-        );
-    }
-
 
     private void Update()
     {
-        if(GameStateEffectManager.AllowMouseInput && AllowMouseInput)
+        // Mouse isn't allowed in this state at all.
+        if (!GameStateEffectManager.AllowMouseInput)
         {
-            DetectKeyboardInput();
-            DetectMouseInput();
+            if (CurrentMode != InputMode.Keyboard)
+                SetInputMode(InputMode.Keyboard);
+
+            // Still update this so entering a mouse-enabled state
+            // doesn't immediately count old movement as new movement.
+            _lastMousePosition = Input.mousePosition;
+
+            return;
         }
+
+        DetectKeyboardInput();
+        DetectMouseInput();
+    }
+
+    private void HandleStateChanged(
+        GameState previousState,
+        GameState newState)
+    {
+        // If the new state doesn't support mouse input,
+        // immediately return to keyboard mode.
+        if (!GameStateEffectManager.AllowMouseInput)
+        {
+            SetInputMode(InputMode.Keyboard);
+        }
+
+        // Reset mouse position so changing state doesn't
+        // accidentally trigger mouse mode.
+        _lastMousePosition = Input.mousePosition;
     }
 
     private void DetectKeyboardInput()
     {
-        bool usingKeyboard = false;
+        if (InputBindingManager.Instance == null)
+            return;
 
-        foreach(InputActionType inputAction in keyboardInputs)
+        foreach (InputActionType inputAction in keyboardInputs)
         {
-            if(InputBindingManager.Instance.GetKeyDown(inputAction))
+            if (InputBindingManager.Instance.GetKeyDown(inputAction))
             {
-                usingKeyboard = true;
-                break;
+                SetInputMode(InputMode.Keyboard);
+                return;
             }
-        }
-
-        if (usingKeyboard && CurrentMode != InputMode.Keyboard)
-        {
-            SetInputMode(InputMode.Keyboard);
         }
     }
 
-
     private void DetectMouseInput()
     {
-        // Check if the mouse has moved
-        bool mouseMoved = (Input.mousePosition - _lastMousePosition).sqrMagnitude > 4f;
+        Vector3 currentMousePosition = Input.mousePosition;
 
-        bool mouseClicked = Input.GetMouseButtonDown(0);
+        float thresholdSqr =
+            mouseMoveThreshold * mouseMoveThreshold;
 
-        _lastMousePosition = Input.mousePosition;
+        bool mouseMoved =
+            (currentMousePosition - _lastMousePosition)
+            .sqrMagnitude > thresholdSqr;
 
-        if((mouseMoved || mouseClicked) && CurrentMode != InputMode.Mouse)
+        bool mouseClicked =
+            Input.GetMouseButtonDown(0);
+
+        bool mouseScrolled =
+            Mathf.Abs(Input.mouseScrollDelta.y) > 0.01f;
+
+        _lastMousePosition = currentMousePosition;
+
+        if (mouseMoved || mouseClicked || mouseScrolled)
         {
             SetInputMode(InputMode.Mouse);
         }
@@ -153,14 +135,15 @@ public class InputModeManager : MonoBehaviour
 
     private void SetInputMode(InputMode newMode)
     {
-        CurrentMode = newMode;
+        bool modeChanged = CurrentMode != newMode;
 
-        //Cursor.visible = false;
+        CurrentMode = newMode;
 
         CursorController.Instance?.ShowCursor(
             newMode == InputMode.Mouse
         );
 
-        OnInputModeChanged?.Invoke(newMode);
+        if (modeChanged)
+            OnInputModeChanged?.Invoke(newMode);
     }
 }

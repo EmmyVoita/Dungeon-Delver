@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class DescriptionPanelController : MonoBehaviour
 {
-    [SerializeField] private List<GameState> hideStates;
+
     [SerializeField] private RectTransform rect;
     [SerializeField] private RectTransform layoutRoot;
     [SerializeField] private CanvasGroup canvasGroup;
@@ -18,40 +18,47 @@ public class DescriptionPanelController : MonoBehaviour
     [SerializeField] private float shownY = 0f;
     [SerializeField] private float duration = 0.4f;
 
-    private void OnEnable()
-    {
-        GameStateManager.OnStateChanged += HandleStateChanged;
-    }
 
-    private void OnDisable()
-    {
-        GameStateManager.OnStateChanged -= HandleStateChanged;
-    }
-
-    private void HandleStateChanged(GameState previousState, GameState newState)
-    {
-        if(hideStates.Contains(newState))
-        {
-            Hide();
-        }
-    }
 
     private void Awake()
     {
         Hide();
     }
 
+    
+    private void OnDestroy()
+    {
+        rect.DOKill();
+    }
+
+
     private void RebuildLayout()
     {
+        if (typewriter == null)
+        {
+            Debug.LogError($"{name}: Typewriter is not assigned.", this);
+            return;
+        }
+
+        if (typewriter.textComponent == null)
+        {
+            Debug.LogError($"{name}: Typewriter has no Text Component assigned.", typewriter);
+            return;
+        }
+
+        if (layoutRoot == null)
+        {
+            Debug.LogError($"{name}: Layout Root is not assigned.", this);
+            return;
+        }
+
         typewriter.textComponent.ForceMeshUpdate();
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(
             typewriter.textComponent.rectTransform
         );
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(
-            layoutRoot
-        );
+        LayoutRebuilder.ForceRebuildLayoutImmediate(layoutRoot);
     }
 
     public void Show(string text)
@@ -60,8 +67,7 @@ public class DescriptionPanelController : MonoBehaviour
         canvasGroup.DOKill();
 
         canvasGroup.alpha = 1;
-        rect.DOAnchorPosY(shownY, duration)
-            .SetEase(easeCurve);
+        rect.DOAnchorPosY(shownY, duration).SetEase(easeCurve);
 
         // start typing AFTER movement (feels better)
         typewriter.StartTyping(text);
@@ -71,24 +77,11 @@ public class DescriptionPanelController : MonoBehaviour
 
     public void ShowImmediate(string text)
     {
-        /*
-        typewriter.textComponent.ForceMeshUpdate();
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(
-            typewriter.textComponent.rectTransform
-        );
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(
-            layoutRoot
-        );
-        */
-
         rect.DOKill();
         canvasGroup.DOKill();
 
         canvasGroup.alpha = 1;
-        rect.DOAnchorPosY(shownY, duration)
-            .SetEase(easeCurve);
+        rect.DOAnchorPosY(shownY, duration).SetEase(easeCurve);
 
         // start typing AFTER movement (feels better)
         typewriter.SetInstant(text);
@@ -121,7 +114,6 @@ public class DescriptionPanelController : MonoBehaviour
         // start typing AFTER movement (feels better)
         detailsTypewriter.SetInstant(text);
     }
-
 
 
     public void Hide()

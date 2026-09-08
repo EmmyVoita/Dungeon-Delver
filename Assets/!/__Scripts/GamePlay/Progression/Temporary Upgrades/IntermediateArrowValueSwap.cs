@@ -6,7 +6,7 @@ public class IntermediateArrowValueSwap: UpgradeBase
     public float normalArrowMultiplier = 0.9f;
     public float critArrowMultiplier = 1.1f;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{NORMAL_ARROW_MULTIPLIER}", (normalArrowMultiplier-1).ToString("P0"))
@@ -15,11 +15,13 @@ public class IntermediateArrowValueSwap: UpgradeBase
 
     public override void Apply()
     {
+        /*
         StatModifierManager.Instance.AddTemporaryModifier(
             new TempNormalArrowMultiplier(normalArrowMultiplier)
         );
         StatModifierManager.Instance.AddTemporaryModifier(
             new TempCritArrowMultiplier(critArrowMultiplier)
         );
+        */
     }
 }

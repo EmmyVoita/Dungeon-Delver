@@ -11,6 +11,13 @@ public class RunStatsTracker : MonoBehaviour
     public int HighestCombo { get; private set; }
     public int TotalDamageTaken { get; private set; }
     public int RoundsPlayed { get; private set; }
+    public int TotalAbilityUsed { get; private set; }
+    public int TotalAbilityCharge { get; private set; }
+    public int RerollsUsed { get; private set; }
+    public int RerollsGained { get; private set; }
+    public int TotalHealthHealed { get; private set; }
+    public int TotalShopsVisited { get; private set; }
+
 
     public float RunAccuracy => TotalSpawned == 0 ? 0f : (float)TotalHit / TotalSpawned;
     public float RunCritRate => TotalHit == 0 ? 0f : (float)TotalCrit / TotalHit;
@@ -19,11 +26,48 @@ public class RunStatsTracker : MonoBehaviour
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        RunStateManager.OnRerollGained += AddRerollGained;
+        RunStateManager.OnUseReroll += AddRerollUsed;
+        Player.OnHeal += AddHeal;
+        ShopManager.OnShopOpened += AddShopOpened;
     }
 
     void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        RunStateManager.OnRerollGained -= AddRerollGained;
+        RunStateManager.OnUseReroll -= AddRerollUsed;
+        Player.OnHeal -= AddHeal;
+        ShopManager.OnShopOpened -= AddShopOpened;
+    }
+
+    private void AddRerollGained(int amount)
+    {
+        RerollsGained += amount;
+    }
+
+    private void AddRerollUsed()
+    {
+        RerollsGained++;
+    }
+
+    private void AddHeal(int amount, bool wasFullHealth)
+    {
+        if(wasFullHealth)
+            return;
+
+        if(GameStateManager.Instance.CurrentState == GameState.RunLoad || GameStateManager.Instance.CurrentState == GameState.RunIntro)
+            return;
+
+        TotalHealthHealed += amount;
+    }
+
+    private void AddShopOpened(ShopType shopType)
+    {
+        if(shopType != ShopType.Normal)
+            return;
+
+        TotalShopsVisited++;
     }
 
 
@@ -41,6 +85,9 @@ public class RunStatsTracker : MonoBehaviour
         TotalCrit += round.Crit;
         TotalDamageTaken += round.DamageTaken;
         HighestCombo = Mathf.Max(HighestCombo, round.HighestCombo);
+        TotalAbilityUsed += round.AbilityUsed;
+        TotalAbilityCharge += round.AbilityCharge;
+
 
         RoundsPlayed++;
     }
@@ -55,6 +102,10 @@ public class RunStatsTracker : MonoBehaviour
         RoundsPlayed = 0;
         TotalDamageTaken = 0;
         HighestCombo = 0;
+        TotalAbilityUsed = 0;
+        TotalAbilityCharge = 0;
+        RerollsUsed = 0;
+        RerollsGained = 0;
     }
 
     public void PrintStats()

@@ -7,12 +7,24 @@ public abstract class AbilityEffectBase : MonoBehaviour
     
     protected AbilityEffectContext Context { get; private set; }
 
+   
+
     private bool _hasEnded;
 
     public virtual void Activate(AbilityEffectContext context)
     {
         Context = context;
         _hasEnded = false;
+    }
+
+    public virtual void UpgradeA()
+    {
+        
+    }
+
+    public virtual void UpgradeB()
+    {
+        
     }
 
     protected void EndEffect()

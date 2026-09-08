@@ -47,14 +47,6 @@ public class RewardStampText : MonoBehaviour
         textComponent.text = "";
     }
 
-    private void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.X))
-        {
-            Play("PERFECT");
-        }
-    }
-
     private IEnumerator AnimateText(string message)
     {
         textComponent.text = message;

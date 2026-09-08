@@ -12,18 +12,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 533bbb4c05ab7a44692d3b1cd279da1b, type: 3}
   m_Name: Currency Zap Upgrade
   m_EditorClassIdentifier: Assembly-CSharp::CurrencyZapUpgrade
-  _cost: 0
+  upgradeId: 55ab4ec3-e841-4696-9473-7a2bf0f90b66
+  category: 5
+  requiredUpgrades: []
+  baseOfferWeight: 0.2
+  _cost: 500
   _maxStacks: 1
+  duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 2100000, guid: c53b19056d5694243a51693a687fb889, type: 2}
   centerIcon: {fileID: 21300000, guid: f9a87df7dea13b449b967f8857b993fa, type: 3}
-  icon: {fileID: 21300000, guid: 6180d88e91c884e4c842e26453488aaa, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Arcane Relic
   descriptionTemplate: Gain an orb that zaps a nearby arrow whenever you gain currency.
     {APPEARANCE_PERCENTAGE} chance to trigger. Always triggers if you have at least
     {CURRENCY_UPGRADE_REQUIRED} currency.
   detailsTemplate: This upgrade does not stack.
+  currencyStep: 500
+  weightPerCurrencyStep: 0.25
+  maximumCurrencyWeightBonus: 1
+  currencySynergyUpgrades:
+  - {fileID: 11400000, guid: 410d2474a2f65674380a20955d7c2d1c, type: 2}
+  - {fileID: 11400000, guid: 728c241f50ac3704db83c94cc123409b, type: 2}
+  - {fileID: 11400000, guid: 50ef8fecbdbe86d4491b8458e68bf16a, type: 2}
+  - {fileID: 11400000, guid: e26ba38fed1de7f44b1f652b55c1bb5b, type: 2}
+  weightPerSynergyStack: 0.25
   currencyRequired: 1000
   radius: 4.75
   zapChance: 0.5

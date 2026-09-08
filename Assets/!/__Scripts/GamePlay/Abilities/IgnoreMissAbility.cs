@@ -26,8 +26,8 @@ public class IgnoreMissAbility : AbilityBase
 
     public override void Activate(Quaternion rotation)
     {
-        _currentSave = new ShieldDamageSave(true, true, GetModifiedDuration(), stopTimeDuration: 1.5f);
-        DamageSaveManager.Instance.Register(_currentSave);
+        _currentSave = new ShieldDamageSave(true, notify: true, duration: GetModifiedDuration(), stopTimeDuration: 1.5f);
+        DamageSaveManager.Instance.RegisterGeneral(_currentSave);
         ComboManager.Instance.PreventNextComboBreak(GetModifiedDuration());
         
         if(_durationRoutine != null)

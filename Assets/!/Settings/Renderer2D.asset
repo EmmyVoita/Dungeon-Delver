@@ -1,5 +1,45 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8261134173135464529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
+  m_Name: FullScreenPassRendererFeature
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
+  m_Active: 0
+  injectionPoint: 600
+  fetchColorBuffer: 1
+  requirements: 0
+  passMaterial: {fileID: 2100000, guid: 3eeb6f4abc7985443b60d5c3a6bb794a, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
+--- !u!114 &-8134316934687745950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
+  m_Name: FullScreenPassRendererFeature
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
+  m_Active: 1
+  injectionPoint: 550
+  fetchColorBuffer: 1
+  requirements: 4
+  passMaterial: {fileID: 2100000, guid: f3048ff9c218033458aa3500dc31315e, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
 --- !u!114 &-3129591260061936503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -90,7 +130,9 @@ MonoBehaviour:
   - {fileID: -3129591260061936503}
   - {fileID: -1620893422412972089}
   - {fileID: 4192684842593385651}
-  m_RendererFeatureMap: 70b60fcfdc960767b81e8f378a8ea2f88954d78b547591d4c7bf4e2a056e81e9b37cf189a6682f3a
+  - {fileID: -8134316934687745950}
+  - {fileID: -8261134173135464529}
+  m_RendererFeatureMap: 70b60fcfdc960767b81e8f378a8ea2f88954d78b547591d4c7bf4e2a056e81e9b37cf189a6682f3a62187e69d8191d8faf976b283d8e5a8d
   m_UseNativeRenderPass: 0
   m_LayerMask:
     serializedVersion: 2

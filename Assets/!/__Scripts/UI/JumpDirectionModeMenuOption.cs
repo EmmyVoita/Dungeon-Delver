@@ -82,7 +82,7 @@ public class JumpDirectionModeMenuOption : PracticeMenuOption
         ApplyMode();
         UpdateVisuals();
 
-        manager.OnBossPromptConfirm();
+        manager.OnConfirm();
     }
 
     private void UpdateVisuals(bool isExiting = false)

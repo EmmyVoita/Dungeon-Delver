@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: LevelBBoss
   m_EditorClassIdentifier: Assembly-CSharp::LevelDataObject
   _levelFile: {fileID: 4900000, guid: b1a9a7b8624a9e547ab8471e9d867da4, type: 3}
-  _baseCurrencyReward: 100
+  _baseCurrencyReward: 500

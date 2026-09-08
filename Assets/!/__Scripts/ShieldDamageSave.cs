@@ -5,31 +5,49 @@ public class ShieldDamageSave : IDamageSave
     public static event Action<ShieldDamageSave> OnDamagePrevented;
     public int Priority => 100;
     public bool RemoveAtLevelEnd => true;
+    public GameObject ShieldPrefab { get; }
     
     private bool _preventComboBreak;
     private bool _notify;
     private float _duration;
     private float _startTime;
     private float _stopTimeDuration;
+    private int _abilityChargeAmount;
 
-    public ShieldDamageSave(bool preventComboBreak, bool notify = false, float duration = -1, float stopTimeDuration = -1)
+    public ShieldDamageSave(bool preventComboBreak,
+                            GameObject shieldPrefab = null,
+                            bool notify = false, 
+                            float duration = -1, 
+                            float stopTimeDuration = -1, 
+                            int abilityChargeAmount = 0)
     {
         _preventComboBreak = preventComboBreak;
         _notify = notify;
         _duration = duration;
         _startTime = Time.time;
         _stopTimeDuration = stopTimeDuration;
+        _abilityChargeAmount = abilityChargeAmount;
+        ShieldPrefab = shieldPrefab;
+    }
+
+    public bool HasExpired()
+    {
+        return _duration >= 0f && Time.time > _startTime + _duration;
     }
 
     public bool CanPreventDamage(int damage)
     {
-        bool durationCheck = _duration == -1 || Time.time <= _startTime + _duration;
-        return damage > 0 && durationCheck;
+        return damage > 0 && !HasExpired();
     }
 
     public bool PreventDamage(int damage)
     {
+         Player.Instance.AbilityCharge += _abilityChargeAmount;
         Player.Instance.AddHitBlock(1);
+
+       
+
+        ComboManager.Instance._ignoreNextMissCount++;
 
         if(_notify)
             OnDamagePrevented?.Invoke(this);
@@ -44,8 +62,18 @@ public class ShieldDamageSave : IDamageSave
         return true;
     }
 
-    public IDamageSave Clone()
+    public IRuntimeModifier Clone()
     {
         return new ShieldDamageSave(_preventComboBreak);
+    }
+
+    public void OnDestroy()
+    {
+        
+    }
+
+     public void OnActivate()
+    {
+        
     }
 }

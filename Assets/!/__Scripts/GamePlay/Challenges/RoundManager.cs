@@ -3,9 +3,6 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
-using Unity.VisualScripting;
-
-
 
 
 
@@ -51,7 +48,6 @@ public class RoundManager : MonoBehaviour
     // Events
     // ------------------------------------------------------------
 
-
     // ------------------------------------------------------------
     // Stages
     // ------------------------------------------------------------
@@ -63,19 +59,13 @@ public class RoundManager : MonoBehaviour
     // ------------------------------------------------------------
     // Runtime State
     // ------------------------------------------------------------
-
-    [Header("Runtime")]
-  
-    public RoundStatsTracker roundStats;
-    public RunStatsTracker runStats;
-  
-
+    [Header("References")]
+    [SerializeField] private BackgroundVisualManager visualManager;
 
 
    
 
     public bool GameComplete => _currentLevelIndex >= _currentStageSequence.Count && _currentStageIndex == Mathf.Max(stages.Count - 1, 0);
-    public float RoundBPMMultiplier => 1 + _bpmBonus;
     public double RoundStartDSP { get; set; }
     public float  RoundStartTime { get; private set; } // gameplay time
 
@@ -86,28 +76,43 @@ public class RoundManager : MonoBehaviour
     public string LevelIndex => $"{_currentStageIndex+1}-{_currentLevelIndex+1}";
     
     public int CurrentLevelReward => _currentStageSequence[_currentLevelIndex].BaseCurrencyReward;
+    public int CurrentLevelRerollReward => _currentStageSequence[_currentLevelIndex].BaseRerollReward;
+    public string CurrentStageName => stages[_currentStageIndex].stageName;
+
+    public bool IsAdvancingToNextStage =>
+    _currentLevelIndex >= _currentStageSequence.Count &&
+    _currentStageIndex < stages.Count - 1;
+
+    public string NextStageName
+    {
+        get
+        {
+            int nextStageIndex = _currentStageIndex + 1;
+
+            if (nextStageIndex < 0 || nextStageIndex >= stages.Count)
+                return CurrentStageName;
+
+            return stages[nextStageIndex].stageName;
+        }
+    }
 
 
     private List<LevelDataObject> _currentStageSequence;
     private Coroutine _activeRoundCoroutine;
     private int _currentLevel;
-    private bool _applyTempBPMBonus = false;
-    private float _bpmBonus = 0f;
     private int _currentStageIndex = 0;
     private int _currentLevelIndex = 0;
 
 
     private void OnEnable()
     {
-        UpgradeCardManager.UpgradeSelectionComplete += SetupAndStartRound;
+        //ShopManager.UpgradeSelectionComplete += SetupAndStartRound;
         GameStateManager.OnStateChanged += HandleStateChanged;
-       
-
     }
 
     private void OnDisable()
     {
-        UpgradeCardManager.UpgradeSelectionComplete -= SetupAndStartRound;
+        //ShopManager.UpgradeSelectionComplete -= SetupAndStartRound;
         GameStateManager.OnStateChanged -= HandleStateChanged;
     }
 
@@ -126,21 +131,18 @@ public class RoundManager : MonoBehaviour
         _currentLevelIndex = 0;
         _currentStageIndex = 0;
         _currentLevel = 0;
-
-        
-        
-        
     }
 
     private void Start()
     {
-        runStats = ScoreManager.Instance.RunStatsTracker;
-        roundStats = ScoreManager.Instance.RoundStatsTracker;
-        
-        roundStats.Reset();
-        runStats.ResetRun();
-        runStats.PrintStats();
+        if (GameSceneLoader.PendingConfig != null &&
+            GameSceneLoader.PendingConfig.IsEditorMode)
+        {
+            GameStateManager.Instance.SetState(GameState.Editor);
+        }
     }
+
+
 
     private void Update()
     {
@@ -166,10 +168,8 @@ public class RoundManager : MonoBehaviour
                 return;
         #endif  
 
-        if(newState == GameState.DeathSequence)
-        {
-            //runStats.AddRound(stats);
-        }
+        if(GameSceneLoader.PendingConfig != null && GameSceneLoader.PendingConfig.IsEditorMode)
+            return;
 
         if(newState == GameState.RunLoad && ObstacleManager.Instance.TestOn != true)
         {
@@ -192,11 +192,6 @@ public class RoundManager : MonoBehaviour
             ArrowSpawner.Instance.StopAllSpawning();
             ArrowSpawner.Instance.ClearAllArrows();
         }
-
-        if(newState == GameState.GameOverTally)
-        {
-            runStats.AddRound(roundStats);
-        }
     }
 
 
@@ -211,8 +206,10 @@ public class RoundManager : MonoBehaviour
             yield break;
         }
 
-        roundStats.Reset();
-        runStats.ResetRun();
+        ScoreManager.Instance.RoundStatsTracker.Reset();
+        ScoreManager.Instance.RunStatsTracker.ResetRun();
+
+        MusicManager.Instance.mainClip = TestSession.levelMusic;
 
         CountdownUI.Instance.BeginCountdown(() =>
         {
@@ -232,7 +229,7 @@ public class RoundManager : MonoBehaviour
     {
         if(stageIndex == 0)
         {
-            runStats.ResetRun();
+            ScoreManager.Instance.RunStatsTracker.ResetRun();
         }
 
         if (stageIndex >= stages.Count)
@@ -273,6 +270,9 @@ public class RoundManager : MonoBehaviour
         }
 
         _currentStageSequence.Add(stage.bossFile);
+
+        if(!BackgroundPreference.UseSimpleBackground)
+            visualManager.ChangeDefaultBackground(stage.backgroundData);
             
 
         _currentLevelIndex = 0;
@@ -315,6 +315,7 @@ public class RoundManager : MonoBehaviour
 
     public void SetupAndStartRound()
     {
+        
         // Safety check to prevent starting a new round while one is active
         if (_activeRoundCoroutine != null)
             StopCoroutine(_activeRoundCoroutine);
@@ -346,13 +347,14 @@ public class RoundManager : MonoBehaviour
        
         RoundCountdownStartTime = Time.time;
         
-        GameStateManager.Instance.RequestStateChange(GameState.PreRoundCountdown);
+        GameStateManager.Instance.SetState(GameState.PreRoundCountdown);
 
         CountdownUI.Instance.BeginCountdown(() =>
         {
             RoundStartDSP  = AudioSettings.dspTime;
             RoundStartTime = Time.time;
             _activeRoundCoroutine = StartCoroutine(PlayRound(levelData.LevelFile));
+            RunStateManager.Instance.AdvanceWorldMapRoute();
         });
     }
 
@@ -362,7 +364,7 @@ public class RoundManager : MonoBehaviour
         OnRoundStart?.Invoke();
 
         // Reset stats for the new round
-        roundStats.Reset();
+        ScoreManager.Instance.RoundStatsTracker.Reset();
 
         StageDataObject stage = stages[_currentStageIndex];
 
@@ -379,14 +381,11 @@ public class RoundManager : MonoBehaviour
         {
             float startTime = GameSessionBootstrap.Config.LevelEditorStartTime;
 
-            yield return StartCoroutine(ArrowSpawner.Instance.PlayFromTime(levelFile, 
-                                                                           startTime, 
-                                                                           _bpmBonus));
+            yield return StartCoroutine(ArrowSpawner.Instance.PlayFromTime(levelFile, startTime));
         }
         else
         {
-            yield return StartCoroutine(ArrowSpawner.Instance.HandleSpawning(levelFile, 
-                                                                             _bpmBonus));
+            yield return StartCoroutine(ArrowSpawner.Instance.HandleSpawning(levelFile));
         }
             
         
@@ -400,11 +399,6 @@ public class RoundManager : MonoBehaviour
 
         yield return new WaitForSeconds(roundEndDelay);
 
-        if (_applyTempBPMBonus)
-        {
-            _bpmBonus = 0f;
-            _applyTempBPMBonus = false;
-        }
     
         yield return StartCoroutine(EndOfRoundSequence());
     }
@@ -457,27 +451,22 @@ public class RoundManager : MonoBehaviour
         yield return StartCoroutine(HandleEndOfRoundTally());
         yield return StartCoroutine(CurrencyManager.Instance.EndOfRoundSequence());
 
-        runStats.AddRound(roundStats);
+        if(!GameComplete)
+        {
+            _currentLevelIndex++;
+            _currentLevel++;
+        }
 
-        _currentLevelIndex++;
-        _currentLevel++;
-
-        GameStateManager.Instance.SetState(postRoundNextState);
-
-        yield return StartCoroutine(CoroutineHelpers.WaitForJump(GameState.WorldMapViewEnd));
-
-        Debug.Log("Input recieved to continue from world map view end");
+       
+        //yield return StartCoroutine(CoroutineHelpers.WaitForJump(GameState.WorldMapViewEnd, true));
 
        if(GameComplete)
             GameStateManager.Instance.SetState(GameState.GameWin);
         else
-            GameStateManager.Instance.RequestStateChange(GameState.UpgradeSelection);
+        {  
+            GameStateManager.Instance.SetState(postRoundNextState);
+            //GameStateManager.Instance.RequestStateChange(GameState.UpgradeSelection);
+            ScoreManager.Instance.RunStatsTracker.AddRound(ScoreManager.Instance.RoundStatsTracker);
+        }
     }
-
-    public void ApplyTempBPMBonus(float bonus)
-    {
-        _bpmBonus = bonus;
-        _applyTempBPMBonus = true;
-    }   
-
 }

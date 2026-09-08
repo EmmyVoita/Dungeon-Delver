@@ -17,5 +17,7 @@ MonoBehaviour:
   fileName: multiwallhole
   prefab: {fileID: 5786008387265426506, guid: d5ee24ea0287bbb4b836e6c4f327c7d8, type: 3}
   icon: {fileID: 0}
-  description: Bars with holes in them move across the screen in multiple directions.
-    Jump through the holes.
+  stageNumber: 1
+  hasBossOverride: 0
+  description: A series of walls moves in multiple directionds towards the player.
+    Each wall has a hole to pass through.

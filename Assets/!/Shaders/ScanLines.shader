@@ -47,6 +47,7 @@ Shader "ScanLines"
 
                //ScanLines
                 float wave = sin(((uv.y - uv.x) + _Time.y * _Speed) * _ScanlineFrequency);
+                //float wave = sin(((uv.y) + _Time.y * _Speed) * _ScanlineFrequency);
                 //float remappedWave = RemapFloat(wave,-1,1,_ScanlineLowerBound, 1);
                 float scan = step(0, wave);
                 //float scan = smoothstep(_ScanlineLowerBound, 1.0, wave);

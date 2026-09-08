@@ -26,12 +26,15 @@ public class SceneInitializer : MonoBehaviour
     {
         foreach(InitalizeMaterialData data in matData)
         {
+            if(data.mat == null)
+                continue;
+                
             data.mat.SetFloat(data.propertyName,data.propertyValue);
         }
     }
 
     private void ReleaseInputFocus()
     {
-        InputFocusManager.ClearOwner();
+        InputFocusManager.Clear();
     }
 }

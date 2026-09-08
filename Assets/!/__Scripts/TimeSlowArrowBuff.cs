@@ -27,7 +27,7 @@ public class TimeSlowArrowBuff : MonoBehaviour, IArrowEffect
 
         if (!arrow.IsRecoveryArrow)
         {
-            arrow.SetTimeSlowArrow();
+            arrow.SetEmpoweredArrow();
             arrowsRemaining--;
         }
     }

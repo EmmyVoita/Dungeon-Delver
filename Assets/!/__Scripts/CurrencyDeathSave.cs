@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CurrencyDeathSave : IDeathSave
 {
-    public int Priority => 100;
+    public int Priority => 10;
     public bool RemoveAtLevelEnd => _removeAtEndLevel;
 
     private int _healAmount = 1;
@@ -33,8 +33,18 @@ public class CurrencyDeathSave : IDeathSave
         return spent;
     }
 
-    public IDeathSave Clone()
+    public IRuntimeModifier Clone()
     {
         return new CurrencyDeathSave(_healAmount,_cost, _removeAtEndLevel);
+    }
+
+    public void OnActivate()
+    {
+        
+    }
+
+    public void OnDestroy()
+    {
+        
     }
 }

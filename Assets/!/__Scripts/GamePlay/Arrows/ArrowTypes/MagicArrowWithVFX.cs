@@ -10,8 +10,8 @@ public class MagicArrowWithVFX : ArrowBase
     [Header("Additional Flag Colors")]
     [SerializeField] protected string colorCpropertyName = "_ColorC";
     [SerializeField] protected string colorDpropertyName = "_ColorD";
-    [ColorUsage(true, true)][SerializeField] protected Color goldenColorC;
-    [ColorUsage(true, true)][SerializeField] protected Color goldenColorD;
+    [SerializeField] protected Color goldenColorC;
+    [SerializeField] protected Color goldenColorD;
 
 
     protected override void Die(Goal.GoalType goalType = Goal.GoalType.Normal, bool invokeDeathEvent = true, Vector2 hitDirection = default)

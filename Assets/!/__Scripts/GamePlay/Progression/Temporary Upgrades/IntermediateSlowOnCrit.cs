@@ -9,7 +9,7 @@ public class IntermediateSlowOnCrit : UpgradeBase
     public float hold = 0.08f;
     public float easeOut = 0.12f;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{NORMAL_ARROW_MULTIPLIER}", (normalArrowMultiplier-1).ToString("P0"));
@@ -17,6 +17,7 @@ public class IntermediateSlowOnCrit : UpgradeBase
 
     public override void Apply()
     {
+        /*
         var listener = new SlowOnCritListener(
             slowMultiplier,
             easeIn,
@@ -29,5 +30,6 @@ public class IntermediateSlowOnCrit : UpgradeBase
         StatModifierManager.Instance.AddTemporaryModifier(
             new TempNormalArrowMultiplier(normalArrowMultiplier)
         );
+        */
     }
 }

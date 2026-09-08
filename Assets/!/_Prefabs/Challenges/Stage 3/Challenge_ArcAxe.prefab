@@ -116,7 +116,6 @@ MonoBehaviour:
   spawnSound:
     clip: {fileID: 8300000, guid: 5d3221e6416802a489a2278b70768906, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 0.5
     pitch: 1.25
     pitchVariation: 0.1
@@ -136,7 +135,6 @@ MonoBehaviour:
   reverseSound:
     clip: {fileID: 8300000, guid: 26d5a4bc6e09ecb4ca444cd3b3da43f6, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 0.8
     pitchVariation: 0

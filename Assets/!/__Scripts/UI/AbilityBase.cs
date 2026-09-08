@@ -4,18 +4,28 @@ using UnityEngine;
 
 public abstract class AbilityBase : MonoBehaviour
 {
+    public static event Action<int> OnUpgradeCountChanged;
     public event Action<AbilityBase> OnAbilityStarted;
     public event Action<AbilityBase> OnAbilityEnded;
 
     public AbilityData Data { get; private set; }
 
     public bool IsActive {get; private set;}
+    public int UpgradeCount { get; private set; }
 
-    protected readonly List<AbilityUpgradeBase> activeUpgrades = new();
+    [SerializeField] private List<AbilityUpgradeBase> upgradeData;
+    public List<AbilityUpgradeBase> UpgradeData => upgradeData;
+
 
     public virtual void Initialize(AbilityData data)
     {
         Data = data;
+    }
+
+    public void AddUpgrade(int amount = 1)
+    {
+        UpgradeCount += amount;
+        OnUpgradeCountChanged?.Invoke(amount);
     }
 
     protected float GetModifiedDuration()
@@ -54,6 +64,7 @@ public abstract class AbilityBase : MonoBehaviour
         OnAbilityEnded?.Invoke(this);
     }
 
+    /*
     public virtual void ApplyUpgrade(AbilityUpgradeBase upgrade)
     {
         if (upgrade == null)
@@ -62,4 +73,5 @@ public abstract class AbilityBase : MonoBehaviour
         activeUpgrades.Add(upgrade);
         upgrade.ApplyToAbility(this);
     }
+    */
 }

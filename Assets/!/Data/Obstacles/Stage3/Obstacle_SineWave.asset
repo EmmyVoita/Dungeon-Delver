@@ -17,4 +17,5 @@ MonoBehaviour:
   fileName: sinewave
   prefab: {fileID: 3330349871917066309, guid: 75654dedf5ea1394aa4a6630b2fcc424, type: 3}
   icon: {fileID: 0}
+  stageNumber: 3
   description: sine wave

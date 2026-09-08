@@ -28,6 +28,24 @@ public class GoldenArrowManager : MonoBehaviour
 
     private readonly List<IGoldenArrowWorthModifier> _worthModifiers = new();
 
+    private readonly List<IGoldenArrowCatchEffect> _catchEffects = new();
+
+    public void AddCatchEffect(IGoldenArrowCatchEffect effect)
+    {
+        if (effect == null || _catchEffects.Contains(effect))
+            return;
+
+        _catchEffects.Add(effect);
+    }
+
+    public void RemoveCatchEffect(IGoldenArrowCatchEffect effect)
+    {
+        if (effect == null)
+            return;
+
+        _catchEffects.Remove(effect);
+    }
+
 
     private void OnDisable()
     {
@@ -96,6 +114,10 @@ public class GoldenArrowManager : MonoBehaviour
         if (!data.status.HasFlag(ArrowStatus.Golden))
             return;
 
+        foreach(var catchEffect in _catchEffects)
+        {
+            catchEffect.OnGoldenArrowCaught(data);
+        }
   
         CurrencyManager.Instance.AddCurrency(GetGoldenArrowWorth());
 

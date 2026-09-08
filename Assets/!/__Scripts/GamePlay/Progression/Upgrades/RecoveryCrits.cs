@@ -10,7 +10,7 @@ public class RecoveryCrits : UpgradeBase, IActivatableUpgrade
     private bool isActive = false;
     private int currentStreak = 0;
 
-    public override string GetDescription()
+    public override string GetFormattedDescription()
     {
         return descriptionTemplate
             .Replace("{ABILITY_CHARGE_BONUS}", abilityChargeBonus.ToString())

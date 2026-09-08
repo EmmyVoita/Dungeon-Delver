@@ -47,6 +47,9 @@ public class EmpoweredVisualEffect : MonoBehaviour
             effect.SendEvent(playEventName);
         }
         StartCoroutine(StopAndDestroy());
+
+        //SafteyFallback
+        Destroy(transform.root.gameObject, safetyLifetime);
     }
 
     private IEnumerator StopAndDestroy()
@@ -80,6 +83,6 @@ public class EmpoweredVisualEffect : MonoBehaviour
             yield return null;
         }
 
-        Destroy(gameObject);
+        Destroy(transform.root.gameObject);
     }
 }

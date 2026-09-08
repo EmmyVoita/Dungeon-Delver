@@ -5,7 +5,7 @@ public enum GameState
     RoundResultsTally,
     RoundResults,
     RoundResultsExit,
-    UpgradeSelection,
+    RoundReward,
     ItemActivations,
     RoundActive,
     Paused,        // optional

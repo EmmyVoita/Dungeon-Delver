@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b61ca639df6751843ac220a546ac2bc4, type: 3}
+  m_Name: Extra Free Card Pick Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::ExtraFreeCardPickUpgrade
+  upgradeId: 28cd7799-bd4a-4fd1-a57b-3a6402705ab6
+  category: 7
+  requiredUpgrades: []
+  baseOfferWeight: 1
+  _cost: 200
+  _maxStacks: 1
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Free Card Route Upgrade
+  descriptionTemplate: You can now choose {AMOUNT} more free card when you choose
+    the free card route in the world map
+  detailsTemplate: This upgrade does not stack.
+  amount: 1

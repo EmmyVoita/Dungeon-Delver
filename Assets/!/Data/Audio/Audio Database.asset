@@ -66,6 +66,12 @@ MonoBehaviour:
     volume: 0
     pitch: 0
     pitchVariation: 0
+  rerollGain:
+    clip: {fileID: 8300000, guid: 42ae7e3e5b598c848bb49f36ab3c1202, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0.1
   ambienceLoop:
     clip: {fileID: 0}
     channel: 0
@@ -84,3 +90,20 @@ MonoBehaviour:
     volume: 1
     pitch: 1
     pitchVariation: 0
+  arrowSounds:
+  - arrowHitSound: {fileID: 8300000, guid: 4996e6b9ee656364f852f1eac55c2847, type: 3}
+    name: Tap
+    normalHitPitch: 2
+    critcalHitPitch: 2.5
+  - arrowHitSound: {fileID: 8300000, guid: f08e4e684365b2941ba5fb373264dd6f, type: 3}
+    name: Knock
+    normalHitPitch: 1.8
+    critcalHitPitch: 2.1
+  - arrowHitSound: {fileID: 8300000, guid: fef65794fbfc1754197e5acab64dbbfd, type: 3}
+    name: Clink
+    normalHitPitch: 1
+    critcalHitPitch: 1
+  - arrowHitSound: {fileID: 8300000, guid: cb6cce2a140f264439d10eac0fbe217c, type: 3}
+    name: Blip
+    normalHitPitch: 1.2
+    critcalHitPitch: 1.4

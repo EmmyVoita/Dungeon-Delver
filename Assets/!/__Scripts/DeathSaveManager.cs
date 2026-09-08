@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class DeathSaveManager : MonoBehaviour
+public class DeathSaveManager : RuntimeModifierManager<IDeathSave>
 {
     public static DeathSaveManager Instance;
 
@@ -11,18 +12,6 @@ public class DeathSaveManager : MonoBehaviour
     [SerializeField] private ScreenShakeRequest screenShakeData;
     [SerializeField] private SoundEffect procSoundEffect;
     [SerializeField] private GameObject procEffect;
-
-
-    private bool _initialized;
-    private List<IDeathSave> _deathSaves;
-    private List<IDeathSave> _renewingDeathSaves;
-
-
-    private void OnDisable()
-    {
-        GameStateManager.OnStateChanged -= HandleStateChanged;
-        Player.OnPreDamageTaken -= HandleDamageTaken;
-    }
 
     private void Awake()
     {
@@ -33,69 +22,25 @@ public class DeathSaveManager : MonoBehaviour
         }
 
         Instance = this;
-
-        _deathSaves = new();
-        _renewingDeathSaves = new();
     }
 
-    private void Initialize()
+
+
+    protected override void Unsubscribe()
     {
-        if (_initialized)
-            return;
+        Player.OnPreDamageTaken -= HandleDamageTaken;
+        base.Unsubscribe();
+    }
 
-        _initialized = true;
-
-        GameStateManager.OnStateChanged += HandleStateChanged;
+    protected override void Subscribe()
+    {
         Player.OnPreDamageTaken += HandleDamageTaken;
     }
 
 
-    // Remove temporary at the end of the round;
-    private void HandleStateChanged(GameState previousState, GameState newState)
-    {
-        if(newState == GameStateManager.LevelStartState)
-        {
-            foreach(IDeathSave item in _renewingDeathSaves)
-            {
-                Debug.Log("Adding renewing death save item");
-                _deathSaves.Add(item.Clone());
-            }
-        }
-
-        if(newState == GameStateManager.LevelEndState)
-        {
-            RemoveTemporary();
-        }
-    }
-
-    public void RegisterRenewing(IDeathSave upgrade)
-    {
-        Initialize();
-
-        _renewingDeathSaves.Add(upgrade);
-
-        Debug.Log($"Adding death save upgrade \n"+
-                  $"Priority => {upgrade.Priority} \n" +
-                  $"Remove at level end => {upgrade.RemoveAtLevelEnd} \n");
-    }
-
-
-    public void Register(IDeathSave upgrade)
-    {
-        Initialize();
-
-        _deathSaves.Add(upgrade);
-
-        Debug.Log($"Adding death save upgrade \n"+
-                  $"Priority => {upgrade.Priority} \n" +
-                  $"Remove at level end => {upgrade.RemoveAtLevelEnd} \n");
-
-    }
 
     private void  HandleDamageTaken(int damage)
     {
-        Debug.Log($"Death Saves Active: {_deathSaves.Count}");
-
         if(!(Player.Instance.Health - damage <= 0))
             return;
 
@@ -111,42 +56,23 @@ public class DeathSaveManager : MonoBehaviour
 
     private bool PullDeathSave(int damage)
     {
-        if(_deathSaves.Count <= 0)
+        if(activeModifiers.Count <= 0)
             return false;
 
-        _deathSaves.Sort((x,y) => y.Priority.CompareTo(x.Priority));
+        activeModifiers.Sort((x,y) => y.Modifier.Priority.CompareTo(x.Modifier.Priority));
 
-        for(int i = 0; i < _deathSaves.Count; i++)
+        for(int i = 0; i < activeModifiers.Count; i++)
         {
-            IDeathSave deathSave = _deathSaves[i];
+            IDeathSave deathSave = activeModifiers[i].Modifier;
 
             if(!deathSave.CanPreventDeath(damage))
                 continue;
 
             deathSave.PreventDeath(damage);
-            _deathSaves.RemoveAt(i);
+            activeModifiers.RemoveAt(i);
             return true;
         }
 
         return false;
     }
-
-    private void RemoveTemporary()
-    {
-        List<IDeathSave> savesToRemove = new();
-
-        foreach(IDeathSave item in _deathSaves)
-        {
-            if(item.RemoveAtLevelEnd)
-            {
-                savesToRemove.Add(item);
-            }
-        }
-
-        foreach(IDeathSave item in savesToRemove)
-        {
-            _deathSaves.Remove(item);
-        }
-    }
-    
 }

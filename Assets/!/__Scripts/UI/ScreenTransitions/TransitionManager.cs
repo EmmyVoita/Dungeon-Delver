@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -12,6 +14,8 @@ public class TransitionManager : MonoBehaviour
     public System.Action OnTransitionComplete;
 
     [SerializeField] private List<GameStateTransitionSequence> sequences;
+    [SerializeField] private TransitionStep shutterTransitionOpen;
+    [SerializeField] private TransitionStep shutterTransitionClose;
 
     //[SerializeField] private string transitionProperty = "_WipeTransitionValue";
     
@@ -68,10 +72,10 @@ public class TransitionManager : MonoBehaviour
         }
     }
 
+ 
+    
 
-
-
-    private void PlaySequence(GameStateTransitionSequence sequence)
+    private void PlaySequence(GameStateTransitionSequence sequence, Action halfWayCallback = null)
     {
         if (isPlaying) return;
         isPlaying = true;
@@ -91,7 +95,10 @@ public class TransitionManager : MonoBehaviour
                 transitionMaterial.SetFloat(stepCopy.transitionProperty, currentValue);
 
                 if (stepCopy.triggerStateSwitch)
+                {
+                    halfWayCallback?.Invoke();
                     GameStateManager.Instance.SetState(pendingState);
+                }
             });
 
             currentSequence.Append(
@@ -110,6 +117,72 @@ public class TransitionManager : MonoBehaviour
             if (stepCopy.holdTime > 0)
                 currentSequence.AppendInterval(stepCopy.holdTime);
         }
+
+        currentSequence.OnComplete(() =>
+        {
+            isPlaying = false;
+            OnTransitionComplete?.Invoke();
+        });
+    }
+
+
+    // Basic Shutter open and close
+    //--------------------------------------------------------------------------------------
+    public IEnumerator PlayOpenShutter()
+    {
+        if (isPlaying)
+            yield break;
+
+        PlayTransitionStepSequence(shutterTransitionOpen);
+
+        yield return new WaitUntil(() => !isPlaying);
+    }
+
+    public IEnumerator PlayCloseShutter()
+    {
+        if (isPlaying)
+            yield break;
+
+        PlayTransitionStepSequence(shutterTransitionClose);
+
+        yield return new WaitUntil(() => !isPlaying);
+    }
+
+    private void PlayTransitionStepSequence(TransitionStep transitionStep)
+    {
+        if (isPlaying) return;
+        isPlaying = true;
+
+        currentSequence?.Kill();
+        currentSequence = DOTween.Sequence();
+
+
+        var stepCopy = transitionStep;
+
+        currentSequence.AppendCallback(() =>
+        {
+            transitionMaterial = stepCopy.material;
+
+            currentValue = stepCopy.startValue;
+            transitionMaterial.SetFloat(stepCopy.transitionProperty, currentValue);
+        });
+
+        currentSequence.Append(
+            DOTween.To(
+                () => currentValue,
+                x =>
+                {
+                    currentValue = x;
+                    transitionMaterial.SetFloat(stepCopy.transitionProperty, currentValue);
+                },
+                stepCopy.targetValue,
+                stepCopy.duration
+            ).SetEase(stepCopy.ease)
+        );
+
+        if (stepCopy.holdTime > 0)
+            currentSequence.AppendInterval(stepCopy.holdTime);
+    
 
         currentSequence.OnComplete(() =>
         {

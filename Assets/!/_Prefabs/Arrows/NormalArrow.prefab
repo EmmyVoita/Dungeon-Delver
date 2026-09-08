@@ -116,13 +116,17 @@ MonoBehaviour:
   baseMaterial: {fileID: 2100000, guid: 82c78b02c81a1e040b2596ee2105c5f4, type: 2}
   colorApropertyName: _ColorA
   colorBpropertyName: _ColorB
-  goldenColorA: {r: 1.7568628, g: 0.36078432, b: 0.09411765, a: 1}
-  goldenColorB: {r: 1.8490566, g: 0.7805711, b: 0.13082945, a: 1}
+  goldenColorA: {r: 0.82745105, g: 0.5686275, b: 0.34117648, a: 1}
+  goldenColorB: {r: 1, g: 0.8686299, b: 0.2971698, a: 1}
+  empoweredColorA: {r: 0.43137255, g: 0.60784316, b: 0.23921569, a: 1}
+  empoweredColorB: {r: 0.9137255, g: 1, b: 0.5411765, a: 1}
   recoveryColorA: {r: 0.012014951, g: 0.09433961, b: 0.03516876, a: 1}
   recoveryColorB: {r: 0.45112416, g: 1.8443025, b: 0.45112416, a: 1}
-  arrowHitSound: {fileID: 8300000, guid: f08e4e684365b2941ba5fb373264dd6f, type: 3}
-  normalHitPitch: 1.8
-  criticalHitPitch: 2.1
+  slowFactor: 0.7
+  slowDuration: 2
+  arrowHitSound: {fileID: 8300000, guid: 4996e6b9ee656364f852f1eac55c2847, type: 3}
+  normalHitPitch: 2
+  criticalHitPitch: 2.5
   directionalPitchFactor: 0
   directionalEQStrength: 0.5
   killEffect: {fileID: 6150066417496139723, guid: 9fb52edbed03ad74bab4878615f4c202, type: 3}

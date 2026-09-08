@@ -5,7 +5,7 @@ using UnityEngine;
 public class HealOptionUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI healOptionText;
-    [SerializeField] private GameState showState = GameState.UpgradeSelection;
+    [SerializeField] private GameState showState = GameState.RoundReward;
 
     private void OnEnable()
     {

@@ -2,11 +2,13 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 using System;
+using UnityEngine.UI;
 
 public class TextTypewriter : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] public TMP_Text textComponent;
+    [SerializeField] public RectTransform layoutRoot;
 
 
     [Header("Text Settings")]   
@@ -26,6 +28,7 @@ public class TextTypewriter : MonoBehaviour
 
     [Header("Behaviour")]
     [SerializeField] private bool stopOnPause = false;
+    [SerializeField] private bool rebuildLayout = false;
 
 
     
@@ -54,6 +57,18 @@ public class TextTypewriter : MonoBehaviour
         OverlayManager.OnOverlayChanged -= HandleOverlayChanged;
     }
 
+    private void RebuildLayout()
+    {
+        textComponent.ForceMeshUpdate();
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(
+            textComponent.rectTransform
+        );
+
+        if(layoutRoot)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(layoutRoot);
+    }
+
     private void HandleOverlayChanged(OverlayState previousState, OverlayState newState)
     {
         if(!stopOnPause) return;
@@ -68,6 +83,13 @@ public class TextTypewriter : MonoBehaviour
             _paused = false;
     }
 
+    public void StopTyping(bool clearText)
+    {
+        StopAllCoroutines();
+        if(clearText)
+            textComponent.text = "";
+    }
+
 
     // ------------------------------------------------------------
     // Start typing new text
@@ -79,6 +101,9 @@ public class TextTypewriter : MonoBehaviour
         textComponent.text = castToUpperCase ? newText.ToUpper() : newText;
         _typingCoroutine = StartCoroutine(TypeText(onComplete));
         _paused = false;
+
+        if(rebuildLayout)
+            RebuildLayout();
     }
 
     // ------------------------------------------------------------
@@ -93,6 +118,9 @@ public class TextTypewriter : MonoBehaviour
         _textInfo = textComponent.textInfo;
 
         textComponent.maxVisibleCharacters = _textInfo.characterCount;
+
+        if(rebuildLayout)
+            RebuildLayout();
     }
 
     // ------------------------------------------------------------
@@ -107,6 +135,9 @@ public class TextTypewriter : MonoBehaviour
         _textInfo = textComponent.textInfo;
 
         textComponent.maxVisibleCharacters = _textInfo.characterCount;
+
+        if(rebuildLayout)
+            RebuildLayout();
     }
 
     // ------------------------------------------------------------

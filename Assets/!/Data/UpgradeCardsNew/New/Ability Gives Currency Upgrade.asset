@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84ef780df866a0643aa6a2a65908b7aa, type: 3}
+  m_Name: Ability Gives Currency Upgrade
+  m_EditorClassIdentifier: Assembly-CSharp::AbilityGivesCurrencyUpgrade
+  upgradeId: 5656cbf3-54d7-4926-9a19-268cd349c31a
+  category: 3
+  requiredUpgrades: []
+  baseOfferWeight: 1
+  _cost: 200
+  _maxStacks: 999
+  duration: 0
+  cardDecoration: {fileID: 0}
+  cardDecorationMaterial: {fileID: 0}
+  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  iconMaterial: {fileID: 0}
+  displayName: Ability Gives Currency
+  descriptionTemplate: If you use your ability within {TIMER} seconds of reaching
+    full ability charge, gain {CURRENCY_AMOUNT}
+  detailsTemplate: 
+  currencyAmount: 20
+  timer: 3

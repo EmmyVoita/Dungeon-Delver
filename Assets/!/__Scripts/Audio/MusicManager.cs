@@ -25,7 +25,8 @@ public class MusicManager : MonoBehaviour
     private double _scaledTime;
     private double _lastDSPTime;
 
-    private Tween fadeTween;
+    private Tween fadeInTween;
+    private Tween fadeOutTween;
     private Coroutine startRoutine;
 
     private bool isPaused = false;
@@ -45,15 +46,15 @@ public class MusicManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        if (GameSessionBootstrap.Config != null &&
-            GameSessionBootstrap.Config.Mode == GameMode.LevelEditorTest)
-        {
-            mainClip = LevelEditorTestMusic;
-        }
 
         mainSource.playOnAwake = false;
         mainSource.volume = 0f;
         mainSource.clip = mainClip;
+    }
+
+    private void Start()
+    {
+        
     }
 
     private void OnEnable()
@@ -74,6 +75,12 @@ public class MusicManager : MonoBehaviour
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (GameSessionBootstrap.Config != null &&
+            GameSessionBootstrap.Config.Mode == GameMode.LevelEditorTest)
+        {
+            mainClip = LevelEditorTestMusic;
+        }
+
         ResetTiming();
     }
 
@@ -127,7 +134,7 @@ public class MusicManager : MonoBehaviour
     {
         double currentDSP = AudioSettings.dspTime;
 
-        // 🔒 Prevent large jumps when paused
+        // Prevent large jumps when paused
         if (isPaused)
         {
             _lastDSPTime = currentDSP;
@@ -139,7 +146,6 @@ public class MusicManager : MonoBehaviour
 
         float scale = TimeManager.Instance.GetCurrentScale();
 
-        // 🎯 THIS is the important line
         _scaledTime += dspDelta * scale;
     }
 
@@ -154,11 +160,11 @@ public class MusicManager : MonoBehaviour
         _lastDSPTime = AudioSettings.dspTime;
         
 
-        fadeTween?.Kill();
+        fadeInTween?.Kill();
+        fadeOutTween?.Kill();
 
         mainSource.Stop();
-        //mainSource.enabled = false;
-        //mainSource.enabled = true;
+
 
         float editorOffset = GameSessionBootstrap.Config.LevelEditorStartTime;
 
@@ -178,10 +184,10 @@ public class MusicManager : MonoBehaviour
 
         mainSource.PlayScheduled(RoundManager.Instance.RoundStartDSP);
 
-        fadeTween = DOTween.To(
+        fadeInTween = DOTween.To(
             () => mainSource.volume,
             v => mainSource.volume = v,
-            AudioSettingsManager.Instance.musicVolume,
+            AudioSettingsManager.GetVolume(AudioChannel.Music),
             fadeInDuration
         );
     }
@@ -191,9 +197,9 @@ public class MusicManager : MonoBehaviour
         if (!IsMainPlaying)
             return;
 
-        fadeTween?.Kill();
+        fadeOutTween?.Kill();
 
-        fadeTween = DOTween.To(
+        fadeOutTween = DOTween.To(
             () => mainSource.volume,
             v => mainSource.volume = v,
             0f,
@@ -203,7 +209,8 @@ public class MusicManager : MonoBehaviour
 
     private void StopImmediate()
     {
-        fadeTween?.Kill();
+        fadeInTween?.Kill();
+        fadeOutTween?.Kill();
 
         if (startRoutine != null)
             StopCoroutine(startRoutine);
@@ -227,7 +234,15 @@ public class MusicManager : MonoBehaviour
             return;
 
         isPaused = false;
-        mainSource.UnPause();
+
+        fadeInTween?.Kill();
+        fadeInTween = null;
+
+        if (mainSource != null)
+        {
+            mainSource.volume = AudioSettingsManager.GetVolume(AudioChannel.Music);
+            mainSource.UnPause();
+        }
     }
 
     public void ResetTiming()

@@ -12,9 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e089aa6dc258cec4389cde27f8242585, type: 3}
   m_Name: Obstacle_OrbEncounter
   m_EditorClassIdentifier: 
-  displayName: Orb Encounter
+  displayName: Bomb Barrage
   textColor: {r: 0.7176471, g: 0.9411765, b: 0.5372549, a: 1}
   fileName: orbencounter
   prefab: {fileID: 1834395925374464629, guid: 51f3df1ce42582f428c7af1f519fc0ac, type: 3}
   icon: {fileID: 0}
-  description: 
+  stageNumber: 3
+  hasBossOverride: 0
+  description: Bombs periodically spawn around the player. When the bombs explode,
+    they spawn a ring of fireballs that track towards the player. The spawn rates
+    speeds up over time.

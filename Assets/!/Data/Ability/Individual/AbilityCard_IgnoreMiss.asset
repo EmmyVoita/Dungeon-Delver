@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilityType: 8
   baseCost: 15
-  scoreRequirement: 50000
+  scoreRequirement: 99999999
   baseDuration: 1.2
   abilityName: Flow Shield
   description: 'A temporary shield that keeps your combo from being broken. '
