@@ -7,7 +7,7 @@ public class HighComboUnlockRequirement : RunModifierUnlockRequirement
 
     public override string GetRequirementRatioText()
     {
-        return $"{ScoreManager.Instance.HighestCombo().ToString("N0")}/{comboRequirement.ToString("N0")}";
+        return $"{RunHistoryManager.Instance.HighestCombo.ToString("N0")}/{comboRequirement.ToString("N0")}";
     }
 
     public override string GetUnlockDescriptionText()
@@ -17,6 +17,6 @@ public class HighComboUnlockRequirement : RunModifierUnlockRequirement
 
     public override bool IsUnlocked()
     {
-        return ScoreManager.Instance.HighestCombo() >= comboRequirement;
+        return RunHistoryManager.Instance.HighestCombo >= comboRequirement;
     }
 }

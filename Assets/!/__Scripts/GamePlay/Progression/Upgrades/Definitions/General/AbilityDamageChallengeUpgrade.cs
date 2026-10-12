@@ -9,7 +9,7 @@ public class AbilityDamageChallengeUpgrade : UpgradeBase, IAbilityDamageModifier
     [SerializeField] private int additionalAbilityDamage = 1;
     [SerializeField] private int currencyAmount = 5000;
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
         replacements["{ABILITY_DAMAGE}"] =
             $"<color=#{UIColors.ToHex(UIColors.Red)}>" +
@@ -23,7 +23,7 @@ public class AbilityDamageChallengeUpgrade : UpgradeBase, IAbilityDamageModifier
             $"<color=#{UIColors.ToHex(UIColors.Green)}>" +
             $"{currencyAmount}</color>";
 
-        base.AddReplacements(replacements);
+        base.AddReplacements(replacements, isInventory);
     }
 
     public override void Apply()

@@ -12,30 +12,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b37e31f9da885b439050edc5f9d08ac, type: 3}
   m_Name: Audio Database
   m_EditorClassIdentifier: Assembly-CSharp::AudioDatabase
-  navigate:
+  navigateMajor:
     clip: {fileID: 8300000, guid: f08e4e684365b2941ba5fb373264dd6f, type: 3}
     channel: 2
     volume: 1
-    pitch: 2.3
-    pitchVariation: 0.05
-  select:
-    clip: {fileID: 8300000, guid: 76185870d18f62d4aa7d71461be9be05, type: 3}
+    pitch: 2.5
+    pitchVariation: 0
+  navigateMinor:
+    clip: {fileID: 8300000, guid: cb6cce2a140f264439d10eac0fbe217c, type: 3}
     channel: 2
     volume: 1
-    pitch: 3.5
-    pitchVariation: 0
+    pitch: 1
+    pitchVariation: 0.1
+  select:
+    clip: {fileID: 8300000, guid: 312a6702637c8314181d78536464a7ce, type: 3}
+    channel: 2
+    volume: 0.8
+    pitch: 1.5
+    pitchVariation: 0.05
   back:
-    clip: {fileID: 8300000, guid: 126f92ff01dd9d5489f6049b715b16da, type: 3}
+    clip: {fileID: 8300000, guid: bdaf45b76568919449310a0868c6077f, type: 3}
     channel: 2
     volume: 1
     pitch: 0.9
     pitchVariation: 0
   negative:
-    clip: {fileID: 8300000, guid: 39cf5373bf5e6c94db1eb15f30fb7ed7, type: 3}
+    clip: {fileID: 8300000, guid: bdaf45b76568919449310a0868c6077f, type: 3}
     channel: 2
     volume: 1
-    pitch: 4
-    pitchVariation: 0.1
+    pitch: 0.9
+    pitchVariation: 0.05
   purchase:
     clip: {fileID: 8300000, guid: eba8394a383f8f6448d5697739119d07, type: 3}
     channel: 2

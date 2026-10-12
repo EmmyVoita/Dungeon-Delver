@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Upgrades/CurrencyDamageSaveUpgrade")]
@@ -13,9 +14,10 @@ public class CurrencyDamageSaveUpgrade : CurrencyWeightedUpgradeBase
         DamageSaveManager.Instance.RegisterRenewing(new CurrencyDamageSave(currencyRequired, true, shieldPrefab), this);
     }
 
-    public override string GetFormattedDescription()
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        return descriptionTemplate
-        .Replace("{COST}", $"<color=#{UIColors.ToHex(UIColors.Red)}>${currencyRequired}</color>");
+        replacements["{REQUIRED_COST}"] = $"<color=#{UIColors.ToHex(UIColors.Red)}>${currencyRequired}</color>";
+
+        base.AddReplacements(replacements, isInventory);
     }
 }

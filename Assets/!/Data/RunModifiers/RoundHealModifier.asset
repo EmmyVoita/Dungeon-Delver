@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: RoundHealModifier
   m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
   displayName: Regen
-  description: At the end of each round heal for +1 health.
-  icon: {fileID: -1477887677, guid: 88d76b0b15dabe949804a049add3668d, type: 3}
+  description: At the end of each round heal for [VALUE] health.
+  icon: {fileID: 577630183, guid: 058c59b587e10dc418e771e8c4ffb530, type: 3}
   summaryName: Round Heal
-  summaryIcon: {fileID: -1477887677, guid: 88d76b0b15dabe949804a049add3668d, type: 3}
+  summaryIcon: {fileID: 1292964493, guid: cf8e3d9803c43f648bec853b2993de62, type: 3}
   type: 7
   category: 0
   minValue: 0
-  maxValue: 3
+  maxValue: 2
   step: 1
   scoreMultiplierPerStep: 0
   valueSuffix: 
+  unlockRequirement: {fileID: 0}

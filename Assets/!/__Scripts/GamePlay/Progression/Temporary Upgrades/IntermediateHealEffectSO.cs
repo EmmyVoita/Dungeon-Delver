@@ -17,7 +17,7 @@ public class IntermediateHealEffectSO : UpgradeBase
         }
     }
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{HEAL_AMOUNT}", immediateHealAmount.ToString("N0"))

@@ -37,15 +37,13 @@ public class RotatingLinesLaneDodger : ChallengeBase
     private float _elapsedTime = 0f;
 
 
-    void Start()
+    void Awake()
     {
         _spawnObjs = new List<GameObject>();
         _rowAmchors = new List<Transform>();
         _updateMovement = false;
         _rotationSpeed = 0f;
         _elapsedTime = 0f;
-
-        Begin();
     }
 
     void Setup()

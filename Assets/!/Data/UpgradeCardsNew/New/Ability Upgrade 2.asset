@@ -18,7 +18,7 @@ MonoBehaviour:
   - upgrade: {fileID: 11400000, guid: 60e006e4db3f46c40a1599853909f04a, type: 2}
     minimumStacks: 1
   baseOfferWeight: 1
-  _cost: 200
+  _cost: 300
   _maxStacks: 1
   duration: 0
   cardDecoration: {fileID: 0}

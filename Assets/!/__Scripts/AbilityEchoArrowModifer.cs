@@ -16,7 +16,7 @@ public class AbilityEchoArrowModifier : IArrowSpawnEffect
         //ArrowSpawnManager.Instance.AddSpawnEffect(this);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         //ArrowSpawnManager.Instance.RemoveSpawnEffect(this);
     }

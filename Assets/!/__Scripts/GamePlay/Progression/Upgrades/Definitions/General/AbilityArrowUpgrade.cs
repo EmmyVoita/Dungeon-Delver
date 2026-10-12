@@ -7,13 +7,13 @@ public class AbilityArrowUpgrade : UpgradeBase
 {
     [SerializeField] private float spawnChance = 0.01f;
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
         replacements["{SPAWN_CHANCE}"] =
             $"<color=#{UIColors.ToHex(UIColors.Green)}>" +
             $"{spawnChance:P0}</color>";
         
-        base.AddReplacements(replacements);
+        base.AddReplacements(replacements, isInventory);
     }
 
     public override void Apply()

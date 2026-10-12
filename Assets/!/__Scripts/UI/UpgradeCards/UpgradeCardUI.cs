@@ -68,6 +68,22 @@ public class UpgradeCardUI : MonoBehaviour, IPointerClickHandler
     private UpgradeCategoryDatabase _categoryDatabase;
     private int _stack;
 
+    private void OnEnable()
+    {
+        ShopManager.OnCardPurchased += HandleCardPurchased;
+        RefreshUI();
+    }
+
+    private void OnDisable()
+    {
+        ShopManager.OnCardPurchased -= HandleCardPurchased;
+    }
+
+    private void HandleCardPurchased(UpgradeBase upgradeBase)
+    {
+        RefreshUI();
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button != PointerEventData.InputButton.Left)
@@ -97,7 +113,7 @@ public class UpgradeCardUI : MonoBehaviour, IPointerClickHandler
 
     private void Update()
     {
-   
+        
     }
 
 
@@ -125,21 +141,38 @@ public class UpgradeCardUI : MonoBehaviour, IPointerClickHandler
 
   
     // -------------------------
-    public string GetDescription() => descriptionText != null ? descriptionText : "";
+    public string GetDescription(bool isInventory = false) => Base != null ? Base.GetDescription(isInventory) : "";
 
     public void Setup(UpgradeBase option, UpgradeCategoryDatabase database, bool useCanAppear = false)
     {
         _categoryDatabase = database;
         _stack = 1;
 
+        Base = option;
+
+        RefreshUI();
+
+        
+
+        if(!Base.CanAppear() && useCanAppear)
+            coverRect.gameObject.SetActive(true);
+        else
+            coverRect.gameObject.SetActive(false);
+    }
+
+    private void RefreshUI()
+    {
+        if(Base == null)
+            return;
+
         foreach(Image iconImage in subIconImages)
         {
             if (iconImage != null)
             {
-                iconImage.sprite = option.GetCategoryIcon(_categoryDatabase);
+                iconImage.sprite = Base.GetCategoryIcon(_categoryDatabase);
 
                 if(iconImage.material == null)
-                    iconImage.material = option.iconMaterial;
+                    iconImage.material = Base.iconMaterial;
             }
 
             if (iconImage != null && iconImage.material != null)
@@ -150,11 +183,11 @@ public class UpgradeCardUI : MonoBehaviour, IPointerClickHandler
             }
         }
 
-        if (mainIconImage != null && option.centerIcon != null)
+        if (mainIconImage != null && Base.CenterIcon != null)
         {
-            mainIconImage.sprite = option.centerIcon;
+            mainIconImage.sprite = Base.CenterIcon;
             mainIconImage.SetNativeSize();
-            mainIconImage.material = option.iconMaterial;
+            mainIconImage.material = Base.iconMaterial;
         }
 
         if (mainIconImage != null && mainIconImage.material != null)
@@ -164,33 +197,26 @@ public class UpgradeCardUI : MonoBehaviour, IPointerClickHandler
             mainIconImage.material = mat;
         }
 
-        if(cardDecorationImage != null && option.cardDecoration != null)
+        if(cardDecorationImage != null && Base.cardDecoration != null)
         {
-            cardDecorationImage.sprite = option.cardDecoration;
+            cardDecorationImage.sprite = Base.cardDecoration;
             
-            if(option.cardDecorationMaterial != null)
+            if(Base.cardDecorationMaterial != null)
             {
-                Material mat = Instantiate(option.cardDecorationMaterial);
+                Material mat = Instantiate(Base.cardDecorationMaterial);
                 _runtimeIconMaterials.Add(mat);
                 cardDecorationImage.material = mat;
             }
         }
         
-        descriptionText = option.GetDescription();
-
-        Base = option;
-
-        if(!Base.CanAppear() && useCanAppear)
-            coverRect.gameObject.SetActive(true);
-        else
-            coverRect.gameObject.SetActive(false);
+        descriptionText = Base.GetDescription();
     }
 
-    public void ShowDrawPercentage()
+    public void ShowDrawPercentage(UpgradeCategory upgradeCategory)
     {
         stackBadgePanel.gameObject.SetActive(true);
 
-        float totalWeight = ShopManager.Instance.GetTotalDrawPoolWeight();
+        float totalWeight = ShopManager.Instance.GetTotalDrawPoolWeight(upgradeCategory);
 
         if (totalWeight <= 0f)
         {

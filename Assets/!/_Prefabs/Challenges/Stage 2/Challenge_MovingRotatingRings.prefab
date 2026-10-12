@@ -163,8 +163,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3da55463a36a704cbb067cc69d9ff88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
+  registerWithManager: 1
   priority: 1
   controlMode: 2
+  childChallenges: []
+  addCanvasPopup: 1
   listenForBossActive: 1
   lifetimeMode: 2
   switchPlayerState: 1
@@ -174,13 +177,13 @@ MonoBehaviour:
   shootSoundEffect:
     clip: {fileID: 8300000, guid: 35f2087f655e83240b4bfa7e50a59852, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
-  spawnDistance: 7
-  spawnInterval: 1.5
+  spawnDistance: 6.2
+  spawnInterval: 1.4
   spawnCount: 4
+  fireAction: 6
   minFireDelay: 0.1
   unregisterDelay: 8
   directions:
@@ -234,8 +237,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cdfaa969cdcf1a46a748c762c879784, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RingFormationSpawner
+  registerWithManager: 1
   priority: 0
   controlMode: 1
+  childChallenges:
+  - {fileID: 6708980072396151544}
   rotationPattern: 0
   ringPrefab: {fileID: 5685954767897672649, guid: 0702ad5d007e5684b84ecfd93a85f204, type: 3}
   ringCount: 3

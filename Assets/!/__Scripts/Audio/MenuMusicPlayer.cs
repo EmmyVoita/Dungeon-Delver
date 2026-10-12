@@ -14,6 +14,7 @@ public class MenuMusicPlayer : MonoBehaviour
     [Header("References")]
     [SerializeField] private AudioSource source;
     [SerializeField] private AudioClip menuMusic;
+    [SerializeField] private float basePitch = 1.0f;
 
     [SerializeField] private float fadeOutDuration = 1f;
     [SerializeField] private float fadeInDuration = 1f;
@@ -64,7 +65,7 @@ public class MenuMusicPlayer : MonoBehaviour
     private void HandleTimeScaleChanged(float scale)
     {
         if (source != null)
-            source.pitch = scale;
+            source.pitch = scale * basePitch;
     }
 
     private void HandleVolumeUpdated()

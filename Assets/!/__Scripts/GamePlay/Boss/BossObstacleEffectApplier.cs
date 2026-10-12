@@ -39,6 +39,7 @@ public class BossObstacleEffectApplier : MonoBehaviour
     private void ApplyToObstacle(GameObject obstacle)
     {
         
+        /*
         var shooter = obstacle.GetComponentsInChildren<WallShooter>();
         if (shooter != null)
         {
@@ -48,6 +49,7 @@ public class BossObstacleEffectApplier : MonoBehaviour
                     s.Begin();
             }
         }
+        */
 
         var fallingBreakables = obstacle.GetComponentsInChildren<FallingBreakableSpawner>();
         if(fallingBreakables != null)

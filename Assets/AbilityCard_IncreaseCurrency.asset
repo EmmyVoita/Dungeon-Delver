@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3f6a0e3cd052a94787e24cf68a5e06f, type: 3}
+  m_Name: AbilityCard_IncreaseCurrency
+  m_EditorClassIdentifier: 
+  abilityType: 10
+  baseCost: 30
+  scoreRequirement: 500000
+  baseDuration: 5
+  abilityName: Gold Maker
+  description: 'Double your currency gain by <color=#6EE68C>50%</color> for {DURATION}
+    seconds '
+  iconData: {fileID: 11400000, guid: a44c9a3a88f99ee4ba43a83c90355908, type: 2}
+  cardBackground: {fileID: 0}
+  iconScale: 1.75
+  activationSound:
+    clip: {fileID: 8300000, guid: ed5fd421ddeebc149a27ede4450dac66, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1.5
+    pitchVariation: 0
+  deactivateSound:
+    clip: {fileID: 8300000, guid: ed5fd421ddeebc149a27ede4450dac66, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0
+  abilityPrefab: {fileID: 6061379434939344847, guid: dcb80b6f0a7f51740aee7865a00a3639, type: 3}

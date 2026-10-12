@@ -1,6 +1,7 @@
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class FallingBreakable : MonoBehaviour, IShakeScreen
 {
@@ -35,6 +36,17 @@ public class FallingBreakable : MonoBehaviour, IShakeScreen
     public float magnitude = 0.4f;
     public float duration = 0.15f;
 
+    [Header("Speed Boost")]
+    [SerializeField] private Vector3 targetPos;
+    [SerializeField] private float boostDistance = 3f;
+    [SerializeField] private float boostedMoveSpeed = 4f;
+    [SerializeField] private float accelerationDuration = 0.3f;
+
+    [SerializeField] private VisualEffect boostEffect;
+    [SerializeField] private SoundEffect boostSound;
+
+    private bool hasBoosted;
+
 
     private Tween activeShake;
     private Vector3 basePosition;
@@ -55,11 +67,46 @@ public class FallingBreakable : MonoBehaviour, IShakeScreen
         health = maxHealth;
         basePosition = shakeTransform.localPosition;
         notBroken = true;
+        if(boostEffect)
+            boostEffect.Stop();
     }
 
     void Update()
     {
+        CheckForSpeedBoost();
+
         transform.position += transform.up * moveSpeed * Time.deltaTime;
+    }
+
+    private void CheckForSpeedBoost()
+    {
+        if (hasBoosted)
+            return;
+
+        float distance = Vector2.Distance(transform.position, targetPos);
+
+        if (distance <= boostDistance)
+        {
+            StartSpeedBoost();
+        }
+    }
+
+    private void StartSpeedBoost()
+    {
+        hasBoosted = true;
+
+        AudioHelpers.PlaySoundEffect(boostSound, transform.position);
+
+        if(boostEffect)
+        boostEffect.Play();
+
+        DOTween.To(
+            () => moveSpeed,
+            value => moveSpeed = value,
+            boostedMoveSpeed,
+            accelerationDuration
+        )
+        .SetEase(Ease.InQuad);
     }
 
     private void ShakeBasedOnHealth()

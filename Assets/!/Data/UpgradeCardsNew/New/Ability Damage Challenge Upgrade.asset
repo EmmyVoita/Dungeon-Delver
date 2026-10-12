@@ -24,12 +24,10 @@ MonoBehaviour:
   centerIcon: {fileID: 21300000, guid: d4e5253fe91a3144096f856bc68e1c25, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Energy Leak
-  descriptionTemplate: 'Gain {CURRENCY_AMOUNT} now, and lose damage {ABILITY_DAMAGE}
-    ability charge when you take damage. If you don''t have enough ability charge,
-    then you will take {HEALTH_DAMAGE} damage. '
-  detailsTemplate: This upgrade does stack. Each stack further increases the ability
-    damage you take by  {ABILITY_DAMAGE} and health damage by {HEALTH_DAMAGE}.  If
-    you have multiple, all of them will expire at the end of the level.
-  additionalHealthDamage: 1
+  descriptionTemplate: 'Gain {CURRENCY_AMOUNT} now, and taking damage drains {ABILITY_DAMAGE}
+    ability charge. If you don''t have enough ability charge, take {HEALTH_DAMAGE}
+    damage. '
+  detailsTemplate: 
+  additionalHealthDamage: 2
   additionalAbilityDamage: 20
   currencyAmount: 400

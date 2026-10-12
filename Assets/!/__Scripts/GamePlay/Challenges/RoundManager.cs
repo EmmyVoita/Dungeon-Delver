@@ -10,78 +10,59 @@ using UnityEngine.InputSystem;
 public class RoundManager : MonoBehaviour
 {
     public static RoundManager Instance { get; private set; }
-
-    
     public static event Action OnRoundStart;
     public static event Action OnRoundEndA;
     public static event Action OnRoundEnd;
+    public static event Action OnGameComplete;
 
-    // ------------------------------------------------------------
-    // Test Mode
-    // ------------------------------------------------------------
-
-    public bool IsTestMode => TestSession.runSingleLevel;
-    public TextAsset testLevel => TestSession.tempLevelAsset;
-
-    // ------------------------------------------------------------
-    // Settings
-    // ------------------------------------------------------------
-    
-    [Header("State Management")]
-    [SerializeField] private GameState postRoundNextState = GameState.WorldMapView;
-    [SerializeField] private GameState deathState = GameState.DeathSequence;
 
     [Header("Dev Controls")]
     [SerializeField] private bool preventAutoStart = false;
+
+
+    [Header("References")]
+    [SerializeField] private BackgroundVisualManager visualManager;
+
+
+    [Header("Stages")]
+    [SerializeField] private StageDatabase stageDatabase;
+    //public List<StageDataObject> stages;
+
+
+    [Header("State Management")]
+    [SerializeField] private GameState deathState = GameState.DeathSequence;
+
 
     [Header("Input")]
     public Key skipRoundKey = Key.R;
     public Key skipStageKey = Key.T; // 👈 new
 
 
-
     [Header("Round End")]
     [SerializeField] private float roundEndDelay = 2f;
     [SerializeField] private float roundEndTimeout = 20f;
 
-    // ------------------------------------------------------------
-    // Events
-    // ------------------------------------------------------------
+  
 
-    // ------------------------------------------------------------
-    // Stages
-    // ------------------------------------------------------------
-
-    [Header("Stages")]
-    //public List<StageData> stages;
-    public List<StageDataObject> stages;
-
-    // ------------------------------------------------------------
-    // Runtime State
-    // ------------------------------------------------------------
-    [Header("References")]
-    [SerializeField] private BackgroundVisualManager visualManager;
 
 
    
+    public List<StageDataObject> StageObjects => stageDatabase.Stages;
+    public int StageCount => stageDatabase != null ? stageDatabase.Stages.Count : 0;
 
-    public bool GameComplete => _currentLevelIndex >= _currentStageSequence.Count && _currentStageIndex == Mathf.Max(stages.Count - 1, 0);
+
+    public bool IsTestMode => TestSession.runSingleLevel;
+    public TextAsset testLevel => TestSession.tempLevelAsset;
+    public bool GameComplete => _currentLevelIndex >= _currentStageSequence.Count && _currentStageIndex == Mathf.Max(stageDatabase.Stages.Count - 1, 0);
     public double RoundStartDSP { get; set; }
     public float  RoundStartTime { get; private set; } // gameplay time
-
-    public float RoundCountdownStartTime { get; private set; }
-    public bool IsBossRound => stages[_currentStageIndex].bossFile.LevelFile == _currentStageSequence[_currentLevelIndex - 1];
-
-    public int CurrentLevelIndex => _currentLevel;
+    public int TotalCurrentLevelIndex => _currentLevel;
+    public int CurrentStageIndex => _currentStageIndex;
     public string LevelIndex => $"{_currentStageIndex+1}-{_currentLevelIndex+1}";
-    
     public int CurrentLevelReward => _currentStageSequence[_currentLevelIndex].BaseCurrencyReward;
-    public int CurrentLevelRerollReward => _currentStageSequence[_currentLevelIndex].BaseRerollReward;
-    public string CurrentStageName => stages[_currentStageIndex].stageName;
+    public string CurrentStageName => stageDatabase.Stages[_currentStageIndex].stageName;
+    public bool IsAdvancingToNextStage => _currentLevelIndex >= _currentStageSequence.Count && _currentStageIndex < stageDatabase.Stages.Count - 1;
 
-    public bool IsAdvancingToNextStage =>
-    _currentLevelIndex >= _currentStageSequence.Count &&
-    _currentStageIndex < stages.Count - 1;
 
     public string NextStageName
     {
@@ -89,10 +70,10 @@ public class RoundManager : MonoBehaviour
         {
             int nextStageIndex = _currentStageIndex + 1;
 
-            if (nextStageIndex < 0 || nextStageIndex >= stages.Count)
+            if (nextStageIndex < 0 || nextStageIndex >= stageDatabase.Stages.Count)
                 return CurrentStageName;
 
-            return stages[nextStageIndex].stageName;
+            return stageDatabase.Stages[nextStageIndex].stageName;
         }
     }
 
@@ -102,17 +83,16 @@ public class RoundManager : MonoBehaviour
     private int _currentLevel;
     private int _currentStageIndex = 0;
     private int _currentLevelIndex = 0;
+    private bool _gameCompleted = false;
 
 
     private void OnEnable()
     {
-        //ShopManager.UpgradeSelectionComplete += SetupAndStartRound;
         GameStateManager.OnStateChanged += HandleStateChanged;
     }
 
     private void OnDisable()
     {
-        //ShopManager.UpgradeSelectionComplete -= SetupAndStartRound;
         GameStateManager.OnStateChanged -= HandleStateChanged;
     }
 
@@ -131,34 +111,84 @@ public class RoundManager : MonoBehaviour
         _currentLevelIndex = 0;
         _currentStageIndex = 0;
         _currentLevel = 0;
+        _gameCompleted = false;
     }
 
     private void Start()
     {
-        if (GameSceneLoader.PendingConfig != null &&
-            GameSceneLoader.PendingConfig.IsEditorMode)
-        {
-            GameStateManager.Instance.SetState(GameState.Editor);
-        }
+        StartSession();
     }
 
-
-
+    
     private void Update()
     {
-
-    #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (Keyboard.current[skipRoundKey].wasPressedThisFrame)
-            SkipRound();
-    #endif
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (Keyboard.current[skipRoundKey].wasPressedThisFrame)
+                SkipRound();
+        #endif
 
         if (IsTestMode && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            Debug.Log("⏹ Test aborted. Returning to editor.");
             UnityEngine.SceneManagement.SceneManager.LoadScene(TestSession.returnScene);
         }
     }
 
+
+
+    private void StartSession()
+    {
+        if (GameSessionBootstrap.Config == null)
+        {
+            Debug.LogError("No GameSessionConfig found.");
+            return;
+        }
+
+        // Currently we handle the normal run load in the game session bootstrap
+        // & the run intro controller. The run intro controller plays the run 
+        // intro and then sets the state to run load where our event listener
+        // here waits for the run load state and then starts the first stage
+        switch (GameSessionBootstrap.Config.Mode)
+        {
+            case GameMode.LevelEditorTest:
+                Player.Instance.HealFull();
+                GameStateManager.Instance.SetState(GameState.Editor);
+                StartCoroutine(PlayTestLevel());
+                break;
+        }
+    }
+
+
+
+    // this is a function to help with testing
+    public void SkipRound()
+    {
+        // we can only skip the round while one is active
+        if(GameStateManager.Instance.CurrentState != GameState.RoundActive)
+            return;
+
+        StopActiveRound();
+
+        OnRoundEnd?.Invoke();
+
+        StartCoroutine(EndOfRoundSequence());
+    }
+
+    // When we stop a round we want to make sure that we clean up everything
+    // we define a function in our arrowspawner that calls to kill all active
+    // arrows. we define a similar function in our obstacle manager that will
+    // end all active challenges.
+    private void StopActiveRound()
+    {
+        if (_activeRoundCoroutine != null)
+        {
+            StopCoroutine(_activeRoundCoroutine);
+            _activeRoundCoroutine = null;
+        }
+            
+        ArrowSpawner.Instance.StopAllSpawning();
+        ArrowSpawner.Instance.ClearAllArrows();
+        ObstacleManager.Instance.ForceClearAll();
+    }
 
 
     private void HandleStateChanged(GameState previousState, GameState newState)
@@ -170,28 +200,22 @@ public class RoundManager : MonoBehaviour
 
         if(GameSceneLoader.PendingConfig != null && GameSceneLoader.PendingConfig.IsEditorMode)
             return;
-
-        if(newState == GameState.RunLoad && ObstacleManager.Instance.TestOn != true)
-        {
-            StartStage(_currentStageIndex);
-        }
-        else if(newState == GameState.Editor)
-        {
-            Player.Instance.HealPlayer(10);
-            StartCoroutine(PlayTestLevel());
-        }
         
-        if(newState != GameState.RoundActive &&  newState != GameState.Editor && newState != GameState.RoundResultsTally && newState != GameState.RoundResultsExit)
-        {
-            if (_activeRoundCoroutine != null)
-            {
-                StopCoroutine(_activeRoundCoroutine);
-                _activeRoundCoroutine = null;
-            }
+        if(ObstacleManager.Instance.TestOn == true)
+            return;
 
-            ArrowSpawner.Instance.StopAllSpawning();
-            ArrowSpawner.Instance.ClearAllArrows();
-        }
+        if(newState == GameState.RunLoad)
+            StartStage(_currentStageIndex);
+        
+        // This is a safety fall. We check whether were in a round state,
+        // and then if we are no longer in a round state for whether or not 
+        // to manually call to stop the active round.
+        // This relys on the assumtion that the round logic will only start
+        // being active when we transition into the round states.
+        if(previousState.IsRoundState() && !newState.IsRoundState())//previousState.IsRoundState() && !newState.IsRoundState())
+        {
+            StopActiveRound();
+        }                                                                                                                                                                                          
     }
 
 
@@ -206,8 +230,8 @@ public class RoundManager : MonoBehaviour
             yield break;
         }
 
-        ScoreManager.Instance.RoundStatsTracker.Reset();
-        ScoreManager.Instance.RunStatsTracker.ResetRun();
+        RunHistoryManager.Instance.RoundStatsTracker.Reset();
+        RunHistoryManager.Instance.RunStatsTracker.ResetRun();
 
         MusicManager.Instance.mainClip = TestSession.levelMusic;
 
@@ -220,141 +244,118 @@ public class RoundManager : MonoBehaviour
     }
 
 
-    private void HandleGameCompletion()
-    {
-        
-    }
+
 
     private void StartStage(int stageIndex)
-    {
+    {   
+        // When we start the first stage, reset the run stats tracker. 
+        // We need to do this because scoremanager, which maintains a reference 
+        // to both the round stats tracker and run stats tracker, is dont destory
+        // on load so it persists between runs and if we reset the game.
         if(stageIndex == 0)
-        {
-            ScoreManager.Instance.RunStatsTracker.ResetRun();
-        }
+            RunHistoryManager.Instance.RunStatsTracker.ResetRun();
 
-        if (stageIndex >= stages.Count)
-        {
-            HandleGameCompletion();
-            return;
-        }
-
+        /*
+        // Each stage has a different music file, so we need to update that
+        // in our music manager
         MusicManager.Instance.mainClip = stages[stageIndex].musicClip;
+        */
 
-        StageDataObject stage = stages[stageIndex];
-        _currentStageSequence.Clear();
+        // Our stage data object holds a reference to a list of leveldataobjects.
+        // LevelDataObject holds a reference to the level file alongside rewards 
+        // for completetion. Here we are grabbing the levels from the stage data object
+        // and passing it to a function to add levels sequentially.
+        StageDataObject stage = stageDatabase.Stages[stageIndex];
+        List<LevelDataObject> sourceLevels = stage.levelFiles;
 
+        // Add levels to a list 
+        AddSequentialLevels(stage, sourceLevels);
 
-        List<LevelDataObject> sourceLevels = new();
-
-        foreach(LevelDataObject obj in stage.levelFiles)
-        {
-            sourceLevels.Add(obj);
-        }
-
-        switch (stage.levelOrderMode)
-        {
-            case LevelOrderMode.InOrder:
-                AddSequentialLevels(stage, sourceLevels);
-                break;
-
-            case LevelOrderMode.Random:
-                AddRandomLevels(stage, sourceLevels);
-                break;
-        }
-
-        // Boss always last
-        if (stage.bossFile.LevelFile == null)
-        {
-            Debug.LogError("Boss file was null");
-            return;
-        }
-
-        _currentStageSequence.Add(stage.bossFile);
-
+        // Currently we have custom backgrounds for different stages
+        // this is something that i am experimenting with so i have a
+        // setting to toggle it on and off. Here we update the background
+        // when we move to a new stage.
         if(!BackgroundPreference.UseSimpleBackground)
             visualManager.ChangeDefaultBackground(stage.backgroundData);
             
-
+        // Reset the current level index back to 0 when we start a new stage
         _currentLevelIndex = 0;
+
         SetupAndStartRound();
     }
 
     private void AddSequentialLevels(StageDataObject stage, List<LevelDataObject> sourceLevels)
     {
+        // _currentStageSequence is a list that holds the current stage's level files
+        // We call addsequentiallevels to add the normal levels, then after we add the boss
+        
+        _currentStageSequence.Clear();
+       
         int count = Mathf.Min(stage.levelsToPlay, sourceLevels.Count);
 
         for (int i = 0; i < count; i++)
         {
             _currentStageSequence.Add(sourceLevels[i]);
         }
+
+        // Always add the boss level to be last
+        if (stage.bossFile.LevelFile != null)
+            _currentStageSequence.Add(stage.bossFile);
     }
 
-    private void AddRandomLevels(StageDataObject stage, List<LevelDataObject> sourceLevels)
-    {
-        sourceLevels.Shuffle();
-
-        if (stage.allowRepeats)
-        {
-            for (int i = 0; i < stage.levelsToPlay; i++)
-            {
-                _currentStageSequence.Add(sourceLevels[i % sourceLevels.Count]);
-            }
-        }
-        else
-        {
-            int count = Mathf.Min(stage.levelsToPlay, sourceLevels.Count);
-            for (int i = 0; i < count; i++)
-            {
-                _currentStageSequence.Add(sourceLevels[i]);
-            }
-        }
-    }
-
-
-
-
+    // Setup and start round is THE function that we call to begin playing 
+    // the next level We rely on other scripts to call this function.
     public void SetupAndStartRound()
     {
-        
         // Safety check to prevent starting a new round while one is active
         if (_activeRoundCoroutine != null)
             StopCoroutine(_activeRoundCoroutine);
 
-        // If we completed all of the levels in the stage, we need to move to next stage or completion
+
+        // If we completed all of the levels in the stage, we need to move 
+        // to next stage or completion
         if (_currentLevelIndex >= _currentStageSequence.Count)
         {
             _currentStageIndex++;
-
-            if (_currentStageIndex >= stages.Count)
-            {
-                HandleGameCompletion();
-                return;
-            }
 
             StartStage(_currentStageIndex);
             return;
         }
 
-
+        // We grab the level data to play by using our current level index.
+        // We previously, when we loaded the stage, added all the stage level files
+        // into _currentStageSequence
         LevelDataObject levelData = _currentStageSequence[_currentLevelIndex];
         
+        // safety check 
         if (levelData == null)
         {
             Debug.LogError("LevelData has no TextAsset assigned!");
             return;
         }
-
-       
-        RoundCountdownStartTime = Time.time;
         
+        // We have an inbetween game state that represents when we start the countdown
+        // below and when that countdown ends. The purpose of this state is just to 
+        // to be able to leave our like world map view state and call functions on leaving that
+        // while avoiding imeditaley transition to the round active state where functions would
+        // prematurely be called if we immediatley transitioned to that.
         GameStateManager.Instance.SetState(GameState.PreRoundCountdown);
 
+        MusicManager.Instance.mainClip = levelData.MusicClip;
+
+        // We use a countdown when we start a level, and we have a dedicated
+        // countdown manager because we use it elsewhere when we like unpause
+        // from our pause menu during the level.   
         CountdownUI.Instance.BeginCountdown(() =>
         {
+          
+
+            // Managing having the arrows be percisely liked to the music audio time we 
+            // need to use dsptime. So we set that exactly when we call to start the round.
             RoundStartDSP  = AudioSettings.dspTime;
             RoundStartTime = Time.time;
+
             _activeRoundCoroutine = StartCoroutine(PlayRound(levelData.LevelFile));
-            RunStateManager.Instance.AdvanceWorldMapRoute();
         });
     }
 
@@ -364,71 +365,93 @@ public class RoundManager : MonoBehaviour
         OnRoundStart?.Invoke();
 
         // Reset stats for the new round
-        ScoreManager.Instance.RoundStatsTracker.Reset();
-
-        StageDataObject stage = stages[_currentStageIndex];
+        RunHistoryManager.Instance.RoundStatsTracker.Reset();
 
         // If Boss round, trigger boss logic
-        if (stage.bossFile.LevelFile == levelFile)
-        {
-            BossManager.Instance.StartBoss();
-        }
+        StageDataObject stage = stageDatabase.Stages[_currentStageIndex];
 
+        if (stage.bossFile.LevelFile == levelFile)
+            BossManager.Instance.StartBoss();
+
+        // Increment the game state
         GameStateManager.Instance.SetState(GameState.RoundActive);
 
-
-        if(GameSceneLoader.PendingConfig != null)
+        // We use the same function for a normal game mode and our level editor test
+        // gamemode. In our level editor, we provide a function to start the level at a 
+        // specific time to make it easier to test things. By default the value of 
+        // level editor start time is 0, so this does nothing for the normal game mode.
+        // Game Session Bootstrap should never be null, but just in case we fall back to just
+        // using 0 start time.
+        if(GameSessionBootstrap.Config != null)
         {
             float startTime = GameSessionBootstrap.Config.LevelEditorStartTime;
-
             yield return StartCoroutine(ArrowSpawner.Instance.PlayFromTime(levelFile, startTime));
         }
         else
         {
-            yield return StartCoroutine(ArrowSpawner.Instance.HandleSpawning(levelFile));
+            yield return StartCoroutine(ArrowSpawner.Instance.PlayFromTime(levelFile, 0));
         }
             
-        
+        // Wait until obstacles are cleared and our arrows are wll resolved
+        yield return new WaitUntil(() => ArrowSpawner.Instance.AllGameplayResolved);
 
-        // Wait until obstacles are cleared
-        yield return new WaitUntil(() =>
-            !ArrowSpawner.Instance.IsSpawning &&
-            !ObstacleManager.Instance.AnyActive
-        );
-
-
+        // wait a short delay after the level is over
         yield return new WaitForSeconds(roundEndDelay);
 
-    
         yield return StartCoroutine(EndOfRoundSequence());
     }
 
-    // ------------------------------------------------------------
-    // Stats / Utilities
-    // ------------------------------------------------------------
 
 
 
-    public void SkipRound()
+    private IEnumerator EndOfRoundSequence()
     {
-        if(GameStateManager.Instance.CurrentState != GameState.RoundActive)
-            return;
+        // We have a tally at the end of the level for adding our combo and
+        // remaining ability charge
+        yield return StartCoroutine(HandleEndOfRoundTally());
 
-        if (_activeRoundCoroutine != null)
+        // We have a bunch of rewards that we give the player at the end of the level
+        // after we complete the tally like giving currency for combo or our level's
+        // base reward. The coroutine loops through all of these rewards then returns
+        yield return StartCoroutine(CurrencyManager.Instance.EndOfRoundSequence());
+
+        // We check for the game win condition here at the end of the round
+        // Our GameComplete bool is defined as ->
+        // _currentLevelIndex >= _currentStageSequence.Count && _currentStageIndex == Mathf.Max(stages.Count - 1, 0);
+        // which says that we are trying to advance to the next level on the last stage
+        if(!GameComplete)
         {
-            StopCoroutine(_activeRoundCoroutine);
-            _activeRoundCoroutine = null;
+            _currentLevelIndex++;
+            _currentLevel++;
         }
-            
-        ArrowSpawner.Instance.StopAllSpawning();
-        ArrowSpawner.Instance.ClearAllArrows();
 
-        OnRoundEnd?.Invoke();
+        // This round is finished, so ALWAYS add its stats.
+        RunHistoryManager.Instance.RunStatsTracker.AddRound(RunHistoryManager.Instance.RoundStatsTracker);
 
-
-        StartCoroutine(EndOfRoundSequence());
+        if(GameComplete && !_gameCompleted)
+        {
+            OnGameComplete?.Invoke();
+            GameStateManager.Instance.SetState(GameState.GameWin);
+            _gameCompleted = true;
+        }
+        else
+        {  
+            // Here we handle which state that we transition to after the end of the round
+            // We have to options where we instantly choose and get a reward, or we choose
+            // a reward for the next level.
+            switch(BetweenRoundFlowManager.Instance.RewardTiming)
+            {
+                case RouteRewardTiming.BeforeNextLevel:
+                    GameStateManager.Instance.SetState(GameState.WorldMapView);
+                break;
+                    case RouteRewardTiming.AfterCurrentLevel:
+                    GameStateManager.Instance.SetState(GameState.RoundReward);
+                break;
+            }
+        }
     }
 
+    // This coroutine just waits until the end of round tally completes
     private IEnumerator HandleEndOfRoundTally()
     {
         bool tallyComplete = false;
@@ -444,29 +467,5 @@ public class RoundManager : MonoBehaviour
                                                           roundEndTimeout);
 
         ScoreTallyController.RoundEndTallyComplete -= Handler;
-    }
-
-    private IEnumerator EndOfRoundSequence()
-    {
-        yield return StartCoroutine(HandleEndOfRoundTally());
-        yield return StartCoroutine(CurrencyManager.Instance.EndOfRoundSequence());
-
-        if(!GameComplete)
-        {
-            _currentLevelIndex++;
-            _currentLevel++;
-        }
-
-       
-        //yield return StartCoroutine(CoroutineHelpers.WaitForJump(GameState.WorldMapViewEnd, true));
-
-       if(GameComplete)
-            GameStateManager.Instance.SetState(GameState.GameWin);
-        else
-        {  
-            GameStateManager.Instance.SetState(postRoundNextState);
-            //GameStateManager.Instance.RequestStateChange(GameState.UpgradeSelection);
-            ScoreManager.Instance.RunStatsTracker.AddRound(ScoreManager.Instance.RoundStatsTracker);
-        }
     }
 }

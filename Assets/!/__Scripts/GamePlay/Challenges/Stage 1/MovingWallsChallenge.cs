@@ -35,13 +35,6 @@ public class MovingWallsChallenge : ChallengeBase
     private int lastDirectionIndex = -1;
 
 
-    void Start()
-    {
-        currentPitch = beepPitchStart;
-
-        Begin();
-    }
-
     IEnumerator SpawnSequence()
     {
         for (int i = 0; i < spawnCount; i++)
@@ -127,6 +120,7 @@ public class MovingWallsChallenge : ChallengeBase
 
     public override void Begin(object config = null)
     {
+        currentPitch = beepPitchStart;
         base.Begin();
         if (autoSpawnOnStart)
             StartCoroutine(SpawnSequence());

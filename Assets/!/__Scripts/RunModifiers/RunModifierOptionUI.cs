@@ -64,12 +64,14 @@ public class RunModifierOptionUI : RunModifierMenuOptionBase
     [Header("Audio")]
     [SerializeField] private SoundEffect maximumSound;
     [SerializeField] private SoundEffect minimumSound;
+    [SerializeField] private float pitchstep = 0.1f;
 
-    
+
     private RunModifierDefinition _definition;
     private float _currentValue;
     private Material runTimeMaterial;
     private float _maxAllowedValue;
+    private Vector3 baseScale;
 
 
     private Color baseColorA;
@@ -96,6 +98,8 @@ public class RunModifierOptionUI : RunModifierMenuOptionBase
 
     public void Initialize(RunModifierDefinition definition)
     {
+
+        baseScale = rootRect.localScale;
         outlineRect.DOKill();
         outlineRect.localScale = Vector3.one;
         outlineRect.gameObject.SetActive(false);
@@ -232,7 +236,7 @@ public class RunModifierOptionUI : RunModifierMenuOptionBase
         RefreshValueUI();
 
         if(!silent)
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, Camera.main.transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMinor, Camera.main.transform.position);
     }
 
     private void ChangeValue(int direction)
@@ -269,14 +273,23 @@ public class RunModifierOptionUI : RunModifierMenuOptionBase
                          Mathf.Approximately(_currentValue, _maxAllowedValue);
 
         bool reachedMin = !Mathf.Approximately(previousValue, _definition.minValue) &&
-                           Mathf.Approximately(_currentValue, _definition.minValue);    
+                           Mathf.Approximately(_currentValue, _definition.minValue);   
+
+        bool atMin = _currentValue == _definition.minValue;
+
+        bool atMax = _currentValue == _maxAllowedValue;
 
         //bool shouldBeGolden = reachedMax && _definition.category == RunModifierCategory.Challenge;
 
 
         if (reachedMax)
         {
+            RunModifierMenuNavigator.Instance.PanelNudge.NudgeRight();
+
             AudioHelpers.PlaySoundEffect(maximumSound,Camera.main.transform.position);
+
+            rootRect.DOKill();
+            rootRect.localScale = baseScale;
 
             rootRect.DOPunchScale(Vector3.one * punchScale, 
                                     duration: 0.2f,
@@ -285,11 +298,32 @@ public class RunModifierOptionUI : RunModifierMenuOptionBase
         }
         else if(reachedMin)
         {
+            RunModifierMenuNavigator.Instance.PanelNudge.NudgeLeft();
             AudioHelpers.PlaySoundEffect(minimumSound,Camera.main.transform.position);
         }
         else
         {
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate,Camera.main.transform.position);
+            if(atMin || atMax)
+                return;
+
+            /*
+            if(direction == -1)
+                RunModifierMenuNavigator.Instance.PanelNudge.NudgeLeft();
+            else if(direction == 1)
+                RunModifierMenuNavigator.Instance.PanelNudge.NudgeRight();
+            */
+            rootRect.DOKill();
+            rootRect.localScale = baseScale;
+
+
+            rootRect.DOPunchScale(Vector3.one * punchScale * 0.5f, 
+                                    duration: 0.2f,
+                                    vibrato: 10,
+                                    elasticity: 1).SetUpdate(true);
+
+            float pitchMult = 1.0f + pitchstep * _currentValue;
+                                    
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMinor,Camera.main.transform.position,pitchMult);
         }
 
         PunchArrow(direction, true);

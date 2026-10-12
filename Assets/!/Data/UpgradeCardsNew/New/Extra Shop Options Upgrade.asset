@@ -21,10 +21,10 @@ MonoBehaviour:
   duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
-  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  centerIcon: {fileID: 727045490, guid: cf8e3d9803c43f648bec853b2993de62, type: 3}
   iconMaterial: {fileID: 0}
-  displayName: Extra Shop Option
+  displayName: Draw One
   descriptionTemplate: When you open a shop of any category you have a {CHANCE} chance
     to have an extra option.
-  detailsTemplate: This upgrade does not stack.
+  detailsTemplate: 
   chance: 0.33

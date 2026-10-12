@@ -16,12 +16,12 @@ public class GoldenArrowAbilityChargeUpgrade : UpgradeBase
         GoldenArrowManager.Instance.AddCatchEffect(new GoldenArrowAbilityChargeModifier(amount));
     }
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
         replacements["{AMOUNT}"] =
             $"<color=#{UIColors.ToHex(UIColors.Green)}>" +
             $"{amount:N0}</color>";
 
-        base.AddReplacements(replacements);
+        base.AddReplacements(replacements, isInventory);
     }
 }

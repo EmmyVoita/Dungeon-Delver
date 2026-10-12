@@ -16,8 +16,8 @@ MonoBehaviour:
   dimScreen: 0
   allowPlayerInput: 0
   enableDamage: 0
-  allowPause: 1
+  allowPause: 0
   showScoreUI: 0
   allowPlayerDeath: 0
   showPlayer: 0
-  allowMouseInput: 1
+  allowMouseInput: 0

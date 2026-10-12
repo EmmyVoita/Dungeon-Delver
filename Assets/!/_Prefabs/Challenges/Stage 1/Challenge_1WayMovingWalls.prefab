@@ -48,6 +48,8 @@ MonoBehaviour:
   registerWithManager: 1
   priority: 0
   controlMode: 1
+  childChallenges:
+  - {fileID: 1108110177414258835}
   spawnBeep:
     clip: {fileID: 8300000, guid: 44459bfd1738cc2479d043b1f7168f49, type: 3}
     channel: 2
@@ -112,7 +114,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4740895895095594392}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c37f6cd9b3fddbc4dbe8c74f531bdd26, type: 3}
   m_Name: 
@@ -120,12 +122,18 @@ MonoBehaviour:
   registerWithManager: 1
   priority: 0
   controlMode: 1
+  childChallenges: []
   easeCurve: 6
   startWindupDelay: 0
   oscilationXSpeed: 3
+  settingsData:
+    fireMode: 1
+    projectileFireMode: 0
+    direDelayMode: 0
+    firePositionMode: 1
+    lifetimeMode: 0
   lifetimeMode: 1
   listenForBossActive: 1
-  activationMode: 1
   portalPrefab: {fileID: 0}
   projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
   linePrefab: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}

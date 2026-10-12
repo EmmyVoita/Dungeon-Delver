@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: NormalArrowBuff
   m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
   displayName: On Point
-  description: Normal arrows have a +25% chance to give ability charge.
-  icon: {fileID: 21300000, guid: 3ff395e78b8181f43aafc90574cc6ca0, type: 3}
-  summaryName: Normal arrow charge chance
-  summaryIcon: {fileID: 21300000, guid: 3ff395e78b8181f43aafc90574cc6ca0, type: 3}
+  description: Normal arrows have a [VALUE] chance to give ability charge.
+  icon: {fileID: -1196187215, guid: 910762d1a3b570b479b60a96cfd249e1, type: 3}
+  summaryName: Charge Chance
+  summaryIcon: {fileID: -1426685933, guid: cf8e3d9803c43f648bec853b2993de62, type: 3}
   type: 10
   category: 0
   minValue: 0
-  maxValue: 4
+  maxValue: 3
   step: 1
   scoreMultiplierPerStep: 0
   valueSuffix: 

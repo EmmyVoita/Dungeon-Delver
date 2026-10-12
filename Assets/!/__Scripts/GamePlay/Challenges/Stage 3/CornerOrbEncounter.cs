@@ -26,10 +26,6 @@ public class CornerOrbEncounter : ChallengeBase
     private float lastAngle = -999f;
     private List<GameObject> _activeBombs = new List<GameObject>();
 
-    void Start()
-    {
-       Begin();
-    }
 
     IEnumerator SpawnRoutine()
     {

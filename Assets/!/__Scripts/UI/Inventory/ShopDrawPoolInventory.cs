@@ -1,23 +1,33 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ShopDrawPoolInventory : InventoryBase
 {
-    private ShopPagesController _shopPagesController;
-    private ShopPagesController.ShopPage _targetExitShopPage;
+    private PagesController _pagesController;
+    private int _targetExitShopPage;
+    private UpgradeCategory _upgradeCategory;
 
-    public void SetVisibilityData(ShopPagesController shopPagesController, ShopPagesController.ShopPage targetExitShopPage)
+    [Header("Percentage Visibility")]
+    [SerializeField] private bool showDrawPoolPercentages = false;
+
+    public void SetVisibilityData(PagesController pagesController, int targetExitPage)
     {
-        _shopPagesController = shopPagesController;
-        _targetExitShopPage = targetExitShopPage;
+        _pagesController = pagesController;
+        _targetExitShopPage = targetExitPage;
+    }
+
+    public void SetTargetCategory(UpgradeCategory upgradeCategory)
+    {
+        _upgradeCategory = upgradeCategory;
     }
 
     protected override void Update()
     {
-        if(_shopPagesController)
+        if(_pagesController)
         {
-            if(_shopPagesController.IsTransitioning)
+            if(_pagesController.IsTransitioning)
                 return;
         }
 
@@ -26,9 +36,9 @@ public class ShopDrawPoolInventory : InventoryBase
 
     public override void Close()
     {
-        if(_shopPagesController)
+        if(_pagesController)
         {
-            _shopPagesController.ShowPage(_targetExitShopPage, () =>
+            _pagesController.ShowPage(_targetExitShopPage, () =>
             {
                 InputFocusManager.Release(this);
             });
@@ -69,8 +79,9 @@ public class ShopDrawPoolInventory : InventoryBase
     
     protected override void FillInventory()
     {
-        UpgradeCategory category = ShopManager.Instance.CurrentUpgradeCategory;
-        List<UpgradeBase> drawPool = ShopManager.Instance.CreateDrawPool(category, hideCantAppear: false);
+        List<UpgradeBase> drawPool = ShopManager.Instance.CreateDrawPool(_upgradeCategory, 
+                                                                        hideCantAppear: false, 
+                                                                        exclusions: ShopManager.Instance.CurrentExclusions);
 
         drawPool = drawPool.OrderByDescending(t => t.CanAppear()).ToList();
 
@@ -84,10 +95,14 @@ public class ShopDrawPoolInventory : InventoryBase
         {   
             AddCard(card, 1);
         }
-
-        foreach(var kvp in _upgradeCards)
+        
+        if(showDrawPoolPercentages)
         {
-            kvp.Value.ShowDrawPercentage();
+            foreach(var kvp in _upgradeCards)
+            {
+                kvp.Value.ShowDrawPercentage(_upgradeCategory);
+            }
         }
+       
     }
 }

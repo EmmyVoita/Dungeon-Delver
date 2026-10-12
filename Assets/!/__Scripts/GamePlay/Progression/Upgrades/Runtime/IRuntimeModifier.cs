@@ -5,5 +5,5 @@ public interface IRuntimeModifier
     int Priority { get; }
     IRuntimeModifier Clone();
     void OnActivate();
-    void OnDestroy();
+    void Destroy();
 }

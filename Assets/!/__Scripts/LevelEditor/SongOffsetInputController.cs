@@ -9,9 +9,9 @@ public class SongOffsetInputController : MonoBehaviour
     private void Start()
     {
         // Initialize from data
-        offsetInput.SetTextWithoutNotify(
-            LevelEditorData.Instance.SongOffsetSeconds.ToString("F3")
-        );
+        //offsetInput.SetTextWithoutNotify(
+        //    LevelEditorData.Instance.SongOffsetSeconds.ToString("F3")
+        //);
     }
 
 

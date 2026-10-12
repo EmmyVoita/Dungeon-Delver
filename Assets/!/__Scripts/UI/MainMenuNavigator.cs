@@ -201,13 +201,13 @@ public class MainMenuNavigator : BaseMenu
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
         {
             SelectedIndex = (SelectedIndex + 1) % options.Length;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             UpdateVisuals();
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
             SelectedIndex = (SelectedIndex - 1 + options.Length) % options.Length;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             UpdateVisuals();
         }
 

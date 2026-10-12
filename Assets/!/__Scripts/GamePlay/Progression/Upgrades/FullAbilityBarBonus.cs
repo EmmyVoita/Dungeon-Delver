@@ -6,7 +6,7 @@ public class FullAbilityBarBonus : UpgradeBase, IActivatableUpgrade, IArrowScore
 {
     public float arrowValueMultiplier = 1.1f;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{ARROW_VALUE_MULTIPLIER}", (arrowValueMultiplier - 1).ToString("P0"));

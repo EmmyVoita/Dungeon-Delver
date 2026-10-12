@@ -16,5 +16,6 @@ public enum AbilityType
     GoldenHarvest,
     RandomQuestion,
     IgnoreMiss,
-    BigGoal
+    BigGoal,
+    IncreaseCurrencyGain
 }

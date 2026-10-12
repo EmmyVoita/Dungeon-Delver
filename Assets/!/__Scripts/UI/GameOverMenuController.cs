@@ -204,14 +204,14 @@ public class GameOverMenuController : MonoBehaviour
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
         {
             selectedIndex = (selectedIndex + 1) % options.Length;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             UpdateVisuals();
         }
 
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
             selectedIndex = (selectedIndex - 1 + options.Length) % options.Length;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             UpdateVisuals();  
         }
     }

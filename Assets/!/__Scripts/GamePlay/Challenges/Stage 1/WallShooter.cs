@@ -7,53 +7,16 @@ using UnityEngine.Rendering;
 
 public class WallShooter : ChallengeBase
 {
-    public enum FireMode
-    {
-        Burst,
-        Continuous
-    }
-
-    public enum ProjectileFireMode
-    {
-        Still,
-        MoveBackForth
-    }
-
-    public enum FireDelayMode
-    {
-        Immediate,
-        WithSetDelay,
-        Randomized
-    }
-
-    public enum FirePositionMode
-    {
-        Default,
-        PositionList
-    }
-
-    public enum ActivationMode
-    {
-        AutoOnStart,
-        Manual
-    }
-
-    public enum LifetimeMode
-    {
-        SelfManaged,
-        External
-    }
+   
 
     public Ease easeCurve = Ease.OutQuad;
     public float startWindupDelay = 0.0f;
     public float oscilationXSpeed = 3.0f;
 
-    [SerializeField] private LifetimeMode lifetimeMode = LifetimeMode.SelfManaged;
-
+    [SerializeField] private WallShooterData settingsData;
 
     [Header("Activation")]
     [SerializeField] private bool listenForBossActive = false;
-    [SerializeField] private ActivationMode activationMode = ActivationMode.AutoOnStart;
 
 
     [Header("References")]
@@ -63,10 +26,6 @@ public class WallShooter : ChallengeBase
 
 
     [Header("General Settings")]
-    public FireMode fireMode = FireMode.Burst;
-    public ProjectileFireMode projectileFireMode = ProjectileFireMode.MoveBackForth;
-    public FireDelayMode fireDelayMode = FireDelayMode.Randomized;
-    public FirePositionMode firePositionMode = FirePositionMode.Default;
     public float unregisterDelay = 1.0f;
     public float startDelay = 0.0f;
 
@@ -111,7 +70,6 @@ public class WallShooter : ChallengeBase
     
 
     
-    public LifetimeMode LifetimeSetting => lifetimeMode;
 
 
     private List<WallProjectile> projectiles = new List<WallProjectile>();
@@ -125,18 +83,6 @@ public class WallShooter : ChallengeBase
     void Awake()
     {
         obstacleContainer = new GameObject("WallShooter_Container");
-    }
-
-
-    void Start()
-    {
-        if(listenForBossActive && BossManager.Instance.IsBossActive)
-            Begin();
-
-        if (activationMode == ActivationMode.AutoOnStart)
-        {
-            Begin();
-        }
     }
 
     
@@ -158,7 +104,7 @@ public class WallShooter : ChallengeBase
         for (int i = 0; i < projectileCount; i++)
         {
 
-            switch(firePositionMode)
+            switch(settingsData.firePositionMode)
             {
                 case FirePositionMode.PositionList:
                     int randIndex = Random.Range(0, predefinedOffsets.Count); 
@@ -216,7 +162,7 @@ public class WallShooter : ChallengeBase
             }
            
 
-            if(projectileFireMode == ProjectileFireMode.MoveBackForth)
+            if(settingsData.projectileFireMode == ProjectileFireMode.MoveBackForth)
             {
                 line.transform.parent = obj.transform;
                 
@@ -228,9 +174,9 @@ public class WallShooter : ChallengeBase
         }
     }
 
-    private IEnumerator OscilateProjectiles()
+    protected IEnumerator OscilateProjectiles()
     {
-        if(fireMode == FireMode.Continuous)
+        if(settingsData.fireMode == FireMode.Continuous)
         {
             StartCoroutine(ChallengeSequence());
             yield break;
@@ -250,7 +196,7 @@ public class WallShooter : ChallengeBase
 
         Sequence s = DOTween.Sequence();
 
-        if(projectileFireMode == ProjectileFireMode.MoveBackForth)
+        if(settingsData.projectileFireMode == ProjectileFireMode.MoveBackForth)
         {
             AudioHelpers.PlaySoundEffect(shiftStartSound, Camera.main.transform.position);
 
@@ -297,7 +243,7 @@ public class WallShooter : ChallengeBase
     {
         yield return new WaitForSeconds(startDelay);
         
-        switch(fireMode)
+        switch(settingsData.fireMode)
         {
             case FireMode.Burst:
                 yield return StartCoroutine(FireSequence());
@@ -312,20 +258,19 @@ public class WallShooter : ChallengeBase
                 break;
         }
 
-        if (lifetimeMode == LifetimeMode.SelfManaged)
-        {
-            yield return new WaitForSeconds(unregisterDelay);
-            End();
-        }
+  
+        yield return new WaitForSeconds(unregisterDelay);
+        End();
+
     }
 
     IEnumerator FireSequence()
     {
-        switch (fireDelayMode)
+        switch (settingsData.fireDelayMode)
         {
             case FireDelayMode.Immediate:
 
-                if(fireMode == FireMode.Continuous)
+                if(settingsData.fireMode == FireMode.Continuous)
                 {
                     SpawnProjectiles();
                 }
@@ -378,11 +323,7 @@ public class WallShooter : ChallengeBase
         AudioHelpers.PlaySoundEffect(fireSound, Camera.main.transform.position);
     }
 
-    IEnumerator FireWithDelay(
-        WallProjectile projectile,
-        SpriteFadeInOut fade,
-        float delay
-    )
+    IEnumerator FireWithDelay(WallProjectile projectile,SpriteFadeInOut fade,float delay)
     {
         yield return new WaitForSeconds(delay);
 
@@ -407,8 +348,11 @@ public class WallShooter : ChallengeBase
 
     public override void Begin(object config = null)
     {
+        if(listenForBossActive && !BossManager.Instance.IsBossActive)
+            return;
+        
         base.Begin();
-         StartCoroutine(OscilateProjectiles());
+            StartCoroutine(OscilateProjectiles());
     }
 
     public override void End()

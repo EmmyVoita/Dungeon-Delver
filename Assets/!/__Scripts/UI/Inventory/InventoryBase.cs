@@ -301,7 +301,7 @@ public abstract class InventoryBase : MonoBehaviour
             
         OpenCardDetails(false);
          
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
 
         UpgradeCardUI selectedCardUI = null;
 

@@ -18,7 +18,7 @@ public class DirectionalWarningController : MonoBehaviour
     public class DirectionalWarning
     {
         public Direction direction;
-        public Image image;
+        public SpriteRenderer srend;
         public Sprite sprite;
     }
     public SoundEffect warningSound;
@@ -45,10 +45,10 @@ public class DirectionalWarningController : MonoBehaviour
 
         foreach (var w in warnings)
         {
-            if (w.image == null || w.sprite == null)
+            if (w.srend == null || w.sprite == null)
                 continue;
 
-            w.image.enabled = false;
+            w.srend.enabled = false;
             lookup[w.direction] = w;
             activeFlashes[w.direction] = null;
         }
@@ -77,7 +77,7 @@ public class DirectionalWarningController : MonoBehaviour
 
     private IEnumerator FlashRoutine(DirectionalWarning warning)
     {
-        Image img = warning.image;
+        SpriteRenderer img = warning.srend;
         img.sprite = warning.sprite;
         img.enabled = true;
 
@@ -104,7 +104,7 @@ public class DirectionalWarningController : MonoBehaviour
         //ScreenDimmerManager.Instance.RemoveDimSource(this.transform.name);
     }
 
-    private IEnumerator Fade(Image img, Color baseColor, float from, float to, float duration)
+    private IEnumerator Fade(SpriteRenderer sRend, Color baseColor, float from, float to, float duration)
     {
         float t = 0f;
 
@@ -112,10 +112,10 @@ public class DirectionalWarningController : MonoBehaviour
         {
             t += Time.deltaTime;
             float a = Mathf.Lerp(from, to, t / duration);
-            img.color = new Color(baseColor.r, baseColor.g, baseColor.b, a);
+            sRend.color = new Color(baseColor.r, baseColor.g, baseColor.b, a);
             yield return null;
         }
 
-        img.color = new Color(baseColor.r, baseColor.g, baseColor.b, to);
+        sRend.color = new Color(baseColor.r, baseColor.g, baseColor.b, to);
     }
 }

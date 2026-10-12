@@ -15,6 +15,9 @@ public class EditorPlaybackController : MonoBehaviour
 
     [Header("References")]
     public ArrowSpawner arrowSpawner;     
+    public TimelineView timelineView;    
+
+    [SerializeField] private float defaultZoom = 0.5f;
 
 
     [Header("Playback State")]
@@ -27,7 +30,9 @@ public class EditorPlaybackController : MonoBehaviour
     
 
     
-
+    private bool loopToolActive;
+    private float loopStartTime;
+    private float loopEndTime;
     private AudioClip _editorMusic;
     private float currentTime = 0f;        // current playback time in SECONDS           
     private List<EditorSimulatedArrow> simulatedArrows = new();
@@ -37,6 +42,22 @@ public class EditorPlaybackController : MonoBehaviour
     public float CurrentTime => currentTime;
     public bool SuppressSimulationAudio { get; private set; }
 
+    void OnEnable()
+    {
+        TimeManager.OnTimeScaleChanged += HandleTimeScaleChanged;
+    }
+
+    void OnDisable()
+    {
+        TimeManager.OnTimeScaleChanged -= HandleTimeScaleChanged;
+    }
+
+    private void HandleTimeScaleChanged(float scale)
+    {
+        if (musicSource != null)
+            musicSource.pitch = scale;
+    }
+
     void OnDestroy()
     {
         if (Instance == this)
@@ -44,7 +65,19 @@ public class EditorPlaybackController : MonoBehaviour
     }
 
 
+    public void AssignLoop(float startTime, float endTime)
+    {
+        loopStartTime = startTime;
+        loopEndTime = endTime;
+        loopToolActive = true;
+    }
 
+    public void ClearLoopTool()
+    {
+        loopStartTime = 0;
+        loopEndTime = 0;
+        loopToolActive = false;
+    }
 
     void Awake()
     {
@@ -67,6 +100,11 @@ public class EditorPlaybackController : MonoBehaviour
     void Start()
     {
         TimeManager.Instance.ClearAllModifiers();
+
+        if(TestSession.levelMusic != null)
+        {
+            SetEditorMusic(TestSession.levelMusic);
+        }
     }
 
 
@@ -74,28 +112,34 @@ public class EditorPlaybackController : MonoBehaviour
     // ---------------------------------------------------------
     void Update()
     {
-        Time.timeScale = 1.0f;
         if (!isPlaying)
             return;
 
-        currentTime += Time.deltaTime * playSpeed;
+        currentTime += Time.unscaledDeltaTime * TimeManager.Instance.GetCurrentScale();
 
-        // Clamp to end of timeline
-        if (currentTime > LevelEditorData.Instance.MaxTime)
+        if (loopToolActive && currentTime >= loopEndTime)
+        {
+            currentTime = loopStartTime;
+
+            SyncSimulationToTime();
+            SyncMusicToTime();
+        }
+        else if (!loopToolActive && currentTime >= LevelEditorData.Instance.MaxBeatTime)
         {
             currentTime = 0f;
 
-            // resimulate arrows at start
-            foreach (var sim in simulatedArrows)
-                sim.Simulate(currentTime);
-
+            SyncSimulationToTime();
             SyncMusicToTime();
         }
 
-        // Simulate arrow movement
         foreach (var arrow in simulatedArrows)
             arrow.Simulate(currentTime);
+    }
 
+    private void SyncSimulationToTime()
+    {
+        foreach (var sim in simulatedArrows)
+            sim.Simulate(currentTime);
     }
 
     public void SelectMusicFile()
@@ -199,7 +243,7 @@ public class EditorPlaybackController : MonoBehaviour
 
         if (wasPlaying)
         {
-            musicSource.pitch = playSpeed;
+            musicSource.pitch = TimeManager.Instance.GetCurrentScale();
             musicSource.Play();
         }
     }
@@ -277,58 +321,64 @@ public class EditorPlaybackController : MonoBehaviour
     // Playback Controls
     // ---------------------------------------------------------
     
+    // time is in seconds
     public void JumpToTime(float t)
     {
         SuppressSimulationAudio = true;
 
-        currentTime = Mathf.Clamp(t, 0f, LevelEditorData.Instance.MaxTime);
+        // Clamp to TIMELINE length, not music length
+        currentTime = Mathf.Clamp(
+            t,
+            0f,
+            LevelEditorData.Instance.MaxSecondsTime
+        );
 
         foreach (var sim in simulatedArrows)
             sim.Simulate(currentTime);
 
-        Debug.Log($"Clip? {musicSource.clip}, Length: {(musicSource.clip ? musicSource.clip.length : -1)}");
-
-        if (musicSource != null && musicSource.clip != null && musicSource.clip.length > 0f)
-        {
-            float safeTime = Mathf.Clamp(currentTime, 0f, musicSource.clip.length - 0.01f);
-            musicSource.time = safeTime;
-        }
+        // Handles looping music
+        SyncMusicToTime();
 
         SuppressSimulationAudio = false;
 
-        //LevelTimelineUI.Instance.SetScrollRectPos(currentTime);
-
-        float x = LevelTimelineUI.Instance.TimelineView.TimeToPixels(currentTime);
-
-        float normalized = x / Mathf.Max(1f, LevelTimelineUI.Instance.content.sizeDelta.x);
-        LevelTimelineUI.Instance.scrollRect.horizontalNormalizedPosition = normalized;
+        LevelTimelineUI.Instance.ScrollToTime(currentTime);
     }
 
     public void Play()
     {
         isPlaying = true;
-        if (_editorMusic != null)
-        {
-            musicSource.time = currentTime;
-            musicSource.pitch = playSpeed;
-            SyncMusicToTime();
-            musicSource.Play();
-        }
+
+        if (_editorMusic == null)
+            return;
+
+        musicSource.time = currentTime;
+        musicSource.pitch = TimeManager.Instance.GetCurrentScale();
+        SyncMusicToTime();
+        musicSource.Play();
     }
 
     public void SyncMusicToTime()
     {
-        if (musicSource == null || musicSource.clip == null || musicSource.clip.length <= 0f)
+        if (musicSource == null ||
+            musicSource.clip == null ||
+            musicSource.clip.length <= 0f)
             return;
 
         float offset = LevelEditorData.Instance.SongOffsetSeconds;
-        float targetTime = Mathf.Max(0f, currentTime + offset);
-        targetTime %= musicSource.clip.length;
 
-        float safeTime = Mathf.Clamp(targetTime, 0f, musicSource.clip.length - 0.01f);
-        musicSource.time = safeTime;
+        float targetTime = currentTime + offset;
 
-        UIToast.Show($"safeTime -> {safeTime}");
+        // Properly wrap into 0 -> clip.length
+        targetTime = Mathf.Repeat(targetTime, musicSource.clip.length);
+
+        UIToast.Show(
+            $"SYNC MUSIC | Timeline: {currentTime:F3}" +
+            $"\nClip Length: {musicSource.clip.length:F3}" +
+            $"\nMusic Time: {targetTime:F3}",
+            0.1f
+        );
+
+        musicSource.time = targetTime;
     }
 
 

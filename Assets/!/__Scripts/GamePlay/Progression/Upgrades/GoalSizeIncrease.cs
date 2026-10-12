@@ -5,7 +5,7 @@ public class GoalSizeIncrease: UpgradeBase, IGoalSizeModifier
 {
     public float goalSizeMultiplier = 1.25f;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{GOAL_SIZE_MULTIPLIER}", ( goalSizeMultiplier - 1).ToString("P0"));

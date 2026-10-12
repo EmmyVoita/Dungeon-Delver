@@ -49,7 +49,7 @@ public class RelicRegenerationEffect : ITimedEffect
         _elapsedTime = 0f;
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
     }
 }

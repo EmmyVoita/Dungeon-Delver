@@ -14,7 +14,7 @@ public class GoldenArrowAbilityChargeModifier :IRuntimeModifier,IGoldenArrowCatc
         GoldenArrowManager.Instance.AddCatchEffect(this);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         GoldenArrowManager.Instance.RemoveCatchEffect(this);
     }

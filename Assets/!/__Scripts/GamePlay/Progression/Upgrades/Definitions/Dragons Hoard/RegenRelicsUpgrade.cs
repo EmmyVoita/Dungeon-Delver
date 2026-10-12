@@ -15,9 +15,9 @@ public class RegenRelicsUpgrade : UpgradeBase
         TimedEffectManager.Instance.RegisterRenewing(new RelicRegenerationEffect(currencyAmount, regenerationInterval), this);
     }
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        base.AddReplacements(replacements);
+        base.AddReplacements(replacements,isInventory);
 
         replacements["{REGEN_INTERVAL}"] =
             $"<color=#{UIColors.ToHex(UIColors.Yellow)}>" +

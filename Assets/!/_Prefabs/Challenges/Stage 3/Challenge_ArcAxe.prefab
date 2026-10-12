@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6619423081986948406
+--- !u!1 &4925185158276643447
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3974892943302382020}
-  - component: {fileID: 5588818573937385387}
+  - component: {fileID: 1755478259230390494}
+  - component: {fileID: 1055243291898831055}
   m_Layer: 0
-  m_Name: Boss
+  m_Name: Collapse
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3974892943302382020
+--- !u!4 &1755478259230390494
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6619423081986948406}
+  m_GameObject: {fileID: 4925185158276643447}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -32,33 +32,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6266098156709910258}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5588818573937385387
+--- !u!114 &1055243291898831055
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6619423081986948406}
+  m_GameObject: {fileID: 4925185158276643447}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ab8821f62409034da4b837180a5ff21, type: 3}
+  m_Script: {fileID: 11500000, guid: fcd40125a00ce6342812c641eaf24a21, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossSafeLaneChallenge
+  m_EditorClassIdentifier: Assembly-CSharp::BossLaneCollapseChallenge
   registerWithManager: 1
   priority: 0
   controlMode: 4
-  config:
-    maxLanes: 5
-    laneSpacing: 1
-    laneMoveDuration: 0.15
-    laneWidthScale: 1
-  spawnPrefabs:
-  - {fileID: 2209782324246233958, guid: cb3d57ff39828094c8a78df7a4362069, type: 3}
-  safeLaneInterval: 1
-  safeLaneVisualDelay: 2
-  safeLaneWarningDuration: 0.5
-  obstacleActiveTime: 16
-  spawnX: 7
+  childChallenges: []
+  startingDelay: 0
+  collapseInterval: 3
+  warningTime: 1
+  collapseDuration: 4
 --- !u!1 &7452298568174148011
 GameObject:
   m_ObjectHideFlags: 0
@@ -89,7 +82,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3974892943302382020}
+  - {fileID: 1755478259230390494}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4516986514474416242
@@ -107,6 +100,8 @@ MonoBehaviour:
   registerWithManager: 1
   priority: 0
   controlMode: 4
+  childChallenges:
+  - {fileID: 1055243291898831055}
   config:
     maxLanes: 5
     laneSpacing: 1.25
@@ -126,6 +121,7 @@ MonoBehaviour:
   arcHeight: 5
   arcYOffset: 0
   travelDuration: 2
+  startingDelay: 0
   baseInterval: 1.2
   intervalStep: 0.075
   minInterval: 0.8

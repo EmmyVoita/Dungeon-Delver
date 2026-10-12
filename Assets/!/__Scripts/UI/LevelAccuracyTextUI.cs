@@ -43,7 +43,7 @@ public class LiveAccuracyTextUI : MonoBehaviour
             return;
         }
 
-        float accuracy = ScoreManager.Instance.RoundStatsTracker.CurrentLevelAccuracy;
+        float accuracy = RunHistoryManager.Instance.RoundStatsTracker.CurrentLevelAccuracy;
         float percent = accuracy * 100f;
 
         accuracyText.text = $"{prefix}{percent:0}{suffix}";

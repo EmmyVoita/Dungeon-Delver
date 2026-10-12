@@ -16,7 +16,7 @@ MonoBehaviour:
   category: 3
   requiredUpgrades: []
   baseOfferWeight: 1.5
-  _cost: 200
+  _cost: 300
   _maxStacks: 2
   duration: 0
   cardDecoration: {fileID: 0}
@@ -26,7 +26,6 @@ MonoBehaviour:
   displayName: Golden Combo
   descriptionTemplate: Every {COMBO_REQUIRED} combo, transform {ARROWS_GRANTED} arrows
     into {GOLDEN_ARROWS}, which give currency if crit.
-  detailsTemplate: This upgrade stacks up to {STACK_COUNT}. Every stack grants you
-    an additional {ARROWS_GRANTED} arrows.
+  detailsTemplate: Every stack grants you an additional {ARROWS_GRANTED} arrows.
   comboRequired: 25
   goldenArrowsGranted: 2

@@ -16,16 +16,17 @@ MonoBehaviour:
   category: 2
   requiredUpgrades: []
   baseOfferWeight: 1
-  _cost: 200
+  _cost: 300
   _maxStacks: 999
   duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
-  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  centerIcon: {fileID: 21300000, guid: 9ca5bd6f099742b40bdfe9e47746c229, type: 3}
   iconMaterial: {fileID: 0}
-  displayName: Ability Shield
+  displayName: Spellplate
   descriptionTemplate: When you use your ability gain a shield that lasts for {DURATION}
-    seconds.
+    seconds. Increase your ability cost by {ABILITY_COST_MOD}.
   detailsTemplate: 
   shieldDuration: 5
-  shieldPrefab: {fileID: 6998217769083237475, guid: 377ef4cdfaf8e0f478c67c15d5c22119, type: 3}
+  abilityCostModifier: 1.25
+  shieldPrefab: {fileID: 6998217769083237475, guid: 813a050f011bc3c4497be08d262d1a53, type: 3}

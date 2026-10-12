@@ -25,10 +25,6 @@ public class BounceBombSpawner : ChallengeBase
         BounceBomb.OnBombCleared -= HandleBombCleared;
     }
 
-    void Start()
-    {
-        Begin();
-    }
 
     private IEnumerator SpawnSequence()
     {

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.Globalization;
 
 public class AddArrowUI : MonoBehaviour
 {
@@ -17,9 +18,11 @@ public class AddArrowUI : MonoBehaviour
     [SerializeField] private LevelEditorData editorData;
     [SerializeField] private EditorPlaybackController playbackController;
     [SerializeField] private ArrowSpawner arrowSpawner;
+    [SerializeField] private TMP_InputField defaultArrowSpeedInput;
 
 
     private List<ArrowTypeDefinition> typeDefs;
+    private int defaultArrowSpeed = 6;
 
     void Awake()
     {
@@ -29,64 +32,13 @@ public class AddArrowUI : MonoBehaviour
     void Start()
     {
         typeDefs = arrowSpawner.ArrowTypeDefinitions;
-
-        PopulateDirectionDropdown();
-        PopulateTypeDropdown();
-
         addButton.onClick.AddListener(OnAddArrow);
+        defaultArrowSpeedInput.SetTextWithoutNotify($"{defaultArrowSpeed}");
     }
 
-    // ------------------------------------------------------------
-    // Populate Dropdowns
-    // ------------------------------------------------------------
 
-    private void PopulateDirectionDropdown()
-    {
-        directionDropdown.ClearOptions();
-        directionDropdown.AddOptions(new List<string>
-        {
-            "Up", "Down", "Left", "Right",
-            "Up-Right", "Up-Left", "Down-Right", "Down-Left"
-        });
-    }
-
-    private void PopulateTypeDropdown()
-    {
-        typeDropdown.ClearOptions();
-
-        List<string> names = new List<string>();
-        foreach (var def in typeDefs)
-            names.Add(def.displayName);
-
-        typeDropdown.AddOptions(names);
-    }
-
-    // ------------------------------------------------------------
-    // Convert dropdown → direction
-    // ------------------------------------------------------------
-
-    private Vector2 DirectionFromDropdown(int index)
-    {
-        return index switch
-        {
-            0 => Vector2.up,
-            1 => Vector2.down,
-            2 => Vector2.left,
-            3 => Vector2.right,
-            4 => new Vector2(1, 1).normalized,
-            5 => new Vector2(-1, 1).normalized,
-            6 => new Vector2(1, -1).normalized,
-            7 => new Vector2(-1, -1).normalized,
-            _ => Vector2.up
-        };
-    }
-
-    // ------------------------------------------------------------
-    // Add Arrow Button Logic (UPDATED)
-    // ------------------------------------------------------------
     private void OnAddArrow()
     {
-        //AudioSettingsManager.PlayGeneralButtonSound();
         if(LevelEditorData.Instance.currentLevelAsset == null)
         {
             UIToast.Error("No level loaded to add arrow");
@@ -95,33 +47,41 @@ public class AddArrowUI : MonoBehaviour
         TimelineToolController.Instance.EnterAddArrowMode();
     }
 
-    public void AddArrowAtTime(float time)
+    public void OnDefaultArrowSpeedChanged(string _)
     {
-        if (!float.TryParse(speedInput.text, out float speed))
+        string text = defaultArrowSpeedInput.text;
+
+        if (string.IsNullOrWhiteSpace(text))
         {
-            UIToast.Error("❌ Invalid speed value");
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
+            UIToast.Error("DefaultArrowSpeed input cannot be empty!");
             return;
         }
 
-        Vector2 dir = DirectionFromDropdown(directionDropdown.value);
-        string typeName = typeDefs[typeDropdown.value].displayName;
+        if (!int.TryParse(text,NumberStyles.Integer,CultureInfo.InvariantCulture, out int speed))
+        {
+            UIToast.Error($"Invalid Default Speed input: '{text}'");
+            return;
+        }
 
+        UIToast.Show($"Default arrow Speed updated => {speed}");
+        defaultArrowSpeed = speed;
+    }
+
+    public void AddArrowAtTime(float time)
+    {
         var evt = new ArrowEventData(
             time,
-            "arrow",
-            dir,
-            speed,
-            typeName
+            Vector2.up,
+            defaultArrowSpeed,
+            "normalarrow"
         );
 
-        LevelEditorData.Instance.AddEvent(evt);
+        EditorHistory.Instance.Execute(new AddEventCommand(evt));
 
+        //LevelEditorData.Instance.AddEvent(evt);
         LevelTimelineUI.Instance.BuildTimeline();
         playbackController.RebuildSimulation();
         TimelineToolController.Instance.ExitTool();
-
-        //AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
     }
 
 }

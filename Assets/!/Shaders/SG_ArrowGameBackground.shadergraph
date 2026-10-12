@@ -1273,8 +1273,8 @@
     "m_ObjectId": "13d52f01a68d4d5da0f81efd0ca9fb90",
     "m_Title": "Color Adjustments",
     "m_Position": {
-        "x": 689.0001220703125,
-        "y": -1100.9998779296875
+        "x": 689.0,
+        "y": -1101.0
     }
 }
 
@@ -2139,8 +2139,8 @@
     "m_ObjectId": "3ee71ea2d5864a258d3c4cde2961c2f4",
     "m_Title": "Main Textrure",
     "m_Position": {
-        "x": -2358.999755859375,
-        "y": -2680.999755859375
+        "x": -2359.0,
+        "y": -2681.0
     }
 }
 
@@ -2459,7 +2459,7 @@
     "m_Title": "Create a grient at the bottom of the screen that blends between two colors",
     "m_Position": {
         "x": -1348.0,
-        "y": -1102.9998779296875
+        "y": -1103.0
     }
 }
 
@@ -4983,8 +4983,8 @@
     "m_ObjectId": "c090c0ca27784ac3a1e25e4c65ec6b93",
     "m_Title": "Secondary Texture",
     "m_Position": {
-        "x": -2440.999755859375,
-        "y": -1949.999755859375
+        "x": -2441.0,
+        "y": -1950.0
     }
 }
 

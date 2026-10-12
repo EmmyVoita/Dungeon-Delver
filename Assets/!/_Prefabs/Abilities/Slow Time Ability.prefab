@@ -45,14 +45,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   upgradeData:
-  - icon: {fileID: 0}
+  - icon: {fileID: 21300000, guid: cfd0567beae7c0d4fb8b57973de7dfe0, type: 3}
     displayName: Ability Upgrade Tier 1
-    description: Gain currency for each arrow crit while time is slowed. Currency
-      scales exponentially for each arrow crit.
+    description: 'Encore. Extend the duration of your ability by <color=#6EE68C>1
+      second</color>. '
     details: This upgrade does not stack.
-  - icon: {fileID: 0}
+  - icon: {fileID: 1506465343, guid: a9123ae3c843c0a46a2bafa36ed83d54, type: 3}
     displayName: Ability Upgrade Tier 2
-    description: Extend the duration of your ability for each arrow crit.
-    details: Extends the duration by 0.2 seconds for each arrow.
+    description: 'If you use your ability during a challenge, refund <color=#6EE68C>30%</color>
+      ability charge. '
+    details: This upgrade does not stack.
   effectPrefab: {fileID: 2306586631246076703, guid: 7c6d814ac2a89134c9e9b1d6d7dadec1, type: 3}
   spawnAtPlayer: 1

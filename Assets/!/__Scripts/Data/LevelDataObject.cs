@@ -4,6 +4,7 @@ using UnityEngine;
 public class LevelDataObject : ScriptableObject
 {
     [SerializeField] private TextAsset _levelFile;
+    [SerializeField] private AudioClip musicClip;
 
     [Header("Shop Rewards")]
     [SerializeField] private int _baseCurrencyReward = 100;
@@ -12,4 +13,5 @@ public class LevelDataObject : ScriptableObject
     public int BaseCurrencyReward => _baseCurrencyReward;
     public int BaseRerollReward => _baseCurrencyReward;
     public TextAsset LevelFile => _levelFile;
+    public AudioClip MusicClip => musicClip;
 }

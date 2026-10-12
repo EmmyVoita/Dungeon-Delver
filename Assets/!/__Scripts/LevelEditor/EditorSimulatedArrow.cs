@@ -109,6 +109,7 @@ public class EditorSimulatedArrow : MonoBehaviour
     
     void OnGUI()
     {
+        /*
         if (data == null || Camera.main == null) return;
 
         Vector3 screen = Camera.main.WorldToScreenPoint(transform.position);
@@ -128,6 +129,7 @@ public class EditorSimulatedArrow : MonoBehaviour
             $"hit: {data.arrivalTime:F3}\n" +
             $"Δ: {(EditorPlaybackController.Instance.CurrentTime - data.arrivalTime):F3}"
         );
+        */
     }
  
 

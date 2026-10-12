@@ -15,7 +15,7 @@ public abstract class UpgradeBase : ScriptableObject
 
     [Header("Shop Offering")]
     [Tooltip("The player must own every upgrade in this list.")]
-    [SerializeField] private List<UpgradeRequirement> requiredUpgrades = new();
+    [SerializeField] protected List<UpgradeRequirement> requiredUpgrades = new();
 
     [Tooltip("A value that describes how likely the card is to appear in the shop.")]
     [Min(0)]
@@ -49,6 +49,7 @@ public abstract class UpgradeBase : ScriptableObject
     public UpgradeCategory Category => category;
     public UpgradeDuration Duration => duration;
     public virtual string DisplayName => displayName;
+    public virtual Sprite CenterIcon => centerIcon;
 
     #if UNITY_EDITOR
         private void OnValidate()
@@ -70,8 +71,7 @@ public abstract class UpgradeBase : ScriptableObject
         if (ShopManager.Instance == null)
             return false;
 
-        int ownedCount =
-            ShopManager.Instance.GetPurchasedCardCount(this);
+        int ownedCount = ShopManager.Instance.GetPurchasedCardCount(this);
 
         if (ownedCount >= MaxStacks)
             return false;
@@ -84,14 +84,14 @@ public abstract class UpgradeBase : ScriptableObject
         return CanAppear() ? baseOfferWeight : 0.0f;
     }
 
-    public virtual string GetFormattedDescription()
+    public virtual string GetFormattedDescription(bool isInventory = false)
     {
-        return FormatText(descriptionTemplate);
+        return FormatText(descriptionTemplate, isInventory);
     }
 
-    public string GetDescription()
+    public string GetDescription(bool isInventory = false)
     {
-        string description = GetFormattedDescription();
+        string description = GetFormattedDescription(isInventory);
 
         if (duration == UpgradeDuration.ThisLevel)
             description += LASTS_THIS_NEXT_LEVEL;
@@ -101,11 +101,19 @@ public abstract class UpgradeBase : ScriptableObject
 
     public virtual string GetDetails()
     {
-        return FormatText(detailsTemplate);
+        string stackText;
+
+        if (MaxStacks <= 1)
+            stackText = "This upgrade does not stack.";
+        else if (MaxStacks == 999)
+            stackText = "No stack limit.";
+        else
+            stackText = $"This card stacks up to {MaxStacks} times.";
+
+        return FormatText($"{stackText}\n\n{detailsTemplate}");
     }
 
-    public Sprite GetCategoryIcon(
-        UpgradeCategoryDatabase database)
+    public Sprite GetCategoryIcon(UpgradeCategoryDatabase database)
     {
         if (database == null)
             return null;
@@ -113,7 +121,7 @@ public abstract class UpgradeBase : ScriptableObject
         return database.GetIcon(Category);
     }
 
-    protected virtual void AddReplacements(Dictionary<string, string> replacements)
+    protected virtual void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
         replacements["{MAX_STACKS}"] =
             $"<color=#{UIColors.ToHex(UIColors.Yellow)}>" +
@@ -127,21 +135,30 @@ public abstract class UpgradeBase : ScriptableObject
             $"<color=#{UIColors.ToHex(UIColors.Purple)}>" +
             Category.ToString();
 
+        bool playerExists = Player.Instance != null; 
+
+        string abilityReplacement = playerExists ?  $"<color=#{UIColors.ToHex(UIColors.Orange)}>" + 
+                                                    $"Maximum ability charge cannot be reduced below {Player.Instance.MinimumAllowedMaxAbilityCharge}</color>." :
+                                                    "";
+        
+        replacements["{MAXABILITY_STATEMENT}"] = abilityReplacement;
+
         replacements["{GOLDEN_ARROWS}"] = 
             $"<color=#{UIColors.ToHex(UIColors.Purple)}>Golden Arrows</color>";
 
         replacements["{EMPOWERED_ARROW}"] = 
             $"<color=#{UIColors.ToHex(UIColors.Purple)}>Empowered Arrows</color>";
+        
     }
 
-    protected string FormatText(string text)
+    protected string FormatText(string text, bool isInventory = false)
     {
         if (string.IsNullOrEmpty(text))
             return string.Empty;
 
         Dictionary<string, string> replacements = new();
 
-        AddReplacements(replacements);
+        AddReplacements(replacements,isInventory);
 
         foreach (KeyValuePair<string, string> replacement in replacements)
         {

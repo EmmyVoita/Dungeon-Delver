@@ -195,6 +195,8 @@ MonoBehaviour:
   registerWithManager: 1
   priority: 1
   controlMode: 2
+  childChallenges: []
+  addCanvasPopup: 1
   listenForBossActive: 1
   lifetimeMode: 2
   switchPlayerState: 1
@@ -204,13 +206,13 @@ MonoBehaviour:
   shootSoundEffect:
     clip: {fileID: 8300000, guid: 35f2087f655e83240b4bfa7e50a59852, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
-  spawnDistance: 7
-  spawnInterval: 1.5
+  spawnDistance: 6.2
+  spawnInterval: 1.3
   spawnCount: 3
+  fireAction: 6
   minFireDelay: 0.1
   unregisterDelay: 8
   directions:
@@ -267,6 +269,8 @@ MonoBehaviour:
   registerWithManager: 1
   priority: 0
   controlMode: 1
+  childChallenges:
+  - {fileID: 7087284656622553578}
   ringPrefab: {fileID: 110340108235673376, guid: 6e771345172556d4688258a08799bb68, type: 3}
   ringCount: 5
   spawnInterval: 1.5

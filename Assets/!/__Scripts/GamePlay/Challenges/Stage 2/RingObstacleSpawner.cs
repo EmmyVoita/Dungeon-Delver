@@ -16,8 +16,6 @@ public class RingObstacleSpawner : ChallengeBase
     void Start()
     {
         ringsAlive = ringCount;
-
-        Begin();
     }
 
     private IEnumerator SpawnRingsRoutine()

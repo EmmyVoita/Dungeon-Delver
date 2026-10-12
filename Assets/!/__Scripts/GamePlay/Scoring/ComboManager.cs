@@ -277,7 +277,7 @@ public class ComboManager : MonoBehaviour
          
             if(!blockBreakThisFrame)
             {
-                AudioHelpers.PlaySoundEffect(ignoreMissSoundEffect, Camera.main.transform.position);
+                //AudioHelpers.PlaySoundEffect(ignoreMissSoundEffect, Camera.main.transform.position);
 
                 if (ignoreMissVFXPrefab != null)
                 {

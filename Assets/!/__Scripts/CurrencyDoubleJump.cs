@@ -49,7 +49,7 @@ public class CurrencyDoubleJump : IJumpEffect
         return new CurrencyDoubleJump(_currencyRequired);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

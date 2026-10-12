@@ -19,6 +19,7 @@ public class WorldMapRouteSelector : MonoBehaviour
 
     [Header("Core")]
     [SerializeField] private int baseOptionCount = 3;
+    [SerializeField] private bool allowRerolling = false;
 
     [Header("References")]
     [SerializeField] private RectTransform optionsContainer;
@@ -31,6 +32,12 @@ public class WorldMapRouteSelector : MonoBehaviour
     [SerializeField] private RectTransform optionsLayoutRoot;
     [SerializeField] private UIPanelNudge panelNudge;
     [SerializeField] private RouteOptionDatabase routeOptionDatabase;
+
+
+    [SerializeField] private PagesController pagesController;
+    [SerializeField] private ShopDrawPoolInventory drawPoolInventory;
+    [SerializeField] private InventoryOpenSettings drawPoolOpenSettings;
+    [SerializeField] private int targetExitPage = 0;
 
     [Header("UI")]
     //[SerializeField]
@@ -78,6 +85,11 @@ public class WorldMapRouteSelector : MonoBehaviour
         //routeIconRoot.gameObject.SetActive(false);
         CleanUpText();
         //RunStateManager.Instance.AddGuaranteedWorldMapOptions(baseOptionCount);
+
+        foreach(var option in routeOptionDatabase.routeOptions)
+        {
+            RunStateManager.Instance.AddRouteWeightMultiplier(option.type, option.baseWeight);
+        }
     }
 
 
@@ -135,6 +147,77 @@ public class WorldMapRouteSelector : MonoBehaviour
         AnimateSelection();
         
 
+        if(HandleRerollInput())
+            return;
+
+        if(HandleDrawPoolInput())
+            return;
+
+        if(HandleSelectInput())
+            return;
+
+        HandleNavigation();
+    }
+
+    private bool HandleDrawPoolInput()
+    {
+        if(!InputBindingManager.Instance.GetKeyDown(InputActionType.UseAbility))
+            return false;
+
+        WorldMapRouteOption hovered = currentOptions[_selectedIndex];
+
+        UpgradeCategory category;
+
+        bool isUpgradeCategory = hovered.TryGetUpgradeCategory(out category);
+
+        if(!isUpgradeCategory)
+            return false;
+        
+        drawPoolInventory.SetTargetCategory(category);
+        drawPoolInventory.SetVisibilityData(pagesController, targetExitPage);
+
+        if(drawPoolInventory.TryOpen(promptController,drawPoolOpenSettings))
+            pagesController.ShowNextPage();
+
+        return true;
+    }
+
+    private bool HandleRerollInput()
+    {
+        #if !UNITY_EDITOR
+            if(!allowRerolling)
+                return false;
+        #endif
+        
+
+        if(!RunStateManager.Instance.CanRerollShop || _rerollLock)
+            return false;
+
+        if(!InputBindingManager.Instance.GetKeyDown(InputActionType.Reroll))
+            return false;
+
+        bool goThroughWithReroll = RunStateManager.Instance.ConsumeShopReroll();
+        _rerollLock = true;
+        if(goThroughWithReroll)
+        {
+            Reroll();
+        } 
+
+        return true;
+    }
+
+    private bool HandleSelectInput()
+    {
+        if (!InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
+            return false;
+
+        InputBindingManager.Instance.BlockUntilRelease(InputActionType.Confirm);
+        SelectCurrentOption();
+        return true;
+    }
+
+    private void HandleNavigation()
+    {
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
         {
             MoveSelection(1);
@@ -143,23 +226,6 @@ public class WorldMapRouteSelector : MonoBehaviour
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
             MoveSelection(-1);
-        }
-
-        if(InputBindingManager.Instance.GetKeyDown(InputActionType.Reroll) && RunStateManager.Instance.CanRerollShop && !_rerollLock)
-        {
-            bool goThroughWithReroll = RunStateManager.Instance.ConsumeShopReroll();
-            _rerollLock = true;
-            if(goThroughWithReroll)
-            {
-                Reroll();
-            } 
-        }
-        
-
-        if (InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
-        {
-            InputBindingManager.Instance.BlockUntilRelease(InputActionType.Confirm);
-            SelectCurrentOption();
         }
     }
 
@@ -177,6 +243,28 @@ public class WorldMapRouteSelector : MonoBehaviour
     }
 
     
+    private WorldMapRouteOption DrawRouteOption(List<WorldMapRouteOption> available)
+    {
+        float totalWeight = 0f;
+        foreach(var routeOption in available)
+        {
+            totalWeight += RunStateManager.Instance.GetRouteWeightMultiplier(routeOption.type);
+        }
+
+        float roll = Random.Range(0,totalWeight);
+
+        foreach(var option in available)
+        {
+            roll -= RunStateManager.Instance.GetRouteWeightMultiplier(option.type);
+
+            if(roll <= 0)
+            {
+                return option;
+            }
+        }
+
+        return null;
+    }
 
 
     private void DrawOptions()
@@ -187,13 +275,9 @@ public class WorldMapRouteSelector : MonoBehaviour
 
         for (int i = 0; i < _currentOptionCount && available.Count > 0; i++)
         {
-            int randomIndex = Random.Range(0, available.Count);
-
-            WorldMapRouteOption option = available[randomIndex];
-
+            WorldMapRouteOption option = DrawRouteOption(available);
             currentOptions.Add(option);
-
-            available.RemoveAt(randomIndex);
+            available.Remove(option);
         }
 
         if (_buildCoroutine != null)
@@ -277,7 +361,7 @@ public class WorldMapRouteSelector : MonoBehaviour
 
 
         AudioHelpers.PlaySoundEffect(
-            AudioLibrary.Instance.Database.navigate,
+            AudioLibrary.Instance.Database.navigateMajor,
             transform.position
         );
 
@@ -322,9 +406,12 @@ public class WorldMapRouteSelector : MonoBehaviour
 
         WorldMapRouteOption selected = currentOptions[_selectedIndex];
 
-        RunStateManager.Instance.SetNextWorldMapRoute(selected.type);
+        RunStateManager.Instance.SelectWorldMapRoute(selected.type);
 
-        RunStateManager.Instance.SetRouteHistory(RoundManager.Instance.CurrentLevelIndex,selected.type);
+        StageLevelIndex currentStageRoundIndex = new StageLevelIndex{ levelIndex = RoundManager.Instance.TotalCurrentLevelIndex,
+                                                                      stageIndex = RoundManager.Instance.CurrentStageIndex};
+                                                                    
+        RunStateManager.Instance.SetRouteHistory(currentStageRoundIndex,selected.type);
 
         AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select,transform.position);
 
@@ -332,7 +419,7 @@ public class WorldMapRouteSelector : MonoBehaviour
 
         Close();
 
-        BetweenRoundFlowManager.Instance.StartNextRound();
+        BetweenRoundFlowManager.Instance.WorldMapTransitionToNextState();
     }
 
 

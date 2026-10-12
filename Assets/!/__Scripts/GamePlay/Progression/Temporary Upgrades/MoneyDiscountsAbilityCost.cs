@@ -7,34 +7,16 @@ public class MoneyDiscountsAbilityCost : CurrencyWeightedUpgradeBase
     [SerializeField, Min(0)]
     private int abilityCostAmount = 1;
 
-    public override string GetFormattedDescription()
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        return descriptionTemplate
-            .Replace(
-                "{ABILITY_COST_AMOUNT}",
-                $"<color=#{UIColors.ToHex(UIColors.Green)}>{abilityCostAmount:N0}</color>")
-            .Replace(
-                "{CURRENCY_STEP}",
-                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>");
-    }
+        replacements["{ABILITY_COST_AMOUNT}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>{abilityCostAmount:N0}</color>";
+        replacements["{CURRENCY_STEP}"] = $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>";
 
-    public override string GetDetails()
-    {
-        return detailsTemplate
-            .Replace(
-                "{ABILITY_COST_AMOUNT}",
-                $"<color=#{UIColors.ToHex(UIColors.Green)}>{abilityCostAmount:N0}</color>")
-            .Replace(
-                "{CURRENCY_STEP}",
-                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>");
+        base.AddReplacements(replacements,isInventory);
     }
 
     public override void Apply()
     {
-        AbilityChargeManager.Instance.RegisterPermanent(
-            new CurrencyAbilityCostUpgrade(
-                currencyStep,
-                abilityCostAmount), this);
-        
+        AbilityChargeManager.Instance.RegisterPermanent(new CurrencyAbilityCostUpgrade(currencyStep,abilityCostAmount), this);
     }
 }

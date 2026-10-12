@@ -7,27 +7,12 @@ public class CurrencyAbilityDurationUpgrade : CurrencyWeightedUpgradeBase
     [SerializeField, Min(.1f)]
     private float abilityDurationMod = 1.1f;
 
-
-    public override string GetFormattedDescription()
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        return descriptionTemplate
-            .Replace(
-                "{ABILITY_DURATION_MOD}",
-                $"<color=#{UIColors.ToHex(UIColors.Green)}>{(abilityDurationMod- 1):P0}</color>")
-            .Replace(
-                "{CURRENCY_STEP}",
-                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>");
-    }
+        replacements["{ABILITY_DURATION_MOD}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>{(1.0f-abilityDurationMod):P0}</color>";
+        replacements["{CURRENCY_STEP}"] = $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>";
 
-    public override string GetDetails()
-    {
-        return detailsTemplate
-            .Replace(
-                "{ABILITY_DURATION_MOD}",
-                $"<color=#{UIColors.ToHex(UIColors.Green)}>{(1.0f-abilityDurationMod):P0}</color>")
-            .Replace(
-                "{CURRENCY_STEP}",
-                $"<color=#{UIColors.ToHex(UIColors.Yellow)}>${currencyStep:N0}</color>");
+        base.AddReplacements(replacements, isInventory);
     }
 
     public override void Apply()

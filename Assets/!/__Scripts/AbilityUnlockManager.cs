@@ -10,6 +10,38 @@ public class AbilityUnlockManager : MonoBehaviour
 
     private AbilitySaveData _saveData;
     private string _saveFilePath;
+
+    private bool Unlocked(AbilityData ability)
+    {
+        return RunHistoryManager.Instance.GetHighScore() >= ability.scoreRequirement || 
+               RunHistoryManager.Instance.GetUnlockAll();
+    }
+
+    private void OnEnable()
+    {
+        RunHistoryManager.OnSetUnlockAll += HandleSetUnlockAll;
+    }
+
+    private void OnDisable()
+    {
+        RunHistoryManager.OnSetUnlockAll -= HandleSetUnlockAll;
+    }
+
+    private void HandleSetUnlockAll(bool unlocked)
+    {
+        Debug.Log($"AbilityUnlockManager received UnlockAll: {unlocked}");
+        Debug.Log($"GetUnlockAll() = {RunHistoryManager.Instance.GetUnlockAll()}");
+
+        LoadData();
+        CheckForUpdates();
+
+        foreach (var record in _saveData.records)
+        {
+            Debug.Log($"{record.abilityType}: unlocked = {record.unlocked}");
+        }
+
+        StartCoroutine(presentationController.PlayUnlockSequence(GetNewUnlocks()));
+    }
     
     
     private void Start()
@@ -20,18 +52,13 @@ public class AbilityUnlockManager : MonoBehaviour
             return;
         }
 
-        _saveFilePath = Path.Combine(
-            Application.persistentDataPath,
-            "abilitySaveData.json"
-        );
+        _saveFilePath = Path.Combine(Application.persistentDataPath,"abilitySaveData.json");
 
         LoadData();
         CheckForUpdates();
-        SyncMissingAbilities();
+        //SyncMissingAbilities();
 
-        StartCoroutine(
-            presentationController.PlayUnlockSequence(GetNewUnlocks())
-        );
+        StartCoroutine(presentationController.PlayUnlockSequence(GetNewUnlocks()));
     }
 
     private void LoadData()
@@ -39,22 +66,37 @@ public class AbilityUnlockManager : MonoBehaviour
         if (File.Exists(_saveFilePath))
         {
             string json = File.ReadAllText(_saveFilePath);
-
-            Debug.Log($"Loaded Ability Unlock JSON:\n{json}");
-
             _saveData = JsonUtility.FromJson<AbilitySaveData>(json);
         }
         else
-        {
+        {   
+            // So the goal here is that if we dont have an existing file we read from out database 
+            // of abilities and create a new unlock record for each ability.
+            // The unlock record maintins the ability type, which is an enum. This is how we identify
+            // which record is assigned to what ability. We will check for whether an ability is unlocked
+            // whenever there is a chance for that to be updated. This will be when we load the menu 
+            // (from getting back from playing the game which might update the players high score)
+            // Then, I also have a setting to unlock everything, so we also need to check it then.
+            // The run history manager maintains a veriable for whether everything should be unlocked,
+            // so we can check that. What I will do here is subscribe to an event that fires whenever that
+            // run history variable changes.
+
             List<AbilityUnlockRecord> records = new List<AbilityUnlockRecord>();
 
             foreach(AbilityData ability in abilityDatabase.abilities)
             {
-                Debug.Log($"Highscore => {ScoreManager.Instance.HighScore()}, score required => {ability.scoreRequirement}");
+
+                // When we first unlock an ability, we have an animation for presenting the ability.
+                // The idea is that we store a variable that says whether its already been presented. 
+                // Its set to false by default, and then when it gets presented, it gets set to true.
+
+                // I want to handle the situation for when we have abilities that are unlocked by default.
+                // For those I dont want to play the unlock animation so i just set presented to true when
+                // we create the record.
                 records.Add(new AbilityUnlockRecord()
                 {
                     abilityType = ability.abilityType,
-                    unlocked = ScoreManager.Instance.HighScore() >= ability.scoreRequirement,
+                    unlocked = Unlocked(ability),
                     presented = ability.scoreRequirement == 0 ? true : false
                 });
             }
@@ -68,24 +110,111 @@ public class AbilityUnlockManager : MonoBehaviour
 
     private void CheckForUpdates()
     {
-        // We want to check to see if any of the abilites should be unlocked when we load the data
-        List<AbilityUnlockRecord> records = new List<AbilityUnlockRecord>();
+        List<AbilityUnlockRecord> updatedRecords = new();
 
-        for(int i = 0; i < _saveData.records.Count; i++)
+        foreach (AbilityData ability in abilityDatabase.abilities)
         {
-            records.Add(new AbilityUnlockRecord()
+            AbilityUnlockRecord existingRecord =
+                _saveData.records.FirstOrDefault(
+                    r => r.abilityType == ability.abilityType
+                );
+
+            if (existingRecord != null)
             {
-                abilityType = abilityDatabase.abilities[i].abilityType,
-                unlocked = ScoreManager.Instance.HighScore() >= abilityDatabase.abilities[i].scoreRequirement,
-                presented = _saveData.records[i].presented
-            });
+                // Existing ability
+                updatedRecords.Add(new AbilityUnlockRecord()
+                {
+                    abilityType = ability.abilityType,
+                    unlocked = Unlocked(ability),
+                    presented = existingRecord.presented
+                });
+            }
+            else
+            {
+                // Newly added ability
+                updatedRecords.Add(new AbilityUnlockRecord()
+                {
+                    abilityType = ability.abilityType,
+                    unlocked = Unlocked(ability),
+                    presented = ability.scoreRequirement == 0
+                });
+            }
         }
 
-        _saveData = new AbilitySaveData()
+        _saveData.records = updatedRecords;
+
+        SaveDataToFile();
+    }
+
+    /*
+    private void UpdateRecordCountChanged()
+    {
+        // We also need to handle the situation in which we've added new abilities to the
+        // ability database.
+        if(abilityDatabase.abilities.Count > _saveData.records.Count)
         {
-            records = records
-        };
-    } 
+            // loop over the ability data base and check if the record contains that ability type.
+            // If the record doesn't have that ability type then add it. 
+            // For the other recods we just check whether "unlocked" has changed.
+            foreach (AbilityData ability in abilityDatabase.abilities)
+            {
+                bool exists = _saveData.records.Any(r => r.abilityType == ability.abilityType);
+
+                if (!exists)
+                {
+                    _saveData.records.Add(new AbilityUnlockRecord()
+                    {
+                        abilityType = ability.abilityType,
+                        unlocked = Unlocked(ability),
+                        presented = ability.scoreRequirement == 0
+                    });
+                }
+            }
+
+            SaveDataToFile();
+            return;
+        }
+
+
+        // Its possible that the number of records doesnt match the number of abilities in our file
+        // This happens if i remove an ability from the ability database. In that case we just copy 
+        // the data for the missing abilities.
+
+        if(abilityDatabase.abilities.Count < _saveData.records.Count)
+        {
+            List<AbilityUnlockRecord> records = new List<AbilityUnlockRecord>();
+
+            foreach (AbilityUnlockRecord record in _saveData.records)
+            {
+                bool existsInDatabase = abilityDatabase.abilities.Any(r => r.abilityType == record.abilityType);
+
+                if(existsInDatabase)
+                {
+                    AbilityData abilityData = abilityDatabase.abilities.First(r => r.abilityType == record.abilityType);
+
+                    records.Add(new AbilityUnlockRecord()
+                    {
+                        abilityType = record.abilityType,
+                        unlocked = Unlocked(abilityData),
+                        presented = record.presented
+                    });
+                }
+                else
+                {
+                    records.Add(record);
+                }
+            }
+
+            _saveData = new AbilitySaveData()
+            {
+                records = records
+            };
+
+            SaveDataToFile();
+            return;
+        }
+    }
+    */
 
     private List<AbilityType> GetNewUnlocks()
     {
@@ -99,8 +228,6 @@ public class AbilityUnlockManager : MonoBehaviour
         {
             abilityData.Add(unlockRecord.abilityType);
         }
-
-        Debug.Log($"Fetching New Unlocks. Amount => {abilityData.Count}");
 
         return abilityData;
     }
@@ -117,15 +244,12 @@ public class AbilityUnlockManager : MonoBehaviour
 
     private AbilityUnlockRecord GetRecordByType(AbilityType type)
     {
-        return _saveData.records
-            .FirstOrDefault(a => a.abilityType == type);
+        return _saveData.records.FirstOrDefault(a => a.abilityType == type);
     }
 
     public void MarkPresented(AbilityType type)
     {
-        AbilityUnlockRecord record =
-            _saveData.records.Find(
-                r => r.abilityType == type);
+        AbilityUnlockRecord record =_saveData.records.Find(r => r.abilityType == type);
 
         if (record != null)
         {
@@ -148,25 +272,6 @@ public class AbilityUnlockManager : MonoBehaviour
         Debug.Log($"Saved Ability Unlock Records To {_saveFilePath}");
     }
 
-    private void SyncMissingAbilities()
-    {
-        foreach (AbilityData ability in abilityDatabase.abilities)
-        {
-            bool exists = _saveData.records.Any(r => r.abilityType == ability.abilityType);
-
-            if (!exists)
-            {
-                _saveData.records.Add(new AbilityUnlockRecord()
-                {
-                    abilityType = ability.abilityType,
-                    unlocked = ScoreManager.Instance.HighScore() >= ability.scoreRequirement,
-                    presented = ability.scoreRequirement == 0
-                });
-            }
-        }
-
-        SaveDataToFile();
-    }
 
     [ContextMenu("Delete Ability Save File")]
     public void DeleteSaveFile()

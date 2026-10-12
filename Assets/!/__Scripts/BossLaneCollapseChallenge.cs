@@ -3,37 +3,31 @@ using System.Collections;
 
 public class BossLaneCollapseChallenge : ChallengeBase
 {
+    [SerializeField] private float startingDelay = 0f;
     [SerializeField] private float collapseInterval = 3f;
     [SerializeField] private float warningTime = 1f;
     [SerializeField] private float collapseDuration = 2f;
 
     private Coroutine routine;
 
-    void Start()
-    {
-        if(BossManager.Instance.IsBossActive)
-            Begin();
-    }
 
     public override void Begin(object config = null)
     {
+        if(!BossManager.Instance.IsBossActive)
+            return;
+
         routine = StartCoroutine(CollapseRoutine());
     }
 
     private IEnumerator CollapseRoutine()
     {
+        yield return new WaitForSeconds(startingDelay);
         yield return null;
         
         while (true)
         {
-
-            StartCoroutine(
-                CollapseLaneSequence()
-            );
-
-            yield return new WaitForSeconds(
-                collapseInterval
-            );
+            StartCoroutine(CollapseLaneSequence());
+            yield return new WaitForSeconds(collapseInterval);
         }
     }
 

@@ -13,6 +13,12 @@ public enum RunModifierType
     AbilityDamage,
     NormalArrowAbilityCharge,
     StartingAbilityCharge,
-    StartingCurrency
+    StartingCurrency,
+    RandomGoldenArrow,
+    AbilityChargeOnCurrencyGain,
+    CritsTakeAbilityCharge,
+    CritsLoseCurrency,
+    RotateBoard,
+    AdditionalGeneralShop
 }
 

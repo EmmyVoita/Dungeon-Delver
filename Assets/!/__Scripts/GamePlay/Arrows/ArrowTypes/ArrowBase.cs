@@ -6,6 +6,7 @@ using UnityEngine.Rendering;
 public abstract class ArrowBase : MonoBehaviour
 {
     public static event Action<ArrowResolvedData> OnArrowResolved;
+    
 
     [Header("Arrow Stats")]
     [SerializeField] private float health = 1f;
@@ -185,7 +186,7 @@ public abstract class ArrowBase : MonoBehaviour
     {
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         float offset = flip180 ? 90f : -90f;
-        transform.rotation = Quaternion.Euler(0, 0, angle + offset);
+        transform.localRotation = Quaternion.Euler(0, 0, angle + offset);
     }
 
 
@@ -203,6 +204,7 @@ public abstract class ArrowBase : MonoBehaviour
         {
             ArrowResolvedData data = new ArrowResolvedData
             {
+                arrowBase = this,
                 goalType = goalType,
                 status = this._status
             };
@@ -234,8 +236,8 @@ public abstract class ArrowBase : MonoBehaviour
     protected void SmoothTranslate(Vector3 targetPos)
     {
         // Smooth movement toward correct DSP position
-        transform.position = Vector2.Lerp(
-            transform.position,
+        transform.localPosition = Vector2.Lerp(
+            transform.localPosition,
             targetPos,
             1f - Mathf.Exp(-20f * Time.deltaTime)
         );

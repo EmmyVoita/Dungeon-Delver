@@ -31,6 +31,7 @@ public class ArrowSpawner : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private DirectionalWarningController directionalWarningController;
+    [SerializeField] private PatternDatabase patternDatabase;
     
     [SerializeField] private float spawnDistance = 10f;
     [SerializeField] private float goalRadius = 1f;
@@ -48,16 +49,20 @@ public class ArrowSpawner : MonoBehaviour
     private Coroutine spawnCoroutine;
     private bool stopRequested = false; // 🔹 new flag for graceful stop
     private float bpm;
-    private GameObject arrowContainer;
+    [SerializeField] private GameObject arrowContainer;
+    [SerializeField] private GameObject challengeContainer;
 
     private bool isPausedByObstacle = false;
-    private int currentIndex = 0;
-
+  
     //private double lastDSPTime;
     //private double scaledSongTime;
 
 
+    private readonly HashSet<ArrowBase> _activeArrows = new();
 
+    public int ActiveArrowCount => _activeArrows.Count;
+    public bool HasActiveArrows =>_activeArrows.Count > 0;
+    public bool AllArrowsResolved =>!IsSpawning && _activeArrows.Count == 0;
 
     public int TotalArrowsThisRound { get; private set; }
     public float ActiveBPM => bpm;
@@ -67,6 +72,11 @@ public class ArrowSpawner : MonoBehaviour
     public float GoalRadius => goalRadius;
     public float ArrowTravelDistance => Mathf.Max(spawnDistance - goalRadius,0f);
     public bool IsSpawning { get; private set; }
+
+
+    public bool PatternFinished => !IsSpawning;
+
+    public bool AllGameplayResolved => PatternFinished && _activeArrows.Count == 0 && !ObstacleManager.Instance.AnyActive;
 
 
     private bool useEightDirections = false;
@@ -83,7 +93,7 @@ public class ArrowSpawner : MonoBehaviour
         else
             Instance = this;
 
-        arrowContainer = new GameObject("Arrow_Container");
+        //arrowContainer = new GameObject("Arrow_Container");
     }
 
     void OnEnable()
@@ -91,6 +101,7 @@ public class ArrowSpawner : MonoBehaviour
         GameStateManager.OnStateChanged += HandleStateChanged;
         ObstacleManager.OnFirstObstacleAppeared += HandlePauseSpawning;
         ObstacleManager.OnAllObstaclesCleared += HandleResumeSpawning;
+        ArrowBase.OnArrowResolved += HandleArrowResolved;
     }
 
     void OnDisable()
@@ -98,6 +109,15 @@ public class ArrowSpawner : MonoBehaviour
         GameStateManager.OnStateChanged -= HandleStateChanged;
         ObstacleManager.OnFirstObstacleAppeared -= HandlePauseSpawning;
         ObstacleManager.OnAllObstaclesCleared -= HandleResumeSpawning;
+        ArrowBase.OnArrowResolved -= HandleArrowResolved;
+    }
+
+    private void HandleArrowResolved(ArrowResolvedData data)
+    {
+        if (data.arrowBase == null)
+            return;
+
+        _activeArrows.Remove(data.arrowBase);
     }
 
     private void HandlePauseSpawning()
@@ -125,10 +145,6 @@ public class ArrowSpawner : MonoBehaviour
     {
         IsSpawning = true;
 
-        //lastDSPTime = AudioSettings.dspTime;
-        //scaledSongTime = 0f;
-
-
         if (patternAsset == null)
         {
             Debug.LogError("HandleSpawning called with null TextAsset!");
@@ -142,13 +158,14 @@ public class ArrowSpawner : MonoBehaviour
         Player.Instance.UseEightDirections = useEightDirections;
         spawnCoroutine = StartCoroutine(SpawnFromPattern(GameSessionBootstrap.Config.LevelEditorStartTime));
         yield return spawnCoroutine;
-        yield return null;
+        yield return new WaitForSeconds(1.0f);
         IsSpawning = false;
     }
 
 
     public void HandleStateChanged(GameState previousState, GameState newState)
     {
+        
         if(newState == GameState.GameOverTally || newState == GameState.DeathSequence)
         {
            StopAllSpawning();
@@ -170,6 +187,9 @@ public class ArrowSpawner : MonoBehaviour
     {
         foreach (var arrow in GameObject.FindGameObjectsWithTag("Arrow"))
             Destroy(arrow);
+
+        _activeArrows.Clear();
+
         OnClearArrows?.Invoke();
     }
 
@@ -189,9 +209,9 @@ public class ArrowSpawner : MonoBehaviour
 
          IsSpawning = true;
 
-        currentIndex = FindStartingIndex(startTime);
+        
 
-        spawnCoroutine = StartCoroutine(SpawnFromPattern(GameSessionBootstrap.Config.LevelEditorStartTime));
+        spawnCoroutine = StartCoroutine(SpawnFromPattern(GameSessionBootstrap.Config.LevelStartTime));
         yield return spawnCoroutine;
         IsSpawning = false;
     }
@@ -202,47 +222,21 @@ public class ArrowSpawner : MonoBehaviour
         patternEvents.Clear();
         useEightDirections = false;
 
-        string[] lines = patternAsset.text.Split(
-            new[] { '\n', '\r' },
-            StringSplitOptions.RemoveEmptyEntries
-        );
+        string[] lines = patternAsset.text.Split(new[] { '\n', '\r' },StringSplitOptions.RemoveEmptyEntries);
 
-        float fileBPM = bpm; // fallback
+        Debug.LogError($"ACTUAL FILE CONTENT:\n{patternAsset.text}");
 
-        // 🔹 Check first few lines for a "# BPM:" definition
-        foreach (string raw in lines)
+        // Parse the header for BPM and direction data
+        bool hasBPM = ParseHeader(lines, out bpm);
+
+        // Ensure that we have bpm data
+        if(!hasBPM)
         {
-            string line = raw.Trim();
-
-            if (line.StartsWith("# BPM", StringComparison.OrdinalIgnoreCase))
-            {
-                string[] parts = line.Split(':');
-                if (parts.Length > 1 && float.TryParse(parts[1], out float parsedBPM))
-                {
-                    fileBPM = parsedBPM;
-                    Debug.Log($"🎵 BPM loaded from asset: {fileBPM}");
-                }
-                break;
-            }
-
-            if (line.StartsWith("# DIRECTIONS", StringComparison.OrdinalIgnoreCase))
-            {
-                if (line.Contains("8"))
-                    useEightDirections = true;
-            }
+            Debug.LogError("LEVEL FILE DOES NOT CONTAIN # BPM!");
+            return;
         }
-
-
         
-
-
-        // Use the file BPM if available
-        bpm = fileBPM;
-        float secondsPerBeat = 60f / bpm;
-
-        
-
-
+        // parse for event type
         for (int i = 0; i < lines.Length; i++)
         {
             string line = lines[i].Trim();
@@ -255,67 +249,23 @@ public class ArrowSpawner : MonoBehaviour
                 continue;
             }
 
-            float time = float.Parse(parts[0]);
             string eventType = parts[1].Trim().ToLower();
-            string type = parts[4].Trim().ToLower();
 
-            if (eventType == "arrow")
+            switch(eventType)
             {
-                string dirStr = parts[2].Trim().ToLower();
-                float speed = float.Parse(parts[3]);
-
-                Vector2 dir = dirStr switch
-                {
-                    "up" => Vector2.up,
-                    "down" => Vector2.down,
-                    "left" => Vector2.left,
-                    "right" => Vector2.right,
-                    "up-right" => new Vector2(1, 1).normalized,
-                    "down-right" => new Vector2(1, -1).normalized,
-                    "down-left" => new Vector2(-1, -1).normalized,
-                    "up-left" => new Vector2(-1, 1).normalized,
-                    _ => Vector2.zero
-                };
-
-                ArrowTypeDefinition arrowTypeDef =  arrowDatabase.arrows.Find(def => def.displayName.ToLower() == type.ToLower());
-                       
-                float spawnTime = CalculateSpawnTime(time, speed);
-                float arrivalTime = CalculateArrivalTime(time);
-
-                // 🔹 Add warning BEFORE arrow if needed
-                if (arrowTypeDef != null && arrowTypeDef.requiresWarning)
-                {
-                    patternEvents.Add(new SpawnEvent
-                    {
-                        time = Mathf.Max(0, spawnTime - arrowTypeDef.warningLeadTime),
-                        eventType = "warning",
-                        paramA = dir,
-                        type = type
-                    });
-                }
-
-                patternEvents.Add(new SpawnEvent
-                {
-                    time = spawnTime,
-                    arrivalTime = arrivalTime,
-                    eventType = "arrow",
-                    paramA = dir,
-                    paramB = speed,
-                    type = type
-                });
+                case "arrow":
+                    HandleArrowEvent(parts);
+                    break;
+                case "obstacle":
+                    HandleChallengeEvent(parts);
+                    break;
+                case "pattern":
+                    HandlePatternEvent(parts);
+                    break;
+                default:
+                    Debug.LogError($"UNRECOGNIZED EVENTTYPE SYMBOL WHEN PARSING LEVEL FILE => {eventType}");
+                    return;
             }
-            else if (eventType == "obstacle")
-            {
-                patternEvents.Add(new SpawnEvent
-                {
-                    time = time * secondsPerBeat,
-                    eventType = "obstacle",
-                    paramA = Vector2.zero,   // unused
-                    paramB = 0,              // unused
-                    type = type              // fileName from your CSV
-                });
-            }
-
         }
 
         patternEvents.Sort((a, b) => a.time.CompareTo(b.time));
@@ -327,6 +277,170 @@ public class ArrowSpawner : MonoBehaviour
             if (e.eventType == "arrow")
                 TotalArrowsThisRound++;
         }
+
+        Debug.Log($"Level File contains => {patternEvents.Count} Pattern Events, with => {TotalArrowsThisRound} total arrows");
+    }
+
+    private void HandlePatternEvent(string[] parts)
+    {
+        
+        float time = float.Parse(parts[0]);
+        string patternBlockType = parts[2].Trim().ToLower();
+        int patternBlockLength = int.Parse(parts[3]);
+        float speed = float.Parse(parts[4]);
+
+        Debug.Log($"Found Pattern Event Time => {time}, Block Type {patternBlockType}," +
+                  $"Block Length {patternBlockLength}, Speed => {speed}");
+
+        if (patternBlockType.TryParsePatternType(out PatternType patternType))
+        {
+            // Create pattern block
+            ArrowPattern pattern = patternDatabase.GetRandomPattern(patternType, patternBlockLength);
+
+            if(pattern == null)
+            {
+                Debug.LogError("When parsing a pattern event and trying to create pattern," +
+                               "there were no patterns found that match the parameters" +
+                               $"PatternType => {patternType}, Pattern Block Length {patternBlockLength}");
+                return;
+            }
+
+            foreach (ArrowSpawnData patternArrow in pattern.Arrows)
+            {
+                float arrowBeat = patternArrow.beat;
+                float totalBeat = time + arrowBeat;
+
+                Debug.Log($"Adding pattern arrow: LocalBeat={patternArrow.beat}, " + $"TotalBeat={totalBeat}");
+
+                AddArrow(totalBeat,speed,patternArrow.direction, "normalarrow");
+            }
+        }
+        else
+        {
+        Debug.LogError($"Failed to parse pattern type '{patternBlockType}'");
+        }
+    }
+
+    private void HandleChallengeEvent(string[] parts)
+    {
+        float time = float.Parse(parts[0]);
+        string type = parts[4].Trim().ToLower();
+
+        float secondsPerBeat = 60f / bpm;
+
+        patternEvents.Add(new SpawnEvent
+        {
+            time = time * secondsPerBeat,
+            eventType = "obstacle",
+            paramA = Vector2.zero,   // unused
+            paramB = 0,              // unused
+            type = type              // fileName from your CSV
+        });
+    }
+
+    private void HandleArrowEvent(string[] parts)
+    {
+        float time = float.Parse(parts[0]);
+        string type = parts[4].Trim().ToLower();
+        
+        string dirStr = parts[2].Trim().ToLower();
+        float speed = float.Parse(parts[3]);
+
+        Vector2 dir = dirStr switch
+        {
+            "up" => Vector2.up,
+            "down" => Vector2.down,
+            "left" => Vector2.left,
+            "right" => Vector2.right,
+            "up-right" => new Vector2(1, 1).normalized,
+            "down-right" => new Vector2(1, -1).normalized,
+            "down-left" => new Vector2(-1, -1).normalized,
+            "up-left" => new Vector2(-1, 1).normalized,
+            _ => Vector2.zero
+        };
+
+        AddArrow(time, speed, dir, type);        
+    }
+
+    private void AddArrow(float time, float speed, Vector2 dir, string type)
+    {
+        ArrowTypeDefinition arrowTypeDef =  arrowDatabase.arrows.Find(def => def.displayName.ToLower() == type.ToLower());
+
+        float spawnTime = CalculateSpawnTime(time, speed);
+        float arrivalTime = CalculateArrivalTime(time);
+
+        // 🔹 Add warning BEFORE arrow if needed
+        if (arrowTypeDef != null && arrowTypeDef.requiresWarning)
+        {
+            patternEvents.Add(new SpawnEvent
+            {
+                time = Mathf.Max(0, spawnTime - arrowTypeDef.warningLeadTime),
+                eventType = "warning",
+                paramA = dir,
+                type = type
+            });
+        }
+
+        patternEvents.Add(new SpawnEvent
+        {
+            time = spawnTime,
+            arrivalTime = arrivalTime,
+            eventType = "arrow",
+            paramA = dir,
+            paramB = speed,
+            type = type
+        });
+    }
+
+    private bool ParseHeader(string[] lines, out float bpm)
+    {
+        bpm = 0;
+        bool hasBPM = false;
+        //Check first few lines for a "# BPM:" definition
+        foreach (string raw in lines)
+        {
+            string line = raw.Trim();
+
+            if (line.StartsWith("# BPM", StringComparison.OrdinalIgnoreCase))
+            {
+                string[] parts = line.Split(':');
+                if (parts.Length > 1 && float.TryParse(parts[1], out float parsedBPM))
+                {
+                    bpm = parsedBPM;
+                    hasBPM = true;
+                }
+            }
+            else if (line.StartsWith("# DIRECTIONS", StringComparison.OrdinalIgnoreCase))
+            {
+                if (line.Contains("8"))
+                    useEightDirections = true;
+            }
+
+            // Header is finished once we reach actual level data.
+            if (!string.IsNullOrWhiteSpace(line) && !line.StartsWith("#"))
+            {
+                break;
+            }
+        }
+        
+        return hasBPM;
+    }
+
+    public List<ArrowSpawnData> ResolvePatternBlock(List<PatternBlock> blocks)
+    {
+        List<ArrowSpawnData> result = new();
+
+        foreach (PatternBlock block in blocks)
+        {
+            ArrowPattern pattern = patternDatabase.GetRandomPattern(block.PatternType, block.LengthInBeats);
+
+            if (pattern == null)
+                continue;
+
+            
+        }
+
+        return result;
     }
 
     // --------------------------------------------------
@@ -382,7 +496,7 @@ public class ArrowSpawner : MonoBehaviour
 
             var evt = patternEvents[index];
 
-            // 👇 wait until it's time to spawn this event
+            // wait until it's time to spawn this event
             yield return WaitUntilEventTime(evt.time);
 
             SpawnEvent(evt);
@@ -451,7 +565,7 @@ public class ArrowSpawner : MonoBehaviour
 
 
 
-    // --------------------------------------------------
+   
     public void SpawnObstacle(Vector2 _ignored, string type, int damageOverride = -1)
     {
 
@@ -466,9 +580,24 @@ public class ArrowSpawner : MonoBehaviour
         GameObject prefab = obstacleTypeDef.prefab;
         GameObject obstacle = Instantiate(prefab, Vector2.zero, Quaternion.identity);
 
-        obstacle.transform.parent = arrowContainer.transform;
+        obstacle.transform.parent = challengeContainer.transform;
 
         ObstacleManager.OnObstacleSpawned?.Invoke(obstacle);   
+
+        ChallengeBase challengeBase = obstacle.GetComponentInChildren<ChallengeBase>();
+
+
+        if (challengeBase == null)
+        {
+            Debug.LogError(
+                $"{obstacle.name} has no ChallengeBase!"
+            );
+
+            Destroy(obstacle);
+            return;
+        }
+
+        challengeBase.Begin();
 
         if (damageOverride != -1)
         {
@@ -476,7 +605,7 @@ public class ArrowSpawner : MonoBehaviour
         }
     }
 
-    // --------------------------------------------------
+   
     public void SpawnArrow(Vector2 direction, float speed, float spawnTime, float arrivalTime, string type, Color colorOverride = default, int damageOverride = -1)
     {
         ArrowTypeDefinition arrowTypeDef = arrowDatabase.arrows.Find(def => def.displayName.ToLower() == type.ToLower());
@@ -488,17 +617,19 @@ public class ArrowSpawner : MonoBehaviour
             return;
         }
 
-        Vector2 spawnPos = (Vector2)transform.position + direction * spawnDistance;
-        Vector2 endPos = (Vector2)transform.position + direction * goalRadius;
+        Vector3 localDirection = arrowContainer.transform.InverseTransformDirection(direction);
 
-        GameObject arrow = Instantiate(arrowPrefab, spawnPos, Quaternion.identity);
+
+        Vector2 spawnPos = (Vector2)direction * spawnDistance;
+        Vector2 endPos = (Vector2)direction * goalRadius;
+
+        GameObject arrow = Instantiate(arrowPrefab, arrowContainer.transform);
         arrow.tag = "Arrow";
-
-        arrow.transform.parent = arrowContainer.transform;
-
+        arrow.transform.localPosition = spawnPos;
         SpriteRenderer sr = arrow.GetComponent<SpriteRenderer>();
         if (sr != null)
             sr.color = colorOverride == default ? Color.white : colorOverride;
+
 
         if(damageOverride != -1)
         {
@@ -507,16 +638,16 @@ public class ArrowSpawner : MonoBehaviour
 
         ArrowEffectManager.Instance.ApplyEffectsToArrow(arrow.GetComponent<ArrowBase>());
 
-        //Debug.Log($"Arrow Spawned At => {spawnTime}, Arrival Time => {arrivalTime}");
-        
         arrow.GetComponent<ArrowBase>().Init(direction, 
                                              speed,
                                              spawnTime,
                                              arrivalTime,
                                              spawnPos,
                                              endPos);
+
+        _activeArrows.Add(arrow.GetComponent<ArrowBase>());
         
-        ScoreManager.Instance.RoundStatsTracker.AddSpawned();
+        RunHistoryManager.Instance.RoundStatsTracker.AddSpawned();
 
         OnArrowSpawned?.Invoke(arrow.GetComponent<ArrowBase>());
     }

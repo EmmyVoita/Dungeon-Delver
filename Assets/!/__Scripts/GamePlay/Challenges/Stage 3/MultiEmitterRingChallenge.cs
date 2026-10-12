@@ -37,10 +37,7 @@ public class MultiEmitterRingChallenge : ChallengeBase
     private List<GameObject> _spawnedObjs = new();
     private List<GameObject> _indicatorObjs = new();
 
-    void Start()
-    {
-        Begin();
-    }
+
 
     public override void Begin(object config = null)
     {

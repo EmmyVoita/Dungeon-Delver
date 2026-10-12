@@ -28,6 +28,9 @@ public class RunModifierMenuNavigator : BaseMenu
     [Header("Modifier Summary")]
     [SerializeField] private Transform modifierSummaryContainer;
     [SerializeField] private GameObject modifierSummaryRowPrefab;
+    [SerializeField] private GameObject truncateObject;
+    [SerializeField] private TextMeshProUGUI truncateText;
+    [SerializeField] private int maxSummaryRows = 6;
 
     [Header("Points UI")]
     [SerializeField] private int pointsCount = 5;
@@ -88,6 +91,9 @@ public class RunModifierMenuNavigator : BaseMenu
     [SerializeField] private float bottomScrollPadding = 40f;
     [SerializeField] private float mouseScrollCooldown= 0.03f;
 
+    [Header("Menu Transition")]
+    [SerializeField] private ScreenSpaceTransitionData gameSceneTransitionData;
+
 
      private float _nextMouseScrollTime; 
     private Vector2 _lastHeldDirection;
@@ -109,6 +115,7 @@ public class RunModifierMenuNavigator : BaseMenu
     public RunModifierMenuOptionBase CurrentOption => _currentOption;
     public RunModifierDefinition CurrentObstacle => _currentRunModifier;
     public int PointsRemaining => _pointsRemaining;
+    public UIPanelNudge PanelNudge => panelNudge;
 
     private RectTransform Content => leftScrollRect.content;
     private RectTransform Viewport => leftScrollRect.viewport;
@@ -127,6 +134,45 @@ public class RunModifierMenuNavigator : BaseMenu
         RunModifierManager.OnValueChanged -= HandleValueChanged;
         RunModifierMenuOptionBase.OnNavigateToOption -= HandleNavigationRequest;
         RunModifierOptionUI.OnClicked -= HandleUIClicked;
+    }
+
+    public void RebuildMenuOptions()
+    {
+        if (_currentOption != null)
+        {
+            _currentOption.OnExit();
+            _currentOption = null;
+        }
+
+        BuildMenuOptions();
+
+        _selectedIndex = 0;
+
+        ResetScrollToTop();
+
+        if (_runModifiers.Count > 0)
+        {
+            SwitchTo(
+                _runModifiers[0],
+                updateDescription: true,
+                silent: true,
+                scrollToOption: false
+            );
+        }
+    }
+
+    private void ResetScrollToTop()
+    {
+        _scrollTween?.Kill();
+        Content.DOKill();
+
+        leftScrollRect.StopMovement();
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+        Canvas.ForceUpdateCanvases();
+
+        leftScrollRect.verticalNormalizedPosition = 1f;
     }
 
     private void HandleUIClicked(RunModifierOptionUI optionUI)
@@ -169,6 +215,8 @@ public class RunModifierMenuNavigator : BaseMenu
         Content.anchoredPosition = new Vector2(Content.anchoredPosition.x, 0f);
 
         _pointsRemaining = pointsCount;
+
+        truncateObject.SetActive(false);
 
         SwitchTo(
             _runModifiers[0],
@@ -268,7 +316,9 @@ public class RunModifierMenuNavigator : BaseMenu
 
         RunModifierManager.Instance.ApplyModifiers();
 
-        SceneManager.LoadScene(SceneNames.ArrowGameScene);
+        
+        SceneTransitionManager.Instance.LoadScene(SceneNames.ArrowGameScene, gameSceneTransitionData);
+       
 
         return true;
     }
@@ -501,7 +551,7 @@ public class RunModifierMenuNavigator : BaseMenu
 
             if(_currentRunModifier.IsUnlocked)
             {
-                descriptionText.text = _currentRunModifier.description;
+                descriptionText.text = _currentRunModifier.GetDescription();
                 currentRunModifierIcon.sprite = _currentRunModifier.icon;
                 lockedRatioText.gameObject.SetActive(false);
                 currentRunModifierScoreMod.gameObject.SetActive(_currentRunModifier.scoreMultiplierPerStep != 0f);
@@ -528,7 +578,7 @@ public class RunModifierMenuNavigator : BaseMenu
 
 
         if(!silent)
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate,transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor,transform.position);
         
         if (_currentOption != null)
             _currentOption.OnExit();
@@ -626,48 +676,110 @@ public class RunModifierMenuNavigator : BaseMenu
 
     private void BuildModifierSummaryUI()
     {
-        
-        // Loop throught the run modifier manager's RunModifierSlection list and check
-        // whether the value is 0. If the value is not zero, then we will want to create
-        // and instance of the summary row prefab and initalize it.
-        foreach (RunModifierSelection selction in RunModifierManager.Instance.Selections)
+        foreach (RunModifierSelection selection in RunModifierManager.Instance.Selections)
         {
-            if(selction.definition == null)
+            if (selection.definition == null)
                 continue;
 
-            RunModifierType type = selction.definition.type;
+            RunModifierType type = selection.definition.type;
 
             string finalValue = RunModifierManager.Instance.GetFinalValue(type);
 
-            GameObject rowObject = Instantiate(modifierSummaryRowPrefab, modifierSummaryContainer);
+            GameObject rowObject =
+                Instantiate(modifierSummaryRowPrefab, modifierSummaryContainer);
 
-            RunModifierSummaryRowUI rowUI = rowObject.GetComponent<RunModifierSummaryRowUI>();
+            RunModifierSummaryRowUI rowUI =
+                rowObject.GetComponent<RunModifierSummaryRowUI>();
 
-
-            // make sure that the game object has the necessary script
-            if(rowUI == null)
+            if (rowUI == null)
             {
                 Destroy(rowObject);
                 continue;
             }
 
-            rowUI.Setup(selction.definition, finalValue);
+            rowUI.Setup(selection.definition, finalValue);
 
-            _summaryRows[selction.definition] = rowUI;
+            _summaryRows[selection.definition] = rowUI;
 
             rowObject.SetActive(false);
         }
+
+        RefreshModifierSummaryVisibility();
     }
 
-    private void RefreshModifierSummary(RunModifierSelection selection)
+    private void RefreshModifierSummary(RunModifierSelection changedSelection)
     {
-        RunModifierType type =  selection.definition.type;
-        string finalValue = RunModifierManager.Instance.GetFinalValue(type);
+        // Update the value for the modifier that changed.
+        if (changedSelection?.definition != null &&
+            _summaryRows.TryGetValue(changedSelection.definition, out RunModifierSummaryRowUI changedRow))
+        {
+            RunModifierType type = changedSelection.definition.type;
 
-        RunModifierSummaryRowUI rowUI = _summaryRows[selection.definition];
+            string finalValue =
+                RunModifierManager.Instance.GetFinalValue(type);
 
-        rowUI.SetValue(finalValue);
+            changedRow.SetValue(finalValue);
+        }
 
-        rowUI.gameObject.SetActive(selection.value != 0);
+        RefreshModifierSummaryVisibility();
+    }
+
+    private void RefreshModifierSummaryVisibility()
+    {
+        IReadOnlyList<RunModifierSelection> selections =
+            RunModifierManager.Instance.Selections;
+
+        // All currently active modifiers, in the same order as the manager.
+        List<RunModifierSelection> activeSelections = selections
+            .Where(selection =>
+                selection.definition != null &&
+                selection.value != 0)
+            .ToList();
+
+        int visibleCount = Mathf.Min(
+            activeSelections.Count,
+            maxSummaryRows
+        );
+
+        // Hide every row first.
+        foreach (RunModifierSummaryRowUI row in _summaryRows.Values)
+        {
+            row.gameObject.SetActive(false);
+        }
+
+        // Show only the rows that fit.
+        for (int i = 0; i < visibleCount; i++)
+        {
+            RunModifierSelection selection = activeSelections[i];
+
+            if (!_summaryRows.TryGetValue(
+                    selection.definition,
+                    out RunModifierSummaryRowUI row))
+            {
+                continue;
+            }
+
+            RunModifierType type = selection.definition.type;
+
+            string finalValue =
+                RunModifierManager.Instance.GetFinalValue(type);
+
+            row.SetValue(finalValue);
+            row.gameObject.SetActive(true);
+        }
+
+        truncateObject.transform.SetAsLastSibling();
+
+        int hiddenCount =
+            Mathf.Max(0, activeSelections.Count - maxSummaryRows);
+
+        bool shouldTruncate = hiddenCount > 0;
+
+        truncateObject.SetActive(shouldTruncate);
+
+        if (shouldTruncate)
+        {
+            truncateText.text = $"+{hiddenCount} MORE";
+        }
     }
 }

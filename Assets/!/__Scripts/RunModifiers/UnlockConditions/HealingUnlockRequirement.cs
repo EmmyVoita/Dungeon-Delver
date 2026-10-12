@@ -7,7 +7,7 @@ public class HealingUnlockRequirement : RunModifierUnlockRequirement
 
     public override string GetRequirementRatioText()
     {
-        return $"{ScoreManager.Instance.TotalHealing().ToString("N0")}/{healingRequirement.ToString("N0")}";
+        return $"{RunHistoryManager.Instance.TotalHealing.ToString("N0")}/{healingRequirement.ToString("N0")}";
     }
 
     public override string GetUnlockDescriptionText()
@@ -17,6 +17,6 @@ public class HealingUnlockRequirement : RunModifierUnlockRequirement
 
     public override bool IsUnlocked()
     {
-        return ScoreManager.Instance.TotalHealing() >= healingRequirement;
+        return RunHistoryManager.Instance.TotalHealing >= healingRequirement;
     }
 }

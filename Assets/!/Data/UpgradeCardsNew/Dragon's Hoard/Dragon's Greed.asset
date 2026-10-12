@@ -17,18 +17,19 @@ MonoBehaviour:
   requiredUpgrades: []
   baseOfferWeight: 0.1
   _cost: 250
-  _maxStacks: 2
+  _maxStacks: 1
   duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
-  centerIcon: {fileID: 21300000, guid: 8c91102cf5862c94ab466f250d9011da, type: 3}
+  centerIcon: {fileID: 21300000, guid: a539e732e230b70488be880c2ea87cf9, type: 3}
   iconMaterial: {fileID: 0}
-  displayName: Hoarder's Cache
-  descriptionTemplate: 'For every {CURRENCY_STEP} you have, decrease your ability
-    cost by {ABILITY_COST_AMOUNT}. '
-  detailsTemplate: This upgrade stacks. Your ability cost can not be reduced below
-    10 by this or any combination of upgrades.
-  currencyStep: 200
+  displayName: Money Talks
+  descriptionTemplate: For every {CURRENCY_STEP} you have, decrease your ability
+    cost by {ABILITY_COST_AMOUNT}.
+  detailsTemplate: '{MAXABILITY_STATEMENT}
+
+'
+  currencyStep: 300
   weightPerCurrencyStep: 0.25
   maximumCurrencyWeightBonus: 1.25
   currencySynergyUpgrades:

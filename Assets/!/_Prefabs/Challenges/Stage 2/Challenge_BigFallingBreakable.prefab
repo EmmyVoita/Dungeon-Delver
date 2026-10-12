@@ -241,9 +241,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3da55463a36a704cbb067cc69d9ff88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
-  registerWithManager: 1
+  registerWithManager: 0
   priority: 1
   controlMode: 2
+  childChallenges: []
   addCanvasPopup: 0
   listenForBossActive: 0
   lifetimeMode: 1
@@ -454,6 +455,8 @@ MonoBehaviour:
   registerWithManager: 1
   priority: 0
   controlMode: 2
+  childChallenges:
+  - {fileID: 4361098198041981907}
   addCanvasPopup: 1
   listenForBossActive: 0
   lifetimeMode: 0

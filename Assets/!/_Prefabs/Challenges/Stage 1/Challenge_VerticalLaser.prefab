@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2764905159647937728}
-  - component: {fileID: 6502799267077886823}
+  - component: {fileID: 1457842756998831297}
   m_Layer: 0
   m_Name: ProjectileHook
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8287457485645395988}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6502799267077886823
+--- !u!114 &1457842756998831297
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,38 +41,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 154750060358446877}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c37f6cd9b3fddbc4dbe8c74f531bdd26, type: 3}
+  m_Script: {fileID: 11500000, guid: b7b99c261c232b9448d269bc78294333, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::BurstWallShooter
+  registerWithManager: 1
   priority: 0
   controlMode: 1
-  easeCurve: 6
-  startWindupDelay: 0
-  oscilationXSpeed: 3
-  lifetimeMode: 1
+  childChallenges: []
+  settingsData:
+    fireMode: 0
+    projectileFireMode: 0
+    fireDelayMode: 0
+    firePositionMode: 1
   listenForBossActive: 1
-  activationMode: 1
   portalPrefab: {fileID: 0}
   projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
   linePrefab: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
-  fireMode: 0
-  projectileFireMode: 0
-  fireDelayMode: 0
-  firePositionMode: 1
   unregisterDelay: 1
   startDelay: 1
-  fireDelay: 1.5
-  continuousFireCount: 5
   oscillateDistance: 0.5
   oscillateSpeed: 2
   shiftDuration: 0.5
-  shiftStartSound:
-    clip: {fileID: 0}
-    channel: 0
-    affectedByTimeScale: 0
-    volume: 0
-    pitch: 0
-    pitchVariation: 0
   predefinedOffsets:
   - {x: 3, y: 5, z: 0}
   - {x: 0.5, y: 5, z: 0}
@@ -89,18 +78,25 @@ MonoBehaviour:
   fireSound:
     clip: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tickSound:
     clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
-    pitch: 1.2
+    pitch: 1
     pitchVariation: 0
   tickCount: 3
+  easeCurve: 22
+  startWindupDelay: 0
+  oscilationXSpeed: 3
+  shiftStartSound:
+    clip: {fileID: 8300000, guid: bda41de902222eb4ab895b9a967a6b74, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0
 --- !u!1 &1645244160336350965
 GameObject:
   m_ObjectHideFlags: 0
@@ -330,6 +326,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4625789883294640681}
   - component: {fileID: 5459435892850448975}
+  - component: {fileID: 5188414352965958854}
   m_Layer: 0
   m_Name: ProjectileHook2
   m_TagString: Untagged
@@ -364,21 +361,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c37f6cd9b3fddbc4dbe8c74f531bdd26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  registerWithManager: 1
   priority: 0
   controlMode: 1
+  childChallenges: []
   easeCurve: 6
   startWindupDelay: 0
   oscilationXSpeed: 3
-  lifetimeMode: 1
+  settingsData:
+    fireMode: 0
+    projectileFireMode: 0
+    fireDelayMode: 0
+    firePositionMode: 1
   listenForBossActive: 1
-  activationMode: 1
   portalPrefab: {fileID: 0}
   projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
   linePrefab: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
-  fireMode: 0
-  projectileFireMode: 0
-  fireDelayMode: 0
-  firePositionMode: 1
   unregisterDelay: 1
   startDelay: 1
   fireDelay: 1.5
@@ -389,7 +387,6 @@ MonoBehaviour:
   shiftStartSound:
     clip: {fileID: 0}
     channel: 0
-    affectedByTimeScale: 0
     volume: 0
     pitch: 0
     pitchVariation: 0
@@ -409,18 +406,81 @@ MonoBehaviour:
   fireSound:
     clip: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tickSound:
     clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1.2
     pitchVariation: 0
   tickCount: 3
+--- !u!114 &5188414352965958854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3927797868786210445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7b99c261c232b9448d269bc78294333, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BurstWallShooter
+  registerWithManager: 1
+  priority: 0
+  controlMode: 1
+  childChallenges: []
+  settingsData:
+    fireMode: 0
+    projectileFireMode: 0
+    fireDelayMode: 0
+    firePositionMode: 1
+  listenForBossActive: 1
+  portalPrefab: {fileID: 0}
+  projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
+  linePrefab: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
+  unregisterDelay: 1
+  startDelay: 1
+  oscillateDistance: 0.5
+  oscillateSpeed: 2
+  shiftDuration: 0.5
+  predefinedOffsets:
+  - {x: -3, y: -5, z: 0}
+  - {x: -0.5, y: -5, z: 0}
+  projectileFireDirection: {x: 1, y: 1}
+  projectileCount: 1
+  projectileSpacing: 0
+  projectileSpeed: 22
+  firingWindupDuration: 0.5
+  maxRandFireDelay: 0.25
+  postWindupDelay: 0
+  spawnPositionOffset: {x: 0, y: 5, z: 0}
+  randPosOffsetX: 0
+  randPosOffsetY: 0.15
+  fireSound:
+    clip: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0
+  tickSound:
+    clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0
+  tickCount: 3
+  easeCurve: 22
+  startWindupDelay: 0
+  oscilationXSpeed: 3
+  shiftStartSound:
+    clip: {fileID: 8300000, guid: bda41de902222eb4ab895b9a967a6b74, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0
 --- !u!1 &4248110704084531658
 GameObject:
   m_ObjectHideFlags: 0
@@ -543,6 +603,7 @@ MonoBehaviour:
   - 0.05
   - 0.1
   stopAtLastFrame: 1
+  playOnAwake: 1
 --- !u!1 &4459112190557552876
 GameObject:
   m_ObjectHideFlags: 0
@@ -665,6 +726,7 @@ MonoBehaviour:
   - 0.05
   - 0.1
   stopAtLastFrame: 1
+  playOnAwake: 1
 --- !u!1 &5264518880695646827
 GameObject:
   m_ObjectHideFlags: 0
@@ -935,8 +997,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9c94800922c0cd42bc10e99700de657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  registerWithManager: 1
   priority: 0
   controlMode: 1
+  childChallenges:
+  - {fileID: 1457842756998831297}
+  - {fileID: 5459435892850448975}
   obstacleRoot: {fileID: 0}
   laserBursts: 1
   delayBetweenBursts: 0.4
@@ -990,7 +1056,6 @@ MonoBehaviour:
   pulseSound:
     clip: {fileID: 8300000, guid: 812701c866d5fbf4bacea5766b8f2897, type: 3}
     channel: 2
-    affectedByTimeScale: 1
     volume: 1
     pitch: 1
     pitchVariation: 0
@@ -1008,7 +1073,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
+  abilityChargeDamage: 0
   sourceName: Unknown
+  playHitSound: 1
 --- !u!50 &6004622561016584786
 Rigidbody2D:
   serializedVersion: 5

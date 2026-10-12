@@ -136,7 +136,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
-  abilityChargeDamage: 3
+  abilityChargeDamage: 999
   sourceName: Magic Sword
   playHitSound: 1
 --- !u!1 &2750867479228544999

@@ -51,4 +51,10 @@ public class YourCardsInventory : InventoryBase
             AddCard(kvp.Key, kvp.Value);
         }
     }
+
+    protected override string GetDescription(UpgradeCardUI cardUI)
+    {
+        string prefix = $"[<color=#{UIColors.ToHex(UIColors.Yellow)}>${cardUI.Base.Cost.ToString("N0")}</color>] ";
+        return prefix + cardUI.GetDescription(true);
+    }
 }

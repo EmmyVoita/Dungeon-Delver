@@ -6,9 +6,9 @@ using UnityEngine;
 public class AbilityUpgrade1 : AbilityUpgradeUpgradeBase
 {
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        base.AddReplacements(replacements);
+        base.AddReplacements(replacements, isInventory);
     }
     
     public override void Apply()

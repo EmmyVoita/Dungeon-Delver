@@ -23,6 +23,10 @@ public class Goal : MonoBehaviour
    
 
     [Header("Critcal Catch")]
+    [SerializeField] private bool lockInputDuringRotation;
+    [SerializeField] private float rotationUnlockThreshold = 1f;
+
+    
     [SerializeField] private VisualEffect critCatchEffect;
     [SerializeField] private VisualEffect goldenCatchEffect;
     [Tooltip("VFX event name to trigger")]
@@ -90,6 +94,7 @@ public class Goal : MonoBehaviour
     // Exposed direction property (read-only)
     public Vector2 GoalDirection => _goalDirection;
     public bool CritWindowActive => Time.time <= critExpireTime;
+    private bool IsRotating => Quaternion.Angle(transform.localRotation, targetRotation) > rotationUnlockThreshold;
 
     void Awake()
     {
@@ -180,6 +185,7 @@ public class Goal : MonoBehaviour
     }
 
 
+    
     public void SetGoalDirection(Vector2 dir)
     {
         if (dir == Vector2.zero)
@@ -196,15 +202,39 @@ public class Goal : MonoBehaviour
 
         lastManualRotateTime = Time.time;
 
-        float critWindow =
-            StatModifierManager.Instance == null
-            ? Player.Instance.CritWindow
-            : Player.Instance.CritWindow;//UpgradeManager.Instance.ModifyCritWindow(Player.Instance.CritWindow);
+        critExpireTime = Time.time + Player.Instance.CritWindow;
 
-        critExpireTime = Time.time + critWindow;
-
-        TriggerCritWindowVisual(critWindow);
+        TriggerCritWindowVisual(Player.Instance.CritWindow);
     }
+    
+    /*
+    public void SetGoalDirection(Vector2 dir)
+    {
+        if (dir == Vector2.zero)
+            return;
+
+        // Ignore new directional inputs until we've finished rotating.
+        if (lockInputDuringRotation && IsRotating)
+            return;
+
+        dir = dir.normalized;
+
+        if (dir == _goalDirection)
+            return;
+
+        _goalDirection = dir;
+
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
+        targetRotation = Quaternion.Euler(0, 0, angle);
+
+        if (!CritWindowActive)
+        {
+            float critWindow = Player.Instance.CritWindow;
+
+            critExpireTime = Time.time + critWindow;
+            TriggerCritWindowVisual(critWindow);
+        }
+    }*/
 
     // --------------------------------------------------------
     // 🎯 Arrow collision

@@ -7,7 +7,7 @@ public class AbilityOverflowToScore : UpgradeBase, IActivatableUpgrade
     public int scorePerOverflow = 500;
     public SoundEffect bonusSound;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{SCORE_PER_OVERFLOW}", scorePerOverflow.ToString("N0"));

@@ -4,21 +4,71 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Upgrades/Currency Build/FullAbilityGoldWorthUpgrade")]
 public class FullAbilityGoldWorthUpgrade : UpgradeBase
 {
-    [SerializeField] private float increase = 2;
+    [SerializeField] private List<int> currencyPerStack;
     [SerializeField] private bool addValue = false;
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        replacements["{INCREASE}"] =
-            $"<color=#{UIColors.ToHex(UIColors.Green)}>" +
-            $"${increase:N0}</color>";
+        string currencyText = isInventory ? InventoryText() : $"${GetCurrencyText()}";
+        replacements["{INCREASE}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>" +$"{currencyText}</color>";
 
      
-        base.AddReplacements(replacements);
+        base.AddReplacements(replacements, isInventory);
+    }
+
+    public override bool CanAppear()
+    {
+        if (ShopManager.Instance == null)
+            return false;
+
+        int ownedCount = ShopManager.Instance.GetPurchasedCardCount(this);
+
+        if (ownedCount >= MaxStacks)
+            return false;
+
+        return ShopManager.Instance.HasCards(requiredUpgrades) || GameSessionBootstrap.Config.GoldenArrowChance > 0;
+    }
+
+    private string InventoryText()
+    {
+        string text = "(";
+
+        for(int i = 0; i < currencyPerStack.Count; i++)
+        {
+            string prefix = i == 0 ? "" : "/";
+            text += $"{prefix}${currencyPerStack[i]}";
+        }
+        text += ")";
+
+        return text;
+    }
+
+    private int GetCurrencyText()
+    {
+        int stackCount = ShopManager.Instance ? ShopManager.Instance.GetOwnedStackCount(this) : 0;
+
+        if (currencyPerStack.Count == 0)
+            return 0;
+
+        int index = Mathf.Clamp(stackCount, 0, currencyPerStack.Count - 1);
+
+        return currencyPerStack[index];
+    }
+
+    private int GetCurrencyAmount()
+    {
+        int stackCount = ShopManager.Instance ? ShopManager.Instance.GetOwnedStackCount(this) : 0;
+
+        if (currencyPerStack.Count == 0)
+            return 0;
+
+        int index = Mathf.Clamp(stackCount - 1, 0, currencyPerStack.Count - 1);
+
+        return currencyPerStack[index];
     }
 
     public override void Apply()
     {
-        GoldenArrowManager.Instance.AddWorthModifier(new FullAbilityGoldenWorthMod(increase, addValue));
+        GoldenArrowManager.Instance.AddWorthModifier(new FullAbilityGoldenWorthMod(GetCurrencyAmount(), addValue));
     }
 }

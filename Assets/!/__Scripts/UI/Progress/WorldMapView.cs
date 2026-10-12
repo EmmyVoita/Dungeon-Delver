@@ -36,7 +36,7 @@ public class WorldMapView : MonoBehaviour
 
     private int CurrentIndex =>
         RoundManager.Instance != null
-            ? RoundManager.Instance.CurrentLevelIndex
+            ? RoundManager.Instance.TotalCurrentLevelIndex
             : 0;
 
     public void Build(Action onComplete)

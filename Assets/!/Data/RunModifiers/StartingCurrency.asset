@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db6fa1bb419fe6b418ba32663d8dcda7, type: 3}
   m_Name: StartingCurrency
   m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
-  displayName: INHERITANCE
-  description: Start with +500 currency.
-  icon: {fileID: 19754118, guid: 27bd66fca1b217743ba4c34f89617b8e, type: 3}
-  summaryName: Starting Currency
-  summaryIcon: {fileID: 19754118, guid: 27bd66fca1b217743ba4c34f89617b8e, type: 3}
+  displayName: SAVINGS
+  description: Start with [VALUE] currency.
+  icon: {fileID: 1396528829, guid: aba93ec40ac92da4ba7433714b70aa3c, type: 3}
+  summaryName: Start Currency
+  summaryIcon: {fileID: -604642799, guid: cf8e3d9803c43f648bec853b2993de62, type: 3}
   type: 12
   category: 0
   minValue: 0

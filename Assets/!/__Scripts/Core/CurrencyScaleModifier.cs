@@ -2,18 +2,17 @@ using System;
 
 public class CurrencyScaleModifier
 {
-    public string Id;
-    public float Value = 1f;
-    public bool IsActive = true;
+    public float Value { get; private set; }
+    public bool IsActive { get; private set; }
 
-    public CurrencyScaleModifier(string id, float targetValue)
+    public CurrencyScaleModifier(float value)
     {
-        Id = id;
-        Value = targetValue;
+        Value = value;
+        IsActive = true;
     }
 
-    public void SetValue(float v)
+    public void Disable()
     {
-        Value = v;
+        IsActive = false;
     }
 }

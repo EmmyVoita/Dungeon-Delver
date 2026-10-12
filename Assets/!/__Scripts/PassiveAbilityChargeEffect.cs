@@ -19,7 +19,7 @@ public class PassiveAbilityChargeEffect : IPassiveEffect
         //throw new System.NotImplementedException();
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         //throw new System.NotImplementedException();
     }
@@ -28,14 +28,14 @@ public class PassiveAbilityChargeEffect : IPassiveEffect
     {
         if(_isActive)
         {
-            _currentCharge += _chargeRate * Time.deltaTime;
+            _currentCharge += Player.Instance.MaxAbilityCharge * _chargeRate * Time.deltaTime;
 
             int currentChargeInt = Mathf.FloorToInt(_currentCharge);
 
             if(currentChargeInt >= 1)
             {
                 Player.Instance.AbilityCharge += currentChargeInt;
-                _currentCharge = 0;
+                _currentCharge -= currentChargeInt;
             }
         }
     }

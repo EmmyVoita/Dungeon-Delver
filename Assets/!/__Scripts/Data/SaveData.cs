@@ -4,4 +4,5 @@ using System.Collections.Generic;
 public class SaveData
 {
     public List<RunRecord> records = new();
+    public bool unlockAll = false;
 }

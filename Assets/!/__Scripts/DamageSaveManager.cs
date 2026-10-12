@@ -14,6 +14,7 @@ public class DamageSaveManager : RuntimeModifierManager<IDamageSave>
     [SerializeField] private GameObject currencyProcEffect;
 
     [Header("Shields")]
+    [SerializeField] private float shieldSizeStep = 0.3f;
     [SerializeField] private SoundEffect ignoreMissSoundEffect;
     [SerializeField] private GameObject ignoreMissVFXPrefab;
 
@@ -25,7 +26,7 @@ public class DamageSaveManager : RuntimeModifierManager<IDamageSave>
         if (shieldPrefab != null)
         {
             GameObject shieldObject = Instantiate(shieldPrefab, Player.Instance.transform.position,Quaternion.identity);
-            shieldObject.transform.localScale = Vector3.one * (1f + _activeShieldObjects.Count * .2f);
+            shieldObject.transform.localScale = Vector3.one * (1f + _activeShieldObjects.Count * shieldSizeStep);
             shieldObject.transform.SetParent(Player.Instance.transform);
             _activeShieldObjects.Add(shieldObject);
         }

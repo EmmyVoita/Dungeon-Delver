@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CurrencyAbilityCostUpgrade : IAbilityCostModifier
 {
-    public int Priority => 0;
+    public int Priority => -1000;
     public int StackCount => _stackCount;
 
     private readonly int _currencyStep;
@@ -47,7 +47,7 @@ public class CurrencyAbilityCostUpgrade : IAbilityCostModifier
         );
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

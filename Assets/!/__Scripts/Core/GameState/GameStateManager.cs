@@ -14,11 +14,29 @@ public class GameStateManager : MonoBehaviour
     public static GameState LevelStartState => GameState.RoundActive;
     public static GameState LevelEndState => GameState.RoundResultsTally;
     public static GameState PostRoundRewardState => GameState.PreRoundCountdown;
+
+    
     public bool InGameOverState => CurrentState == GameState.GameOverTally ||
-                                      CurrentState == GameState.DeathSequence || 
-                                      CurrentState == GameState.GameOverResults;
+                                   CurrentState == GameState.DeathSequence || 
+                                   CurrentState == GameState.GameOverResults;
 
     public static event Action<GameState, GameState> OnStateChanged;
+
+    public bool InRoundState(GameState state)
+    {
+        return state == GameState.RoundActive ||
+                state == GameState.Editor ||
+                state == GameState.RoundResultsTally ||
+                state == GameState.RoundResultsExit;
+    }
+
+    private bool ShouldStopRoundForState(GameState state)
+    {
+        return state == GameState.DeathSequence ||
+            state == GameState.GameOverTally ||
+            state == GameState.GameWin ||
+            state == GameState.MainMenu;
+    }
 
     private void Awake()
     {

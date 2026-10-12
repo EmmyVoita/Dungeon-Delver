@@ -1,0 +1,9 @@
+# Saved by Level Editor
+# BPM: 97
+# OFFSET: 0
+# DIRECTIONS: 4
+
+10,pattern,easy,4,6
+15,pattern,easy,4,6
+20,arrow,up,6,normalarrow
+23,pattern,normal,8,6

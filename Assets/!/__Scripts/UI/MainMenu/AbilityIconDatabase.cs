@@ -7,22 +7,27 @@ public class AbilityIconDatabase : MonoBehaviour
 
     [SerializeField] private List<AbilityIconEntry> entries;
 
-    private Dictionary<AbilityType, Sprite> lookup;
+    private Dictionary<AbilityType, AbilityIconEntry> lookup;
 
     private void Awake()
     {
         Instance = this;
 
-        lookup = new Dictionary<AbilityType, Sprite>();
+        lookup = new Dictionary<AbilityType, AbilityIconEntry>();
 
         foreach (var entry in entries)
         {
-            lookup[entry.type] = entry.icon;
+            lookup[entry.type] = entry;
         }
     }
 
     public Sprite GetIcon(AbilityType type)
     {
-        return lookup.TryGetValue(type, out var icon) ? icon : null;
+        return lookup.TryGetValue(type, out var entry) ? entry.icon : null;
+    }
+
+    public Sprite GetSmallIcon(AbilityType type)
+    {
+        return lookup.TryGetValue(type, out var entry) ? entry.smallIcon : null;
     }
 }

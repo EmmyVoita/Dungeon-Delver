@@ -9,14 +9,26 @@ public class CoinCollectZap : ICoinCollectEffect
     private bool _preventComboBreak;
     private int _currencyRequired;
     private float _zapRadius; 
-    private float _zapChance; 
+    private float _baseZapChance; 
+    private float _enhancedZapChance;
+    private Gradient _gradient;
+    private Gradient _empoweredGradient;
 
-    public CoinCollectZap(int currencyRequired, bool preventComboBreak, float zapRadius = 8f, float zapChance = 0.5f)
+    public CoinCollectZap(Gradient gradient,
+                          Gradient empoweredGradient,
+                          int currencyRequired,     
+                          bool preventComboBreak, 
+                          float zapRadius = 8f, 
+                          float zapChance = 0.25f,
+                          float enhancedZapChance = 0.5f)
     {
+        _gradient = gradient;
+        _empoweredGradient = empoweredGradient;
         _preventComboBreak = preventComboBreak;
         _currencyRequired = currencyRequired;
         _zapRadius = zapRadius;
-        _zapChance = zapChance;
+        _baseZapChance = zapChance;
+        _enhancedZapChance = enhancedZapChance;
     }
 
     public bool CanTriggerEffect(int amount)
@@ -28,13 +40,11 @@ public class CoinCollectZap : ICoinCollectEffect
 
     public bool TriggerEffect(int amount)                  
     {
-        if(CurrencyManager.Instance.CurrentCurrency >= _currencyRequired)
+        float zapChance = CurrencyManager.Instance.CurrentCurrency >= _currencyRequired ? _enhancedZapChance : _baseZapChance;
+
+        if(Random.value < zapChance)
         {
-            CoinZapManager.Instance.QueueZap(_zapRadius, _preventComboBreak, true);
-        }
-        else if(Random.value >= _zapChance)
-        {
-            CoinZapManager.Instance.QueueZap(_zapRadius, _preventComboBreak, false);
+            CoinZapManager.Instance.QueueZap(_zapRadius, _preventComboBreak, false, _gradient);
         }
 
         return true;
@@ -42,10 +52,18 @@ public class CoinCollectZap : ICoinCollectEffect
 
     public IRuntimeModifier Clone()
     {
-        return new CoinCollectZap(_currencyRequired, _preventComboBreak, _zapRadius, _zapChance);
+        return new CoinCollectZap(
+            _gradient, 
+            _empoweredGradient, 
+            _currencyRequired, 
+            _preventComboBreak, 
+            _zapRadius, 
+            _baseZapChance,
+            _enhancedZapChance
+        );
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

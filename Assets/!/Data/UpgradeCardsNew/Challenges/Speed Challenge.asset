@@ -25,8 +25,8 @@ MonoBehaviour:
   iconMaterial: {fileID: 0}
   displayName: Crescendo
   descriptionTemplate: Gain {CURRENCY} now, but speed up the next level by {TIME_SCALE}.
-  detailsTemplate: This upgrade does stack. Each stack further increases the speed
-    up of the next level by {TIME_SCALE}. If you have multiple, all of them will
-    expire at the end of the level.
+  detailsTemplate: Each stack further increases the speed up of the next level by
+    {TIME_SCALE}. If you have multiple, all of them will expire at the end of the
+    level.
   currencyAmount: 400
   modifier: 1.1

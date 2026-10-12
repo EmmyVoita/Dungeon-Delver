@@ -8,14 +8,7 @@ public class PauseMenuOptionClickHandler :
     IPointerEnterHandler,
     IPointerExitHandler
 {
-    [SerializeField] private PauseMenuNavigator owner;
-    //[SerializeField]
-    //private JumpDirectionModeMenuOption owner;
-
-    [SerializeField]
-    private int index;
-
-    
+   
     [SerializeField] private TextMeshProUGUI optionText;
     [SerializeField] private Color selectedColor = Color.yellow;
     [SerializeField] private Color defaultColor = Color.white;
@@ -23,58 +16,49 @@ public class PauseMenuOptionClickHandler :
     [SerializeField] private float transitionSpeed = 8f;
 
 
+     private PauseMenuNavigator _owner;
     private bool _pointerInside;
+    private int _index;
 
-    public void OnPointerClick(
-        PointerEventData eventData)
+    public void Initialize(PauseMenuNavigator owner, int index)
     {
-        Debug.Log("OnPOinterClick!");
+        _owner = owner;
+        _index = index;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
         if (InputModeManager.Instance.CurrentMode
             != InputModeManager.InputMode.Mouse)
             return;
 
-        owner.SetIndex(index);
+        _owner.SetIndex(_index);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-         Debug.Log("OnPOinterEnter!");
-        //if(MenuManager.Instance.ActiveMenuLocked) return;
-
         // Ignore if keyboard mode active
         if (InputModeManager.Instance.CurrentMode
             != InputModeManager.InputMode.Mouse)
             return;
 
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
 
         _pointerInside = true;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log("OnPOinterExit!");
-        //if(MenuManager.Instance.ActiveMenuLocked) return;
-
         // Ignore if keyboard mode active
         if (InputModeManager.Instance.CurrentMode
             != InputModeManager.InputMode.Mouse)
             return;
-
-        
 
         _pointerInside = false;
     }
 
     private void Update()
     {
-        /*
-        if(MenuManager.Instance.ActiveMenuLocked)
-        {
-            _pointerInside = false;
-        }
-        */
-        
         if (InputModeManager.Instance.CurrentMode
             != InputModeManager.InputMode.Mouse)
             return;

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using DG.Tweening;
+using UnityEngine.VFX;
 
 public class AOEProjectile : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class AOEProjectile : MonoBehaviour
     [Header("Visual")]
     [SerializeField] private Transform warningCircle;
     [SerializeField] private Transform sprite;
+    [SerializeField] private  GameObject explodeEffect;
 
     [Header("Audio")]
     public SoundEffect spawnSound;
@@ -114,6 +116,8 @@ public class AOEProjectile : MonoBehaviour
 
         AudioHelpers.PlaySoundEffect(explodeSound, transform.position);
 
+        Instantiate(explodeEffect, transform.position, Quaternion.identity);
+
         // TODO: damage logic (overlap circle)
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, hitboxRadius);
 
@@ -135,5 +139,13 @@ public class AOEProjectile : MonoBehaviour
         }
 
         Destroy(gameObject);
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.CompareTag("Player"))
+        {
+           Explode();
+        }
     }
 }

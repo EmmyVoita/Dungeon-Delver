@@ -43,7 +43,7 @@ public class CurrencyDeathSave : IDeathSave
         
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

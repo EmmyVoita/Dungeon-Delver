@@ -5,7 +5,8 @@ using UnityEngine;
 public class AudioDatabase : ScriptableObject
 {
     [Header("UI")]
-    public SoundEffect navigate;
+    public SoundEffect navigateMajor;
+    public SoundEffect navigateMinor;
     public SoundEffect select;
     public SoundEffect back;
     public SoundEffect negative;

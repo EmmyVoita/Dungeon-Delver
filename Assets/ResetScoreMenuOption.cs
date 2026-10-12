@@ -23,7 +23,9 @@ public class ResetScoreMenuOption : BaseSettingOption
     public override void OnActivate()
     {
         AudioHelpers.PlayMyClipAtPoint(resetSound, AudioChannel.SFX, Camera.main.transform.position);
-        ScoreManager.Instance.ResetSaveData();
+        RunHistoryManager.Instance.ResetSaveData();
         unlockManager.DeleteSaveFile();
+        RunHistoryManager.Instance.SetUnlockAll(false);
+        RunModifierMenuNavigator.Instance.RebuildMenuOptions();
     }
 }

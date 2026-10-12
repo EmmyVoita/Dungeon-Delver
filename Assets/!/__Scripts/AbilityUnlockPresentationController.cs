@@ -10,13 +10,9 @@ public class AbilityUnlockPresentationController : MonoBehaviour
    [SerializeField] private PlayMenuNavigator selectManager;
    [SerializeField] private AbilityUnlockManager unlockManager;
 
-   public IEnumerator PlayUnlockSequence(
-        List<AbilityType> unlocks)
+    public IEnumerator PlayUnlockSequence(List<AbilityType> unlocks)
     {
         if(unlocks.Count <= 0) yield break;
-
-        // Lock player input
-        //MenuManager.Instance.LockActiveMenuInput(true);
 
         yield return null;
 
@@ -47,6 +43,7 @@ public class AbilityUnlockPresentationController : MonoBehaviour
 
         // UnLock player input
         InputFocusManager.Release(this);
+        InputFocusManager.Clear();
     }
 
     private IEnumerator PlaySingleUnlock(AbilityType unlock)

@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using TMPro;
 using System.Linq;
+using Unity.VisualScripting;
 
 public class PlayMenuNavigator : BaseMenu
 {
@@ -20,6 +21,7 @@ public class PlayMenuNavigator : BaseMenu
     [SerializeField] private UIPanelNudge panelNudge;
     [SerializeField] private GameSpeedOption gameSpeedOption;
     [SerializeField] private RunModifierMenuNavigator runModifiers;
+    [SerializeField] private Image smallIcon;
    
     [SerializeField] private PlayPagesController playPagesController;
 
@@ -86,6 +88,7 @@ public class PlayMenuNavigator : BaseMenu
             return;
 
         MenuManager.Instance.RequestMenuTransition(MenuState.RunModifiers);
+        
 
         /*
         GameSceneLoader.PendingConfig = new GameSceneConfig(GameMode.StandardRun,0,null);
@@ -98,11 +101,20 @@ public class PlayMenuNavigator : BaseMenu
 
     private void HandleAbilityCardClicked(AbilityData data)
     {
-        SelectAbility(data);
+        if(!InputFocusManager.HasFocus(this))
+            return;
+        
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
+        TrySelectAbility();
     }
 
     private void HanldeCarouselArrowClicked(CarouselArrow.CarosuelDirection direction)
     {   
+        if(!InputFocusManager.HasFocus(this))
+            return;
+
+        //AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
+
         if(direction == CarouselArrow.CarosuelDirection.Left)
             _selectedIndex = (_selectedIndex - 1 + _currentCards.Count) % _currentCards.Count;
         else if (direction == CarouselArrow.CarosuelDirection.Right)
@@ -110,7 +122,7 @@ public class PlayMenuNavigator : BaseMenu
     
         OnHoverChanged?.Invoke();
         HighlightCard();
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
     }
 
     protected override void Awake()
@@ -193,9 +205,16 @@ public class PlayMenuNavigator : BaseMenu
         if (!InputBindingManager.Instance.GetKeyDown(InputActionType.Confirm))
             return false;
 
+        TrySelectAbility();
+
+        return true;
+    }
+
+    private void TrySelectAbility()
+    {
         panelNudge.NudgeDown();
 
-        if (ScoreManager.Instance.HighScore() >= _currentCards[_selectedIndex].Card.scoreRequirement)
+        if (unlockManager.IsUnlocked(_currentCards[_selectedIndex].Card.abilityType))
         {
             SelectAbility(_currentCards[_selectedIndex].Card);
         }
@@ -203,8 +222,6 @@ public class PlayMenuNavigator : BaseMenu
         {
             AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.negative, transform.position);
         }
-
-        return true;
     }
 
     private void HandleNaviagation()
@@ -215,7 +232,7 @@ public class PlayMenuNavigator : BaseMenu
             OnHoverChanged?.Invoke();
             HighlightCard();
             panelNudge.NudgeLeft();
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveRight))
         {
@@ -223,7 +240,7 @@ public class PlayMenuNavigator : BaseMenu
             OnHoverChanged?.Invoke();
             HighlightCard();
             panelNudge.NudgeRight();
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
         }
     }
 
@@ -385,9 +402,11 @@ public class PlayMenuNavigator : BaseMenu
 
             if (isSelected && descriptionTypewriter != null)
             {
-                if (ScoreManager.Instance.HighScore() >= _currentCards[i].Card.scoreRequirement)
+                if (unlockManager.IsUnlocked(_currentCards[i].Card.abilityType))
                 {
-                    string description = _currentCards[i].Card != null ? _currentCards[i].Card.GetFormattedDescription() : "No card description found";
+                    string description = _currentCards[i].Card != null ? _currentCards[i].Card.GetFormattedDescription() : 
+                                                                         "No card description found";
+                    
                     descriptionTypewriter.StartTyping(description);
                 } 
                 else
@@ -406,6 +425,10 @@ public class PlayMenuNavigator : BaseMenu
                 abilityCostText.text = _currentCards[i].Card.baseCost.ToString();
             }
 
+            if(smallIcon)
+            {
+                smallIcon.sprite = AbilityIconDatabase.Instance.GetSmallIcon(_currentCards[i].Card.abilityType);
+            }
             
 
             var sway = _currentCards[i].GetComponent<CardParallaxSway>();
@@ -414,7 +437,8 @@ public class PlayMenuNavigator : BaseMenu
                 
         }
 
-        float offset = (-_selectedIndex * cardSpacing) + 0.5f * cardSpacing;
+        float totalWidth = (_currentCards.Count - 1) * cardSpacing;
+        float offset = (totalWidth/ 2f) - (_selectedIndex * cardSpacing);
         _targetPosition = new Vector2(offset, 0);
         Debug.DrawLine(Vector3.zero, Vector3.up * 5, Color.red);
     }
@@ -476,9 +500,5 @@ public class PlayMenuNavigator : BaseMenu
             GameMode.StandardRun,
             0,
             null);
-        
-
-        //MenuManager.Instance.RequestMenuTransition(MenuState.RunModifiers);
-       // startOptions.Open(GameMode.StandardRun, SceneNames.ArrowGameScene);
     }
 }

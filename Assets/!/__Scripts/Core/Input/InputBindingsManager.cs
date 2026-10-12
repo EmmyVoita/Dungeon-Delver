@@ -295,13 +295,31 @@ public class InputBindingManager : MonoBehaviour
 
     public bool GetKeyHeld(InputActionType action)
     {
-         if (!bindings.TryGetValue(action, out var key))
-        return false;
+        if (!bindings.TryGetValue(action, out var key))
+            return false;
 
         if (key == Key.None || Keyboard.current == null)
             return false;
+
+        bool fallBackKeyPressed = false;
+
+        switch (action)
+        {
+            case InputActionType.MoveUp:
+                fallBackKeyPressed = Keyboard.current[Key.UpArrow].isPressed;
+                break;
+            case InputActionType.MoveDown:
+                fallBackKeyPressed = Keyboard.current[Key.DownArrow].isPressed;
+                break;
+            case InputActionType.MoveLeft:
+                fallBackKeyPressed = Keyboard.current[Key.LeftArrow].isPressed;
+                break;
+            case InputActionType.MoveRight:
+                fallBackKeyPressed = Keyboard.current[Key.RightArrow].isPressed;
+                break;
+        }
             
-        return Keyboard.current[key].isPressed;
+        return Keyboard.current[key].isPressed || fallBackKeyPressed;
     }
 
 

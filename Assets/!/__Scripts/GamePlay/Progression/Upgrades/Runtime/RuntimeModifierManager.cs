@@ -124,7 +124,7 @@ public abstract class RuntimeModifierManager<TModifier> : MonoBehaviour
     /// </summary>
     public virtual void RegisterPermanent(
         TModifier modifier,
-        UpgradeBase sourceUpgrade)
+        UpgradeBase sourceUpgrade = null)
     {
         if (modifier == null)
             return;
@@ -172,7 +172,7 @@ public abstract class RuntimeModifierManager<TModifier> : MonoBehaviour
             if (permanentModifiers.Contains(entry))
                 continue;
 
-            entry.Modifier.OnDestroy();
+            entry.Modifier.Destroy();
             activeModifiers.RemoveAt(i);
 
             // Renewing modifier instances end each level, but their
@@ -220,7 +220,7 @@ public abstract class RuntimeModifierManager<TModifier> : MonoBehaviour
         if (entry == null)
             return;
 
-        entry.Modifier.OnDestroy();
+        entry.Modifier.Destroy();
         activeModifiers.Remove(entry);
 
         if (entry.RemoveCardWhenExpired &&
@@ -241,7 +241,7 @@ public abstract class RuntimeModifierManager<TModifier> : MonoBehaviour
     {
         foreach (var entry in activeModifiers)
         {
-            entry.Modifier?.OnDestroy();
+            entry.Modifier?.Destroy();
         }
 
         activeModifiers.Clear();
@@ -258,7 +258,7 @@ public abstract class RuntimeModifierManager<TModifier> : MonoBehaviour
     {
         foreach (RuntimeModifierEntry<TModifier> entry in activeModifiers)
         {
-            entry.Modifier.OnDestroy();
+            entry.Modifier.Destroy();
         }
 
         activeModifiers.Clear();

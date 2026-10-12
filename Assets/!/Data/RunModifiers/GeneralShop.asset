@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db6fa1bb419fe6b418ba32663d8dcda7, type: 3}
+  m_Name: GeneralShop
+  m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
+  displayName: A REGULAR
+  description: General Shops are twice as likely to appear.
+  icon: {fileID: -1534497256, guid: eb2db5f6038f3ce4180e2ebb703ccad2, type: 3}
+  summaryName: General Shop Weight
+  summaryIcon: {fileID: -604642799, guid: cf8e3d9803c43f648bec853b2993de62, type: 3}
+  type: 18
+  category: 0
+  minValue: 0
+  maxValue: 1
+  step: 1
+  scoreMultiplierPerStep: 0
+  valueSuffix: 
+  unlockRequirement: {fileID: 11400000, guid: 81224fb4f41fc204e8bbdea0ccaae6ce, type: 2}

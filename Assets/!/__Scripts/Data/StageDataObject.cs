@@ -4,19 +4,22 @@ using System.Collections.Generic;
 [CreateAssetMenu(menuName = "Data / Stage Data")]
 public class StageDataObject : ScriptableObject
 {
+    [Header("Identity")]
     public string stageName;
-    public AudioClip musicClip;
+    
+    [Header("Visuals")]
     public MainBackgroundData backgroundData;
 
-    [Header("Level Settings")]
-    public int levelsToPlay = 2;
+    [Header("Level Files")]
     public List<LevelDataObject> levelFiles;
-    public LevelOrderMode levelOrderMode = LevelOrderMode.Random;
+    public LevelDataObject bossFile;
 
+    [Header("Stage Sequence")]
+    public int levelsToPlay = 2;
     [Tooltip("If true, levels can repeat if there aren't enough unique ones.")]
     public bool allowRepeats = false;
 
-
-    [Header("Boss")]
-    public LevelDataObject bossFile;
+    [Header("Audio")]
+    public AudioClip musicClip;
+    public AudioClip bossMusicClip;
 }

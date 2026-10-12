@@ -35,11 +35,11 @@ public static class StatDisplayHelpers
     public static StatValue ResolveStatValue(StatRowData data)
     {
         if(RoundManager.Instance == null || 
-           ScoreManager.Instance == null || 
+           RunHistoryManager.Instance == null || 
            Player.Instance == null || 
            CurrencyManager.Instance == null ||
-           ScoreManager.Instance.RoundStatsTracker == null ||
-           ScoreManager.Instance.RunStatsTracker  == null
+           RunHistoryManager.Instance.RoundStatsTracker == null ||
+           RunHistoryManager.Instance.RunStatsTracker  == null
            )
         {
             Debug.LogError("Score Manager or Round Manager Instance can not be null when evaluating display stat for UI");
@@ -50,25 +50,25 @@ public static class StatDisplayHelpers
         {
             case StatValueType.TotalScore:
                 return StatValue.FromInt(
-                    ScoreManager.Instance.RunStatsTracker.TotalScore
+                    RunHistoryManager.Instance.RunStatsTracker.TotalScore
                 );
             case StatValueType.Hits:
                 return StatValue.FromRatio(
-                    ScoreManager.Instance.RoundStatsTracker.Hit,
-                   ScoreManager.Instance.RoundStatsTracker.Spawned
+                    RunHistoryManager.Instance.RoundStatsTracker.Hit,
+                   RunHistoryManager.Instance.RoundStatsTracker.Spawned
                 );
             case StatValueType.RunHits:
                 return StatValue.FromRatio(
-                    ScoreManager.Instance.RunStatsTracker.TotalHit,
-                    ScoreManager.Instance.RunStatsTracker.TotalSpawned
+                    RunHistoryManager.Instance.RunStatsTracker.TotalHit,
+                    RunHistoryManager.Instance.RunStatsTracker.TotalSpawned
                 );
             case StatValueType.RunTotalScore:
                 {
                     Debug.Log($"Entered RunTotalScore case. Data: {data.statValueType}");
-                    Debug.Log($"ScoreManager.Instance: {ScoreManager.Instance}");
+                    Debug.Log($"ScoreManager.Instance: {RunHistoryManager.Instance}");
                     Debug.Log("About to read RunScoreTotal");
 
-                    int runScoreTotal = ScoreManager.Instance.RunScoreTotal;
+                    int runScoreTotal = ScoreManager.Instance.CurrentScore;
 
                     Debug.Log($"Successfully read RunScoreTotal: {runScoreTotal}");
 
@@ -76,11 +76,11 @@ public static class StatDisplayHelpers
                 }
             case StatValueType.RunHighestCombo:
                 return StatValue.FromInt(
-                    ScoreManager.Instance.RunStatsTracker.HighestCombo
+                    RunHistoryManager.Instance.RunStatsTracker.HighestCombo
                 );
             case StatValueType.RunDamageTaken:
                 return StatValue.FromInt(
-                    ScoreManager.Instance.RunStatsTracker.TotalDamageTaken
+                    RunHistoryManager.Instance.RunStatsTracker.TotalDamageTaken
                 );
             case StatValueType.CauseOfDeath:
                 {
@@ -92,17 +92,17 @@ public static class StatDisplayHelpers
                     RoundManager.Instance.LevelIndex
                 );
             case StatValueType.RunCritRate:
-                int critPercent = Mathf.RoundToInt(ScoreManager.Instance.RunStatsTracker.RunCritRate * 100f);
+                int critPercent = Mathf.RoundToInt(RunHistoryManager.Instance.RunStatsTracker.RunCritRate * 100f);
                 return StatValue.FromPercent(
                     critPercent
                 );
             case StatValueType.DamageTaken:
                 return StatValue.FromInt(
-                    ScoreManager.Instance.RoundStatsTracker.DamageTaken
+                    RunHistoryManager.Instance.RoundStatsTracker.DamageTaken
                 );
             case StatValueType.RoundScore:
                 return StatValue.FromInt(
-                    ScoreManager.Instance.RoundStatsTracker.Score
+                    RunHistoryManager.Instance.RoundStatsTracker.Score
                 );
             case StatValueType.Currency:
                 return StatValue.FromInt(

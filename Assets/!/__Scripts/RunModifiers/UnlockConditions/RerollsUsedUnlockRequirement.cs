@@ -7,7 +7,7 @@ public class RerollsUsedUnlockRequirement : RunModifierUnlockRequirement
 
     public override string GetRequirementRatioText()
     {
-        return $"{ScoreManager.Instance.TotalRerollsUsed().ToString("N0")}/{rerollRequirement.ToString("N0")}";
+        return $"{RunHistoryManager.Instance.TotalRerollsUsed.ToString("N0")}/{rerollRequirement.ToString("N0")}";
     }
 
     public override string GetUnlockDescriptionText()
@@ -17,6 +17,6 @@ public class RerollsUsedUnlockRequirement : RunModifierUnlockRequirement
 
     public override bool IsUnlocked()
     {
-        return ScoreManager.Instance.TotalRerollsUsed() >= rerollRequirement;
+        return RunHistoryManager.Instance.TotalRerollsUsed >= rerollRequirement;
     }
 }

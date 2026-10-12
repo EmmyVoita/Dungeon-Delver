@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1977434854696843651}
-  - component: {fileID: 4652487950485879776}
+  - component: {fileID: 6951934747265760621}
   m_Layer: 0
   m_Name: ProjectileHookVertical
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8411290210049738593}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4652487950485879776
+--- !u!114 &6951934747265760621
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,38 +41,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 245572351975195380}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c37f6cd9b3fddbc4dbe8c74f531bdd26, type: 3}
+  m_Script: {fileID: 11500000, guid: b7b99c261c232b9448d269bc78294333, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::BurstWallShooter
+  registerWithManager: 1
   priority: 0
   controlMode: 1
-  easeCurve: 6
-  startWindupDelay: 0
-  oscilationXSpeed: 3
-  lifetimeMode: 1
+  childChallenges: []
+  settingsData:
+    fireMode: 0
+    projectileFireMode: 0
+    fireDelayMode: 0
+    firePositionMode: 1
   listenForBossActive: 1
-  activationMode: 1
   portalPrefab: {fileID: 0}
   projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
   linePrefab: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
-  fireMode: 0
-  projectileFireMode: 0
-  fireDelayMode: 0
-  firePositionMode: 1
   unregisterDelay: 1
   startDelay: 1.5
-  fireDelay: 1.5
-  continuousFireCount: 5
   oscillateDistance: 0.5
   oscillateSpeed: 2
   shiftDuration: 0.5
-  shiftStartSound:
-    clip: {fileID: 0}
-    channel: 0
-    affectedByTimeScale: 0
-    volume: 0
-    pitch: 0
-    pitchVariation: 0
   predefinedOffsets:
   - {x: -3.25, y: 5, z: 0}
   - {x: 3.25, y: 5, z: 0}
@@ -91,18 +80,25 @@ MonoBehaviour:
   fireSound:
     clip: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tickSound:
     clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tickCount: 3
+  easeCurve: 22
+  startWindupDelay: 0
+  oscilationXSpeed: 3
+  shiftStartSound:
+    clip: {fileID: 8300000, guid: bda41de902222eb4ab895b9a967a6b74, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0
 --- !u!1 &1645244160336350965
 GameObject:
   m_ObjectHideFlags: 0
@@ -444,6 +440,7 @@ MonoBehaviour:
   - 0.05
   - 0.1
   stopAtLastFrame: 1
+  playOnAwake: 1
 --- !u!1 &5264518880695646827
 GameObject:
   m_ObjectHideFlags: 0
@@ -683,8 +680,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9c94800922c0cd42bc10e99700de657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  registerWithManager: 1
   priority: 0
   controlMode: 1
+  childChallenges:
+  - {fileID: 814956541920066866}
+  - {fileID: 6951934747265760621}
   obstacleRoot: {fileID: 0}
   laserBursts: 1
   delayBetweenBursts: 0.4
@@ -737,7 +738,6 @@ MonoBehaviour:
   pulseSound:
     clip: {fileID: 8300000, guid: 812701c866d5fbf4bacea5766b8f2897, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
@@ -755,7 +755,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
+  abilityChargeDamage: 0
   sourceName: Unknown
+  playHitSound: 1
 --- !u!50 &6004622561016584786
 Rigidbody2D:
   serializedVersion: 5
@@ -792,7 +794,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5876466873741825719}
-  - component: {fileID: 8932009571806106631}
+  - component: {fileID: 814956541920066866}
   m_Layer: 0
   m_Name: ProjectileHook
   m_TagString: Untagged
@@ -815,7 +817,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8411290210049738593}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8932009571806106631
+--- !u!114 &814956541920066866
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -824,43 +826,32 @@ MonoBehaviour:
   m_GameObject: {fileID: 6748417062858929886}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c37f6cd9b3fddbc4dbe8c74f531bdd26, type: 3}
+  m_Script: {fileID: 11500000, guid: b7b99c261c232b9448d269bc78294333, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::BurstWallShooter
+  registerWithManager: 1
   priority: 0
   controlMode: 1
-  easeCurve: 6
-  startWindupDelay: 0
-  oscilationXSpeed: 3
-  lifetimeMode: 1
+  childChallenges: []
+  settingsData:
+    fireMode: 0
+    projectileFireMode: 0
+    fireDelayMode: 0
+    firePositionMode: 1
   listenForBossActive: 1
-  activationMode: 1
   portalPrefab: {fileID: 0}
   projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
   linePrefab: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
-  fireMode: 0
-  projectileFireMode: 0
-  fireDelayMode: 0
-  firePositionMode: 1
   unregisterDelay: 1
   startDelay: 1.5
-  fireDelay: 1.5
-  continuousFireCount: 5
   oscillateDistance: 0.5
   oscillateSpeed: 2
   shiftDuration: 0.5
-  shiftStartSound:
-    clip: {fileID: 0}
-    channel: 0
-    affectedByTimeScale: 0
-    volume: 0
-    pitch: 0
-    pitchVariation: 0
   predefinedOffsets:
-  - {x: -5.5, y: 2, z: 0}
-  - {x: -5.5, y: -2, z: 0}
-  - {x: -5.5, y: -3.25, z: 0}
-  - {x: -5.5, y: 3.25, z: 0}
+  - {x: -5, y: 2, z: 0}
+  - {x: -5, y: -2, z: 0}
+  - {x: -5, y: -3.25, z: 0}
+  - {x: -5, y: 3.25, z: 0}
   projectileFireDirection: {x: 1, y: 0}
   projectileCount: 1
   projectileSpacing: 0
@@ -874,18 +865,25 @@ MonoBehaviour:
   fireSound:
     clip: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tickSound:
     clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tickCount: 3
+  easeCurve: 22
+  startWindupDelay: 0
+  oscilationXSpeed: 3
+  shiftStartSound:
+    clip: {fileID: 8300000, guid: bda41de902222eb4ab895b9a967a6b74, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0
 --- !u!1 &7802391492084843615
 GameObject:
   m_ObjectHideFlags: 0

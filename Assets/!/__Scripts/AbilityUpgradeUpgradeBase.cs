@@ -5,26 +5,16 @@ public class AbilityUpgradeUpgradeBase : UpgradeBase
 {
     [SerializeField] private int upgradeTier = 1;
 
-    public override string DisplayName => GetAbilityUpgradeBase().displayName;
+    public override string DisplayName => GetAbilityUpgradeBase() == null ? "Error" : GetAbilityUpgradeBase().displayName;
+    public override Sprite CenterIcon => GetAbilityUpgradeBase() == null ? null : GetAbilityUpgradeBase().icon;
 
     private AbilityUpgradeBase GetAbilityUpgradeBase()
     {
-        if(!Player.Instance)
-        {
-            Debug.LogError("PLAYER.INSTANCE IS NULL");
-            return null;
-        }
-            
+        AbilityBase abilityBase = GetAbilityBase();
 
-        AbilityBase abilityBase = Player.Instance.CurrentAbility;
-
-        if(!abilityBase)
-        {
-            Debug.LogError("PLAYER.INSTANCE.CURRENT ABILITY IS NULL");
+        if(abilityBase == null)
             return null;
-        }
-            
-        
+
         List<AbilityUpgradeBase> upgradeData = abilityBase.UpgradeData;
 
         int tier = Mathf.Max(0, upgradeTier-1);
@@ -38,13 +28,36 @@ public class AbilityUpgradeUpgradeBase : UpgradeBase
         return upgradeData[tier];
     }
 
-    public override string GetFormattedDescription()
+    private AbilityBase GetAbilityBase()
     {
-        return FormatText(GetAbilityUpgradeBase().description);
+        if(Player.Instance)
+        {
+            return Player.Instance.CurrentAbility;
+        }
+        else if(LeaderBoardMenuNavigator.Instance)
+        {   
+            AbilityData abilityData = LeaderBoardMenuNavigator.Instance.GetCurrentAbilityData();
+            
+            if(!abilityData)
+                return null;
+
+            return abilityData.abilityPrefab;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public override string GetFormattedDescription(bool isInventory)
+    {
+        string description = GetAbilityUpgradeBase() == null ? "Error" : GetAbilityUpgradeBase().description;
+        return FormatText(description, isInventory);
     }
 
     public override string GetDetails()
     {
-        return FormatText(GetAbilityUpgradeBase().details);
+        string details = GetAbilityUpgradeBase() == null ? "Error" : GetAbilityUpgradeBase().details;
+        return FormatText(details);
     }
 }

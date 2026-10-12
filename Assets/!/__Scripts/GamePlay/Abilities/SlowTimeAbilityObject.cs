@@ -11,6 +11,7 @@ public class SlowTimeAbilityObject : AbilityEffectBase
 
     [Header("Slow Time Settings")]
     public VisualEffect slowTimeEffect;
+    public VisualEffect slowTimeUpgradeEffect;
     public float slowFactor = 0.5f; // Slow down to 50% speed
     public float additionalTimeFromArrow = 0.2f;
 
@@ -27,6 +28,11 @@ public class SlowTimeAbilityObject : AbilityEffectBase
     [Header("Audio")]
     [SerializeField] private SoundEffect critcalSEf;
 
+    [Header("Upgrades")]
+    [SerializeField] private int currencyAmount = 40;
+    [SerializeField] private float durationBuff = 1f;
+    [SerializeField] private float refundPercentage = .50f;
+
     public bool useExpandingWave = false;
     public GameObject schockwavePrefab;
     public int maxCountForFullRange = 10;
@@ -37,6 +43,7 @@ public class SlowTimeAbilityObject : AbilityEffectBase
     private int _arrowsCaught = 0;
     private int _criticalArrowsCaught = 0;
     private TimeScaleModifier _slowTimeModifier;
+    private bool caughtArrow;
 
 
     private bool HasCurrencyUpgrade => Context.UpgradeCount >= 1;
@@ -55,11 +62,27 @@ public class SlowTimeAbilityObject : AbilityEffectBase
 
     public override void Activate(AbilityEffectContext context)
     {
-        _arrowsCaught = 0;
+        base.Activate(context);
+
         _criticalArrowsCaught = 0;
 
-        base.Activate(context);
+        if (ObstacleManager.Instance == null)
+        {
+            Debug.LogError("ObstacleManagerInstance null");
+        }
+        else if (ObstacleManager.Instance.AnyActive && HasCurrencyUpgrade)
+        {
+            StartCoroutine(AddAbilityCharge());
+        }
+
         BeginSlowTime();
+    }
+
+    private IEnumerator AddAbilityCharge()
+    {
+        yield return null;
+        int refundAmount = Mathf.RoundToInt(Player.Instance.MaxAbilityCharge * refundPercentage);
+        Player.Instance.SetAbilityCharge(Player.Instance.AbilityCharge + refundAmount,allowWhileActive: true);
     }
 
     void HandleArrowResolved(ArrowResolvedData data)
@@ -67,18 +90,22 @@ public class SlowTimeAbilityObject : AbilityEffectBase
         if(!slowTime)
             return;
 
+            
+
         if(data.goalType == Goal.GoalType.Miss)
             return;
+
+        //_arrowsCaught++;
 
         if(data.goalType == Goal.GoalType.Critical)
         {
             _criticalArrowsCaught++;
 
-            if(HasCurrencyUpgrade)
-                GrantAbilityCurrency();
+            //if(HasCurrencyUpgrade)
+                //GrantAbilityCurrency();
 
-            if(HasDurationUpgrade)
-                ExtendSlowTime();
+            //if(HasDurationUpgrade)
+                //ExtendSlowTime();
         }
     }
 
@@ -95,7 +122,17 @@ public class SlowTimeAbilityObject : AbilityEffectBase
     }
 
 
+    protected override void EndEffect()
+    {
+        /*
+        if(_arrowsCaught == 0 && HasCurrencyUpgrade)
+        {
+            CurrencyManager.Instance.AddCurrency(currencyAmount, "Ability");
+        }
+        */
 
+        base.EndEffect();
+    }
 
 
     void Update()
@@ -137,6 +174,9 @@ public class SlowTimeAbilityObject : AbilityEffectBase
         if (slowTimeEffect != null)
             slowTimeEffect.Play();
 
+        if (slowTimeUpgradeEffect != null && HasDurationUpgrade)
+            slowTimeUpgradeEffect.Play();
+
         if (_slowTimeModifier != null)
         {
             TimeManager.Instance.RemoveModifier(_slowTimeModifier.Id);
@@ -159,7 +199,8 @@ public class SlowTimeAbilityObject : AbilityEffectBase
 
         Debug.Log("Time slowed down due to crit combo!");
 
-        slowTimeDone = Time.unscaledTime + Mathf.Max(0.1f,Context.Duration);
+        float duration = HasDurationUpgrade ? Context.Duration + durationBuff : Context.Duration;
+        slowTimeDone = Time.unscaledTime + Mathf.Max(0.1f,duration);
         slowTime = true;
 
         if (spinRoutine != null)
@@ -228,7 +269,10 @@ public class SlowTimeAbilityObject : AbilityEffectBase
         float currentRotSpeed = rotationSpeed;
 
         if(slowTimeEffect != null)
-        slowTimeEffect.Stop();
+            slowTimeEffect.Stop();
+
+        if (slowTimeUpgradeEffect != null && HasDurationUpgrade)
+            slowTimeUpgradeEffect.Stop();
 
         // Fade out + decelerate rotation
         while (timer < fadeDuration)

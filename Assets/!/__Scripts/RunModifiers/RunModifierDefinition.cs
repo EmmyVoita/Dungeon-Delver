@@ -32,10 +32,14 @@ public class RunModifierDefinition : ScriptableObject
     public RunModifierUnlockRequirement unlockRequirement;
 
 
-    public bool IsUnlocked => unlockRequirement == null || unlockRequirement.IsUnlocked();
+    public bool IsUnlocked => RunHistoryManager.Instance.GetUnlockAll() || unlockRequirement == null || unlockRequirement.IsUnlocked();
     public string UnlockRequirementText => unlockRequirement == null ? string.Empty : unlockRequirement.GetUnlockDescriptionText();
     public string UnlockRatioText => unlockRequirement == null ? string.Empty : unlockRequirement.GetRequirementRatioText();
     
+    public string GetDescription()
+    {
+        return description.Replace("[VALUE]",RunModifierManager.Instance.GetValueString(type));
+    }
 
     public float ClampValue(float value)
     {

@@ -14,7 +14,12 @@ public class RunModifierManager : MonoBehaviour
     [SerializeField] private int additionalAbilityDamageStep = 999;
     [Range(0,1)][SerializeField] private float normalArrowAbilityChargeStep = 0.25f;
     [Range(0,1)][SerializeField] private float startingAbilityChargeStep = 0.5f;
+    [Range(0,1)][SerializeField] private float goldenArrowChargeStep = 0.01f;
+    [SerializeField] private int abilityChargeForCurrencyStep = 1;
     [SerializeField] private int startingCurrencyStep = 500;
+    [SerializeField] private float additionalGeneralShopWeight = 1.0f;
+
+    [SerializeField] private int critsLoseCurrencyStep = 1;
 
     [SerializeField] private List<RunModifierSelection> selections = new();
 
@@ -127,10 +132,64 @@ public class RunModifierManager : MonoBehaviour
                 case RunModifierType.StartingCurrency:
                     GameSceneLoader.PendingConfig.StartingCurrency = (int)GetValue(type) * startingCurrencyStep;
                     break;
+                case RunModifierType.RandomGoldenArrow:
+                    GameSceneLoader.PendingConfig.GoldenArrowChance = (int)GetValue(type) * goldenArrowChargeStep;
+                    break;
+                case RunModifierType.AbilityChargeOnCurrencyGain:
+                    GameSceneLoader.PendingConfig.AbilityChargeOnCurrency = (int)GetValue(type) * abilityChargeForCurrencyStep;
+                    break;
+                case RunModifierType.CritsTakeAbilityCharge:
+                    GameSceneLoader.PendingConfig.CritsAbilityChargeMod = -(int)GetValue(type);
+                    break;
+                case RunModifierType.CritsLoseCurrency:
+                    GameSceneLoader.PendingConfig.CritsLoseCurrencyAmount = (int)GetValue(type) * critsLoseCurrencyStep;
+                    break;
+                case RunModifierType.RotateBoard:
+                    GameSceneLoader.PendingConfig.RotateBoard = (int)GetValue(type) > 0;
+                    break;
+                case RunModifierType.AdditionalGeneralShop:
+                    GameSceneLoader.PendingConfig.AdditionalGeneralShopWeight = (int)GetValue(type) * additionalGeneralShopWeight;
+                    break;
             }
         }
 
         GameSceneLoader.PendingConfig.ScoreMultiplier = GetScoreMultiplier();
+    }
+
+    public string GetValueString(RunModifierType type)
+    {
+        switch (type)
+        {
+            case RunModifierType.CurrencyGain:
+                return FormatValueString("+" + $"{currencyGainStep * 100}%", UIColors.Green);
+            case RunModifierType.LevelSpeed:
+                return FormatValueString("+" + $"{gameSpeedStep * 100}%", UIColors.Red);
+            case RunModifierType.NormalArrowAbilityCharge:
+                return FormatValueString("+" + $"{normalArrowAbilityChargeStep * 100}%", UIColors.Green);
+            case RunModifierType.StartingAbilityCharge:
+                return FormatValueString("+" + $"{startingAbilityChargeStep* 100}%", UIColors.Green);
+            case RunModifierType.StartingCurrency:
+                return FormatValueString("+" + startingCurrencyStep.ToString(), UIColors.Green);
+            case RunModifierType.RandomGoldenArrow:
+                return FormatValueString("+" + $"{goldenArrowChargeStep * 100}%", UIColors.Green);
+            case RunModifierType.AbilityChargeOnCurrencyGain:
+                return FormatValueString("+" + abilityChargeForCurrencyStep.ToString("N0"), UIColors.Green);
+            case RunModifierType.CritsTakeAbilityCharge:
+                return FormatValueString("-1",UIColors.Red);
+            case RunModifierType.CritsLoseCurrency:
+                return FormatValueString("+" + critsLoseCurrencyStep.ToString("N0"), UIColors.Red);
+            case RunModifierType.ExtraDamageTaken:
+                return FormatValueString("+1",UIColors.Red);
+            case RunModifierType.AdditionalGeneralShop:
+                return FormatValueString("x" + (1.0f + additionalGeneralShopWeight).ToString("N0"), UIColors.Red);
+            default:
+                return FormatValueString("+1", UIColors.Green);
+        }
+    }
+
+    private string FormatValueString(string input, Color color)
+    {
+        return $"<color=#{UIColors.ToHex(color)}>{input}</color>";
     }
 
     public string GetFinalValue(RunModifierType type)
@@ -142,39 +201,41 @@ public class RunModifierManager : MonoBehaviour
         switch (type)
         {
             case RunModifierType.BonusHealing:
-                return prefix + val.ToString("N0");
-
+                return FormatValueString(prefix + val.ToString("N0"), UIColors.Green);
             case RunModifierType.EndOfRoundHeal:
-                return prefix +val.ToString("N0");
-
+                return  FormatValueString(prefix +val.ToString("N0"), UIColors.Green);
             case RunModifierType.CurrencyGain:
-                // Each step is +50% currency.
-                // 3 => 150
-                return prefix + $"{val * currencyGainStep * 100}%";
-
+                return  FormatValueString(prefix + $"{val * currencyGainStep * 100}%", UIColors.Green);
             case RunModifierType.RerollsPerLevel:
-                return prefix + val.ToString("N0");
-
+                return FormatValueString(prefix + val.ToString("N0"), UIColors.Green);
             case RunModifierType.StartingRandomCards:
-                return prefix + val.ToString("N0");
-
+                return FormatValueString(prefix + val.ToString("N0"), UIColors.Green);
             case RunModifierType.ExtraDamageTaken:
-                return prefix + val.ToString("N0");
+                return FormatValueString(prefix + val.ToString("N0"), UIColors.Red);
             case RunModifierType.RewardRoute:
-                return prefix + val.ToString("N0");
-
+                return FormatValueString(prefix + val.ToString("N0"), UIColors.Green);
             case RunModifierType.LevelSpeed:
-                // Each step is +5% speed.
-                // 3 => 15
-                return prefix + $"{val * gameSpeedStep * 100}%";
+                return FormatValueString(prefix + $"{val * gameSpeedStep * 100}%", UIColors.Red);
             case RunModifierType.AbilityDamage:
-                return prefix + val.ToString("N0");
+                return FormatValueString($"{val * 100}%",UIColors.Red);
             case RunModifierType.NormalArrowAbilityCharge:
-                return prefix + $"{val * normalArrowAbilityChargeStep * 100}%";
+                return FormatValueString(prefix + $"{val * normalArrowAbilityChargeStep * 100}%",UIColors.Green);
             case RunModifierType.StartingAbilityCharge:
-                return prefix + $"{val * startingAbilityChargeStep * 100}%";
+                return FormatValueString(prefix + $"{val * startingAbilityChargeStep * 100}%",UIColors.Green);
             case RunModifierType.StartingCurrency:
-                return prefix + (val * startingCurrencyStep).ToString();
+                return FormatValueString(prefix + (val * startingCurrencyStep).ToString(),UIColors.Green);
+            case RunModifierType.RandomGoldenArrow:
+                return FormatValueString(prefix + $"{val * goldenArrowChargeStep * 100f}%",UIColors.Green);
+            case RunModifierType.AbilityChargeOnCurrencyGain:
+                return FormatValueString(prefix + (val *  abilityChargeForCurrencyStep).ToString("N0"),UIColors.Green);
+            case RunModifierType.CritsTakeAbilityCharge:
+                return FormatValueString(val > 0 ? "Disabled" : "Enabled",UIColors.Red);
+            case RunModifierType.CritsLoseCurrency:
+                return FormatValueString(prefix + (val * critsLoseCurrencyStep).ToString("N0"),UIColors.Red);
+            case RunModifierType.RotateBoard:
+                return FormatValueString(val > 0 ? "Enabled" : "Disabled",UIColors.Red);
+            case RunModifierType.AdditionalGeneralShop:
+                return FormatValueString("x" + (1.0f + (val * additionalGeneralShopWeight)).ToString("N0"),UIColors.Green);
         }
 
         return val.ToString();

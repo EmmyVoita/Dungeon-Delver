@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class InputModeManager : MonoBehaviour
 {
@@ -14,8 +15,7 @@ public class InputModeManager : MonoBehaviour
 
     public static event Action<InputMode> OnInputModeChanged;
 
-    public InputMode CurrentMode { get; private set; } =
-        InputMode.Keyboard;
+    public InputMode CurrentMode { get; private set; } = InputMode.Keyboard;
 
     [SerializeField]
     private List<InputActionType> keyboardInputs;
@@ -25,8 +25,8 @@ public class InputModeManager : MonoBehaviour
     private float mouseMoveThreshold = 2f;
 
     [Header("Dynamic")]
-    [SerializeField]
-    private Vector3 _lastMousePosition;
+    [SerializeField] private Vector3 _lastMousePosition;
+    [SerializeField] private bool _paused = false;
 
     private void Awake()
     {
@@ -46,22 +46,54 @@ public class InputModeManager : MonoBehaviour
         CursorController.Instance?.ShowCursor(false);
 
         Cursor.visible = false;
+        _paused = false;
     }
 
     private void OnEnable()
     {
         GameStateManager.OnStateChanged += HandleStateChanged;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        PauseMenuNavigator.OnPaused += HandlePaused;
     }
 
     private void OnDisable()
     {
         GameStateManager.OnStateChanged -= HandleStateChanged;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        PauseMenuNavigator.OnPaused -= HandlePaused;
+    }
+
+    private void HandlePaused(bool value)
+    {
+        _paused = value;
+
+        if (CurrentMode != InputMode.Mouse && _paused)
+            SetInputMode(InputMode.Mouse);
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if(scene.name == SceneNames.LevelEditor)
+        {
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.visible = false;
+        }
+
+        if(scene.name == SceneNames.ArrowGameScene)
+        {
+            SetInputMode(InputMode.Keyboard);
+        }
+
+        _paused = false;
     }
 
     private void Update()
     {
         // Mouse isn't allowed in this state at all.
-        if (!GameStateEffectManager.AllowMouseInput)
+        if (!GameStateEffectManager.AllowMouseInput && !_paused)
         {
             if (CurrentMode != InputMode.Keyboard)
                 SetInputMode(InputMode.Keyboard);
@@ -77,9 +109,7 @@ public class InputModeManager : MonoBehaviour
         DetectMouseInput();
     }
 
-    private void HandleStateChanged(
-        GameState previousState,
-        GameState newState)
+    private void HandleStateChanged(GameState previousState,GameState newState)
     {
         // If the new state doesn't support mouse input,
         // immediately return to keyboard mode.

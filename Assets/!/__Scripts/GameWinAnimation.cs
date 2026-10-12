@@ -116,11 +116,12 @@ public class GameWinAnimation : MonoBehaviour
 
     private void Update()
     {
-        
+        #if UNITY_EDITOR
         if(Input.GetKeyDown(KeyCode.M))
         {
             GameStateManager.Instance.SetStateForceUpdate(GameState.GameWin);
         }
+        #endif
         
     }
 

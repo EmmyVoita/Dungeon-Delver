@@ -56,10 +56,7 @@ public class DisguiseAxe : ChallengeBase
     private bool _spawnProjectiles = true;
     private bool _trackReverseTimer = false;
 
-    void Start()
-    {
-        Begin();
-    }
+
 
     void Update()
     {

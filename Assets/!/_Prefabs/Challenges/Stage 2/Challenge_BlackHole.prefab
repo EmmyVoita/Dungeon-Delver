@@ -104,6 +104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40420cdb7f15b4241958f7afe4ff6ea7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  randomStartingAngleZ: 0
   rotationSpeed: {x: 0, y: 0, z: 45}
   rotationSpace: 1
 --- !u!1 &2339160533688471119
@@ -275,8 +276,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dcb69973620f3f43bfdf039a35b3278, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  registerWithManager: 1
   priority: 0
   controlMode: 1
+  childChallenges:
+  - {fileID: 7817218741036465387}
   obstaclePrefabs:
   - {fileID: 3821829617641175035, guid: e371d1e97a45e29488d99c74a778b3be, type: 3}
   registerObstacle: 1
@@ -423,8 +427,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3da55463a36a704cbb067cc69d9ff88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingBreakableSpawner
+  registerWithManager: 1
   priority: 1
   controlMode: 2
+  childChallenges: []
+  addCanvasPopup: 1
   listenForBossActive: 1
   lifetimeMode: 2
   switchPlayerState: 1
@@ -434,13 +441,13 @@ MonoBehaviour:
   shootSoundEffect:
     clip: {fileID: 8300000, guid: 35f2087f655e83240b4bfa7e50a59852, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   spawnDistance: 7
   spawnInterval: 1.5
   spawnCount: 7
+  fireAction: 6
   minFireDelay: 0.1
   unregisterDelay: 8
   directions:

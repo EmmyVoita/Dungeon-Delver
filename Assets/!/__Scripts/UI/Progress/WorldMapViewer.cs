@@ -8,9 +8,6 @@ using UnityEngine.UI;
 
 public class WorldMapViewer : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private WorldMapData mapData;
-
     [Header("Prefabs")]
     [SerializeField] private WorldNodeView nodePrefab;
 
@@ -52,22 +49,36 @@ public class WorldMapViewer : MonoBehaviour
      private WorldMapRouteMarker _currentRouteMarker;
 
     public Vector2 CurrentNodePosition => (nodeViews[CurrentIndex].transform as RectTransform).anchoredPosition;
+    private int CurrentIndex => RoundManager.Instance != null ? RoundManager.Instance.TotalCurrentLevelIndex: 0;
 
-    private int CurrentIndex =>
-        RoundManager.Instance != null
-            ? RoundManager.Instance.CurrentLevelIndex
-            : 0;
-
-    public WorldNodeView CurrentNode
+    private int GetRouteMarkerIndex(int levelIndex)
     {
-        get
+        if (BetweenRoundFlowManager.Instance.RewardTiming == RouteRewardTiming.BeforeNextLevel)
         {
-            if (CurrentIndex < 0 || CurrentIndex >= nodeViews.Count)
-                return null;
-
-            return nodeViews[CurrentIndex];
+            levelIndex--;
         }
+
+        return levelIndex;
     }
+
+    private StageLevelIndex GetRouteHistoryIndexForNode(int nodeIndex)
+    {
+        int levelIndex = nodeIndex;
+
+        if (BetweenRoundFlowManager.Instance.RewardTiming ==
+            RouteRewardTiming.BeforeNextLevel)
+        {
+            levelIndex++;
+        }
+
+        return new StageLevelIndex
+        {
+            stageIndex = RoundManager.Instance.CurrentStageIndex,
+            levelIndex = levelIndex
+        };
+    }
+
+
 
     public void Build(Action onComplete)
     {
@@ -83,9 +94,7 @@ public class WorldMapViewer : MonoBehaviour
 
     private IEnumerator BuildSequence(Action onComplete)
     {
-        if (mapData == null ||
-            mapData.nodes == null ||
-            mapData.nodes.Count == 0)
+        if (RoundManager.Instance.StageCount == 0)
         {
             buildRoutine = null;
             yield break;
@@ -93,33 +102,20 @@ public class WorldMapViewer : MonoBehaviour
 
         SetupPath();
 
-        for (int i = 0; i < mapData.nodes.Count; i++)
+        int index = 0;
+
+        for (int i = 0; i < RoundManager.Instance.StageCount; i++)
         {
-            WorldNodeData nodeData =mapData.nodes[i];
-            Vector2 position =GetNodePosition(i);
-
-            WorldNodeView node =SpawnNode(nodeData,position,i < CurrentIndex);
-
-            if (i == 0)
+            StageDataObject stageDataObject = RoundManager.Instance.StageObjects[i];
+            
+            for(int j = 0; j < stageDataObject.levelsToPlay; j++)
             {
-                yield return new WaitForSecondsRealtime(
-                    firstNodeDelay
-                );
+                yield return CreateNodeSequence(index);
+                index++;
             }
-            else
-            {
-                yield return new WaitForSecondsRealtime(
-                    nodeDisplayDelay
-                );
-            }
-
-            AudioHelpers.PlaySoundEffect(buildSound,transform.position);
-
-            if (RunStateManager.Instance.TryGetRouteHistory(i,out WorldMapRouteType route))
-            {
-                yield return new WaitForSecondsRealtime(routeMarkerDelay);    
-                WorldMapRouteMarker marker =SpawnRouteMarker(node,route);
-            }
+            
+            yield return CreateNodeSequence(index, true);
+            index++;
         }
 
         // Start with the current part of the map visible.
@@ -130,24 +126,40 @@ public class WorldMapViewer : MonoBehaviour
         buildRoutine = null;
     }
 
+    private IEnumerator CreateNodeSequence(int index, bool isBoss = false)
+    {
+        Vector2 position =GetNodePosition(index);
+
+        WorldNodeView node =SpawnNode(position, index, index < CurrentIndex, isBoss);
+
+        if (index == 0)
+            yield return new WaitForSecondsRealtime(firstNodeDelay);
+        else
+            yield return new WaitForSecondsRealtime(nodeDisplayDelay);
+
+        AudioHelpers.PlaySoundEffect(buildSound,transform.position);
+
+        StageLevelIndex historyIndex = GetRouteHistoryIndexForNode(index);
+
+        if (RunStateManager.Instance.TryGetRouteHistory(historyIndex,out WorldMapRouteType route))
+        {
+            yield return new WaitForSecondsRealtime(routeMarkerDelay);    
+            SpawnRouteMarker(node,route);
+        }
+    }
+
     private Vector2 GetNodePosition(int index)
     {
-        return new Vector2(
-            startX + index * spacing,
-            nodeY
-        );
+        return new Vector2(startX + index * spacing,nodeY);
     }
 
     private void SetupPath()
     {
-        if (pathRect == null ||
-            mapData == null ||
-            mapData.nodes.Count == 0)
+        if (pathRect == null || RoundManager.Instance.StageCount == 0)
             return;
 
         float firstX = GetNodePosition(0).x;
-        float lastX =
-            GetNodePosition(mapData.nodes.Count - 1).x;
+        float lastX = GetNodePosition(RoundManager.Instance.StageCount - 1).x;
 
         float width = lastX - firstX;
 
@@ -155,8 +167,7 @@ public class WorldMapViewer : MonoBehaviour
         pathRect.anchorMax = new Vector2(0.5f, 0.5f);
         pathRect.pivot = new Vector2(0f, 0.5f);
 
-        pathRect.anchoredPosition =
-            new Vector2(firstX, nodeY);
+        pathRect.anchoredPosition = new Vector2(firstX, nodeY);
 
         pathRect.SetSizeWithCurrentAnchors(
             RectTransform.Axis.Horizontal,
@@ -164,16 +175,11 @@ public class WorldMapViewer : MonoBehaviour
         );
     }
 
-    private WorldNodeView SpawnNode(
-        WorldNodeData nodeData,
-        Vector2 anchoredPosition,
-        bool completed)
+    private WorldNodeView SpawnNode(Vector2 anchoredPosition, int index, bool completed, bool isBoss)
     {
-        WorldNodeView view =
-            Instantiate(nodePrefab, nodeContainer, false);
+        WorldNodeView view = Instantiate(nodePrefab, nodeContainer, false);
 
-        RectTransform nodeRect =
-            view.transform as RectTransform;
+        RectTransform nodeRect = view.transform as RectTransform;
 
         if (nodeRect != null)
         {
@@ -182,11 +188,7 @@ public class WorldMapViewer : MonoBehaviour
             nodeRect.localScale = Vector3.one;
         }
 
-        view.Initialize(
-            nodeData.index,
-            nodeData.isBoss,
-            completed
-        );
+        view.Initialize(index, isBoss,completed);
 
         nodeViews.Add(view);
 
@@ -208,15 +210,9 @@ public class WorldMapViewer : MonoBehaviour
         if (option == null)
             return null;
 
-        RectTransform nodeRect =
-            node.transform as RectTransform;
+        RectTransform nodeRect = node.transform as RectTransform;
 
-        WorldMapRouteMarker marker =
-            Instantiate(
-                routeMarkerPrefab,
-                nodeRect,
-                false
-            );
+        WorldMapRouteMarker marker = Instantiate(routeMarkerPrefab,nodeRect,false);
 
         RectTransform markerRect =marker.transform as RectTransform;
 
@@ -264,14 +260,12 @@ public class WorldMapViewer : MonoBehaviour
         if (index < 0 || index >= nodeViews.Count)
             return;
 
-        RectTransform nodeRect =
-            nodeViews[index].transform as RectTransform;
+        RectTransform nodeRect = nodeViews[index].transform as RectTransform;
 
         if (nodeRect == null)
             return;
 
-        float targetRootX =
-            focusX - nodeRect.anchoredPosition.x;
+        float targetRootX = focusX - nodeRect.anchoredPosition.x;
 
         Vector2 pos = scrollRoot.anchoredPosition;
         pos.x = targetRootX;
@@ -316,7 +310,9 @@ public class WorldMapViewer : MonoBehaviour
 
     public void CreateCurrentRoutePreview()
     {
-        WorldNodeView node = CurrentNode;
+        int markerIndex = GetRouteMarkerIndex(CurrentIndex);
+
+        WorldNodeView node = GetNode(markerIndex);
 
         if (node == null)
             return;
@@ -324,15 +320,16 @@ public class WorldMapViewer : MonoBehaviour
         if (_currentRouteMarker != null)
             Destroy(_currentRouteMarker.gameObject);
 
-        _currentRouteMarker = Instantiate(routeMarkerPrefab,node.transform,false);
+        _currentRouteMarker =
+            Instantiate(routeMarkerPrefab, node.transform, false);
 
-        RectTransform rect =_currentRouteMarker.transform as RectTransform;
+        RectTransform rect = _currentRouteMarker.transform as RectTransform;
 
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0.5f);
 
-        rect.anchoredPosition =new Vector2(0f, routeMarkerYOffset);
+        rect.anchoredPosition = new Vector2(0f, routeMarkerYOffset);
     }
 
     public void SetCurrentRoutePreview(Sprite icon)

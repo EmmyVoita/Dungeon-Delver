@@ -35,10 +35,7 @@ public class BossSafeLaneChallenge : ChallengeBase
 
 
 
-    void Start()
-    {
-        Begin();
-    }
+
 
     public override void Begin(object config = null)
     {

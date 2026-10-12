@@ -25,6 +25,7 @@ public class ButtonSpriteSwap : MonoBehaviour
 
     void Awake()
     {
+        /*
         if (button == null)
             button = GetComponent<Button>();
 
@@ -38,6 +39,7 @@ public class ButtonSpriteSwap : MonoBehaviour
         originalTextPos = textTransform.anchoredPosition;
 
         button.onClick.AddListener(PlayFeedback);
+        */
     }
 
     void PlayFeedback()

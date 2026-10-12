@@ -81,13 +81,13 @@ public class StartOptionsNavigator : MonoBehaviour
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveRight))
         {
             _selectedIndex = (_selectedIndex + 1) % options.Length;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             UpdateVisuals();
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveLeft))
         {
             _selectedIndex = (_selectedIndex - 1 + options.Length) % options.Length;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             UpdateVisuals();
         }
 

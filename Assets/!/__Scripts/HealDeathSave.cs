@@ -31,7 +31,7 @@ public class HealDeathSave : IDeathSave
         
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

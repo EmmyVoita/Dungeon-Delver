@@ -16,16 +16,18 @@ MonoBehaviour:
   category: 4
   requiredUpgrades: []
   baseOfferWeight: 1
-  _cost: 200
-  _maxStacks: 999
+  _cost: 300
+  _maxStacks: 2
   duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
   centerIcon: {fileID: 21300000, guid: 3be42c3645545984ab356c17701e8db3, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Mana Brew
-  descriptionTemplate: Passivley gain ability charge at a rate of {CHARGE_RATE} per
-    second.
-  detailsTemplate: This upgrade stacks. Each stack increases the charge rate by {CHARGE_RATE}
+  descriptionTemplate: Passively gain {CHARGE_RATE} of your maximum ability charge
     per second.
-  chargeRate: 0.25
+  detailsTemplate: 
+  chargeRatePerStack:
+  - 0.005
+  - 0.003
+  chargeRate: 0.2

@@ -37,10 +37,6 @@ public class LoopingLaneDodger : ChallengeBase
     private bool _hasReversed = false;
 
 
-    void Start()
-    {
-        Begin();
-    }
 
 
     void Update()

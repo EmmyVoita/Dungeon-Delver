@@ -9,7 +9,7 @@ public class IntermediateSlowOnCrit : UpgradeBase
     public float hold = 0.08f;
     public float easeOut = 0.12f;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{NORMAL_ARROW_MULTIPLIER}", (normalArrowMultiplier-1).ToString("P0"));

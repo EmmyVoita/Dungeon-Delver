@@ -64,6 +64,11 @@ public class GoldenArrowManager : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        Initialize();
+    }
+
     private void Initialize()
     {
         if (_initialized)

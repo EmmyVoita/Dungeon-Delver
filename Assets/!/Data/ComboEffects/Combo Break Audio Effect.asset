@@ -16,13 +16,13 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: e2e566b8f6ca5c34983e19a0d5bcd41e, type: 3}
     channel: 2
     volume: 0.6
-    pitch: 0.8
+    pitch: 1
     pitchVariation: 0
   triggerOnlyAtIndex: 0
   comboInterval: 25
   startCombo: 25
   pitchStep: -0.1
-  minPitch: 0.3
-  maxPitch: 2
+  minPitch: 0.6
+  maxPitch: 1.5
   volumeStep: 0.1
   maxVolume: 1.2

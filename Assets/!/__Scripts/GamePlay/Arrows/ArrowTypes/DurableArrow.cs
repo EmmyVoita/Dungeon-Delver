@@ -50,6 +50,7 @@ public class DurableArrow : ArrowBase
 
     protected override void Update()
     {
+        #if UNITY_ENGINE
         if (Input.GetKeyDown(KeyCode.P))
         {
             Debug.Log("MANUAL VFX START");
@@ -57,6 +58,7 @@ public class DurableArrow : ArrowBase
             trailEffect.Reinit();
             trailEffect.Play();
         }
+        #endif
 
         if (_invincible && Time.time > invincibleDone)
             _invincible = false;
@@ -209,7 +211,7 @@ public class DurableArrow : ArrowBase
             bounceStartTime = (float)MusicManager.Instance.ScaledElapsedTime;
             bounceEndTime = bounceStartTime + duration;
 
-            bounceStartPos = transform.position;
+            bounceStartPos = transform.localPosition;
 
             bounceDistance = maxBounceDistance > 0f
                 ? maxBounceDistance

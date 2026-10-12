@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Stage2Data
   m_EditorClassIdentifier: Assembly-CSharp::StageDataObject
   stageName: Cosmic Crossfire
-  musicClip: {fileID: 8300000, guid: b8d87d2dc46df5147a0d6cdd051a28fe, type: 3}
   backgroundData:
     mainBackground: {fileID: 2800000, guid: 65286e6bf69d14546af525fb5a617833, type: 3}
     secondaryBackground: {fileID: 2800000, guid: 0587b914d8ce80c48afa024512384522, type: 3}
@@ -23,11 +22,12 @@ MonoBehaviour:
     secondaryTiling: {x: 0.9, y: 2.7}
     mainDirection: {x: -1, y: 1}
     secondaryDirection: {x: 5, y: 1}
-  levelsToPlay: 3
   levelFiles:
   - {fileID: 11400000, guid: 2a3f80f31c0c83544adf8dcb0e2a512b, type: 2}
   - {fileID: 11400000, guid: 947d0f1f6aefba8429e8ad5e3c9cba04, type: 2}
   - {fileID: 11400000, guid: 0203e0d67cc436040bc82c3fac00736c, type: 2}
-  levelOrderMode: 0
-  allowRepeats: 0
   bossFile: {fileID: 11400000, guid: cfef1040aca03164186543add1765836, type: 2}
+  levelsToPlay: 1
+  allowRepeats: 0
+  musicClip: {fileID: 8300000, guid: b8d87d2dc46df5147a0d6cdd051a28fe, type: 3}
+  bossMusicClip: {fileID: 0}

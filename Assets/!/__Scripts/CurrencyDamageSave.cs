@@ -43,7 +43,7 @@ public class CurrencyDamageSave : IDamageSave
         return new CurrencyDamageSave(_currencyRequired, _preventComboBreak, ShieldPrefab);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

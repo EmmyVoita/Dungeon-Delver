@@ -8,6 +8,7 @@ public class CoinZapManager : MonoBehaviour
     public static CoinZapManager Instance;
 
     [Header("Targeting")]
+    [SerializeField] private float zapAllRadius = 5f;
     [SerializeField] private LayerMask arrowLayerMask;
 
     [Header("Audio")]
@@ -31,12 +32,14 @@ public class CoinZapManager : MonoBehaviour
         public float radius;
         public bool preventComboBreak;
         public bool empowered;
+        public Gradient gradient;
 
-        public ZapRequest(float radius, bool preventComboBreak, bool empowered)
+        public ZapRequest(float radius, bool preventComboBreak, bool empowered, Gradient gradient)
         {
             this.radius = radius;
             this.preventComboBreak = preventComboBreak;
             this.empowered = empowered;
+            this.gradient = gradient;
         }
     }
 
@@ -146,10 +149,8 @@ public class CoinZapManager : MonoBehaviour
         return best;
     }
 
-    public void ZapArrow(ArrowBase target, bool preventComboBreak, bool empowered)
+    public void ZapArrow(ArrowBase target, bool preventComboBreak, bool empowered, Gradient lightningGradient)
     {
-        Debug.Log("ZAPPING ARROW");
-
         if (target == null)
             return;
 
@@ -161,22 +162,20 @@ public class CoinZapManager : MonoBehaviour
         {
             LightningZapEffect zap = Instantiate(zapPrefab);
             zap.Play(origin, target.transform.position);
-
-            
         }
 
         GameObject vfxObj = Instantiate(zapVFX,  target.transform.position, quaternion.identity);
         EmpoweredVisualEffect empoweredEffect = vfxObj.GetComponent<EmpoweredVisualEffect>();
-        empoweredEffect?.Play(empowered);
+        empoweredEffect?.Play(lightningGradient,empowered);
 
         AudioHelpers.PlaySoundEffect(procSoundEffect, target.transform.position);
 
         target.KillArrow(Goal.GoalType.Critical, true);
     }
 
-    public void QueueZap(float radius, bool preventComboBreak, bool empowered)
+    public void QueueZap(float radius, bool preventComboBreak, bool empowered, Gradient gradient)
     {
-        _pendingZaps.Enqueue(new ZapRequest(radius, preventComboBreak, empowered));
+        _pendingZaps.Enqueue(new ZapRequest(radius, preventComboBreak, empowered, gradient));
 
         if (!_processingQueue)
             StartCoroutine(ProcessQueue());
@@ -195,9 +194,49 @@ public class CoinZapManager : MonoBehaviour
             ArrowBase arrow = GetBestArrow(request.radius);
 
             if (arrow != null)
-                ZapArrow(arrow, request.preventComboBreak, request.empowered);
+                ZapArrow(arrow, request.preventComboBreak, request.empowered, request.gradient);
         }
 
         _processingQueue = false;
+    }
+
+    public void ZapAllArrows(Gradient lightningGradient)
+    {
+        Vector2 origin = zapOrigin != null
+            ? zapOrigin.position
+            : Player.Instance.transform.position;
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(
+            origin,
+            zapAllRadius,
+            arrowLayerMask
+        );
+
+        // Prevent accidentally grabbing the same ArrowBase multiple times
+        // if it has multiple colliders.
+        HashSet<ArrowBase> arrows = new();
+
+        foreach (Collider2D col in colliders)
+        {
+            if (col == null)
+                continue;
+
+            ArrowBase arrow = col.GetComponentInParent<ArrowBase>();
+
+            if (arrow == null || arrow.IsDead)
+                continue;
+
+            arrows.Add(arrow);
+        }
+
+        foreach (ArrowBase arrow in arrows)
+        {
+            ZapArrow(
+                arrow,
+                true,
+                false,
+                lightningGradient
+            );
+        }
     }
 }

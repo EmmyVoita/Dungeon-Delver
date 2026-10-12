@@ -42,6 +42,7 @@ public class FanShooterObstacle : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private SoundEffect fireSound;
+    [SerializeField] private SoundEffect startBurstSound;
 
     private float velocityY = 0f;
     private bool registered = false;
@@ -116,8 +117,7 @@ public class FanShooterObstacle : MonoBehaviour
         {
             yield return StartCoroutine(FireFan());
 
-            AudioHelpers.PlaySoundEffect(fireSound, transform.position);
-
+        
             yield return new WaitForSeconds(fireInterval);
         }
 
@@ -147,11 +147,13 @@ public class FanShooterObstacle : MonoBehaviour
         float angleStep = currentCount > 1 ? spreadAngle / (currentCount - 1) : 0f;
         float startAngle = currentCount > 1 ? -spreadAngle * 0.5f : 0f;
 
+        AudioHelpers.PlaySoundEffect(startBurstSound, transform.position);
+
         for (int i = 0; i < currentCount; i++)
         {
             float angle = spawnRandomWithinAngle ? Random.Range(-spreadAngle,spreadAngle) : startAngle + angleStep * i;
 
-            
+            AudioHelpers.PlaySoundEffect(fireSound, transform.position);
 
             Vector2 dir = RotateVector(baseDir, angle);
 

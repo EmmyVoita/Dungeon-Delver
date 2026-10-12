@@ -28,21 +28,6 @@ public class RingFormationSpawner : ChallengeBase
     private Vector3 moveDirection;
     private float totalDistance;
 
-    void Start()
-    {
-        // Force exact start position
-        transform.position = startPosition;
-
-        // Precompute movement data
-        totalDistance = Vector3.Distance(startPosition, endPosition);
-        moveDirection = (endPosition - startPosition).normalized;
-
-        rotationPattern = (Random.value < 0.5f)
-            ? RotationPattern.AllSameDirection
-            : RotationPattern.MiddleOpposite;
-
-        Begin();
-    }
 
     private IEnumerator SpawnRoutine()
     {
@@ -102,6 +87,17 @@ public class RingFormationSpawner : ChallengeBase
 
     public override void Begin(object config = null)
     {
+        // Force exact start position
+        transform.position = startPosition;
+
+        // Precompute movement data
+        totalDistance = Vector3.Distance(startPosition, endPosition);
+        moveDirection = (endPosition - startPosition).normalized;
+
+        rotationPattern = (Random.value < 0.5f)
+            ? RotationPattern.AllSameDirection
+            : RotationPattern.MiddleOpposite;
+
         base.Begin();
 
         StartCoroutine(SpawnRoutine());

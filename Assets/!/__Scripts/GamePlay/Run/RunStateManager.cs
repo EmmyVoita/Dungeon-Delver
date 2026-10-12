@@ -11,38 +11,28 @@ public class RunStateManager : MonoBehaviour
     public static event Action OnUseReroll;
     public static event Action<int> OnRerollGained;
 
-    
-
     public SoundEffect rerollSoundEffect;
-    
 
-    private readonly Dictionary<int, WorldMapRouteType> _routeHistory = new();
+    private readonly Dictionary<StageLevelIndex, WorldMapRouteType> _routeHistory = new();
+      private Dictionary<WorldMapRouteType, float> routeWeightMultipliers = new();
 
     public int ShopRerollsRemaining { get; private set; }
-    
+
     public WorldMapRouteType CurrentRoute { get; private set; } = WorldMapRouteType.None;
-    public WorldMapRouteType NextRoute { get; private set; } = WorldMapRouteType.None;
-    public IReadOnlyDictionary<int, WorldMapRouteType> RouteHistory => _routeHistory;
+
+    public IReadOnlyDictionary<StageLevelIndex, WorldMapRouteType> RouteHistory => _routeHistory;
 
     public int BonusWorldMapOptions { get; private set; }
     public float ExtraWorldMapOptionChance { get; private set; }
+
     public int FreePickAmount { get; private set; } = 1;
 
     public int BonusShopOptions { get; private set; }
     public float ExtraShopOptionChance { get; private set; }
 
-
- 
-
-    public void SetNextWorldMapRoute(WorldMapRouteType route)
+    public void SelectWorldMapRoute(WorldMapRouteType route)
     {
-        NextRoute = route;
-    }
-
-    public void AdvanceWorldMapRoute()
-    {
-        CurrentRoute = NextRoute;
-        NextRoute = WorldMapRouteType.None;
+        CurrentRoute = route;
     }
 
     public void ClearCurrentWorldMapRoute()
@@ -63,23 +53,30 @@ public class RunStateManager : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.Backspace))
         {
             SceneManager.LoadScene(SceneNames.MainMenu);
         }
 
-        if(Input.GetKeyDown(KeyCode.T))
-        {
-            GrantShopReroll(1);
-        }
+        #if UNITY_EDITOR
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                GrantShopReroll(1);
+            }
+        #endif
     }
 
     public void GrantShopReroll(int amount = 1)
     {
         ShopRerollsRemaining += amount;
+
         OnRefreshRerollsChanged?.Invoke();
         OnRerollGained?.Invoke(amount);
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.rerollGain, Camera.main.transform.position);
+
+        AudioHelpers.PlaySoundEffect(
+            AudioLibrary.Instance.Database.rerollGain,
+            Camera.main.transform.position
+        );
     }
 
     public bool CanRerollShop => ShopRerollsRemaining > 0;
@@ -89,23 +86,36 @@ public class RunStateManager : MonoBehaviour
         if (ShopRerollsRemaining <= 0)
             return false;
 
-        AudioHelpers.PlaySoundEffect(rerollSoundEffect, Camera.main.transform.position);
+        AudioHelpers.PlaySoundEffect(
+            rerollSoundEffect,
+            Camera.main.transform.position
+        );
 
         ShopRerollsRemaining--;
-  
+
         OnRefreshRerollsChanged?.Invoke();
         OnUseReroll?.Invoke();
+
         return true;
     }
 
     public void ResetRun()
     {
         ShopRerollsRemaining = 0;
-        // reset other run-level state here
+        CurrentRoute = WorldMapRouteType.None;
+        ClearRouteHistory();
+
+        BonusWorldMapOptions = 0;
+        ExtraWorldMapOptionChance = 0f;
+
+        FreePickAmount = 1;
+
+        BonusShopOptions = 0;
+        ExtraShopOptionChance = 0f;
     }
 
     // World Map Route Count
-    //---------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------
 
     public void AddWorldMapOptionChance(float amount)
     {
@@ -127,7 +137,7 @@ public class RunStateManager : MonoBehaviour
         return result;
     }
 
-    // Shop count
+    // Shop Count
     // ---------------------------------------------------------------------------------
 
     public void AddShopOptionChance(float amount)
@@ -150,8 +160,7 @@ public class RunStateManager : MonoBehaviour
         return result;
     }
 
-
-    // Pick a free card count
+    // Pick a Free Card Count
     // ---------------------------------------------------------------------------------
 
     public void AddGuaranteedFreePickCardAmount(int amount)
@@ -159,22 +168,57 @@ public class RunStateManager : MonoBehaviour
         FreePickAmount += amount;
     }
 
-
     // World Map Route History
-    //---------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------
 
-    public void SetRouteHistory(int levelIndex, WorldMapRouteType route)
+    public List<RouteRecord> GetRouteHistoryRecords()
     {
-        _routeHistory[levelIndex] = route;
+        List<RouteRecord> routeRecords = new();
+
+        foreach (var kvp in RouteHistory)
+        {
+            RouteRecord record = new RouteRecord
+            {
+                routeType = kvp.Value,
+                stageIndex = kvp.Key.stageIndex,
+                levelIndex = kvp.Key.levelIndex
+            };
+
+            routeRecords.Add(record);
+        }
+
+        return routeRecords;
     }
 
-    public bool TryGetRouteHistory(int levelIndex, out WorldMapRouteType route)
+    public void SetRouteHistory(StageLevelIndex stageLevelIndex,WorldMapRouteType route)
     {
-        return _routeHistory.TryGetValue(levelIndex, out route);
+        _routeHistory[stageLevelIndex] = route;
+    }
+
+    public bool TryGetRouteHistory(StageLevelIndex stageLevelIndex,out WorldMapRouteType route)
+    {
+        return _routeHistory.TryGetValue(stageLevelIndex, out route);
     }
 
     public void ClearRouteHistory()
     {
         _routeHistory.Clear();
+    }
+
+    // World map Weights
+
+  
+
+    public float GetRouteWeightMultiplier(WorldMapRouteType type)
+    {
+        return routeWeightMultipliers.TryGetValue(type, out float multiplier)? multiplier: 1f;
+    }
+
+    public void AddRouteWeightMultiplier(WorldMapRouteType type,float amount)
+    {
+        if (!routeWeightMultipliers.ContainsKey(type))
+            routeWeightMultipliers[type] = 1f;
+
+        routeWeightMultipliers[type] += amount;
     }
 }

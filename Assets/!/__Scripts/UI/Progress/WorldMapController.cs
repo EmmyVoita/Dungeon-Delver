@@ -9,6 +9,7 @@ public class WorldMapController : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private TextMeshProUGUI titleText;
+    [SerializeField] private TextMeshProUGUI routeTitleText;
     [SerializeField] private TextTypewriter typewriter;
     [SerializeField] private KeyPromptController promptController;
     [SerializeField] private WorldMapRouteSelector routeSelector;
@@ -45,6 +46,7 @@ public class WorldMapController : MonoBehaviour
     private Tween moveTween;
     private Tween rotateTween;
     private Coroutine displaySequence;
+    private Tween _scrollTween;
 
     public RectTransform WorldMapRootRect => worldMapRootRect;
 
@@ -103,6 +105,9 @@ public class WorldMapController : MonoBehaviour
 
         if (newState == GameState.WorldMapView && previousState != GameState.Paused)
         {
+            routeTitleText.text = BetweenRoundFlowManager.Instance.RewardTiming == RouteRewardTiming.BeforeNextLevel ? "LEVEL REWARD" : "NEXT LEVEL REWARD";
+
+
             WorldMapRootRect.gameObject.SetActive(true);
             //canvasGroup.alpha = 1;
             typewriter.StartTyping(RoundManager.Instance.CurrentStageName, () =>
@@ -135,75 +140,43 @@ public class WorldMapController : MonoBehaviour
         AudioHelpers.PlaySoundEffect(toggleDisplaySound, transform.position);
     }
 
-    /*
-    private IEnumerator DisplaySequence()
-    {
-        SetStartNode(Mathf.Max(CurrentIndex - 1,0));
-
-        yield return new WaitForSeconds(1.0f);
-
-        ShowMarker();
-
-        yield return new WaitForSeconds(1.0f);
-
-        Tween movement = MoveToNode(CurrentIndex);
-
-        AudioHelpers.PlaySoundEffect(moveSound, transform.position);
-
-        if(movement != null)
-            yield return movement.WaitForCompletion();
-        
-        yield return new WaitForSeconds(0.5f);
-
-        routeSelector.Open();
-    }
-    */
+ 
 
     private IEnumerator DisplaySequence()
     {
-        int startIndex = Mathf.Max(CurrentIndex - 1, 0);
+        int startIndex = Mathf.Max(NextIndex - 1, 0);
 
         SetStartNode(startIndex);
 
-        yield return new WaitForSecondsRealtime(0.5f);
+        yield return new WaitForSeconds(0.5f);
 
-        if(animateMarker)
+        AudioHelpers.PlaySoundEffect(moveSound,transform.position);
+
+
+        yield return new WaitForSeconds(0.15f);
+
+
+        switch(BetweenRoundFlowManager.Instance.RewardTiming)
         {
-            //ShowMarker();
-
-            //yield return new WaitForSecondsRealtime(0.5f);
+            case RouteRewardTiming.BeforeNextLevel:
+                break;
+            case RouteRewardTiming.AfterCurrentLevel:
+                _scrollTween = mapView.ScrollToNode(NextIndex);
+                yield return _scrollTween.WaitForCompletion();
+                break;
         }
-     
 
-        //Tween movement = MoveToNode(CurrentIndex);
+        yield return new WaitForSeconds(0.25f);
 
-        AudioHelpers.PlaySoundEffect(
-            moveSound,
-            transform.position
-        );
-
-        //if (movement != null)
-            //yield return movement.WaitForCompletion();
-
-        yield return new WaitForSecondsRealtime(0.15f);
-
-        Tween scrollTween = mapView.ScrollToNode(CurrentIndex);
-
-        if (scrollTween != null)
-            yield return scrollTween.WaitForCompletion();
-
-        yield return new WaitForSecondsRealtime(0.25f);
 
         if(animateMarker)
-        ShowMarker();
+            ShowMarker();
 
         routeSelector.Open();
     }
 
-    private int CurrentIndex =>
-        RoundManager.Instance != null
-        ? RoundManager.Instance.CurrentLevelIndex
-        : 0;
+    private int NextIndex => RoundManager.Instance != null ? RoundManager.Instance.TotalCurrentLevelIndex : 0;
+    private int CurrentIndex => RoundManager.Instance != null ? RoundManager.Instance.TotalCurrentLevelIndex - 1 : 0;
 
 
 

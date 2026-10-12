@@ -15,5 +15,6 @@ MonoBehaviour:
   displayName: normalmagicarrow
   prefab: {fileID: 5575773763797762119, guid: 3ebaca26bd196904b926e341936babf8, type: 3}
   icon: {fileID: 0}
+  markerColor: {r: 0, g: 0.8722749, b: 1, a: 1}
   requiresWarning: 1
   warningLeadTime: 1

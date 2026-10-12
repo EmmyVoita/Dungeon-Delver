@@ -25,8 +25,8 @@ MonoBehaviour:
   iconMaterial: {fileID: 0}
   displayName: Lucky Locket
   descriptionTemplate: 'Gain a temporary shield that absorbs the next hit and grants
-    {ABILITY_CHARGE} ability charge. '
-  detailsTemplate: This upgrade stacks.
+    full ability charge. '
+  detailsTemplate: 
   hitBlockCharges: 1
-  abilityCharge: 20
+  abilityCharge: 999
   shieldPrefab: {fileID: 6998217769083237475, guid: c30b53e374b14d24083ff97ce90c07f0, type: 3}

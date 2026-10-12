@@ -19,8 +19,6 @@ public class OrbitingBlackHoleArmSpawner : ChallengeBase
 
         OrbitingBlackHoleArm obj = Instantiate(obstaclePrefab, spawnPos, Quaternion.identity, transform);
         obj.centerTarget = centerTarget;
-
-        Begin();
     }
 
     private IEnumerator ExpireRoutine()

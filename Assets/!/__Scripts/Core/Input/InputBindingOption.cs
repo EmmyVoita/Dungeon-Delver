@@ -45,7 +45,7 @@ public class InputBindingOption : BaseSettingOption
 
     public override void OnActivate()
     {
-        SoundEffect adjustSound = AudioLibrary.Instance.Database.navigate;
+        SoundEffect adjustSound = AudioLibrary.Instance.Database.navigateMajor;
         AudioHelpers.PlaySoundEffect(adjustSound,Camera.main.transform.position);
         BeginRebind();
     }

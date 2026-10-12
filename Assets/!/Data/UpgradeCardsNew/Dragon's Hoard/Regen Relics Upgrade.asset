@@ -18,7 +18,7 @@ MonoBehaviour:
   - upgrade: {fileID: 11400000, guid: e26ba38fed1de7f44b1f652b55c1bb5b, type: 2}
     minimumStacks: 1
   baseOfferWeight: 2
-  _cost: 500
+  _cost: 300
   _maxStacks: 3
   duration: 0
   cardDecoration: {fileID: 0}
@@ -28,9 +28,8 @@ MonoBehaviour:
   displayName: Best Friends
   descriptionTemplate: Regenerate {COUNT} relic every {REGEN_INTERVAL} seconds that
     gives {CURRENCY}.
-  detailsTemplate: This upgrade stacks up to {MAX_STACKS}. Each stack grants an additional
-    {COUNT} relic every {REGEN_INTERVAL} seconds. You can only have up to 3 relics
-    at a time.
+  detailsTemplate: Each stack grants an additional {COUNT} relic every {REGEN_INTERVAL}
+    seconds. You can only have up to 3 relics at a time.
   count: 1
   currencyAmount: 5
   regenerationInterval: 15

@@ -54,15 +54,10 @@ public class AddChallengeUI : MonoBehaviour
   
         var def = defs[challengeTypeDropdown.value];
 
-        var evt = new ArrowEventData(
-            time: time,
-            objectType: "obstacle",
-            direction: Vector2.zero,
-            speed: 0,
-            nameOfGameObjectToSpawn: def.fileName
-        );
+        var evt = new ChallengeEventData(time, def.fileName);
 
-        editorData.events.Add(evt);
+        EditorHistory.Instance.Execute(new AddEventCommand(evt));
+        //editorData.events.Add(evt);
         editorData.SortEvents();
         editorData.RecalculateMaxTime();
 

@@ -27,7 +27,7 @@ public abstract class AbilityEffectBase : MonoBehaviour
         
     }
 
-    protected void EndEffect()
+    protected virtual void EndEffect()
     {
         if(_hasEnded)
             return;

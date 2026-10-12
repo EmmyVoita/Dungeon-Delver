@@ -166,12 +166,12 @@ public class MusicManager : MonoBehaviour
         mainSource.Stop();
 
 
-        float editorOffset = GameSessionBootstrap.Config.LevelEditorStartTime;
+        float editorStartTime = GameSessionBootstrap.Config.LevelEditorStartTime;
 
-        _scaledTime = editorOffset;
+        _scaledTime = editorStartTime;
 
         mainSource.clip = mainClip;
-        mainSource.time = editorOffset;
+        mainSource.time = Mathf.Repeat(editorStartTime, mainClip.length);
         mainSource.volume = 0f;
         mainSource.pitch = TimeManager.Instance.GetCurrentScale();
 

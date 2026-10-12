@@ -44,7 +44,7 @@ public class BossPromptOptionClickHandler :
             != InputModeManager.InputMode.Mouse)
             return;
 
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
 
         _pointerInside = true;
     }

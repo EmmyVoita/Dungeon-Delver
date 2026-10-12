@@ -26,7 +26,6 @@ MonoBehaviour:
   displayName: Hoardling Friends
   descriptionTemplate: 'When you activate your ability, hoardlings summon {COUNT}
     orbiting relics that block arrows and grant {CURRENCY} when destroyed. '
-  detailsTemplate: 'This upgrade does not stack. You can only have up to 3 relics
-    at one time. '
+  detailsTemplate: 'You can only have up to 3 relics at one time. '
   shieldCount: 3
   currencyAmount: 5

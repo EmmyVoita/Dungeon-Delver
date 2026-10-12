@@ -58,7 +58,7 @@ public class RunIntroController : MonoBehaviour
                 } 
                 else
                 {
-                     introCoroutine = StartCoroutine(IntroSequence());
+                    introCoroutine = StartCoroutine(IntroSequence());
                 }
             }
             else

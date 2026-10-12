@@ -5,7 +5,7 @@ public class IntermediateGoldenMulti : UpgradeBase
 {
     public float goldenValueMultiplier = 2.0f;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{GOLDEN_VALUE_MULTIPLIER}", (goldenValueMultiplier-1).ToString("P0"));

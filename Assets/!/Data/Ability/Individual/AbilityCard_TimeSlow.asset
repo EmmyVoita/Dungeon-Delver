@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AbilityCard_TimeSlow
   m_EditorClassIdentifier: 
   abilityType: 2
-  baseCost: 25
+  baseCost: 30
   scoreRequirement: 0
   baseDuration: 3.5
   abilityName: Lazy Hour

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,14 +15,21 @@ public class TimelineMarkerController : MonoBehaviour
 {
     public event System.Action MarkerTimesChanged;
     public System.Action<TimelineMarker> OnMarkerSelected;
+    [SerializeField] private float markerWidth = 8.0f;
 
 
     [Header("References")]
     public TimelineView timelineView;
-    public Slider scrubSlider;
+    public Scrollbar scrubSlider;
     public RectTransform content;
     public GameObject markerPrefab;
-    private RectTransform markerContainer;
+    [SerializeField] private RectTransform markerContainer;
+
+    [Header("ArrowStacking")]
+    [SerializeField] private float arrowBaseY = 10f;
+    [SerializeField] private float arrowLayerHeight = 28f;
+    [SerializeField] private float arrowMarkerWidth = 24f;
+    [SerializeField] private float markerSpacing = 2f;
 
 
     [Header("Settings")]
@@ -34,14 +42,29 @@ public class TimelineMarkerController : MonoBehaviour
      public HashSet<TimelineMarker> SelectedMarkers => selectedMarkers;
      public IReadOnlyList<TimelineMarker> AllMarkers => markers;
 
+    private bool viewArrowDirections = false;
 
+    public void ToggleArrowDirectionView()
+    {
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, Camera.main.transform.position);
+
+        viewArrowDirections = !viewArrowDirections;
+
+        UIToast.Show($"Toggling arrow direction view => {(viewArrowDirections ? "On" : "Off")}");
+
+        foreach(TimelineMarker marker in markers)
+        {
+            Marker markerComp = marker.GetComponent<Marker>();
+            markerComp.EnableArrowImage(viewArrowDirections);
+        }
+    }
 
 
     void Awake()
     {
         // Create a UI object with a RectTransform
-        GameObject go = new GameObject("MARKERS", typeof(RectTransform));
-        markerContainer = go.GetComponent<RectTransform>();
+        //GameObject go = new GameObject("MARKERS", typeof(RectTransform));
+        //markerContainer = go.GetComponent<RectTransform>();
 
         // Set parent correctly within UI hierarchy
         markerContainer.SetParent(content, false);
@@ -73,21 +96,75 @@ public class TimelineMarkerController : MonoBehaviour
         // Create new markers. Switch on event type for color 
         foreach (var evt in LevelEditorData.Instance.events)
         {
-            switch (evt.objectType)
+            if(evt is ArrowEventData arrowEventData)
             {
-                case "arrow":
-                    CreateMarker(evt, Color.cyan);
-                    break;
-
-                case "obstacle":
-                    CreateMarker(evt, Color.green);
-                    break;
+                CreateMarker(arrowEventData, GetArrowColor(arrowEventData.arrowType));
+            }
+            else if(evt is ChallengeEventData challengeEventData)
+            {
+                CreateMarker(challengeEventData, Color.green);
+            }
+            else if(evt is PatternEventData patternEventData)
+            {
+                CreateMarker(patternEventData, Color.purple);
             }
         }
     }
 
+    public Color GetArrowColor(string arrowType)
+    {
+        ArrowTypeDefinition definition = ArrowSpawner.Instance.ArrowTypeDefinitions.Find(e => e.displayName == arrowType);
 
-    private void CreateMarker(ArrowEventData evt, Color? color = null)
+        if(definition == null)
+        {
+            return Color.white;
+        }
+
+        return definition.markerColor;
+    }
+
+    private void LayoutArrowLayers(List<TimelineMarker> markers)
+    {
+        var arrowMarkers = markers
+            .Where(m => m.Event is LevelEventData)
+            .OrderBy(m => m.Event.beatTime)
+            .ToList();
+
+        float? currentBeat = null;
+        int layer = 0;
+
+        foreach (TimelineMarker marker in arrowMarkers)
+        {
+            // New beat -> start back at layer 0
+            if (currentBeat == null || !Mathf.Approximately(marker.Event.beatTime, currentBeat.Value))
+            {
+                currentBeat = marker.Event.beatTime;
+                layer = 0;
+            }
+
+            Vector2 position = marker.Rect.anchoredPosition;
+
+            position.y = arrowBaseY + layer * arrowLayerHeight;
+
+            marker.Rect.anchoredPosition = position;
+
+            layer++;
+        }
+    }
+
+    private int FindAvailableLayer(float markerLeft,List<float> layerEndXs)
+    {
+        for (int i = 0; i < layerEndXs.Count; i++)
+        {
+            if (markerLeft >= layerEndXs[i] + markerSpacing)
+                return i;
+        }
+
+        return layerEndXs.Count;
+    }
+
+
+    private void CreateMarker(LevelEventData evt, Color? color = null)
     {
         // Instantiate marker prefab & set its position in the timeline
         GameObject obj = Instantiate(markerPrefab, markerContainer);
@@ -100,7 +177,28 @@ public class TimelineMarkerController : MonoBehaviour
 
         // Add our time line marker script so we can handle ui events for it
         TimelineMarker marker = obj.AddComponent<TimelineMarker>();
-        marker.Initialize(evt, LevelTimelineUI.Instance);
+
+        if(evt is PatternEventData patternEventData)
+        {
+            float beatsToSeconds = patternEventData._lengthInBeats * (60f / LevelEditorData.Instance.BPM);
+            float width = timelineView.TimeToPixels(beatsToSeconds);
+
+            marker.Initialize(evt, LevelTimelineUI.Instance, width);
+        }
+        else if(evt is ArrowEventData arrowEventData)
+        {   
+            Marker markerComp = marker.GetComponent<Marker>();
+            markerComp.AssignSprite(arrowEventData.direction);
+            markerComp.EnableArrowImage(viewArrowDirections);
+
+            marker.Initialize(evt, LevelTimelineUI.Instance, markerWidth);
+        }
+        else
+        {
+            marker.Initialize(evt, LevelTimelineUI.Instance, markerWidth);
+        }
+
+        
 
         // Set the color if specified
         if (color.HasValue)
@@ -111,12 +209,14 @@ public class TimelineMarkerController : MonoBehaviour
 
         // Add the marker to our list
         markers.Add(marker);
+
+        UpdateMarkerPositions();
     }
 
     // Marker Updating
     // ------------------------------------------------------------------------------------
 
-    public void CommitMarkerTime_NoRebuild(ArrowEventData evt, float time)
+    public void CommitMarkerTime_NoRebuild(LevelEventData evt, float time)
     {
         evt.beatTime = Mathf.Max(0f, time);
     }
@@ -132,7 +232,7 @@ public class TimelineMarkerController : MonoBehaviour
         LevelEditorData.Instance.SortEvents();
 
         UpdateMarkerPositions();
-        scrubSlider.maxValue = timelineView.TimelineEndTime;
+        //scrubSlider.maxValue = timelineView.TimelineEndTime;
 
         MarkerTimesChanged?.Invoke();
         EditorPlaybackController.Instance.RebuildSimulation();
@@ -148,9 +248,14 @@ public class TimelineMarkerController : MonoBehaviour
             float seconds = marker.Event.beatTime * (60f / LevelEditorData.Instance.BPM);
             float x = timelineView.TimeToPixels(seconds);
             marker.Rect.anchoredPosition = new Vector2(x, markerOffsetY);
+            marker.UpdateTransform(timelineView);
         }
 
         float t = EditorPlaybackController.Instance.CurrentTime;
+
+         // 2. Now that actual screen positions/sizes are known,
+        //    resolve overlaps.
+        LayoutArrowLayers(markers);
     }
 
 
@@ -160,7 +265,7 @@ public class TimelineMarkerController : MonoBehaviour
 
         // Allow snapping ahead of cursor (in BEATS)
         float maxBeat = Mathf.Max(
-            LevelEditorData.Instance.MaxTime,
+            LevelEditorData.Instance.MaxBeatTime,
             rawBeat + 2f
         );
 

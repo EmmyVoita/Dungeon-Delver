@@ -26,11 +26,12 @@ public class RunRecordItem : MonoBehaviour, IPointerClickHandler
     private RunRecord _runRecord;
 
     public RunRecord Record => _runRecord;
+    public AbilityType AbilityType => _runRecord.abilityUsed;
 
 
     public void Initialize(RunRecord runRecord, int rank)
     {
-        Sprite icon = AbilityIconDatabase.Instance?.GetIcon(runRecord.abilityUsed);
+        Sprite icon = AbilityIconDatabase.Instance?.GetSmallIcon(runRecord.abilityUsed);
 
         if(icon != null)
             iconImage.sprite = icon;

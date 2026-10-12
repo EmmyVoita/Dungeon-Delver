@@ -21,10 +21,6 @@ public class OrbitingShooterBlackholeSpawner : ChallengeBase
     private List<BlackholeEmitter> _emitters = new();
     private bool registered;
 
-    void Start()
-    {
-       Begin();
-    }
 
     void Update()
     {

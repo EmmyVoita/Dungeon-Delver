@@ -10,12 +10,15 @@ using UnityEngine.Assertions.Must;
 
 public class PauseMenuNavigator : BaseMenu
 {
+    public static event Action<bool> OnPaused;
     public static event Action OnResume;
     public static event Action OnQuit;
     public static event Action OnRestart;
 
     [Header("References")]
     [SerializeField] private SettingsMenuNavigator settingsMenu;
+    [SerializeField] private GameObject pauseMenuRoot;
+    [SerializeField] private GameObject settingsMenuRoot;
 
     [Header("Building UI")]
     [SerializeField] private List<PauseMenuOption> menuOptions;
@@ -88,12 +91,17 @@ public class PauseMenuNavigator : BaseMenu
         InputFocusManager.Release(this);
     }
 
-    void Awake()
+    protected override void Awake()
     {
         if(pauseMenuGroup)
             pauseMenuGroup.alpha = 0f;
 
         _selectedIndex = -1;
+
+        //pauseMenuRoot.SetActive(false);
+        //settingsMenuRoot.SetActive(false);
+
+        base.Awake();
     }
 
 
@@ -105,9 +113,14 @@ public class PauseMenuNavigator : BaseMenu
     {
         InputFocusManager.Claim(this);
 
+        OnPaused?.Invoke(true);
+
         CountdownUI.Instance.KillActiveCountdown();
 
         waitForConfirmRelease = true;
+
+        //pauseMenuRoot.SetActive(true);
+        //settingsMenuRoot.SetActive(true);
 
         if (resumeRoutine != null)
         {
@@ -149,6 +162,8 @@ public class PauseMenuNavigator : BaseMenu
             base.OnOpen();
             pauseMenuGroup.alpha = 1f;
         }
+
+        //InputModeManager.Instance.EnableMouseInput();
     }
 
     private void BuildMenuOptions()
@@ -161,19 +176,22 @@ public class PauseMenuNavigator : BaseMenu
 
         menuOptionUIs.Clear();
 
-        foreach (PauseMenuOption menuOption in menuOptions)
+        //foreach (PauseMenuOption menuOption in menuOptions)
+        for(int i = 0; i < menuOptions.Count; i++)
         {
             GameObject menuUI = Instantiate(menuOptionPrefab, menuOptionContainer);
 
             PauseMenuOptionUI optionUI = menuUI.GetComponent<PauseMenuOptionUI>();
+            PauseMenuOptionClickHandler clickHandler = menuUI.GetComponent<PauseMenuOptionClickHandler>();
 
-            if (optionUI == null)
+            if (optionUI == null || clickHandler == null)
             {
                 Destroy(menuUI);
                 continue;
             }
 
-            optionUI.Initialize(menuOption);
+            optionUI.Initialize(menuOptions[i]);
+            clickHandler.Initialize(this, i);
 
             menuOptionUIs.Add(optionUI);
         }
@@ -187,6 +205,8 @@ public class PauseMenuNavigator : BaseMenu
 
     public override void OnClose()
     {
+        //pauseMenuRoot.SetActive(false);
+        //settingsMenuRoot.SetActive(false);
         InputFocusManager.Release(this);
         _selectedIndex = -1;
         UpdateVisuals();
@@ -255,13 +275,13 @@ public class PauseMenuNavigator : BaseMenu
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
         {
             _selectedIndex = (_selectedIndex + 1) % menuOptions.Count;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             UpdateVisuals();
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
             _selectedIndex = (_selectedIndex - 1 + menuOptions.Count) % menuOptions.Count;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             UpdateVisuals();
         }
     }
@@ -318,6 +338,7 @@ public class PauseMenuNavigator : BaseMenu
     {
         pauseMenuGroup.alpha = 0;
 
+        OnPaused?.Invoke(false);
 
         AnimateClose(() =>
         {
@@ -364,9 +385,9 @@ public class PauseMenuNavigator : BaseMenu
     private IEnumerator QuitSequence()
     {
         SceneReturnHandler.ReturnToAbilitySelect = false;
-
+        OnQuit?.Invoke();
         
-
+    
         yield return new WaitForSecondsRealtime(0.5f);
 
         RunLifecycle.AbadonRun();

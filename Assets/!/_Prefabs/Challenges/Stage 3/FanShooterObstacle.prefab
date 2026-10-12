@@ -124,6 +124,7 @@ MonoBehaviour:
   - 0.1
   - 0.1
   stopAtLastFrame: 0
+  playOnAwake: 1
 --- !u!1 &1859250561185611588
 GameObject:
   m_ObjectHideFlags: 0
@@ -244,6 +245,7 @@ MonoBehaviour:
   - 0.1
   - 0.1
   stopAtLastFrame: 0
+  playOnAwake: 1
 --- !u!1 &5567816821603440780
 GameObject:
   m_ObjectHideFlags: 0
@@ -386,6 +388,7 @@ MonoBehaviour:
     maxLanes: 7
     laneSpacing: 1
     laneMoveDuration: 0.15
+    laneWidthScale: 1
   projectilePrefab: {fileID: 4453730599579566042, guid: 417402815e2d2ca4fabc20d981cf43e1, type: 3}
   projectileCountA: 6
   projectileCountB: 4
@@ -408,9 +411,14 @@ MonoBehaviour:
   fireSound:
     clip: {fileID: 8300000, guid: e19eb227df997ac49a4d9f7a1c4ace2f, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 0.1
     pitch: 2.5
+    pitchVariation: 0.1
+  startBurstSound:
+    clip: {fileID: 8300000, guid: 04ba5a2d44c1ad7428bfdab7ebf698e9, type: 3}
+    channel: 2
+    volume: 0.3
+    pitch: 1.8
     pitchVariation: 0.1
 --- !u!1 &9061716703838606814
 GameObject:
@@ -459,8 +467,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IdleHover
   enableHover: 1
   enableSway: 1
-  enableScoreJump: 1
-  scaleOnJump: 0
   hoverAmplitude: 0.05
   hoverDuration: 0.5
   swayX: 0
@@ -472,13 +478,6 @@ MonoBehaviour:
   swayDurationX: 2.5
   swayDurationY: 2.5
   swayDurationZ: 2.5
-  shakeDuration: 0.15
-  shakeStrength: 4
-  shakeVibrato: 10
-  jumpStrength: 20
-  jumpDuration: 0.25
-  jumpScaleAmount: 1.4
-  jumpTargetTransform: {fileID: 0}
   randomStartDelayMax: 0.5
   durationVariance: 0.3
   amplitudeVariance: 0

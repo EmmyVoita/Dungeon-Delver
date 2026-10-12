@@ -116,7 +116,7 @@ public class DelayedArrow : ArrowBase
                 idleSpriteAnimator.Restart();
             }
 
-            Debug.Log($"Stop Time => {stopTime}, Resume Time => {resumeTime}, Elapsed => {elapsed}");
+            //Debug.Log($"Stop Time => {stopTime}, Resume Time => {resumeTime}, Elapsed => {elapsed}");
             targetPos = stopPos;
         }
         else if(elapsed <= _arrivalTime)

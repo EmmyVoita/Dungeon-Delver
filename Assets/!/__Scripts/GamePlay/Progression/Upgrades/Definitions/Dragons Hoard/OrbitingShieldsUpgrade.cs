@@ -15,9 +15,9 @@ public class OrbitingShieldsUpgrade : UpgradeBase
     }
 
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements,  bool isInventory)
     {
-        base.AddReplacements(replacements);
+        base.AddReplacements(replacements, isInventory);
 
         replacements["{COUNT}"] =
             $"<color=#{UIColors.ToHex(UIColors.Green)}>" +

@@ -16,7 +16,7 @@ public class RerollHealModifier : IShopRerollEffect
         //ShopManager.Instance.AddRerollEffect(this);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         //ShopManager.Instance.RemoveRerollEffect(this);
     }

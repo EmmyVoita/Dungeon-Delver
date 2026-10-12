@@ -11,25 +11,37 @@ using Unity.VisualScripting;
 public class TutorialFlowManager : MonoBehaviour
 {
     [Header("Tutorial Sections")]
-    public MovementTutorialUI movementTutorial;
-    public ObstacleTutorialUI obstacleTutorial;
-    public AbilityTutorialUI abilityTutorial;
+    [SerializeField] private MovementTutorialUI movementTutorial;
+    [SerializeField] private ObstacleTutorialUI obstacleTutorial;
+    [SerializeField] private AbilityTutorialUI abilityTutorial;
 
-    [Header("Transition Settings")]
-    public float finalTransitionDelay = 1.0f;
-    public float transitionDelay = 1.0f;
-    public float fadeDuration = 0.5f;
+    [Header("Root Objects")]
+    [SerializeField] private GameObject obstacleTutorialRoot;
+    [SerializeField] private GameObject movementTutorialRoot;
+    [SerializeField] private GameObject abilityTutorialRoot;
+
+    [Header("Tutorial Timing")]
+    [SerializeField] private float tutorialStartDelay = 1.0f;
+
+    [Header("Section Transition")]
+    [SerializeField] private float sectionTransitionLeadIn = 0.75f;
+    [SerializeField] private float sectionTransitionPause = 1.0f;
+
+    [Header("Tutorial End")]
+    [SerializeField] private float tutorialEndDelay = 1.0f;
+    [SerializeField] private float exitFadeDuration = 0.5f;
+
 
     [Header("Audio")]
     public SoundEffect transitionSound;
-    public float transitionStartDelay = 0.75f;
     private AudioSource audioSource;
+
 
     [Header("Menu Transition")]
     [SerializeField] private Material transitionMaterial;
     [SerializeField] private string transitionPropertyName = "_TransitionValue";
     [SerializeField] private float targetValue = 1;
-    [SerializeField] private float duration = 0.5f;
+
 
     private void OnEnable()
     {
@@ -41,13 +53,22 @@ public class TutorialFlowManager : MonoBehaviour
         GameStateManager.OnStateChanged -= HandleStateChanged;
     }
 
+    private void Awake()
+    {
+        movementTutorialRoot.SetActive(false);
+        obstacleTutorialRoot.SetActive(false);
+        abilityTutorialRoot.SetActive(false);
+    }
+
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Keypad9))
-        {
-            StopAllCoroutines();
-            StartCoroutine(FinishTutorial());
-        }
+        #if UNITY_EDITOR
+            if(Input.GetKeyDown(KeyCode.Keypad9))
+            {
+                StopAllCoroutines();
+                StartCoroutine(FinishTutorial());
+            }
+        #endif
     }
 
     private void HandleStateChanged(GameState previousState, GameState newState)
@@ -61,64 +82,54 @@ public class TutorialFlowManager : MonoBehaviour
 
     private IEnumerator RunTutorialSequence()
     {
-        // --- STEP 1: MOVEMENT TUTORIAL ---
-        
-        obstacleTutorial.gameObject.SetActive(false);
-        abilityTutorial.gameObject.SetActive(false);
+        yield return new WaitForSeconds(tutorialStartDelay);
 
-        yield return new WaitForSeconds(1.0f); // slight delay before starting
-        movementTutorial.gameObject.SetActive(true);
-       
-
+        // Movement tutorial
+        movementTutorialRoot.SetActive(true);
+        movementTutorial.StartTutorial();
         yield return new WaitUntil(() => movementTutorial.TutorialComplete);
-        movementTutorial.gameObject.SetActive(false);
+        movementTutorialRoot.SetActive(false);
 
-        // Optional transition between tutorials
-        yield return StartCoroutine(PlayTransition("Good! Now let's learn how to dodge obstacles."));
+        // transition between tutorials
+        yield return StartCoroutine(PlayTransition());
 
-        // --- STEP 2: OBSTACLE TUTORIAL ---
-        obstacleTutorial.gameObject.SetActive(true);
+        // Obstacle tutorial
+        obstacleTutorialRoot.SetActive(true);
+        obstacleTutorial.StartTutorial();
         yield return new WaitUntil(() => obstacleTutorial.TutorialComplete);
-        obstacleTutorial.gameObject.SetActive(false);
+        obstacleTutorialRoot.SetActive(false);
 
-        yield return StartCoroutine(PlayTransition("Nice work! Now let's charge and use your ability."));
+        yield return StartCoroutine(PlayTransition());
 
-        // --- STEP 3: ABILITY TUTORIAL ---
-        abilityTutorial.gameObject.SetActive(true);
+        // Ability tutorial
+        abilityTutorialRoot.SetActive(true);
+        abilityTutorial.StartTutorial();
         yield return new WaitUntil(() => abilityTutorial.TutorialComplete);
+        abilityTutorialRoot.SetActive(false);
 
-        yield return StartCoroutine(PlayTransition("Complete"));
+        yield return StartCoroutine(PlayTransition());
 
-        // --- STEP 4: END ---
         StartCoroutine(FinishTutorial());
     }
 
-    // ----------------------------------------
-    // 🎬 Transition message or fade
-    // ----------------------------------------
-    private IEnumerator PlayTransition(string message)
+
+    private IEnumerator PlayTransition()
     {
-        yield return new WaitForSeconds(transitionStartDelay);
-
-        // Optionally play a sound between steps
+        yield return new WaitForSeconds(sectionTransitionLeadIn);
         AudioHelpers.PlaySoundEffect(transitionSound, transform.position);
-
-        yield return new WaitForSeconds(transitionDelay);
+        yield return new WaitForSeconds(sectionTransitionPause);
     }
 
     private IEnumerator FinishTutorial()
     {
-        yield return new WaitForSeconds(finalTransitionDelay);
+        yield return new WaitForSeconds(tutorialEndDelay);
 
-        
-
-        transitionMaterial.DOFloat(targetValue,transitionPropertyName, duration);
-
+        transitionMaterial.DOFloat(targetValue,transitionPropertyName, exitFadeDuration);
         SceneEntryContext.EntryType = SceneEntryType.ReturnFromTutorial;
 
-        yield return new WaitForSeconds(duration);
+        yield return new WaitForSeconds(exitFadeDuration);
 
-        // Example: Load main game scene
+        // Go back to main menu
         Time.timeScale = 1f;
         SceneReturnHandler.ReturnToAbilitySelect = false;
         SceneManager.LoadScene(SceneNames.MainMenu);

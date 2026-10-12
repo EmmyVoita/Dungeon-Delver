@@ -54,13 +54,15 @@ public class ObstacleManager : MonoBehaviour
         Player.OnDamageTaken -= HandleDamageTaken;
         GameStateManager.OnStateChanged -= HandleStateChanged;
     }
-
+    
     private void HandleStateChanged(GameState previousState, GameState newState)
     {
+        /*
         if (newState == GameStateManager.LevelEndState)
         {
             ForceClearAll();
         }
+        */
     }
 
     private void HandleDamageTaken(int damage)
@@ -195,8 +197,7 @@ public class ObstacleManager : MonoBehaviour
 
     public void ForceClearAll()
     {
-        ChallengeBase[] activeChallenges =
-            activeObstacles.ToArray();
+        ChallengeBase[] activeChallenges = activeObstacles.ToArray();
 
         foreach (ChallengeBase challenge in activeChallenges)
         {

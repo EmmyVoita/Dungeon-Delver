@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Intermediate Effects/CurrencyDeath Save")]
@@ -7,19 +8,13 @@ public class CurrencyDeathSaveUpgrade : CurrencyWeightedUpgradeBase
     public int healAmount = 1;
     public int cost = 500;
 
-    public override string GetFormattedDescription()
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        return descriptionTemplate
-            .Replace("{COST}", $"<color=#{UIColors.ToHex(UIColors.Red)}>${cost}</color>")
-            .Replace("{HEALTH}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>1 Health</color>")
-            .Replace("{HEAL_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{healAmount}</color>");
-    }
+        replacements["{COST}"] = $"<color=#{UIColors.ToHex(UIColors.Red)}>${cost}</color>";
+        replacements["{HEAL_AMOUNT}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>{healAmount}</color>";
+        replacements["{HEALTH}"] = $"<color=#{UIColors.ToHex(UIColors.Yellow)}>1 Health</color>";
 
-    public override string GetDetails()
-    {
-         return detailsTemplate
-            .Replace("{COST}", $"<color=#{UIColors.ToHex(UIColors.Red)}>${cost}</color>")
-            .Replace("{HEAL_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{healAmount}</color>");
+        base.AddReplacements(replacements,isInventory);
     }
 
     public override void Apply()

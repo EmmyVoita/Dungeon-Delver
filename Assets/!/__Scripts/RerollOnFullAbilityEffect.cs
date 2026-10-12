@@ -24,7 +24,7 @@ public class RerollOnFullAbilityEffect : IAbilityCostModifier
         return new RerollOnFullAbilityEffect(_abilityCostModifier, _rerollAmount);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         Player.OnAbilityFilled -= HandleAbilityFilled;
     }

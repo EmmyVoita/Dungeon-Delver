@@ -13,12 +13,12 @@ public class ExtraFreeCardPickUpgrade : UpgradeBase
         RunStateManager.Instance.AddGuaranteedFreePickCardAmount(amount);
     }
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
         replacements["{AMOUNT}"] =
             $"<color=#{UIColors.ToHex(UIColors.Green)}>" +
             $"{amount}</color>";
 
-         base.AddReplacements(replacements);
+         base.AddReplacements(replacements, isInventory);
     }
 }

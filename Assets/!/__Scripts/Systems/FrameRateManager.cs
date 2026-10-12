@@ -2,6 +2,7 @@
 
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class FrameRateManager : MonoBehaviour, IDevPanel
 {
@@ -32,6 +33,16 @@ public class FrameRateManager : MonoBehaviour, IDevPanel
 
     private int fpsIndex;
 
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     void Awake()
     {
         // Disable vsync so Application.targetFrameRate actually works
@@ -43,6 +54,11 @@ public class FrameRateManager : MonoBehaviour, IDevPanel
         isVisible = startVisible;
         if (statsPanel != null)
             statsPanel.SetActive(isVisible);
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ApplyFPSCap();
     }
 
     void Update()

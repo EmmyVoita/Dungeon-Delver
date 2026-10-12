@@ -43,7 +43,8 @@ public class BossManager : MonoBehaviour
     }
 
     private void Start()
-    {
+    {   
+        Debug.LogError("StartingBoss");
         _practiceBoss = GameSessionBootstrap.Config.Mode == GameMode.ObstaclePracticeBoss;
         if(_practiceBoss)
          _activeBoss = true;

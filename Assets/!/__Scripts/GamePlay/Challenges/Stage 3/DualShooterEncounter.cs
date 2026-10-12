@@ -18,11 +18,7 @@ public class DualShooterEncounter : ChallengeBase
     private GameObject leftShooter;
     private GameObject rightShooter;
 
-    void Start()
-    {
-        Begin();
-    }
-
+ 
     void SpawnShooters()
     {
         // LEFT

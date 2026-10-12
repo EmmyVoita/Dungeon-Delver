@@ -8,37 +8,64 @@ public class LevelEditorData : MonoBehaviour
     public static LevelEditorData Instance { get; private set; }
 
 
-    public List<ArrowEventData> events = new();
-    public float MaxTime { get; private set; } = 0f;
+    [SerializeField] private TimelineView timelineView;
+    [SerializeField] private float defaultZoom;
+
+    public List<LevelEventData> events = new();
+
+    // Max time in beats
+    public float MaxBeatTime { get; private set; } = 0f;
+    public float MaxSecondsTime => MaxBeatTime * (60f / _bpm);
+
     public int Directions { get; private set; } = 4;  
 
     [Header("Current Level")]
     public TextAsset currentLevelAsset;
 
+
+    private float _bpm;
+
+
     public float SongOffsetSeconds { get; private set; }
 
-    public void SetSongOffset(float offset)
+
+    public void SetSongOffset(float offset) {SongOffsetSeconds = offset;}
+    public void SetBPM(float newBPM) { BPM = Mathf.Clamp(newBPM, 20f, 300f); }
+    public void SortEvents() => events.Sort((a, b) => a.beatTime.CompareTo(b.beatTime));
+    public int CountArrows() => events.FindAll(e => e is ArrowEventData arrowEventData).Count;
+    public int CountObstacles() => events.FindAll(e => e is ChallengeEventData challengeEventData).Count;
+
+    
+    public static float SnapTime(float time, float interval = 0.25f)
     {
-        SongOffsetSeconds = offset;
+        return Mathf.Round(time / interval) * interval;
     }
-
-
-
-    private float bpm = 120f;
 
     public float BPM
     {
-        get => bpm;
+        get => _bpm;
         private set
         {
-            bpm = value;
+            _bpm = value;
             if(UIToast.Instance != null)  UIToast.Show($"BPM updated to: {BPM}");
         }
     }
 
-    public void AddEvent(ArrowEventData evt)
+    public void AddEvent(LevelEventData evt)
     {
         events.Add(evt);
+
+        SortEvents();
+        RecalculateMaxTime();
+
+        // Centralized feedback
+        UIToast.Show(evt.Describe());
+    }
+
+    public void RemoveEvent(LevelEventData evt)
+    {
+        events.Remove(evt);
+
         SortEvents();
         RecalculateMaxTime();
 
@@ -50,10 +77,6 @@ public class LevelEditorData : MonoBehaviour
 
 
 
-    public static float SnapTime(float time, float interval = 0.25f)
-    {
-        return Mathf.Round(time / interval) * interval;
-    }
 
 
     private void Awake()
@@ -78,6 +101,8 @@ public class LevelEditorData : MonoBehaviour
             return false;
         }
 
+        
+
         currentLevelAsset = asset;
         return LoadLevelFromText(asset.text);
     }
@@ -86,7 +111,9 @@ public class LevelEditorData : MonoBehaviour
     public bool LoadLevelFromText(string text)
     {
         events.Clear();
-        MaxTime = 0f;
+        MaxBeatTime = 0f;
+
+        //timelineView.AssignZoom(defaultZoom);
 
         if (string.IsNullOrEmpty(text))
         {
@@ -94,14 +121,50 @@ public class LevelEditorData : MonoBehaviour
             return false;
         }
 
-        string[] lines = text.Split(
-            new[] { '\n', '\r' },
-            StringSplitOptions.RemoveEmptyEntries
-        );
+        string[] lines = text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
-        // ----------------------------
-        // BPM
-        // ----------------------------
+        // Parse the header and read: bpm, song starting offset, and number of arrow directions
+        ParseHeader(lines);
+
+        foreach (string raw in lines)
+        {
+            string line = raw.Trim();
+
+            if (string.IsNullOrEmpty(line) || line.StartsWith("#"))
+                continue;
+
+            string[] parts = line.Split(',');
+
+            string eventType = parts[1].Trim().ToLower();
+
+            switch(eventType)
+            {
+                case "arrow":
+                    HandleArrowEvent(parts);
+                    break;
+                case "obstacle":
+                    HandleChallengeEvent(parts);
+                    break;
+                case "pattern":
+                    HandlePatternEvent(parts);
+                    break;
+                default:
+                    Debug.LogError($"UNRECOGNIZED EVENTTYPE SYMBOL WHEN PARSING LEVEL FILE => {eventType}");
+                    continue;
+            }
+
+            float timeInBeats = float.Parse(parts[0]);
+            MaxBeatTime = Mathf.Max(MaxBeatTime, timeInBeats);
+        }
+
+        UIToast.Show($"Max time (in beats) on load => {MaxBeatTime}");
+
+        SortEvents();
+        return true;
+    }
+
+    private void ParseHeader(string[] lines)
+    {
         foreach (string raw in lines)
         {
             string line = raw.Trim();
@@ -111,7 +174,7 @@ public class LevelEditorData : MonoBehaviour
                 if (parts.Length > 1 && float.TryParse(parts[1], out float parsedBPM))
                 {
                     BPM = parsedBPM;
-                    Debug.Log($"🎵 BPM loaded: {BPM}");
+                    UIToast.Show($"Song BPM loaded => {BPM} beats per minuite");
                 }
                 break;
             }
@@ -121,7 +184,7 @@ public class LevelEditorData : MonoBehaviour
                 if (parts.Length > 1 && float.TryParse(parts[1], out float parsedOffset))
                 {
                     SongOffsetSeconds = parsedOffset;
-                    Debug.Log($"🎵 Song offset loaded: {SongOffsetSeconds}s");
+                    UIToast.Show($"Song Offset loaded => {SongOffsetSeconds} seconds");
                 }
             }
             if (line.StartsWith("# DIRECTIONS", StringComparison.OrdinalIgnoreCase))
@@ -130,60 +193,45 @@ public class LevelEditorData : MonoBehaviour
                 if (parts.Length > 1 && int.TryParse(parts[1], out int parsedDirections))
                 {
                     Directions = parsedDirections;
-                    Debug.Log($"🎵 Directions loaded from asset: {Directions}");
+                    UIToast.Show($"Song Directions loaded => {Directions} arrow directions");
                 }
                 break;
             }
         }
+    }
 
-        // ----------------------------
-        // Events
-        // ----------------------------
-        foreach (string raw in lines)
+    private void HandleArrowEvent(string[] parts)
+    {
+        float timeInBeats = float.Parse(parts[0]);
+        float arrowSpeed = float.Parse(parts[3]);
+        string spawnName = parts[4].Trim().ToLower();
+
+        // cast our string direction to a vector2
+        string dirStr = parts[2].Trim().ToLower();
+        Vector2 direction = DirectionUtils.FromString(dirStr);
+
+        events.Add(new ArrowEventData(timeInBeats, direction, arrowSpeed, spawnName));
+    }
+
+    private void HandleChallengeEvent(string[] parts)
+    {
+        float timeInBeats = float.Parse(parts[0]);
+        string spawnName = parts[4].Trim().ToLower();
+
+        events.Add(new ChallengeEventData(timeInBeats, spawnName));
+    }
+
+    private void HandlePatternEvent(string[] parts)
+    {
+        float timeInBeats = float.Parse(parts[0]);
+        string patternBlockType = parts[2].Trim().ToLower();
+        int patternBlockLength = int.Parse(parts[3]);
+        float arrowSpeed = float.Parse(parts[4]);
+
+        if (patternBlockType.TryParsePatternType(out PatternType patternType))
         {
-            string line = raw.Trim();
-            if (string.IsNullOrEmpty(line) || line.StartsWith("#"))
-                continue;
-
-            string[] p = line.Split(',');
-            if (p.Length < 5)
-                continue;
-
-            float time = float.Parse(p[0]);
-            string eventType = p[1].Trim().ToLower();
-
-            if (eventType == "arrow")
-            {
-                string dirStr = p[2].Trim().ToLower();
-                float speed = float.Parse(p[3]);
-                string spawnName = p[4].Trim().ToLower();
-
-                Vector2 dir = dirStr switch
-                {
-                    "up" => Vector2.up,
-                    "down" => Vector2.down,
-                    "left" => Vector2.left,
-                    "right" => Vector2.right,
-                    "up-right" => new Vector2(1, 1).normalized,
-                    "down-right" => new Vector2(1, -1).normalized,
-                    "down-left" => new Vector2(-1, -1).normalized,
-                    "up-left" => new Vector2(-1, 1).normalized,
-                    _ => Vector2.zero
-                };
-
-                events.Add(new ArrowEventData(time, "arrow", dir, speed, spawnName));
-            }
-            else if (eventType == "obstacle")
-            {
-                string spawnName = p[4].Trim().ToLower();
-                events.Add(new ArrowEventData(time, "obstacle", Vector2.zero, 0f, spawnName));
-            }
-
-            MaxTime = Mathf.Max(MaxTime, time);
+            events.Add(new PatternEventData(timeInBeats,patternType,patternBlockLength, arrowSpeed));
         }
-
-        SortEvents();
-        return true;
     }
 
     public string SerializeToString()
@@ -194,31 +242,14 @@ public class LevelEditorData : MonoBehaviour
         sw.WriteLine($"# BPM: {BPM}");
         sw.WriteLine($"# OFFSET: {SongOffsetSeconds}");
         sw.WriteLine($"# DIRECTIONS: {Directions}");
-        sw.WriteLine("");
+        sw.WriteLine();
 
-        foreach (var e in events)
+        foreach (LevelEventData e in events)
         {
-            float t = LevelTimelineUI.Instance.MarkerController
+            e.beatTime = LevelTimelineUI.Instance.MarkerController
                 .GetNearestSnapTime(e.beatTime);
 
-            if (e.objectType == "arrow")
-            {
-                string dirStr =
-                    e.direction == Vector2.up ? "up" :
-                    e.direction == Vector2.down ? "down" :
-                    e.direction == Vector2.left ? "left" :
-                    e.direction == Vector2.right ? "right" :
-                    (e.direction == new Vector2(1, 1).normalized ? "up-right" :
-                    e.direction == new Vector2(1, -1).normalized ? "down-right" :
-                    e.direction == new Vector2(-1, -1).normalized ? "down-left" :
-                    e.direction == new Vector2(-1, 1).normalized ? "up-left" : "unknown");
-
-                sw.WriteLine($"{t},arrow,{dirStr},{e.speed},{e.nameOfGameObjectToSpawn}");
-            }
-            else if (e.objectType == "obstacle")
-            {
-                sw.WriteLine($"{t},obstacle,0,0,{e.nameOfGameObjectToSpawn}");
-            }
+            sw.WriteLine(e.Serialize());
         }
 
         return sw.ToString();
@@ -235,22 +266,22 @@ public class LevelEditorData : MonoBehaviour
 
         foreach (var e in events)
         {
-            if (e.objectType != "arrow")
-                continue;
-
-            float arrivalSec = e.beatTime * secPerBeat;
-            float travelSec = spawnDistance / e.speed;
-            float spawnSec = arrivalSec - travelSec;
-
-            converted.Add(new ArrowEvent
+            if (e is ArrowEventData arrowEventData)
             {
-                time = e.beatTime,
-                direction = e.direction,
-                speed = e.speed,
-                nameOfGameObjectToSpawn = e.nameOfGameObjectToSpawn,   
-                arrivalTime = arrivalSec,
-                spawnTime = spawnSec
-            });
+                float arrivalSec = e.beatTime * secPerBeat;
+                float travelSec = spawnDistance / arrowEventData.speed;
+                float spawnSec = arrivalSec - travelSec;
+
+                converted.Add(new ArrowEvent
+                {
+                    time = e.beatTime,
+                    direction = arrowEventData.direction,
+                    speed = arrowEventData.speed,
+                    nameOfGameObjectToSpawn = arrowEventData.arrowType,   
+                    arrivalTime = arrivalSec,
+                    spawnTime = spawnSec
+                });
+            }
         }
 
         return converted;
@@ -258,31 +289,15 @@ public class LevelEditorData : MonoBehaviour
 
 
 
-    // Utilities
-    // -----------------------------------------------------------------------
+  
 
-
-    public void SetBPM(float newBPM)
-    {
-        BPM = Mathf.Clamp(newBPM, 20f, 300f); // sane limits
-        Debug.Log($"🎵 BPM set to: {BPM}");
-    }
-
-    public void SortEvents() =>
-        events.Sort((a, b) => a.beatTime.CompareTo(b.beatTime));
-
-    public int CountArrows() =>
-        events.FindAll(e => e.objectType == "arrow").Count;
-
-    public int CountObstacles() =>
-        events.FindAll(e => e.objectType == "obstacle").Count;
 
     public void RecalculateMaxTime() 
     { 
-        MaxTime = 0f; 
+        MaxBeatTime = 0f; 
         foreach (var e in events) 
-        if (e.beatTime > MaxTime) 
-        MaxTime = e.beatTime; 
+            if (e.beatTime > MaxBeatTime) 
+                MaxBeatTime = e.beatTime; 
     }
 
 }

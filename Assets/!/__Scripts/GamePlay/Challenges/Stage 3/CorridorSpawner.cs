@@ -46,12 +46,7 @@ public class CorridorSpawner : ChallengeBase
     private float _speedMultiplier = 1f;
     private Tween currentTween;
 
-    void Start()
-    {
-        _scrollSpeed = 0f;
 
-        Begin();
-    }
 
     private IEnumerator ObstacleSequence()
     {
@@ -175,6 +170,7 @@ public class CorridorSpawner : ChallengeBase
 
     public override void Begin(object config = null)
     {
+        _scrollSpeed = 0f;
         base.Begin(this.config);
         StartCoroutine(ObstacleSequence());
     }

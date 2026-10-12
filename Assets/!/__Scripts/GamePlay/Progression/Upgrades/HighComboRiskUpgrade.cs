@@ -36,7 +36,7 @@ public class HighComboRiskUpgrade :
     // LIFECYCLE
     // =====================
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{SCORE_BONUS_PER_INTERVAL}", (scoreBonusPerInterval).ToString("P0"))

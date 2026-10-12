@@ -24,7 +24,7 @@ MonoBehaviour:
   centerIcon: {fileID: 21300000, guid: f7a0d8a1b06371f409649348182c85d0, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Lucky Brew
-  descriptionTemplate: Each time you heal for at least {HEAL_AMOUNT}, gain {CURRENCY}.
-  detailsTemplate: This upgrade stacks up to {MAX_STACKS}.
-  currencyAmount: 25
+  descriptionTemplate: Each time you heal, gain {CURRENCY}.
+  detailsTemplate: 
+  currencyPerStack: 140000000a000000
   healAmountRequired: 1

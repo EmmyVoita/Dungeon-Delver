@@ -133,6 +133,8 @@ public class AbilityCardUI : MonoBehaviour
             icon.sprite = card.iconData.frames[0];
         }
 
+    
+
         // When we set up the card we want to check whether the ability is unlocked and whether it has been presented yet.
         // If it has not been unlocked, then we show the lock symbol. If it has been unlocked and not presented, we also
         // show the locked symbol. If it has been unlocked and presented, when we dont show it.
@@ -151,6 +153,8 @@ public class AbilityCardUI : MonoBehaviour
         //backgroundImage.material = card.cardMaterial;
         if(card.cardBackground != null)
             background.sprite = card.cardBackground;
+
+        //icon.SetNativeSize();
 
         SetHighlighted(false);
     }

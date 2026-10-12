@@ -7,6 +7,7 @@ public class UIImageCyclerPerFrameTime : MonoBehaviour
     [Header("Animation")]
     [SerializeField] private Image image;
     [SerializeField] private Sprite[] frames;
+    //[SerializeField] private bool setNativeSize = false;
 
     [Tooltip("Seconds each frame stays on screen. Must match frames length.")]
     [SerializeField] private float[] frameDurations;
@@ -33,6 +34,16 @@ public class UIImageCyclerPerFrameTime : MonoBehaviour
         for(int i = 0; i < frameDurations.Length; i++)
         {
             frameDurations[i] = frameDuration;
+        }
+
+        currentFrame = 0;
+        timer = 0f;
+        isPlaying = true;
+
+        if (this.frames.Length > 0)
+        {
+            image.sprite = this.frames[0];
+            image.SetNativeSize();
         }
     }
 

@@ -24,7 +24,7 @@ public class HealOnFullAbilityUpgradeEffect : IAbilityCostModifier
         return new HealOnFullAbilityUpgradeEffect(_abilityCostModifier, _healAmount);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         Player.OnAbilityFilled -= HandleAbilityFilled;
     }

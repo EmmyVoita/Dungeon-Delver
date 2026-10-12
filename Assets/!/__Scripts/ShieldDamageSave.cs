@@ -67,7 +67,7 @@ public class ShieldDamageSave : IDamageSave
         return new ShieldDamageSave(_preventComboBreak);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

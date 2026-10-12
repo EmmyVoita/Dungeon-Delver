@@ -386,7 +386,7 @@ public class GambleReel : MonoBehaviour
         FlickPointer();
 
         AudioHelpers.PlaySoundEffect(
-            AudioLibrary.Instance.Database.navigate,
+            AudioLibrary.Instance.Database.navigateMajor,
             transform.position
         );
     }

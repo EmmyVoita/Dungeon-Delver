@@ -162,7 +162,7 @@ public class SettingsMenuNavigator : BaseMenu
             barImage.DOKill();
             barImage.DOFade(barAlpha,  0.15f).SetUpdate(true);
             tabManager.SetTabFocus(false);
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             HighlightOption(_selectedIndex, instant: true);
         }
 
@@ -196,7 +196,7 @@ public class SettingsMenuNavigator : BaseMenu
                 tabManager.SetTabFocus(true);
 
                 // Audio feedback
-                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
 
                 DeselectAllOptions();
                 return true;
@@ -255,7 +255,7 @@ public class SettingsMenuNavigator : BaseMenu
     void MoveSelection(int direction)
     {
         _selectedIndex = Mathf.Clamp(_selectedIndex + direction, 0, _currentOptions.Count - 1);
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
         HighlightOption(_selectedIndex);
     }
 
@@ -359,7 +359,7 @@ public class SettingsMenuNavigator : BaseMenu
             return;
 
         _inTabNavigation = false;
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
         _selectedIndex = index;
 
         barImage.DOKill();

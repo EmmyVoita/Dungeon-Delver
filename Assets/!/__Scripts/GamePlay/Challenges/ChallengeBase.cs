@@ -1,13 +1,16 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class ChallengeBase : MonoBehaviour
 {
     private object _config;
     public object Config => _config;
-
+    
+    [Header("Base Settings")]
     [SerializeField] private bool registerWithManager = true;
     [SerializeField] private int priority = 0;
     [SerializeField] private PlayerControlState controlMode = PlayerControlState.BasicJump;
+    [SerializeField] private List<ChallengeBase> childChallenges;
 
     public PlayerControlState ControlState => controlMode;
     public int Priority => priority;
@@ -22,6 +25,14 @@ public abstract class ChallengeBase : MonoBehaviour
 
         if(registerWithManager)
             ObstacleManager.Instance?.RegisterObstacle(gameObject);
+
+        foreach (ChallengeBase child in childChallenges)
+        {
+            if (child == null)
+                continue;
+
+            child.Begin();
+        }
     }
 
     public virtual void End()

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: CurrencyModifier
   m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
   displayName: Greed
-  description: Increase the amount of currency you gain by +25%.
-  icon: {fileID: 19754118, guid: 27bd66fca1b217743ba4c34f89617b8e, type: 3}
+  description: Increase the amount of currency you gain by [VALUE].
+  icon: {fileID: 940489312, guid: 910762d1a3b570b479b60a96cfd249e1, type: 3}
   summaryName: Currency
-  summaryIcon: {fileID: 194228794, guid: ba5f45c5e7619ff479b72992ee241ef0, type: 3}
+  summaryIcon: {fileID: -1514936986, guid: d381a132a63b49c448f22f75240b7f59, type: 3}
   type: 1
   category: 0
   minValue: 0

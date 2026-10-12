@@ -16,7 +16,7 @@ MonoBehaviour:
   category: 4
   requiredUpgrades: []
   baseOfferWeight: 1
-  _cost: 200
+  _cost: 300
   _maxStacks: 1
   duration: 0
   cardDecoration: {fileID: 0}

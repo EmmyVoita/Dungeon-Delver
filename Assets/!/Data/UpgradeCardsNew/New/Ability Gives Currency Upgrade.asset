@@ -16,16 +16,16 @@ MonoBehaviour:
   category: 3
   requiredUpgrades: []
   baseOfferWeight: 1
-  _cost: 200
-  _maxStacks: 999
+  _cost: 300
+  _maxStacks: 2
   duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
-  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  centerIcon: {fileID: 21300000, guid: fd6d0509d8580d34aad61e24fe82b3ee, type: 3}
   iconMaterial: {fileID: 0}
-  displayName: Ability Gives Currency
-  descriptionTemplate: If you use your ability within {TIMER} seconds of reaching
-    full ability charge, gain {CURRENCY_AMOUNT}
+  displayName: Time Is Money
+  descriptionTemplate: Use your ability within {TIMER} seconds of reaching full charge
+    to gain {CURRENCY_AMOUNT}.
   detailsTemplate: 
-  currencyAmount: 20
-  timer: 3
+  currencyPerStack: 140000000f000000
+  timer: 5

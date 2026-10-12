@@ -80,10 +80,12 @@ public class BounceOnBombHit : MonoBehaviour
 
     private void Update()
     {
+        #if UNITY_ENGINE
         if (Input.GetKeyDown(KeyCode.Return))
         {
             TriggerBounce();
         }
+        #endif
     }
 
     public void TriggerBounce()

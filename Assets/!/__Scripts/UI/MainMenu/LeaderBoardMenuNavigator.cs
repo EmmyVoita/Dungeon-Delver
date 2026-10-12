@@ -8,7 +8,10 @@ using UnityEngine;
 
 public class LeaderBoardMenuNavigator : BaseMenu
 {
+    public static LeaderBoardMenuNavigator Instance;
+
     [Header("References")]
+    [SerializeField] private AbilityDatabase abilityDatabase;
     [SerializeField] private RectTransform parentTransform;
     [SerializeField] private GameObject listPrefab;
     [SerializeField] private CanvasGroup canvasGroup;
@@ -49,6 +52,31 @@ public class LeaderBoardMenuNavigator : BaseMenu
     [SerializeField] List<RunRecord> _topRuns;
 
     private bool _listBuilt = false;
+    private AbilityType _currentAbilityType;
+
+    public AbilityData GetCurrentAbilityData()
+    {
+        if(abilityDatabase == null || abilityDatabase.abilities == null)
+        {
+            Debug.LogError("Current Ability data in the leaderboard is null");
+            return null;
+        }
+           
+        return abilityDatabase.abilities.FirstOrDefault(r => r.abilityType == _currentAbilityType);
+    }
+
+    protected override void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
+        base.Awake();
+    }
 
     private void OnEnable()
     {
@@ -62,7 +90,7 @@ public class LeaderBoardMenuNavigator : BaseMenu
 
     private void HandleRunRecordClicked(RunRecordItem item)
     {
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
         _selectedIndex = _records.IndexOf(item);
         UpdateVisuals();
     }
@@ -109,20 +137,26 @@ public class LeaderBoardMenuNavigator : BaseMenu
 
     private void HandleNavigationInput()
     {
+        if(_records.Count == 0)
+            return;
+            
         if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveDown))
         {
             _selectedIndex = (_selectedIndex + 1) % _records.Count;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             panelNudge.NudgeDown();
             UpdateVisuals();
+            
         }
         else if (InputBindingManager.Instance.GetKeyDown(InputActionType.MoveUp))
         {
             _selectedIndex = (_selectedIndex - 1 + _records.Count) % _records.Count;
-            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate, transform.position);
+            AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor, transform.position);
             panelNudge.NudgeUp();
             UpdateVisuals();
         }
+
+        _currentAbilityType = _records[_selectedIndex].AbilityType;
     }
 
     private void UpdateVisuals()
@@ -189,7 +223,7 @@ public class LeaderBoardMenuNavigator : BaseMenu
             Destroy(child.gameObject);
         }
 
-        SaveData saveData = ScoreManager.Instance.SaveData;
+        SaveData saveData = RunHistoryManager.Instance.SaveData;
         _topRuns = GetTopRuns(saveData, showAmount);
 
 

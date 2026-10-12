@@ -45,7 +45,7 @@ public class FillRecordInventory : InventoryBase
     protected override string GetDescription(UpgradeCardUI cardUI)
     {
         string prefix = $"[<color=#{UIColors.ToHex(UIColors.Yellow)}>${cardUI.Base.Cost.ToString("N0")}</color>] ";
-        return prefix + cardUI.GetDescription();
+        return prefix + cardUI.GetDescription(true);
     }
     
     protected override void FillInventory()

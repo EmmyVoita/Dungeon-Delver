@@ -38,10 +38,12 @@ public class LevelEditorSessionController : MonoBehaviour
                 levelFileInput.text =TestSession.originalLevelAsset.name;
             }
 
+           
+
             LevelTimelineUI.Instance.BuildTimeline();
             EditorPlaybackController.Instance.BuildSimulatedArrows();
             EditorPlaybackController.Instance.Stop();
-            EditorPlaybackController.Instance.JumpToTime(0);
+            EditorPlaybackController.Instance.JumpToTime(TestSession.levelTime);
         }
     }
 
@@ -93,20 +95,14 @@ public class LevelEditorSessionController : MonoBehaviour
 
         TestSession.levelMusic = EditorPlaybackController.Instance.LevelEditorTestMusic;
 
-        // Save original
-        TestSession.originalLevelAsset =LevelEditorData.Instance.currentLevelAsset;
-
-        // Create a TEMP runtime TextAsset from editor state
-        string serializedLevel =LevelEditorData.Instance.SerializeToString();
-
-        TestSession.tempLevelAsset =new TextAsset(serializedLevel);
+        SetLevelAsset();
 
         TestSession.runSingleLevel = true;
         TestSession.returnScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        TestSession.levelTime = 0;
 
         GameSceneLoader.PendingConfig = new GameSceneConfig(GameMode.LevelEditorTest,0,null);
-   
-        UnityEngine.SceneManagement.SceneManager.LoadScene("ArrowGameScene");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(SceneNames.ArrowGameScene);
     }
 
 
@@ -124,30 +120,24 @@ public class LevelEditorSessionController : MonoBehaviour
 
 
 
-        // Save original
-        TestSession.originalLevelAsset =
-           LevelEditorData.Instance.currentLevelAsset;
-
-        // Create a TEMP runtime TextAsset from editor state
-        string serializedLevel =
-            LevelEditorData.Instance.SerializeToString();
-
-        TestSession.tempLevelAsset =
-            new TextAsset(serializedLevel);
-
+        SetLevelAsset();
         TestSession.runSingleLevel = true;
-        TestSession.returnScene =
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        TestSession.returnScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        TestSession.levelTime = EditorPlaybackController.Instance.CurrentTime;
 
    
-        GameSceneLoader.PendingConfig = new GameSceneConfig(
-            GameMode.LevelEditorTest,
-            EditorPlaybackController.Instance.CurrentTime,
-            null);
+        GameSceneLoader.PendingConfig = new GameSceneConfig(GameMode.LevelEditorTest,EditorPlaybackController.Instance.CurrentTime,null);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(SceneNames.ArrowGameScene);
+    }
 
-        Debug.Log("▶ Starting test session with in-memory level");
+    private void SetLevelAsset()
+    {
+        // Save original
+        TestSession.originalLevelAsset = LevelEditorData.Instance.currentLevelAsset;
 
-        UnityEngine.SceneManagement.SceneManager
-            .LoadScene("ArrowGameScene");
+        // Create a TEMP runtime TextAsset from editor state
+        string serializedLevel = LevelEditorData.Instance.SerializeToString();
+
+        TestSession.tempLevelAsset = new TextAsset(serializedLevel);
     }
 }

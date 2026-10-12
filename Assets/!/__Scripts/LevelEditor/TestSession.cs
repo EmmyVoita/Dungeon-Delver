@@ -11,6 +11,8 @@ public static class TestSession
     public static TextAsset tempLevelAsset;
     public static AudioClip levelMusic;
 
+    public static float levelTime;
+
     // Scene to return to after testing
     public static string returnScene = "LevelEditorScene";
 }

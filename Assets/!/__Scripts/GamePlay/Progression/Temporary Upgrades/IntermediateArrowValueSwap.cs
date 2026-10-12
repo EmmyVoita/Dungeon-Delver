@@ -6,7 +6,7 @@ public class IntermediateArrowValueSwap: UpgradeBase
     public float normalArrowMultiplier = 0.9f;
     public float critArrowMultiplier = 1.1f;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{NORMAL_ARROW_MULTIPLIER}", (normalArrowMultiplier-1).ToString("P0"))

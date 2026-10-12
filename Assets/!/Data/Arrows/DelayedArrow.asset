@@ -15,5 +15,6 @@ MonoBehaviour:
   displayName: delayedarrow
   prefab: {fileID: 5575773763797762119, guid: 285f160786fdb134189edc6e499276d9, type: 3}
   icon: {fileID: 0}
+  markerColor: {r: 1, g: 0.5226648, b: 0, a: 1}
   requiresWarning: 0
   warningLeadTime: 0.6

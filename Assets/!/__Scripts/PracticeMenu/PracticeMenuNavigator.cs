@@ -132,6 +132,12 @@ public class PracticeMenuNavigator : BaseMenu
         base.Awake();
     }
 
+    private void SetBossMode(bool value)
+    {
+        _useBoss = value;
+        bossSlider.SetValue(value);
+    }
+
     private void Update()
     {
         if (!CanProcessInput)
@@ -141,14 +147,12 @@ public class PracticeMenuNavigator : BaseMenu
         {
             if(_currentObstacle.hasBossOverride)
             {
-                _useBoss = !_useBoss;
+                SetBossMode(!_useBoss);
 
                 if(_useBoss)
                     panelNudge.NudgeRight();
                 else
                     panelNudge.NudgeLeft();
-
-                bossSlider.SetValue(_useBoss);
             }
         }
 
@@ -395,8 +399,7 @@ public class PracticeMenuNavigator : BaseMenu
         if (newOption == null)
             return;
 
-        _useBoss = false;
-        bossSlider.SetValue(false);
+        SetBossMode(false);
 
         ScrollToSelected(newOption);
 
@@ -413,7 +416,7 @@ public class PracticeMenuNavigator : BaseMenu
             RefreshLayout();
         }
 
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigate,transform.position);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.navigateMajor,transform.position);
 
         if (_currentOption != null)
             _currentOption.OnExit();

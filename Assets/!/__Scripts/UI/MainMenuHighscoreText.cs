@@ -22,7 +22,7 @@ public class MainMenuHighscoreText : MonoBehaviour
     void UpdateHighscoreText()
     {
         // Read from ScoreManager save data and build 
-        SaveData saveData = ScoreManager.Instance.SaveData;
+        SaveData saveData = RunHistoryManager.Instance.SaveData;
         AbilityType targetType = PlayMenuNavigator.Instance.ActiveHover;
 
         if(targetType == AbilityType.ReturnToMenu || targetType == AbilityType.None)

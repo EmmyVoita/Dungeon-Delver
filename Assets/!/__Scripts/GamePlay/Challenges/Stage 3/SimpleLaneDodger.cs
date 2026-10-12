@@ -34,12 +34,10 @@ public class SimpleLaneDodger : ChallengeBase
 
     private List<IReversible> _reversibleObjects = new List<IReversible>();
 
-    void Start()
+    void Awake()
     {
         balls = new List<BasicProjectile>();
         ballsAlive = ballCount;
-
-        Begin();
     }
 
     

@@ -26,7 +26,7 @@ MonoBehaviour:
   displayName: Rune of Restoration
   descriptionTemplate: When your ability meter reaches full heal for {HEAL_VALUE},
     but increase your ability cost by {ABILITY_COST_MULT}.
-  detailsTemplate: 'This upgrade stacks.
+  detailsTemplate: '
 
 '
   synergyUpgrades:

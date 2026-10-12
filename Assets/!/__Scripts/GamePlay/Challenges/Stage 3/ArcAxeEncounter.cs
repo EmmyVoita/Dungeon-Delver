@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using System.Runtime.CompilerServices;
 
 public class ArcAxeEncounter : ChallengeBase
 {
@@ -23,6 +24,7 @@ public class ArcAxeEncounter : ChallengeBase
     [SerializeField] private float travelDuration = 1.2f;
 
     [Header("Timing")]
+    [SerializeField] private float startingDelay = 0f;
     [SerializeField] private float baseInterval = 1.2f;
     [SerializeField] private float intervalStep = 0.1f;
     [SerializeField] private float minInterval = 0.4f;
@@ -43,10 +45,7 @@ public class ArcAxeEncounter : ChallengeBase
     private bool _hasReversed = false;
 
 
-    void Start()
-    {
-        Begin();
-    }
+
 
     void Update()
     {
@@ -73,6 +72,8 @@ public class ArcAxeEncounter : ChallengeBase
 
     private IEnumerator SpawnRoutine()
     {
+        yield return new WaitForSeconds(startingDelay);
+        
         float currentInterval = baseInterval;
         float elapsed = 0f;
 

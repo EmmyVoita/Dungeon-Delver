@@ -4,10 +4,11 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
     using System.Globalization;
 using TMPro;
+using System;
 
 public class LevelTimelineUI : MonoBehaviour
 {
-
+    public static event Action<float,float> OnRebuildTimeline;
     public static LevelTimelineUI Instance;
     // ===========================================================
     // Timeline UI
@@ -15,6 +16,11 @@ public class LevelTimelineUI : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private AddChallengeUI addChallengeUI;
+     [SerializeField] private AddPattern addPatternUI;
+     [SerializeField] private AddLoop addLoopUI;
+    [SerializeField] private GameObject markersContainer;
+    [SerializeField] private RectTransform verticalBar;
+    [SerializeField] private Slider zoomSlider;
 
     [Header("Timeline View")]
     [SerializeField] private TimelineView timelineView;
@@ -41,15 +47,11 @@ public class LevelTimelineUI : MonoBehaviour
     public Color wholeBeatColor = new Color(1, 1, 1, 0.5f);
     public Color quarterBeatColor = new Color(1, 1, 1, 0.15f);
 
-    [Header("Tick Height Settings")]
-    public float wholeTickHeight = 100f;
-    public float quarterTickHeight = 50f;
 
-    public float markerOffsetY = 100f;
-    public float tickOffsetY = 100f;
 
     [Header("Scrubber")]
     public Slider scrubSlider;
+    public Scrollbar scrubScrollBar;
 
     [Header("Scroll Settings")]
     [SerializeField] private float zoomScrollSensitivity = 1f;
@@ -101,8 +103,8 @@ public class LevelTimelineUI : MonoBehaviour
         Instance = this;
 
         // Create a UI object with a RectTransform
-        GameObject go = new GameObject("MARKERS", typeof(RectTransform));
-        markerContainer = go.GetComponent<RectTransform>();
+        //GameObject go = new GameObject("MARKERS", typeof(RectTransform));
+        markerContainer = markersContainer.GetComponent<RectTransform>();
 
         // Set parent correctly within UI hierarchy
         markerContainer.SetParent(content, false);
@@ -120,16 +122,25 @@ public class LevelTimelineUI : MonoBehaviour
 
     void Start()
     {
-        scrubSlider.onValueChanged.AddListener(OnSliderScrub);
+        scrubScrollBar.onValueChanged.AddListener(OnSliderScrub);
+        zoomSlider.onValueChanged.AddListener(OnZoomSliderScrub);
+        //scrubSlider.onValueChanged.AddListener(OnSliderScrub);
+
+        zoomSlider.SetValueWithoutNotify(0.5f);
+    timelineView.AssignZoom(0.5f);
     }
 
     void Update()
     {
         if (!userDraggingSlider)
         {
-            float t = EditorPlaybackController.Instance.CurrentTime;
-            scrubSlider.SetValueWithoutNotify(t);
-            timelineView.SyncScrollToTime(t);
+            float currentTime = EditorPlaybackController.Instance.CurrentTime;
+
+            float normalizedTime = currentTime / timelineView.TimelineEndTime;
+
+            scrubScrollBar.SetValueWithoutNotify(normalizedTime);
+
+            ScrollToTime(currentTime, 0.4f);
         }
 
         // Zoom handling
@@ -137,8 +148,33 @@ public class LevelTimelineUI : MonoBehaviour
         if (scroll != 0)
         {
             timelineView.ApplyZoom(scroll);
+
+            float sliderValue = Mathf.InverseLerp(
+                timelineView.MinPixelsPerSecond,
+                timelineView.MaxPixelsPerSecond,
+                timelineView.PixelsPerSecond
+            );
+
+            zoomSlider.SetValueWithoutNotify(sliderValue);
+
             OnZoomChanged();
         }
+    }
+
+    public void ZoomInButton()
+    {
+        float value = zoomSlider.value;
+        value += 0.1f;
+
+        zoomSlider.value = Mathf.Clamp01(value);
+    }
+
+    public void ZoomOutButton()
+    {
+        float value = zoomSlider.value;
+        value -= 0.1f;
+
+        zoomSlider.value = Mathf.Clamp01(value);
     }
 
     private float SnapBeats(float rawBeats)
@@ -166,7 +202,7 @@ public class LevelTimelineUI : MonoBehaviour
     {
         // Grab the max time from level data to build the width of the timeline
         var data = LevelEditorData.Instance;
-        float maxTime = data.MaxTime;
+        float maxTime = data.MaxBeatTime;
 
         float width = timelineView.TimelineEndTime * timelineView.PixelsPerSecond;
         content.sizeDelta = new Vector2(width, content.sizeDelta.y);
@@ -180,19 +216,24 @@ public class LevelTimelineUI : MonoBehaviour
         // Rebuild our arrow/obstacle markers
         markerController.BuildMarkers();
 
+        /*
         // Scrubber settings
         scrubSlider.minValue = 0;
         scrubSlider.maxValue = maxTime;
         scrubSlider.value = Mathf.Clamp(scrubSlider.value, 0, maxTime);
+        */
+
+        OnRebuildTimeline?.Invoke(timelineView.PixelsPerSecond,maxTime);
 
         // Update grid graphic
-        gridGraphic.pixelsPerSecond = timelineView.PixelsPerSecond;
-        gridGraphic.maxTime = maxTime;
+        //gridGraphic.SetProperties(timelineView.PixelsPerSecond,maxTime);
+        
+        //gridGraphic.pixelsPerSecond = timelineView.PixelsPerSecond;
+        //gridGraphic.maxTime = maxTime;
         gridGraphic.SetVerticesDirty();
+        
 
-        bpmInput.SetTextWithoutNotify(
-            LevelEditorData.Instance.BPM.ToString("F0")
-        );
+        bpmInput.SetTextWithoutNotify(LevelEditorData.Instance.BPM.ToString("F0"));
     }
 
 
@@ -205,7 +246,7 @@ public class LevelTimelineUI : MonoBehaviour
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            Debug.LogError("BPM input cannot be empty!");
+             UIToast.Error("BPM input cannot be empty!");
             return;
         }
 
@@ -215,18 +256,20 @@ public class LevelTimelineUI : MonoBehaviour
                 CultureInfo.InvariantCulture,
                 out float bpm))
         {
-            Debug.LogError($"Invalid BPM input: '{text}'");
+            UIToast.Error($"Invalid BPM input: '{text}'");
             return;
         }
 
         LevelEditorData.Instance.SetBPM(bpm);
+        UIToast.Show($"BPM updated to => {bpm}");
+
+
         markerController.BuildMarkers();
         EditorPlaybackController.Instance.RebuildSimulation();
 
         // Update grid graphic
-        gridGraphic.pixelsPerSecond = timelineView.PixelsPerSecond;
-        gridGraphic.maxTime = timelineView.TimelineEndTime;
-        gridGraphic.SetVerticesDirty();
+        OnRebuildTimeline?.Invoke(timelineView.PixelsPerSecond,timelineView.TimelineEndTime);
+        
     }
 
     // Right click show context menu handing
@@ -242,15 +285,20 @@ public class LevelTimelineUI : MonoBehaviour
         editingMarker = marker;
         marker.SetEditing(true);
 
-        if (marker.Event.objectType == "obstacle")
+        if (marker.Event is ChallengeEventData challengeEventData)
         {
             // Show the editor window
-            EditObstacleUI.Instance.ShowFor(marker.Event, screenPos);
+            EditObstacleUI.Instance.ShowFor(challengeEventData);
         }
-        else if (marker.Event.objectType == "arrow")
+        else if (marker.Event is ArrowEventData arrowEventData)
         {
             // Show the editor window
-            EditArrowUI.Instance.ShowFor(marker.Event, screenPos);
+            EditArrowUI.Instance.ShowFor(arrowEventData);
+        }
+         else if (marker.Event is PatternEventData patternEventData)
+        {
+            // Show the editor window
+            EditPatternUI.Instance.ShowFor(patternEventData);
         }
     }
 
@@ -260,9 +308,15 @@ public class LevelTimelineUI : MonoBehaviour
     private void OnSliderScrub(float value)
     {
         userDraggingSlider = true;
-        EditorPlaybackController.Instance.JumpToTime(value);
-        timelineView.SyncScrollToTime(value);
+        EditorPlaybackController.Instance.JumpToTime(value * timelineView.TimelineEndTime);
+        timelineView.SyncScrollToTime(value * timelineView.TimelineEndTime);
         userDraggingSlider = false;
+    }
+
+    private void OnZoomSliderScrub(float value)
+    {
+        timelineView.AssignZoom(value);
+        OnZoomChanged();
     }
 
     // Zoom changed – update grid graphic
@@ -274,9 +328,7 @@ public class LevelTimelineUI : MonoBehaviour
         markerController.UpdateMarkerPositions();
 
         // Update grid graphic
-        gridGraphic.pixelsPerSecond = timelineView.PixelsPerSecond;
-        gridGraphic.maxTime = timelineView.TimelineEndTime;
-        gridGraphic.SetVerticesDirty();
+        OnRebuildTimeline?.Invoke(timelineView.PixelsPerSecond,timelineView.TimelineEndTime);
     }
 
     // Placement marker during add arrow mode
@@ -361,10 +413,50 @@ public class LevelTimelineUI : MonoBehaviour
         addChallengeUI.AddChallengeAtTime(time);
     }
 
+    public void ConfirmPatternPlacement(float time)
+    {
+        addPatternUI.AddPatternAtTime(time);
+    }
+
+    public void ConfirmLoopPlacement(float time)
+    {
+        addLoopUI.AddLoopMark(time);
+    }
+
 
     // ===========================================================
     // Playhead Position
     // ===========================================================
     
-    
+    // time is in 
+    public void ScrollToTime(float time, float viewportPosition = 0.4f)
+    {
+        float timeX = TimelineView.TimeToPixels(time);
+
+        float contentWidth = content.rect.width;
+        float viewportWidth = scrollRect.viewport.rect.width;
+
+        // Where we'd LIKE the playhead to sit.
+        float desiredViewportX = viewportWidth * viewportPosition;
+
+        // How much we'd need to scroll to put it there.
+        float desiredScrollX = timeX - desiredViewportX;
+
+        // Actual legal scrolling range.
+        float maxScrollX = Mathf.Max(0f,contentWidth - viewportWidth);
+
+        // Clamp to what the ScrollRect can actually do.
+        float actualScrollX = Mathf.Clamp(desiredScrollX,0f,maxScrollX);
+
+        // Move the timeline.
+        scrollRect.horizontalNormalizedPosition =maxScrollX > 0f ? actualScrollX / maxScrollX : 0f;
+
+        // Where does currentTime ACTUALLY appear in the viewport?
+        float playheadX = timeX - actualScrollX;
+
+        verticalBar.anchoredPosition = new Vector2(
+            playheadX,
+            verticalBar.anchoredPosition.y
+        );
+    }
 }

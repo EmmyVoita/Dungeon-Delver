@@ -12,10 +12,7 @@ public class GameSessionBootstrap : MonoBehaviour
     private void Awake()
     {
         Config = GameSceneLoader.PendingConfig ?? Config ?? new GameSceneConfig();
-
-        GameSceneLoader.PendingConfig = null; // prevent leakage
-
-        
+        GameSceneLoader.PendingConfig = null; 
     }
 
     private void Start()
@@ -27,10 +24,14 @@ public class GameSessionBootstrap : MonoBehaviour
 
     private void ApplySessionConfig()
     {
-        Debug.Log($"Applying Session config for Game mode {Config.Mode}");
         switch (Config.Mode)
         {
             case GameMode.StandardRun:
+                if(Config.GoldenArrowChance > 0)
+                    OnArrowSpawnedRMM.Instance.RegisterPermanent(new RandomGoldenArrowModifier(Config.GoldenArrowChance));
+
+                if(Config.AdditionalGeneralShopWeight > 0)
+                    RunStateManager.Instance.AddRouteWeightMultiplier(WorldMapRouteType.GeneralShop, Config.AdditionalGeneralShopWeight);
                 StartCoroutine(HandleStartingInventory());
                 break;
 
@@ -59,6 +60,8 @@ public class GameSessionBootstrap : MonoBehaviour
 
     private IEnumerator HandleStartingInventory()
     {
+        GameStateManager.Instance.SetStateForceUpdate(GameState.None);
+
         if(Config.CardsToGrant == 0)
         {
             GameStateManager.Instance.SetStateForceUpdate(GameState.RunIntro);
@@ -67,7 +70,9 @@ public class GameSessionBootstrap : MonoBehaviour
 
         inventoryRoot.SetActive(true);
 
-        ShopManager.Instance.GrantRandomCards(Config.CardsToGrant);
+        //ShopManager.Instance.GrantRandomCards(Config.CardsToGrant);
+
+        ShopManager.Instance.GrantSetCards(Config.CardsToGrant);
         
         bool complete = false;
 

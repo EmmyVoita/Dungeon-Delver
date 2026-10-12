@@ -9,7 +9,7 @@ public class PaidAbilityUseUpgrade : CurrencyWeightedUpgradeBase
     [SerializeField] private int usesPerLevel = 1;
     [SerializeField] private int currencyCost = 50;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{USES_PER_LEVEL}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{usesPerLevel:N0}</color>")

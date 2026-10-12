@@ -94,13 +94,25 @@ public class FallingBreakableSpawner : ChallengeBase
 
     }
 
-    void Start()
-    {
-        if(!listenForBossActive && lifetimeMode != LifetimeMode.External) 
-            Begin();
 
-        if(listenForBossActive && BossManager.Instance.IsBossActive)
-            Begin();
+    public override void Begin(object config = null)
+    {
+        if(listenForBossActive && !BossManager.Instance.IsBossActive)
+        {
+            Debug.LogError("TRYING TO LISTEN FOR BOSS AND ITS NOT ACTIVE!");
+            return;
+        }
+            
+
+        base.Begin();
+        
+        if(addCanvasPopup)
+            GameplayUIController.Instance.ShowInputPopup(fireAction, 
+                                                        false,
+                                                        prefixText: "[",
+                                                        suffixText: "]",
+                                                        Color.yellow);
+        StartCoroutine(SpawnRoutine());
     }
 
 
@@ -216,18 +228,7 @@ public class FallingBreakableSpawner : ChallengeBase
         ForceKillAll();
     }
 
-    public override void Begin(object config = null)
-    {
-        base.Begin();
 
-        if(addCanvasPopup)
-            GameplayUIController.Instance.ShowInputPopup(fireAction, 
-                                                        false,
-                                                        prefixText: "[",
-                                                        suffixText: "]",
-                                                        Color.yellow);
-        StartCoroutine(SpawnRoutine());
-    }
 
     public override void End()
     {

@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
   displayName: Discovery
   description: Gain an additional reward route option in the world map.
-  icon: {fileID: -867048192, guid: 88d76b0b15dabe949804a049add3668d, type: 3}
+  icon: {fileID: -1890851139, guid: 910762d1a3b570b479b60a96cfd249e1, type: 3}
   summaryName: Reward Route
-  summaryIcon: {fileID: -867048192, guid: 88d76b0b15dabe949804a049add3668d, type: 3}
+  summaryIcon: {fileID: -829752093, guid: cf8e3d9803c43f648bec853b2993de62, type: 3}
   type: 8
   category: 0
   minValue: 0

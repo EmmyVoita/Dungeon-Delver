@@ -176,10 +176,10 @@ public class RoundStatsUI : MonoBehaviour
         switch (data.statValueType)
         {
             case StatValueType.TotalScore:
-                return new Vector2Int(ScoreManager.Instance.RoundScore, -1);
+                return new Vector2Int(RunHistoryManager.Instance.RoundScore, -1);
 
             case StatValueType.Hits:
-                return new Vector2Int(ScoreManager.Instance.RoundStatsTracker.Hit, ScoreManager.Instance.RoundStatsTracker.Spawned);
+                return new Vector2Int(RunHistoryManager.Instance.RoundStatsTracker.Hit, RunHistoryManager.Instance.RoundStatsTracker.Spawned);
 
             default:
                 return Vector2Int.zero;
@@ -233,7 +233,7 @@ public class RoundStatsUI : MonoBehaviour
 
         if (skipRequested)
         {
-            var roundAccuracy = ScoreManager.Instance.RoundStatsTracker.RoundAccuracy;
+            var roundAccuracy = RunHistoryManager.Instance.RoundStatsTracker.RoundAccuracy;
             RatingDisplayData chosenImageData = GetRatingForAccuracy(roundAccuracy);
 
             ratingTextObject.text = chosenImageData.ratingText;
@@ -257,7 +257,7 @@ public class RoundStatsUI : MonoBehaviour
             }
 
             // Snap rating instantly
-            var chosenData = GetRatingForAccuracy(ScoreManager.Instance.RoundStatsTracker.RoundAccuracy);
+            var chosenData = GetRatingForAccuracy(RunHistoryManager.Instance.RoundStatsTracker.RoundAccuracy);
             ratingPresenter.ShowRating(chosenData);
 
             yield break; // ← IMPORTANT
@@ -268,7 +268,7 @@ public class RoundStatsUI : MonoBehaviour
 
     private IEnumerator PlayRatingImageIntro()
     {
-        var roundAccuracy = ScoreManager.Instance.RoundStatsTracker.RoundAccuracy;
+        var roundAccuracy = RunHistoryManager.Instance.RoundStatsTracker.RoundAccuracy;
         RatingDisplayData chosenData = GetRatingForAccuracy(roundAccuracy);
 
         ratingPresenter.ShowRating(chosenData);

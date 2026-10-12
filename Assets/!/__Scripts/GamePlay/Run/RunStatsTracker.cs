@@ -16,7 +16,7 @@ public class RunStatsTracker : MonoBehaviour
     public int RerollsUsed { get; private set; }
     public int RerollsGained { get; private set; }
     public int TotalHealthHealed { get; private set; }
-    public int TotalShopsVisited { get; private set; }
+    //public int TotalShopsVisited { get; private set; }
 
 
     public float RunAccuracy => TotalSpawned == 0 ? 0f : (float)TotalHit / TotalSpawned;
@@ -29,7 +29,7 @@ public class RunStatsTracker : MonoBehaviour
         RunStateManager.OnRerollGained += AddRerollGained;
         RunStateManager.OnUseReroll += AddRerollUsed;
         Player.OnHeal += AddHeal;
-        ShopManager.OnShopOpened += AddShopOpened;
+        //ShopManager.OnShopOpened += AddShopOpened;
     }
 
     void OnDisable()
@@ -38,7 +38,7 @@ public class RunStatsTracker : MonoBehaviour
         RunStateManager.OnRerollGained -= AddRerollGained;
         RunStateManager.OnUseReroll -= AddRerollUsed;
         Player.OnHeal -= AddHeal;
-        ShopManager.OnShopOpened -= AddShopOpened;
+        //ShopManager.OnShopOpened -= AddShopOpened;
     }
 
     private void AddRerollGained(int amount)
@@ -67,7 +67,7 @@ public class RunStatsTracker : MonoBehaviour
         if(shopType != ShopType.Normal)
             return;
 
-        TotalShopsVisited++;
+        //TotalShopsVisited++;
     }
 
 
@@ -78,6 +78,7 @@ public class RunStatsTracker : MonoBehaviour
 
     public void AddRound(RoundStatsTracker round)
     {
+        Debug.LogError("RunStatsTracker . add round");
         TotalScore += round.Score;
         TotalSpawned += round.Spawned;
         TotalHit += round.Hit;

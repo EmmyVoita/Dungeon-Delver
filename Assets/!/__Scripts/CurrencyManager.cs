@@ -99,10 +99,12 @@ public class CurrencyManager : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.K))
-        {
-            AddCurrency(1000, silent: false);
-        }
+        #if UNITY_EDITOR
+            if(Input.GetKeyDown(KeyCode.K))
+            {
+                AddCurrency(1000, silent: false);
+            }
+        #endif
     }
 
     public void ResetCurrency()
@@ -190,7 +192,7 @@ public class CurrencyManager : MonoBehaviour
 
             foreach(var tier in comboRewards)
             {
-                if(ScoreManager.Instance.RoundStatsTracker.HighestCombo >= tier.comboRequirement)
+                if(RunHistoryManager.Instance.RoundStatsTracker.HighestCombo >= tier.comboRequirement)
                 {
                     reward = tier.currencyReward;
                     comboRequirement = tier.comboRequirement;
@@ -206,7 +208,7 @@ public class CurrencyManager : MonoBehaviour
         }
       
 
-        if(ScoreManager.Instance.RoundStatsTracker.PlayerTookNoDamage)
+        if(RunHistoryManager.Instance.RoundStatsTracker.PlayerTookNoDamage)
         {
             AddCurrency(tookNoDamage, "No Damage");
             stampText.Play($"No Damage!");
@@ -221,7 +223,7 @@ public class CurrencyManager : MonoBehaviour
         }
 
 
-        if(ScoreManager.Instance.RoundStatsTracker.PerfectRound)
+        if(RunHistoryManager.Instance.RoundStatsTracker.PerfectRound)
         {
             AddCurrency(perfectRound, "Perfect Round");
             stampText.Play($"Never Missed!");
@@ -288,6 +290,24 @@ public class CurrencyManager : MonoBehaviour
         AudioHelpers.PlaySoundEffect(currencyRewardSound.GetRandom(), transform.position);
 
         _totalCurrency += adjustedAmount;
+    }
+
+    public CurrencyScaleModifier AddTemporaryCurrencyModifier(float scale,float duration)
+    {
+        CurrencyScaleModifier modifier = new CurrencyScaleModifier(scale);
+
+        modifiers.Add(modifier);
+
+        StartCoroutine(RemoveCurrencyModifierAfterDuration(modifier,duration));
+
+        return modifier;
+    }
+    private IEnumerator RemoveCurrencyModifierAfterDuration(CurrencyScaleModifier modifier,float duration)
+    {
+        yield return new WaitForSeconds(duration);
+
+        modifier.Disable();
+        modifiers.Remove(modifier);
     }
 
     public void AddCurrencyModifier(CurrencyScaleModifier mod)

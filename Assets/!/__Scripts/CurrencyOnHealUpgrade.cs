@@ -6,26 +6,58 @@ using UnityEngine;
 public class CurrencyOnHealUpgrade : UpgradeBase
 {
     [Header("Upgrade Settings")]
-    [SerializeField] private int currencyAmount;
+     [SerializeField] private List<int> currencyPerStack;
     [SerializeField] private int healAmountRequired;
 
-    public override string GetFormattedDescription()
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        return descriptionTemplate
-            .Replace("{CURRENCY}", $"<color=#{UIColors.ToHex(UIColors.Green)}>${currencyAmount}</color>")
-            .Replace("{HEAL_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{healAmountRequired}</color>");
+        string currencyText = isInventory ? InventoryText() : $"${GetCurrencyText()}";
+        replacements["{CURRENCY}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>{currencyText}</color>";
+        replacements["{HEAL_AMOUNT}"] =  $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{healAmountRequired}</color>";
+
+        base.AddReplacements(replacements, isInventory);
     }
 
-    public override string GetDetails()
+    private string InventoryText()
     {
-         return detailsTemplate
-            .Replace("{CURRENCY}", $"<color=#{UIColors.ToHex(UIColors.Green)}>${currencyAmount}</color>")
-            .Replace("{HEAL_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{healAmountRequired}</color>")
-            .Replace("{MAX_STACKS}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{MaxStacks}</color>");
+        string text = "(";
+
+        for(int i = 0; i < currencyPerStack.Count; i++)
+        {
+            string prefix = i == 0 ? "" : "/";
+            text += $"{prefix}${currencyPerStack[i]}";
+        }
+        text += ")";
+
+        return text;
+    }
+
+     private int GetCurrencyText()
+    {
+        int stackCount = ShopManager.Instance ? ShopManager.Instance.GetOwnedStackCount(this) : 0;
+
+        if (currencyPerStack.Count == 0)
+            return 0;
+
+        int index = Mathf.Clamp(stackCount, 0, currencyPerStack.Count - 1);
+
+        return currencyPerStack[index];
+    }
+
+    private int GetCurrencyAmount()
+    {
+        int stackCount = ShopManager.Instance ? ShopManager.Instance.GetOwnedStackCount(this) : 0;
+
+        if (currencyPerStack.Count == 0)
+            return 0;
+
+        int index = Mathf.Clamp(stackCount - 1, 0, currencyPerStack.Count - 1);
+
+        return currencyPerStack[index];
     }
 
     public override void Apply()
     {
-        HealthChangeEffectsManager.Instance.RegisterPermanent(new CurrencyOnHeal(currencyAmount,healAmountRequired), this);
+        HealthChangeEffectsManager.Instance.RegisterPermanent(new CurrencyOnHeal(GetCurrencyAmount(),healAmountRequired), this);
     }
 }

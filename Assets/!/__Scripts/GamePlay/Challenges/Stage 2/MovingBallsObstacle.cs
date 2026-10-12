@@ -22,10 +22,9 @@ public class MovingBallsObstacle : ChallengeBase
     private List<BasicProjectile> _projectiles;
     private Coroutine _spawnRoutine;
 
-    void Start()
+    void Awake()
     {
         _projectiles = new List<BasicProjectile>();
-        Begin();
     }
 
    private IEnumerator SpawnBallsRoutine()

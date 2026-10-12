@@ -6,6 +6,7 @@ public class ArrowTypeDefinition : ScriptableObject
     public string displayName;
     public GameObject prefab;
     public Sprite icon;        // optional for UI
+    public Color markerColor;
 
     [Header("Telegraph")]
     public bool requiresWarning;

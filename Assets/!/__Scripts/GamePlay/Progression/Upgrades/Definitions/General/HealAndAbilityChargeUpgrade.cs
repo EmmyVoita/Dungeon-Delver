@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Upgrades/HealAndAbilityCharge")]
@@ -6,18 +7,13 @@ public class HealAndAbilityChargeUpgrade : HealthWeightedUpgradeBase
     [Header("Upgrade Settings")]
     public int healAmount = 1;
 
-    public override string GetFormattedDescription()
-    {
-        return descriptionTemplate
-            .Replace("{HEAL_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{healAmount}</color>")
-            .Replace("{FULL_ABILITY_CHARGE}", $"<color=#{UIColors.ToHex(UIColors.Green)}>Full Ability Charge</color>");
-    }
 
-    public override string GetDetails()
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        return detailsTemplate
-            .Replace("{HEAL_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{healAmount}</color>")
-            .Replace("{FULL_ABILITY_CHARGE}", $"<color=#{UIColors.ToHex(UIColors.Green)}>Full Ability Charge</color>");
+        replacements["{HEAL_AMOUNT}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>{healAmount}</color>";
+        replacements["{FULL_ABILITY_CHARGE}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>Full Ability Charge</color>";
+
+        base.AddReplacements(replacements, isInventory);
     }
 
     public override void Apply()

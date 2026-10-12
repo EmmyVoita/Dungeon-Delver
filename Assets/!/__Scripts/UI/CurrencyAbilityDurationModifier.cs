@@ -46,7 +46,7 @@ public class CurrencyAbilityDurationModifier : IAbilityDurationModifier
         );
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

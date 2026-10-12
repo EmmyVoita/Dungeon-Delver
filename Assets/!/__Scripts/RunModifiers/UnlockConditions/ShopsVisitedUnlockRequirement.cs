@@ -7,7 +7,7 @@ public class ShopsVisitedUnlockRequirement : RunModifierUnlockRequirement
 
     public override string GetRequirementRatioText()
     {
-        return $"{ScoreManager.Instance.TotalShopsVisited().ToString("N0")}/{shopsRequirement.ToString("N0")}";
+        return $"{RunHistoryManager.Instance.TotalShopsVisited.ToString("N0")}/{shopsRequirement.ToString("N0")}";
     }
 
     public override string GetUnlockDescriptionText()
@@ -17,6 +17,6 @@ public class ShopsVisitedUnlockRequirement : RunModifierUnlockRequirement
 
     public override bool IsUnlocked()
     {
-        return ScoreManager.Instance.TotalShopsVisited() >= shopsRequirement;
+        return RunHistoryManager.Instance.TotalShopsVisited >= shopsRequirement;
     }
 }

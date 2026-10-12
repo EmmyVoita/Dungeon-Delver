@@ -22,7 +22,7 @@ public class BasicAbilityCostUpgrade : IAbilityCostModifier
         return new BasicAbilityCostUpgrade(_abilityCostModifier);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

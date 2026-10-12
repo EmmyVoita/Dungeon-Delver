@@ -164,7 +164,7 @@ public class ScoreTallyController : MonoBehaviour
 
                 case TallyType.AbilityCharge:
                     if (Player.Instance.AbilityCharge <= 0) break;
-                    added = Mathf.RoundToInt(ScoreManager.Instance.abilityChargeScorePerUnit);
+                    added = Mathf.RoundToInt(ScoreManager.Instance.AbilityChargeScorePerUnit);
                     Player.Instance.AbilityCharge -= 1;
                     break;
             }

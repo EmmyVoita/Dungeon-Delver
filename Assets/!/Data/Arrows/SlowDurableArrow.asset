@@ -15,3 +15,6 @@ MonoBehaviour:
   displayName: slowdurablearrow
   prefab: {fileID: 5575773763797762119, guid: 13330455e1a502448936717c2d488769, type: 3}
   icon: {fileID: 0}
+  markerColor: {r: 1, g: 0, b: 0.8916426, a: 1}
+  requiresWarning: 0
+  warningLeadTime: 0.6

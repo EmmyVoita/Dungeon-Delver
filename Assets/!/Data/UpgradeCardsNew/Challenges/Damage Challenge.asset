@@ -26,8 +26,7 @@ MonoBehaviour:
   displayName: Cursed Contract
   descriptionTemplate: Gain {CURRENCY_AMOUNT} now, and increase damage taken in the
     next level by {DAMAGE}.
-  detailsTemplate: This upgrade does stack. Each stack further increases the damage
-    you take by {DAMAGE}. If you have multiple, all of them will expire at the end
-    of the level.
+  detailsTemplate: Each stack further increases the damage you take by {DAMAGE}.
+    If you have multiple, all of them will expire at the end of the level.
   additionalDamage: 1
   currencyAmount: 400

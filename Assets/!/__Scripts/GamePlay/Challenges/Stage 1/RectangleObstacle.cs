@@ -138,9 +138,6 @@ public class RectangleObstacle : ChallengeBase
 
         hitLogicComplete = false;
         exitAnimationComplete = false;
-
-        Begin();
-        
     }
 
     void Update()

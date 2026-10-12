@@ -23,10 +23,7 @@ public class LaneDodgerCharger : ChallengeBase
 
     private List<GameObject> _activeObjs = new List<GameObject>();
 
-    void Start()
-    {
-        Begin();
-    }
+
 
     private IEnumerator SpawnRoutine()
     {

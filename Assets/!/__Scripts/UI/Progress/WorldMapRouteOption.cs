@@ -9,6 +9,7 @@ public class WorldMapRouteOption
     public Sprite icon;
 
     public string displayName;
+    public float baseWeight = 1.0f;
 
     [TextArea]
     public string description;

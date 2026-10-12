@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Upgrades/TimeArrow",fileName = "TimeArrowUpgrade")]
@@ -32,12 +33,13 @@ public class TimeArrowUpgrade : CurrencyWeightedUpgradeBase
         CoinCollectEffectsManager.Instance.RegisterRenewing(reward, this);
     }
 
-     public override string GetFormattedDescription()
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        return descriptionTemplate
-            .Replace("{CHARGE_REQUIRED}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{chargeRequired}</color>")
-            .Replace("{COST}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{currencyCost}</color>")
-            .Replace("{TIME_ARROW}", $"<color=#{UIColors.ToHex(UIColors.Purple)}>Time Arrow</color>");
+        replacements["{CHARGE_REQUIRED}"] = $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{chargeRequired}</color>";
+        replacements["{COST}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>{currencyCost}</color>";
+        replacements["{TIME_ARROW}"] = $"<color=#{UIColors.ToHex(UIColors.Purple)}>Time Arrow</color>";
+
+        base.AddReplacements(replacements, isInventory);
     }
 
     public override string GetDetails()

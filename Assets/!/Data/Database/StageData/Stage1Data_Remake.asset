@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103c4e3f201af744b8611f2ab9a4de29, type: 3}
+  m_Name: Stage1Data_Remake
+  m_EditorClassIdentifier: Assembly-CSharp::StageDataObject
+  stageName: Violet Rift
+  backgroundData:
+    mainBackground: {fileID: 2800000, guid: 72567c6f5932fad4fa3c5c68eefa5141, type: 3}
+    secondaryBackground: {fileID: 2800000, guid: ba22ee4e05b99db4e98041c1ab71def4, type: 3}
+    mainSpeed: 1.5
+    secondarySpeed: 3.5
+    mainTiling: {x: 1.8, y: 5.4}
+    secondaryTiling: {x: 1.8, y: 5.4}
+    mainDirection: {x: -1, y: 1}
+    secondaryDirection: {x: 5, y: 1}
+  levelFiles:
+  - {fileID: 11400000, guid: c739fda0bc4ed8f45951a1ab73995264, type: 2}
+  - {fileID: 11400000, guid: c69dbe0c620058243bcfd8cf2cab6e4e, type: 2}
+  - {fileID: 11400000, guid: 965542460ba26c14c8b87572c5a96e5e, type: 2}
+  bossFile: {fileID: 11400000, guid: 1ec52ff194035cb46bcb7d6012c5e184, type: 2}
+  levelsToPlay: 3
+  allowRepeats: 0
+  musicClip: {fileID: 8300000, guid: d1882828bdb679f4088254a129cca18e, type: 3}
+  bossMusicClip: {fileID: 0}

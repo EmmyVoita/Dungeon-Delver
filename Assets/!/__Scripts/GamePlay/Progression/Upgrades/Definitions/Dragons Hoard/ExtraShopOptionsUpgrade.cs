@@ -13,12 +13,12 @@ public class ExtraShopOptionsUpgrade : UpgradeBase
         RunStateManager.Instance.AddShopOptionChance(chance);
     }
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements,  bool isInventory)
     {
         replacements["{CHANCE}"] =
             $"<color=#{UIColors.ToHex(UIColors.Green)}>" +
             $"{chance:P0}</color>";
 
-         base.AddReplacements(replacements);
+         base.AddReplacements(replacements, isInventory);
     }
 }

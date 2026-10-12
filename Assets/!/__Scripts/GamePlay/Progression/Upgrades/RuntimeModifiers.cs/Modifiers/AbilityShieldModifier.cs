@@ -23,7 +23,7 @@ public class AbilityShieldModifier : IAbilityEffectModifier
         return new AbilityShieldModifier(_duration, _shieldPrefab);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

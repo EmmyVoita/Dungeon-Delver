@@ -1,9 +1,15 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(CanvasRenderer))]
 public class TimelineGridGraphic : MaskableGraphic
 {
+    [SerializeField] private GameObject beatNumberPrefab;
+    [SerializeField] private GameObject beatNumberContainer;
+    [SerializeField] private TimelineView timelineView;
+
+
     [Header("External Settings")]
     public float pixelsPerSecond;
     public float maxTime;
@@ -12,13 +18,31 @@ public class TimelineGridGraphic : MaskableGraphic
     public bool showEighthBeats = false;
 
     [Header("Visuals")]
+    public float tickWidth = 3.0f;
     public float wholeTickHeight = 80f;
     public float quarterTickHeight = 40f;
     public float eighthTickHeight = 20f;
 
+    [Header("BeatNumber")]
+    [SerializeField] private float numberHeight = 75f;
+
+
+
     public Color wholeColor = new Color(1,1,1,0.5f);
     public Color quarterColor = new Color(1,1,1,0.2f);
     public Color eighthColor = new Color(1,1,1,0.15f);
+
+    protected override void OnEnable()
+    {
+        LevelTimelineUI.OnRebuildTimeline += HandleRebuildTimeline;
+        base.OnEnable();
+    }   
+
+    protected override void OnDisable()
+    {
+        LevelTimelineUI.OnRebuildTimeline -= HandleRebuildTimeline;
+        base.OnDisable();
+    } 
 
     protected override void Awake()
     {
@@ -34,6 +58,8 @@ public class TimelineGridGraphic : MaskableGraphic
         if(LevelEditorData.Instance == null) return;    
         float secondsPerBeat = 60f / LevelEditorData.Instance.BPM;
 
+        
+
         int beatCount = Mathf.CeilToInt(maxTime / secondsPerBeat);
 
         for (int b = 0; b <= beatCount; b++)
@@ -44,7 +70,7 @@ public class TimelineGridGraphic : MaskableGraphic
             // WHOLE BEAT line
             //-----------------------------
             float xWhole = beatTime * pixelsPerSecond;
-            AddVerticalLine(vh, xWhole, wholeTickHeight, wholeColor);
+            AddVerticalLine(vh, xWhole, wholeTickHeight, wholeColor, true);
 
             //-----------------------------
             // QUARTER BEATS
@@ -91,20 +117,94 @@ public class TimelineGridGraphic : MaskableGraphic
         }
     }
 
-    void AddVerticalLine(VertexHelper vh, float x, float height, Color color)
+    private void UpdateBeatNumbers()
     {
-        const float width = 2f;
+        if (beatNumberPrefab == null || beatNumberContainer == null)
+            return;
+
+        // Clear existing numbers
+        foreach (Transform child in beatNumberContainer.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        if (LevelEditorData.Instance == null)
+            return;
+
+        float bpm = LevelEditorData.Instance.BPM;
+
+        if (bpm <= 0f)
+            return;
+
+        float secondsPerBeat = 60f / bpm;
+
+        int beatCount = Mathf.CeilToInt(maxTime / secondsPerBeat);
+
+        // find what is the length in pixels per beat
+        // take seconds per beat and convert it to time to pixels
+
+        float pixelsPerBeat = timelineView.TimeToPixels(secondsPerBeat);
+
+        int labelInterval;
+
+        if (pixelsPerBeat >= 40f)
+            labelInterval = 1;
+        else if (pixelsPerBeat >= 20f)
+            labelInterval = 2;
+        else if (pixelsPerBeat >= 15f)
+            labelInterval = 4;
+        else
+            labelInterval = 8;
+
+
+        for (int b = 0; b <= beatCount; b++)
+        {
+            if(b % labelInterval != 0)
+                continue;
+
+            float beatTime = b * secondsPerBeat;
+            float x = beatTime * pixelsPerSecond;
+
+            GameObject beatNumber =Instantiate(beatNumberPrefab, beatNumberContainer.transform);
+
+            TextMeshProUGUI text =beatNumber.GetComponent<TextMeshProUGUI>();
+
+            text.text = b.ToString();
+
+            RectTransform rect =beatNumber.GetComponent<RectTransform>();
+
+            rect.anchoredPosition = new Vector2(x, numberHeight);
+        }
+    }
+
+    void AddVerticalLine(VertexHelper vh, float x, float height, Color color, bool lerpAlpha = false)
+    {
 
         UIVertex v0 = UIVertex.simpleVert;
         UIVertex v1 = UIVertex.simpleVert;
         UIVertex v2 = UIVertex.simpleVert;
         UIVertex v3 = UIVertex.simpleVert;
 
-        v0.color = v1.color = v2.color = v3.color = color;
 
+        if(lerpAlpha)
+        {
+            Color bottomColor = color;
+            Color topColor= new Color(color.r, color.g, color.b, 0);
+
+            v0.color = bottomColor;
+            v1.color = bottomColor;
+            v2.color = topColor;
+            v3.color = topColor;
+        }
+        else
+        {
+            v0.color = v1.color = v2.color = v3.color = color;
+        }
+
+     
         v0.position = new Vector3(x, 0);
-        v1.position = new Vector3(x + width, 0);
-        v2.position = new Vector3(x + width, height);
+        v1.position = new Vector3(x + tickWidth, 0);
+        v2.position = new Vector3(x + tickWidth, height);
         v3.position = new Vector3(x, height);
 
         int start = vh.currentVertCount;
@@ -121,10 +221,12 @@ public class TimelineGridGraphic : MaskableGraphic
     //----------------------------------------------------
     // Call this from Timeline to update grid live
     //----------------------------------------------------
-    public void SetProperties(float pps, float max)
+    public void HandleRebuildTimeline(float pps, float max)
     {
         pixelsPerSecond = pps;
         maxTime = max;
+
+        UpdateBeatNumbers();
         SetVerticesDirty();
     }
 }

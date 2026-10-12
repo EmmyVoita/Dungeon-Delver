@@ -20,7 +20,7 @@ public class CurrencyOnHeal : IHealthChangeEffect
 
     public bool TriggerEffect(int amount)                  
     {
-        CurrencyManager.Instance.AddCurrency(_currencyAmount);
+        CurrencyManager.Instance.AddCurrency(_currencyAmount * amount);
         return true;
     }
 
@@ -29,7 +29,7 @@ public class CurrencyOnHeal : IHealthChangeEffect
         return new CurrencyOnHeal(_currencyAmount, _healThreshold);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

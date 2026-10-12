@@ -11,6 +11,7 @@ public class EmpoweredVisualEffect : MonoBehaviour
     [Tooltip("VFX event name to trigger")]
     public string playEventName = "OnPlay";
     public string empoweredPropertyName = "Empowered";
+    public string colorProperty = "ColorGradient";
 
     
 
@@ -30,7 +31,7 @@ public class EmpoweredVisualEffect : MonoBehaviour
             vfx = new List<VisualEffect>(GetComponents<VisualEffect>());
     }
 
-    public void Play(bool empowered = false)
+    public void Play(Gradient lightningGradient,bool empowered = false)
     {
         if (vfx == null)
         {
@@ -44,6 +45,7 @@ public class EmpoweredVisualEffect : MonoBehaviour
         foreach (var effect in vfx)
         {
             effect.SetBool(empoweredPropertyName, empowered);
+            effect.SetGradient(colorProperty,lightningGradient);
             effect.SendEvent(playEventName);
         }
         StartCoroutine(StopAndDestroy());

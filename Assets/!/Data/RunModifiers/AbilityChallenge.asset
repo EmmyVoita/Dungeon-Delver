@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
   displayName: Discharge
   description: When you take damage lose all of your ability charge
-  icon: {fileID: 752097017, guid: 88d76b0b15dabe949804a049add3668d, type: 3}
-  summaryName: Ability Drain
-  summaryIcon: {fileID: 1476569418, guid: ba5f45c5e7619ff479b72992ee241ef0, type: 3}
+  icon: {fileID: 2002990836, guid: d381a132a63b49c448f22f75240b7f59, type: 3}
+  summaryName: Hit Charge Loss
+  summaryIcon: {fileID: 2002990836, guid: d381a132a63b49c448f22f75240b7f59, type: 3}
   type: 9
   category: 1
   minValue: 0
@@ -24,3 +24,4 @@ MonoBehaviour:
   step: 1
   scoreMultiplierPerStep: 0.5
   valueSuffix: 
+  unlockRequirement: {fileID: 0}

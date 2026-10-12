@@ -28,8 +28,7 @@ MonoBehaviour:
     lose {COST} instead and heal {HEAL_AMOUNT} health.
 
 '
-  detailsTemplate: This upgrade does not stack. It can only be triggered once per
-    level.
+  detailsTemplate: It can only be triggered once per level.
   currencyStep: 500
   weightPerCurrencyStep: 0.5
   maximumCurrencyWeightBonus: 1.5

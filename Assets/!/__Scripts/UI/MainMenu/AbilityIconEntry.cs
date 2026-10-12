@@ -5,4 +5,5 @@ public class AbilityIconEntry
 {
     public AbilityType type;
     public Sprite icon;
+    public Sprite smallIcon;
 }

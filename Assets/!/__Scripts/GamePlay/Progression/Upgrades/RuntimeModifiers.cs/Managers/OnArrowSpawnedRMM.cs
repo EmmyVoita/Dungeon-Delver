@@ -26,6 +26,7 @@ public class OnArrowSpawnedRMM : RuntimeModifierManager<IArrowSpawnEffect>
         base.Unsubscribe();
     }
 
+
     public void HandleTriggeringEffects(ArrowBase arrowBase)
     {
         SortActiveModifiers();

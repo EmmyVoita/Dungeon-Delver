@@ -12,7 +12,7 @@ public class IntermediateInvincibilityEffect : UpgradeBase
         GameStateManager.OnStateChanged -= HandleStateChanged;
     }
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{INVINCIBLE_DURATION}", invincibleDuration.ToString("N0"));

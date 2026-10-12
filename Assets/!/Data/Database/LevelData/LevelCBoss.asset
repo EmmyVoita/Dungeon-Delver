@@ -13,4 +13,6 @@ MonoBehaviour:
   m_Name: LevelCBoss
   m_EditorClassIdentifier: Assembly-CSharp::LevelDataObject
   _levelFile: {fileID: 4900000, guid: f113b97ff9849b94e9b1addc32f68f86, type: 3}
+  musicClip: {fileID: 8300000, guid: b0d2fbbfcadc6844ab5ee67d55827f3b, type: 3}
   _baseCurrencyReward: 500
+  _baseRerollReward: 1

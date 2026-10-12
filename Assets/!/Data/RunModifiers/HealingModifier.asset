@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db6fa1bb419fe6b418ba32663d8dcda7, type: 3}
   m_Name: HealingModifier
   m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
-  displayName: Healer
-  description: Increase the amount of healing you gain by +1.
-  icon: {fileID: -1894174002, guid: ba5f45c5e7619ff479b72992ee241ef0, type: 3}
+  displayName: First Aid
+  description: Increase the amount of healing you gain by [VALUE].
+  icon: {fileID: -857196825, guid: aba93ec40ac92da4ba7433714b70aa3c, type: 3}
   summaryName: Additional Heal
-  summaryIcon: {fileID: -1894174002, guid: ba5f45c5e7619ff479b72992ee241ef0, type: 3}
+  summaryIcon: {fileID: -1735177211, guid: cf8e3d9803c43f648bec853b2993de62, type: 3}
   type: 0
   category: 0
   minValue: 0
-  maxValue: 3
+  maxValue: 2
   step: 1
   scoreMultiplierPerStep: 0
   valueSuffix: 

@@ -11,6 +11,7 @@ public static class SceneNames
     public const string ArrowGameScene = "ArrowGameScene";
     public const string AbilitySelect  = "AbilitySelect";
     public const string Credits        = "Credits";
+    public const string LevelEditor       = "LevelEditor";
 
     // Optional helper: checks existence (useful for debugging)
     public static bool Exists(string sceneName)

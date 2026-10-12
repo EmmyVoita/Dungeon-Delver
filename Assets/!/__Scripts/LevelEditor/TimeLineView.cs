@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,7 @@ public class TimelineView : MonoBehaviour
     [SerializeField] private ScrollRect scrollRect;
     [SerializeField] private RectTransform content;
 
+
     [Header("Scale (Zoom)")]
     [SerializeField] private float pixelsPerSecond = 50f;
     [SerializeField] private float minPixelsPerSecond = 20f;
@@ -14,32 +16,27 @@ public class TimelineView : MonoBehaviour
     [SerializeField] private float zoomSpeed = 1.1f;
 
     [Header("Timeline Length")]
-    [SerializeField] private float timelineEndTime = 30f; // seconds
-
-    // ─────────────────────────────────────────────
-    // PROPERTIES
-    // ─────────────────────────────────────────────
+    [SerializeField] private float timelineEndTime = 30f;
 
     public float PixelsPerSecond => pixelsPerSecond;
+    public float MinPixelsPerSecond => minPixelsPerSecond;
+    public float MaxPixelsPerSecond => maxPixelsPerSecond;
     public float TimelineEndTime => timelineEndTime;
 
-    // ─────────────────────────────────────────────
-    // TIME ⇄ PIXEL CONVERSION
-    // ─────────────────────────────────────────────
-
-    public float TimeToPixels(float time)
+    private void Awake()
     {
-        return time * pixelsPerSecond;
+        AssignZoom(0.5f);
+    }
+
+    public float TimeToPixels(float seconds)
+    {
+        return seconds * pixelsPerSecond;
     }
 
     public float PixelsToTime(float pixels)
     {
         return pixels / pixelsPerSecond;
     }
-
-    // ─────────────────────────────────────────────
-    // TIMELINE SIZE
-    // ─────────────────────────────────────────────
 
     public void SetTimelineEndTime(float seconds)
     {
@@ -50,6 +47,7 @@ public class TimelineView : MonoBehaviour
     public void EnsureCoversTime(float time, float padding = 2f)
     {
         float desired = time + padding;
+
         if (desired > timelineEndTime)
         {
             timelineEndTime = desired;
@@ -63,19 +61,15 @@ public class TimelineView : MonoBehaviour
             timelineEndTime * pixelsPerSecond,
             content.sizeDelta.y
         );
-
-        //Debug.Log($"🕒 Timeline resized: {content.sizeDelta.x} pixels for {timelineEndTime} seconds.")  ;
     }
-
-    // ─────────────────────────────────────────────
-    // SCROLLING (TIME-BASED)
-    // ─────────────────────────────────────────────
 
     public void SyncScrollToTime(float time)
     {
         float x = TimeToPixels(time);
         float width = Mathf.Max(1f, content.sizeDelta.x);
-        scrollRect.horizontalNormalizedPosition = Mathf.Clamp01(x / width);
+
+        scrollRect.horizontalNormalizedPosition =
+            Mathf.Clamp01(x / width);
     }
 
     public float GetVisibleTime()
@@ -85,19 +79,13 @@ public class TimelineView : MonoBehaviour
         );
     }
 
-    // ─────────────────────────────────────────────
-    // ZOOM (CORRECT IMPLEMENTATION)
-    // ─────────────────────────────────────────────
-
     public void ApplyZoom(float scrollDelta)
     {
         if (scrollDelta == 0f)
             return;
 
-        // Preserve the time currently visible
         float visibleTime = GetVisibleTime();
 
-        // Adjust zoom directly in PPS space
         if (scrollDelta > 0)
             pixelsPerSecond *= zoomSpeed;
         else
@@ -109,13 +97,23 @@ public class TimelineView : MonoBehaviour
             maxPixelsPerSecond
         );
 
-        //Debug.Log($"🕒 Zoom adjusted: {pixelsPerSecond} PPS. ScrollDelta {scrollDelta}");
-
         ResizeContent();
-
-        // Restore view so time alignment stays correct
         SyncScrollToTime(visibleTime);
     }
 
-    
+
+
+    public void AssignZoom(float sliderValue)
+    {
+        float visibleTime = GetVisibleTime();
+
+        pixelsPerSecond = Mathf.Lerp(
+            minPixelsPerSecond,
+            maxPixelsPerSecond,
+            sliderValue
+        );
+
+        ResizeContent();
+        SyncScrollToTime(visibleTime);
+    }
 }

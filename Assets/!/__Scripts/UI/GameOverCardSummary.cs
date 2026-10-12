@@ -35,7 +35,7 @@ public class GameOverCardSummary : MonoBehaviour
             var upgrade = kvp.Key;
             int count = kvp.Value;
 
-            Sprite icon = upgrade.centerIcon;
+            Sprite icon = upgrade.CenterIcon;
 
             GameObject item = Instantiate(ItemPrefab,transform.position, Quaternion.identity, parentTransform);
             if (item.TryGetComponent(out GameOverUpgradeIcon upgradeIcon))

@@ -19,7 +19,7 @@ public class FullHealthMoney : UpgradeBase
             Deactivate();
     }
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{CURRENCY_AMOUNT}", currencyAmount.ToString());

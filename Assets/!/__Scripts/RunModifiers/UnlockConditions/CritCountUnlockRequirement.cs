@@ -7,7 +7,7 @@ public class CritCountUnlockRequirement : RunModifierUnlockRequirement
 
     public override string GetRequirementRatioText()
     {
-        return $"{ScoreManager.Instance.TotalCrits().ToString("N0")}/{critCountRequirement.ToString("N0")}";
+        return $"{RunHistoryManager.Instance.TotalCrits.ToString("N0")}/{critCountRequirement.ToString("N0")}";
     }
 
     public override string GetUnlockDescriptionText()
@@ -17,6 +17,6 @@ public class CritCountUnlockRequirement : RunModifierUnlockRequirement
 
     public override bool IsUnlocked()
     {
-        return ScoreManager.Instance.TotalCrits() >= critCountRequirement;
+        return RunHistoryManager.Instance.TotalCrits >= critCountRequirement;
     }
 }

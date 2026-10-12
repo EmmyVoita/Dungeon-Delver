@@ -21,9 +21,9 @@ MonoBehaviour:
   duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
-  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  centerIcon: {fileID: 21300000, guid: 129fb6b26ee243842b40f9ef1d5d2328, type: 3}
   iconMaterial: {fileID: 0}
-  displayName: Shop Reroll Heal
+  displayName: Vitality Roll
   descriptionTemplate: When you consume a shop reroll, you have a {HEAL_CHANCE} to
     heal {HEAL_AMOUNT}
   detailsTemplate: 

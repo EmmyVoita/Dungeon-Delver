@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -20,20 +21,11 @@ public class GoldenArrowUpgrade : UpgradeBase
         GoldenArrowManager.Instance.AddGoldenArrowUpgrade(this);
     }
 
-    public override string GetFormattedDescription()
+    protected override void AddReplacements(Dictionary<string, string> replacements,  bool isInventory)
     {
-        return descriptionTemplate
-            .Replace("{COMBO_REQUIRED}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{ComboRequired}</color>")
-            .Replace("{GOLDEN_ARROWS}", $"<color=#{UIColors.ToHex(UIColors.Purple)}>Golden Arrows</color>")
-            .Replace("{ARROWS_GRANTED}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{GoldenArrowsGranted}</color>");
-    }
+        replacements["{COMBO_REQUIRED}"] = $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{ComboRequired}</color>";
+        replacements["{ARROWS_GRANTED}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>{GoldenArrowsGranted}</color>";
 
-    public override string GetDetails()
-    {
-        return detailsTemplate
-            .Replace("{COMBO_REQUIRED}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{ComboRequired}</color>")
-            .Replace("{GOLDEN_ARROWS}", $"<color=#{UIColors.ToHex(UIColors.Purple)}>Golden Arrows</color>")
-            .Replace("{ARROWS_GRANTED}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{GoldenArrowsGranted}</color>")
-            .Replace("{STACK_COUNT}", $"<color=#{UIColors.ToHex(UIColors.Yellow)}>{MaxStacks}</color>");
+        base.AddReplacements(replacements, isInventory);
     }
 }

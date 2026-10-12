@@ -38,9 +38,7 @@ public class AbilityChargeManager : RuntimeModifierManager<IAbilityCostModifier>
     {
     }
 
-    protected override void OnGameStateChanged(
-        GameState previousState,
-        GameState newState)
+    protected override void OnGameStateChanged(GameState previousState,GameState newState)
     {
     }
 
@@ -50,8 +48,7 @@ public class AbilityChargeManager : RuntimeModifierManager<IAbilityCostModifier>
 
         SortActiveModifiers();
 
-        foreach (RuntimeModifierEntry<IAbilityCostModifier> entry
-                in activeModifiers)
+        foreach (RuntimeModifierEntry<IAbilityCostModifier> entry in activeModifiers)
         {
             currentCost = entry.Modifier.ModifyCost(currentCost);
         }

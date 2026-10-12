@@ -9,7 +9,7 @@ public class FullAbilityReroll : UpgradeBase
     [SerializeField] private float abilityCostMult = 1.5f;
 
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{REROLLS}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{rerollAmount}</color>")

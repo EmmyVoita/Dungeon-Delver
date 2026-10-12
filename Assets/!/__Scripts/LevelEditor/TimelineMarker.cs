@@ -17,14 +17,14 @@ public class TimelineMarker : MonoBehaviour,
 
 
     private RectTransform rect;
-    private ArrowEventData evt;
+    private LevelEventData evt;
     private LevelTimelineUI timeline;
     private Canvas canvas;
 
     private bool isDraggingGroup = false;
 
     public RectTransform Rect => rect;
-    public ArrowEventData Event => evt;
+    public LevelEventData Event => evt;
 
     private Dictionary<TimelineMarker, float> dragStartTimes;
 
@@ -32,7 +32,7 @@ public class TimelineMarker : MonoBehaviour,
     // --------------------------------------------------------------
     // Initialization
     // --------------------------------------------------------------
-    public void Initialize(ArrowEventData evt, LevelTimelineUI timeline)
+    public void Initialize(LevelEventData evt, LevelTimelineUI timeline, float width = 5.0f)
     {
         this.evt = evt;
         this.timeline = timeline;
@@ -47,6 +47,9 @@ public class TimelineMarker : MonoBehaviour,
             fillImage = markerComp.fillImage;
             outlineImage = markerComp.outlineImage;
 
+
+            markerComp.root.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,width);
+
             originalColor = fillImage.color;
 
             var c = outlineImage.color;
@@ -56,6 +59,30 @@ public class TimelineMarker : MonoBehaviour,
         else
         {
             Debug.LogError("TimelineMarker: No Marker component found on marker prefab!");
+        }
+    }
+
+    public void UpdateTransform(TimelineView timelineView)
+    {
+        float secondsPerBeat =60f / LevelEditorData.Instance.BPM;
+
+        // Position
+        float eventSeconds =Event.beatTime * secondsPerBeat;
+
+        float x =timelineView.TimeToPixels(eventSeconds);
+
+        RectTransform rect =(RectTransform)transform;
+
+        rect.anchoredPosition =new Vector2(x, rect.anchoredPosition.y);
+
+        // Width
+        if (Event is PatternEventData pattern)
+        {
+            float durationSeconds =pattern._lengthInBeats * secondsPerBeat;
+
+            float width = timelineView.TimeToPixels(durationSeconds);
+
+            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,width);
         }
     }
 
@@ -181,16 +208,10 @@ public class TimelineMarker : MonoBehaviour,
         {
             TimelineMarker m = pair.Key;
 
-            float committedSeconds =
-                m.Rect.anchoredPosition.x / timeline.TimelineView.PixelsPerSecond;
+            float committedSeconds = m.Rect.anchoredPosition.x / timeline.TimelineView.PixelsPerSecond;
+            float committedBeats = committedSeconds / (60f / LevelEditorData.Instance.BPM);
 
-            float committedBeats =
-                committedSeconds / (60f / LevelEditorData.Instance.BPM);
-
-            controller.CommitMarkerTime_NoRebuild(
-                m.Event,
-                committedBeats
-            );
+            controller.CommitMarkerTime_NoRebuild(m.Event,committedBeats);
 
         }
 
@@ -229,7 +250,8 @@ public class TimelineMarker : MonoBehaviour,
     {
         if (fillImage == null) return;
 
-        fillImage.color = selected ? Color.yellow : originalColor;
+        //fillImage.color = selected ? Color.yellow : originalColor;
+        fillImage.color = originalColor;
     }
 
     public void SetEditing(bool editing)
@@ -243,48 +265,5 @@ public class TimelineMarker : MonoBehaviour,
             outlineImage.color = c;
         }
     }
-
-    private void HandleAutoScroll(PointerEventData e)
-    {
-        return;
-        /*
-        RectTransform viewport = timeline.scrollRect.viewport;
-
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            viewport, e.position, null, out Vector2 local))
-            return;
-
-        float edgeZonePixels = 24f;   // how close to the edge (px)
-        float maxScrollSpeed = 0.015f;
-
-        float halfWidth = viewport.rect.width * 0.5f;
-        float rightEdgeStart = halfWidth - edgeZonePixels;
-        float leftEdgeStart  = -halfWidth + edgeZonePixels;
-
-        float scrollDelta = 0f;
-
-        // Right edge
-        if (local.x > rightEdgeStart)
-        {
-            float t = Mathf.InverseLerp(rightEdgeStart, halfWidth, local.x);
-            scrollDelta = Mathf.Lerp(0f, maxScrollSpeed, t);
-        }
-        // Left edge
-        else if (local.x < leftEdgeStart)
-        {
-            float t = Mathf.InverseLerp(leftEdgeStart, -halfWidth, local.x);
-            scrollDelta = Mathf.Lerp(0f, -maxScrollSpeed, t);
-        }
-
-        if (!Mathf.Approximately(scrollDelta, 0f))
-        {
-            timeline.scrollRect.horizontalNormalizedPosition =
-                Mathf.Clamp01(timeline.scrollRect.horizontalNormalizedPosition + scrollDelta);
-        }
-        */
-
-    }
-
-
 }
 

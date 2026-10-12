@@ -38,6 +38,16 @@ public class TimeManager : MonoBehaviour
         ApplyCombinedScale();
     }
 
+    private void Update()
+    {
+        #if UNITY_EDITOR
+            if(Input.GetKeyDown(KeyCode.Keypad7))
+            {
+                ClearModifiers();
+            }
+        #endif
+    }
+
     private void OnEnable()
     {
         //SceneManager.sceneLoaded += HandleSceneLoaded;

@@ -60,10 +60,7 @@ public class SineWaveCorridorChallenge : ChallengeBase
     private float _amplitudeLerpTime;
     private bool _isGrowingAmplitude;
 
-    private void Start()
-    {
-        Begin();
-    }
+
 
     public override void Begin(object config = null)
     {

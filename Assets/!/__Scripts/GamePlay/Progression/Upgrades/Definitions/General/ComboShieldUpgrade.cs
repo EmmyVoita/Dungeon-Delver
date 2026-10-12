@@ -9,13 +9,13 @@ public class ComboShieldUpgrade : UpgradeBase
     [SerializeField] private int abilityCharge = 0;
     [SerializeField] private GameObject shieldPrefab;
 
-    protected override void AddReplacements(Dictionary<string, string> replacements)
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
         replacements["{ABILITY_CHARGE}"] =
             $"<color=#{UIColors.ToHex(UIColors.Green)}>" +
             $"{abilityCharge}</color>";
         
-        base.AddReplacements(replacements);
+        base.AddReplacements(replacements, isInventory);
     }
     
     public override void Apply()

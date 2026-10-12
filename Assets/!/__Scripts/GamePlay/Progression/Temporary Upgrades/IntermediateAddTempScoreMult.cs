@@ -6,7 +6,7 @@ public class IntermediateAddTempScoreMult : UpgradeBase
     public float tempScoreMultAmount = 0.05f;
     public float goldenValueMultiplier = 2.0f;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{TEMP_SCORE_MULT_AMOUNT}", tempScoreMultAmount.ToString("P0"))

@@ -48,6 +48,8 @@ MonoBehaviour:
   registerWithManager: 1
   priority: 0
   controlMode: 4
+  childChallenges:
+  - {fileID: 6785284260912316044}
   config:
     maxLanes: 5
     laneSpacing: 1
@@ -69,7 +71,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7292099256052815929}
-  - component: {fileID: 8100220381011969126}
   - component: {fileID: 6785284260912316044}
   m_Layer: 0
   m_Name: Boss
@@ -93,32 +94,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5104883648423994985}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8100220381011969126
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2602182989849470984}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ab8821f62409034da4b837180a5ff21, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossSafeLaneChallenge
-  registerWithManager: 1
-  priority: 0
-  controlMode: 4
-  config:
-    maxLanes: 5
-    laneSpacing: 1
-    laneMoveDuration: 0.15
-    laneWidthScale: 1
-  spawnPrefabs:
-  - {fileID: 2209782324246233958, guid: cb3d57ff39828094c8a78df7a4362069, type: 3}
-  safeLaneInterval: 3
-  safeLaneWarningDuration: 1
-  obstacleActiveTime: 10
-  spawnX: 7
 --- !u!114 &6785284260912316044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,6 +109,8 @@ MonoBehaviour:
   registerWithManager: 1
   priority: 0
   controlMode: 1
+  childChallenges: []
+  startingDelay: 0
   collapseInterval: 4
   warningTime: 1
   collapseDuration: 4

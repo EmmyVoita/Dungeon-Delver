@@ -4,7 +4,9 @@ public enum TimelineTool
 {
     None,
     AddArrow,
-    AddChallenge
+    AddChallenge,
+    AddPattern,
+    AssignLoop
 }
 
 public class TimelineToolController : MonoBehaviour
@@ -56,6 +58,20 @@ public class TimelineToolController : MonoBehaviour
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto); // optional
     }
 
+    public void EnterAddPatternMode()
+    {
+        SwitchTool(TimelineTool.AddPattern);
+        LevelTimelineUI.Instance.ShowPlacementMarker(true);
+        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto); // optional
+    }
+
+    public void EnterAssignLoopMode()
+    {
+        SwitchTool(TimelineTool.AssignLoop);
+        LevelTimelineUI.Instance.ShowPlacementMarker(true);
+        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto); // optional
+    }
+
     public void ExitTool()
     {
         SwitchTool(TimelineTool.None);
@@ -64,4 +80,6 @@ public class TimelineToolController : MonoBehaviour
 
     public bool IsAddArrowMode => CurrentTool == TimelineTool.AddArrow;
     public bool IsAddChallengeMode => CurrentTool == TimelineTool.AddChallenge;
+    public bool IsAddPatternMode => CurrentTool == TimelineTool.AddPattern;
+    public bool IsAssignLoopMode => CurrentTool == TimelineTool.AssignLoop;
 }

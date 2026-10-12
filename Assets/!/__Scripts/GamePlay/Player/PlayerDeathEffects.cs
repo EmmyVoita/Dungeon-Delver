@@ -8,6 +8,7 @@ public class PlayerDeathEffects : MonoBehaviour
     [Header("References")]
     [SerializeField] private SpriteRenderer playerSrend;
     [SerializeField] private Transform heart;
+    [SerializeField] private SpriteRenderer heartSRend;
     [SerializeField] private VisualEffect rainbowBurst;
     [SerializeField] private string onPlayEvent = "OnPlay";
 
@@ -50,10 +51,12 @@ public class PlayerDeathEffects : MonoBehaviour
     // Debug trigger
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            GameStateManager.Instance.SetState(GameState.DeathSequence);
-        }
+        #if UNITY_EDITOR
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                GameStateManager.Instance.SetState(GameState.DeathSequence);
+            }
+        #endif
     }
 
     void HandleStateChanged(GameState previousState, GameState newState)
@@ -115,8 +118,15 @@ public class PlayerDeathEffects : MonoBehaviour
             )
         );
 
+        seq.AppendCallback(() =>
+        {
+            heart.gameObject.SetActive(false);
+        });
+
         // Wait for burst to play
         seq.AppendInterval(vfxDelay);
+        
+        
 
         // Transition to GameOver
         seq.AppendCallback(() =>

@@ -15,3 +15,6 @@ MonoBehaviour:
   displayName: normalarrow
   prefab: {fileID: 5575773763797762119, guid: ce602c41995a7c5408c1d87e358b1f20, type: 3}
   icon: {fileID: 0}
+  markerColor: {r: 0.4392157, g: 0.8666667, b: 0.70980394, a: 1}
+  requiresWarning: 0
+  warningLeadTime: 0.6

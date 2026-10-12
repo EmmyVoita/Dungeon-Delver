@@ -8,9 +8,9 @@ public class CurrencyChallengeReward : IChallengeReward
     public int UsesRemaining => _usesRemaining;
 
     public int StackCount => _stackCount;
-    public int CurrencyReward => _baseCurrencyReward * _stackCount;
+    public int CurrencyReward => _baseCurrencyReward;
 
-    private readonly int _baseCurrencyReward;
+    private int _baseCurrencyReward;
     private readonly float _appearancePercentage;
     private readonly int _maxUses;
 
@@ -30,9 +30,10 @@ public class CurrencyChallengeReward : IChallengeReward
         _stackCount = Mathf.Max(1, stackCount);
     }
 
-    public void AddStack(int amount = 1)
+    public void AddStack(int amount = 1, int currencyAmount = 0)
     {
         _stackCount += Mathf.Max(0, amount);
+        _baseCurrencyReward += currencyAmount;
     }
 
     public bool ShouldGrantReward(int damageTaken)
@@ -61,7 +62,7 @@ public class CurrencyChallengeReward : IChallengeReward
         );
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

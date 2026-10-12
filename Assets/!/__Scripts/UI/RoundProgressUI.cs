@@ -15,7 +15,7 @@ public class RoundProgressUI : MonoBehaviour
 
     private void Update()
     {
-        var scoreManager = ScoreManager.Instance;
+        var scoreManager = RunHistoryManager.Instance;
         
         if(scoreManager == null || scoreManager.RoundStatsTracker == null)
             return;

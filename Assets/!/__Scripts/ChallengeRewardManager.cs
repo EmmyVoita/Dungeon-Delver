@@ -59,14 +59,10 @@ public class ChallengeRewardManager : RuntimeModifierManager<IChallengeReward>
 
         if (existingRewardEntry?.Modifier is CurrencyChallengeReward existingReward)
         {
-            existingReward.AddStack();
+            existingReward.AddStack(currencyAmount: currencyReward);
             return;
         }
-        else
-        {
-            //Debug.LogError("CurrencyChallengeReward existing not found so creating another");
-        }
-
+        
         CurrencyChallengeReward newReward = new(
             currencyReward,
             maxUses,

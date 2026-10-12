@@ -6,7 +6,7 @@ public class CritWindowForAbilityCost : UpgradeBase, ICritWindowModifier
     public float critWindowMultiplier = 1.25f;
     public float abilityCostMultiplier = 1.5f;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{CRIT_WINDOW_MULTIPLIER}", (critWindowMultiplier - 1).ToString("P0"))

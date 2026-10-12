@@ -69,18 +69,34 @@ public class PracticeObstacleController : MonoBehaviour
 
     void SpawnNewObstacle()
     {
-        if (GameSessionBootstrap.Config == null) 
+        if (GameSessionBootstrap.Config == null)
             return;
 
         bool sessionValid = GameSessionBootstrap.Config.PracticeObstacle != null && GameSessionBootstrap.Config.PracticeObstacle.prefab != null;
 
         GameObject prefab = sessionValid ? GameSessionBootstrap.Config.PracticeObstacle.prefab : defaultChallenge;
 
-        Instantiate(
+        GameObject obstacle = Instantiate(
             prefab,
             Vector3.zero,
             Quaternion.identity
         );
+
+        obstacle.SetActive(true);
+
+        ChallengeBase challengeBase = obstacle.GetComponentInChildren<ChallengeBase>(true);
+
+        if (challengeBase == null)
+        {
+            Debug.LogError(
+                $"{obstacle.name} has no ChallengeBase!"
+            );
+
+            Destroy(obstacle);
+            return;
+        }
+
+        challengeBase.Begin();
     }
 
     private void HandleObstacleCleared()

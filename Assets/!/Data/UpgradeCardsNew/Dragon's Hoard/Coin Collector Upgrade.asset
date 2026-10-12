@@ -17,7 +17,7 @@ MonoBehaviour:
   requiredUpgrades: []
   baseOfferWeight: 1
   _cost: 200
-  _maxStacks: 999
+  _maxStacks: 2
   duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
@@ -27,7 +27,6 @@ MonoBehaviour:
   descriptionTemplate: When a challenge appears, there is a {APPEARANCE_PERCENTAGE}
     chance for it to be golden. If you take no damage, gain {CURRENCY_AMOUNT} currency
     when you complete it.
-  detailsTemplate: 'This upgrade stacks. Every stack grants you an additional {CURRENCY_AMOUNT}
-    currency. '
-  currencyAmount: 50
+  detailsTemplate: ' '
+  currencyPerStack: 140000000a000000
   appearancePercentage: 0.5

@@ -26,7 +26,7 @@ MonoBehaviour:
   displayName: Hoarder's Grip
   descriptionTemplate: For every {CURRENCY_STEP} you have, increase your ability
     duration by {ABILITY_DURATION_MOD}.
-  detailsTemplate: This upgrade does not stack.
+  detailsTemplate: 
   currencyStep: 500
   weightPerCurrencyStep: 0.25
   maximumCurrencyWeightBonus: 1.5

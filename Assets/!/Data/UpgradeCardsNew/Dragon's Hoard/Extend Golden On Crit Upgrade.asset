@@ -26,8 +26,8 @@ MonoBehaviour:
   centerIcon: {fileID: 21300000, guid: 130f0774902be9f4295dd8970ff362a0, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Golden Sprout
-  descriptionTemplate: Successfully critting a {GOLDEN_ARROW} grants {ARROWS_PER_CRIT}
-    additional {GOLDEN_ARROW}, up to <color=#FFD700>{MAX_STACK}</color>.
-  detailsTemplate: This upgrade does not stack.
+  descriptionTemplate: Successfully critting a {GOLDEN_ARROWS} grants {ARROWS_PER_CRIT}
+    additional {GOLDEN_ARROWS}, up to <color=#FFD700>{MAX_STACKS}</color>.
+  detailsTemplate: 
   maxStack: 3
   arrowsPerCrit: 1

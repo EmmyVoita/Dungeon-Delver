@@ -28,7 +28,7 @@ public class ConsecutiveCritsGoldenBuff : UpgradeBase, IActivatableUpgrade
     // Lifecycle
     // ------------------------
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{CRITS_IN_A_ROW}", critsInARowRequired.ToString())

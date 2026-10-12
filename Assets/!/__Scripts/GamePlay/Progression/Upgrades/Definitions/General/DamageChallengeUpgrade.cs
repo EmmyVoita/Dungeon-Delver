@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -7,18 +8,12 @@ public class DamageChallengeUpgrade : UpgradeBase, IDamageModifier
     [SerializeField] private int additionalDamage = 1;
     [SerializeField] private int currencyAmount = 5000;
 
-    public override string GetFormattedDescription()
+     protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        return descriptionTemplate
-            .Replace("{DAMAGE}", $"<color=#{UIColors.ToHex(UIColors.Red)}>{additionalDamage}</color>")
-            .Replace("{CURRENCY_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>${currencyAmount}</color>");
-    }
+        replacements["{DAMAGE}"] = $"<color=#{UIColors.ToHex(UIColors.Red)}>{additionalDamage}</color>";
+        replacements["{CURRENCY_AMOUNT}"] = $"<color=#{UIColors.ToHex(UIColors.Green)}>${currencyAmount}</color>";
 
-    public override string GetDetails()
-    {
-        return detailsTemplate
-            .Replace("{DAMAGE}", $"<color=#{UIColors.ToHex(UIColors.Red)}>{additionalDamage}</color>")
-            .Replace("{CURRENCY_AMOUNT}", $"<color=#{UIColors.ToHex(UIColors.Green)}>${currencyAmount}</color>");
+        base.AddReplacements(replacements, isInventory);
     }
 
     public override void Apply()

@@ -21,11 +21,10 @@ MonoBehaviour:
   duration: 0
   cardDecoration: {fileID: 0}
   cardDecorationMaterial: {fileID: 0}
-  centerIcon: {fileID: 21300000, guid: 165280da8c628e04286c546a27338f42, type: 3}
+  centerIcon: {fileID: 21300000, guid: bd2a67f5224fabf4db936e07c19113c6, type: 3}
   iconMaterial: {fileID: 0}
-  displayName: Ability Arrow
+  displayName: Magic Quiver
   descriptionTemplate: Arrows have a {SPAWN_CHANCE} chance to become an {EMPOWERED_ARROW}.
     Critting an {EMPOWERED_ARROW} activates your ability for free.
-  detailsTemplate: 'This upgrade stacks. Each stack further increases the spawn chance
-    by {SPAWN_CHANCE}. '
+  detailsTemplate: 'Each stack further increases the spawn chance by {SPAWN_CHANCE}. '
   spawnChance: 0.01

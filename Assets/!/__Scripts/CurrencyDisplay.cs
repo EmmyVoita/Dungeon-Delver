@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class CurrencyDisplay : MonoBehaviour
@@ -14,6 +15,8 @@ public class CurrencyDisplay : MonoBehaviour
     [SerializeField] private SoundEffect currencyTallySound;
     [SerializeField] private SoundEffect finishSound;
     [SerializeField] private float pitchStep = 0.025f;
+    [SerializeField] private float maxPitch = 2.0f;
+    [SerializeField] private float minPitch = 0.7f;
     [SerializeField] private int pitchIndex = 0;
     [SerializeField] private float roundActiveVolume = 0.15f;
     
@@ -89,9 +92,16 @@ public class CurrencyDisplay : MonoBehaviour
                 {
                     _lastSoundTime = Time.unscaledTime;
 
+                    /*
                     float pitchMult = newValue > CurrencyManager.Instance.PreviousCurrency ? 
                                       1.0f + pitchIndex * pitchStep :  
                                       1.0f - pitchIndex * pitchStep;
+                    */
+
+                    pitchIndex += newValue > CurrencyManager.Instance.PreviousCurrency ? 1 : -1;
+                    float pitchMult = 1.0f + pitchIndex * pitchStep;
+
+                    pitchMult = Mathf.Clamp(pitchMult, minPitch, maxPitch);
 
                     if(_tallyVolumeMod != 0)
                     {
@@ -103,7 +113,7 @@ public class CurrencyDisplay : MonoBehaviour
                         );
                     }
 
-                    pitchIndex++;
+                    //pitchIndex++;
                 }
             },
             newValue,

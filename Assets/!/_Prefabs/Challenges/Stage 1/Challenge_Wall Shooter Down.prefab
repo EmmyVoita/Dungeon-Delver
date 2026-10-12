@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8933415089594039121}
-  - component: {fileID: 4346754452155908351}
+  - component: {fileID: 1314696196967158157}
   m_Layer: 0
   m_Name: Challenge_Wall Shooter Down
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4346754452155908351
+--- !u!114 &1314696196967158157
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,38 +41,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 8931257001343916097}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c37f6cd9b3fddbc4dbe8c74f531bdd26, type: 3}
+  m_Script: {fileID: 11500000, guid: b7b99c261c232b9448d269bc78294333, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::BurstWallShooter
+  registerWithManager: 1
   priority: 0
   controlMode: 1
-  easeCurve: 22
-  startWindupDelay: 0
-  oscilationXSpeed: 1
-  lifetimeMode: 0
+  childChallenges: []
+  settingsData:
+    fireMode: 0
+    projectileFireMode: 1
+    fireDelayMode: 0
+    firePositionMode: 0
   listenForBossActive: 0
-  activationMode: 0
   portalPrefab: {fileID: 0}
   projectilePrefab: {fileID: 2010101664517538282, guid: 65d213c4f9c9ce74c9ac402876cccffe, type: 3}
   linePrefab: {fileID: 4634198587339261377, guid: 1c0fa8429788ad44e915b9d3bc096423, type: 3}
-  fireMode: 0
-  projectileFireMode: 1
-  fireDelayMode: 0
-  firePositionMode: 0
   unregisterDelay: 1
   startDelay: 0
-  fireDelay: 6
-  continuousFireCount: 3
   oscillateDistance: 3
   oscillateSpeed: 4
   shiftDuration: 0
-  shiftStartSound:
-    clip: {fileID: 8300000, guid: bda41de902222eb4ab895b9a967a6b74, type: 3}
-    channel: 2
-    affectedByTimeScale: 0
-    volume: 1
-    pitch: 1
-    pitchVariation: 0
   predefinedOffsets: []
   projectileFireDirection: {x: 0, y: -1}
   projectileCount: 12
@@ -87,15 +76,22 @@ MonoBehaviour:
   fireSound:
     clip: {fileID: 8300000, guid: 0c5a146ba17ab044faf314b8bd087a4b, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tickSound:
     clip: {fileID: 8300000, guid: 509e6b2533e66e444abd6e74b0a039a2, type: 3}
     channel: 2
-    affectedByTimeScale: 0
     volume: 1
     pitch: 1
     pitchVariation: 0
   tickCount: 3
+  easeCurve: 22
+  startWindupDelay: 0
+  oscilationXSpeed: 1
+  shiftStartSound:
+    clip: {fileID: 8300000, guid: bda41de902222eb4ab895b9a967a6b74, type: 3}
+    channel: 2
+    volume: 1
+    pitch: 1
+    pitchVariation: 0

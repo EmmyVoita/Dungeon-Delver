@@ -28,6 +28,6 @@ MonoBehaviour:
   detailsTemplate: 
   rerollSynergyUpgrades: []
   weightPerSynergyStack: 0.5
-  maximumRerollsWeightBonus: 0.4
+  maximumRerollsWeightBonus: 1
   startingWeighingRerollsAt: 3
   refreshAmount: 3

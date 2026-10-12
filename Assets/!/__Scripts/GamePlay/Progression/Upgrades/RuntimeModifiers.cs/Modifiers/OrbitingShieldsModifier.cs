@@ -23,7 +23,7 @@ public class OrbitingShieldsModifier : IAbilityEffectModifier
         return new OrbitingShieldsModifier(_shieldCount, _currencyAmount);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

@@ -150,7 +150,7 @@ public class GameSpeedOption : MonoBehaviour//BaseSettingOption, IDragHandler, I
 
         _timeScaleMod = 1.0f + _currentValue * timescaleTickValue;
 
-        SoundEffect adjustSound = AudioLibrary.Instance.Database.navigate;
+        SoundEffect adjustSound = AudioLibrary.Instance.Database.navigateMajor;
         AudioHelpers.PlaySoundEffect(adjustSound,Camera.main.transform.position);
 
         UpdateVisual();
@@ -170,7 +170,7 @@ public class GameSpeedOption : MonoBehaviour//BaseSettingOption, IDragHandler, I
 
         _timeScaleMod = 1.0f + _currentValue * timescaleTickValue;
 
-        SoundEffect adjustSound = AudioLibrary.Instance.Database.navigate;
+        SoundEffect adjustSound = AudioLibrary.Instance.Database.navigateMajor;
         AudioHelpers.PlaySoundEffect(adjustSound,Camera.main.transform.position);
         UpdateVisual();
         PlayOnValueChangedAnimations();

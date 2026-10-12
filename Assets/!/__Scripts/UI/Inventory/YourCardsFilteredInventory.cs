@@ -3,14 +3,15 @@ using UnityEngine;
 
 public class YourCardsFilteredInventory : InventoryBase
 {
-    private ShopPagesController _shopPagesController;
-    private ShopPagesController.ShopPage _targetExitShopPage;
+    private PagesController _pagesController;
+    private int _targetExitPage;
 
-    public void SetVisibilityData(ShopPagesController shopPagesController, ShopPagesController.ShopPage targetExitShopPage)
+    public void SetVisibilityData(PagesController pagesController, int targetExitPage)
     {
-        _shopPagesController = shopPagesController;
-        _targetExitShopPage = targetExitShopPage;
+        _pagesController = pagesController;
+        _targetExitPage = targetExitPage;
     }
+
 
     public override bool TryOpen(KeyPromptController keyPromptController, InventoryOpenSettings settings = null)
     {
@@ -25,9 +26,9 @@ public class YourCardsFilteredInventory : InventoryBase
 
     protected override void Update()
     {
-        if(_shopPagesController)
+        if(_pagesController)
         {
-            if(_shopPagesController.IsTransitioning)
+            if(_pagesController.IsTransitioning)
                 return;
         }
 
@@ -36,9 +37,9 @@ public class YourCardsFilteredInventory : InventoryBase
 
     public override void Close()
     {
-        if(_shopPagesController)
+        if(_pagesController)
         {
-            _shopPagesController.ShowPage(_targetExitShopPage, () =>
+            _pagesController.ShowPage(_targetExitPage, () =>
             {
                 InputFocusManager.Release(this);
             });
@@ -51,7 +52,7 @@ public class YourCardsFilteredInventory : InventoryBase
     {
         string prefix = $"[<color=#{UIColors.ToHex(UIColors.Yellow)}>${cardUI.Base.Cost.ToString("N0")}</color>] ";
 
-        return prefix + cardUI.GetDescription();
+        return prefix + cardUI.GetDescription(true);
     }
     
     protected override void FillInventory()

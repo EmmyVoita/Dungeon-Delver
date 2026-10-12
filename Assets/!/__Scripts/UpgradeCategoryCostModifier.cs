@@ -29,7 +29,7 @@ public class UpgradeCategoryCostModifier : IUpgradeCostModifier
         return new UpgradeCategoryCostModifier(_targetCategory, _costModifier);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

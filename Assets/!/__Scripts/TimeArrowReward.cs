@@ -94,7 +94,7 @@ public class TimeArrowReward : ICoinCollectEffect
         );
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         if(_meter != null)
             ChargeMeterManager.Instance.RemoveMeter(_meter.Id);

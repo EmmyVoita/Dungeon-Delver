@@ -26,7 +26,7 @@ public class AbilityGivesCurrencyModifier : IAbilityEffectModifier
         return new AbilityGivesCurrencyModifier(_currencyAmount, _timer);
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
         
     }

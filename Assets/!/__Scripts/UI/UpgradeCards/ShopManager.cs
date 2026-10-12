@@ -6,6 +6,7 @@ using DG.Tweening;
 using TMPro;
 using System.Collections;
 using System.Linq;
+using UnityEngine.Rendering;
 
 
 public class ShopManager : MonoBehaviour
@@ -41,7 +42,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private RectTransform shopRootRect;
     [SerializeField] private UpgradeCategoryDatabase categoryDatabase;
     [SerializeField] private KeyPromptController keyPromptController;
-    [SerializeField] private ShopPagesController shopPagesController;
+    [SerializeField] private PagesController pagesController;
     [SerializeField] private CanvasGroup shopHideCanvasGroup;
     
     [Header("Shop Mode UI")]
@@ -50,6 +51,10 @@ public class ShopManager : MonoBehaviour
 
 
     [Header("Inventory")]
+    [SerializeField] private int shopPageIndex = 0;
+    [SerializeField] private int inventoryPageIndex = 0;
+    [SerializeField] private int drawPoolPageIndex = 0;
+
     [SerializeField] private YourCardsFilteredInventory inventory;
     [SerializeField] private ShopDrawPoolInventory drawPoolInventory;
     [SerializeField] private InventoryOpenSettings inventoryOpenSettings;
@@ -72,6 +77,8 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private InputActionType inventoryKey = InputActionType.ViewUpgrades;
     [SerializeField] private float continueInputDelay = 0.5f;
 
+    [Header("SetCardsPool")]
+    [SerializeField] private List<UpgradeBase> setCardPool;
 
     private List<UpgradeBase> selectedCards = new ();
     private List<UpgradeCardUI> currentCards = new();
@@ -89,6 +96,7 @@ public class ShopManager : MonoBehaviour
     private bool _drawWithCardWeights;
     private int _numCardsToDisplay;
     private Vector3 _rootBaseScale;
+    private List<UpgradeCategory> _currentExclusions;
 
 
     private HashSet<int> _purchasedIndices = new();
@@ -103,6 +111,7 @@ public class ShopManager : MonoBehaviour
     public Dictionary<UpgradeBase, int> AllPurchasedCards => _purchasedCards;
     public Dictionary<UpgradeBase, int> FilteredPurchasedCards => _filteredPurchasedCards;
     public UpgradeCategory CurrentUpgradeCategory => _currentShopCategory;
+    public List<UpgradeCategory> CurrentExclusions => _currentExclusions;
 
     private List<UpgradeBase> Cards => upgradeDatabase.Upgrades;
 
@@ -118,9 +127,9 @@ public class ShopManager : MonoBehaviour
         keyPromptController.ShowUI();
     }
 
-    public float GetTotalDrawPoolWeight()
+    public float GetTotalDrawPoolWeight(UpgradeCategory category)
     {
-        List<UpgradeBase> drawPool = ShopManager.Instance.CreateDrawPool(_currentShopCategory);
+        List<UpgradeBase> drawPool = CreateDrawPool(category);
 
         float totalWeight = 0;
 
@@ -161,6 +170,15 @@ public class ShopManager : MonoBehaviour
     public bool HasCard(UpgradeOption cardOption)
     {
         return _purchasedCards.ContainsKey(cardOption.Base);
+    }
+
+    public int GetOwnedStackCount(UpgradeBase cardOption)
+    {
+        bool containsKey = _purchasedCards.ContainsKey(cardOption);
+        if(!containsKey)
+            return 0;
+
+        return _purchasedCards[cardOption];
     }
 
     public bool HasCards(List<UpgradeRequirement> requiredCards)
@@ -289,7 +307,11 @@ public class ShopManager : MonoBehaviour
         selectedCards.Add(card);
     }
 
-    public void OpenFreePickShop(string shopTitle, UpgradeCategory category = UpgradeCategory.General, int choices = 3, int maxPurchases = 1)
+    public void OpenFreePickShop(string shopTitle, 
+                                 UpgradeCategory category = UpgradeCategory.General, 
+                                 int choices = 3, 
+                                 int maxPurchases = 1,
+                                 List<UpgradeCategory> exclusions = null)
     {
         _shopMode = ShopMode.FreePick;
         _maxPurchases = maxPurchases;
@@ -297,7 +319,7 @@ public class ShopManager : MonoBehaviour
         _drawWithCardWeights = false;
 
         OnShopOpened?.Invoke(ShopType.FreePick);
-        OpenShopInternal(shopTitle, category);
+        OpenShopInternal(shopTitle, category,exclusions);
     }
 
     
@@ -313,11 +335,14 @@ public class ShopManager : MonoBehaviour
         OpenShopInternal(shopTitle, category);
     }
 
-    private void OpenShopInternal(string title, UpgradeCategory category)
+    private void OpenShopInternal(string title, UpgradeCategory category, List<UpgradeCategory> exclusions = null)
     {
         // your existing OpenShop logic
+
+        pagesController.Initialize();
         
         _currentShopCategory = category;
+        _currentExclusions = exclusions;
         selectedIndex = 0;
         _numPurchasedCards = 0;
         _purchasedIndices.Clear();
@@ -343,7 +368,7 @@ public class ShopManager : MonoBehaviour
         }
         
 
-        List<UpgradeBase> pool = CreateDrawPool(category);
+        List<UpgradeBase> pool = CreateDrawPool(category, exclusions: exclusions);
 
         if (pool.Count < _numCardsToDisplay)
         {
@@ -424,32 +449,12 @@ public class ShopManager : MonoBehaviour
     }
 
 
-    private List<UpgradeBase> SelectCardsWithDuplicates(List<UpgradeBase> pool,int amount)
-    {
-        List<UpgradeBase> results = new();
-
-        if (pool == null || pool.Count == 0)
-            return results;
-
-        for (int i = 0; i < amount; i++)
-        {
-            UpgradeBase selected = SelectWeightedUpgrade(pool);
-
-            if (selected == null)
-                break;
-
-            results.Add(selected);
-        }
-
-        return results;
-    }
-
-
 
     public List<UpgradeBase> CreateDrawPool(UpgradeCategory category, 
                                             bool eliminateRoundPurchases = false, 
                                             bool hideCantAppear = true, 
-                                            bool limitToPermanentDuration = false)
+                                            bool limitToPermanentDuration = false,
+                                            List<UpgradeCategory> exclusions = null)
     {
         List<UpgradeBase> pool = new();
 
@@ -457,6 +462,15 @@ public class ShopManager : MonoBehaviour
         {
             if(card == null)
                 continue;
+
+            
+
+            if(exclusions != null) 
+            {
+                if(exclusions.Contains(card.Category))
+                    continue;
+            }
+                
 
             if(card.Category != category && category != UpgradeCategory.General)
                 continue;
@@ -554,7 +568,7 @@ public class ShopManager : MonoBehaviour
     {
         nextCards.Clear();
 
-        List<UpgradeBase> pool = CreateDrawPool(_currentShopCategory);
+        List<UpgradeBase> pool = CreateDrawPool(_currentShopCategory, exclusions: _currentExclusions);
 
         if (pool.Count < _numCardsToDisplay)
         {
@@ -678,10 +692,10 @@ public class ShopManager : MonoBehaviour
         if(!InputBindingManager.Instance.GetKeyDown(inventoryKey))
             return false;
 
-        inventory.SetVisibilityData(shopPagesController, ShopPagesController.ShopPage.Shop);
+        inventory.SetVisibilityData(pagesController, shopPageIndex);
 
         if(inventory.TryOpen(keyPromptController,inventoryOpenSettings))
-            shopPagesController.ShowInventory();
+            pagesController.ShowPage(inventoryPageIndex);
         
         return true;
     }
@@ -690,11 +704,12 @@ public class ShopManager : MonoBehaviour
     {
         if(!InputBindingManager.Instance.GetKeyDown(viewDrawPoolKey))
             return false;
-
-        drawPoolInventory.SetVisibilityData(shopPagesController, ShopPagesController.ShopPage.Shop);
+        
+        drawPoolInventory.SetTargetCategory(CurrentUpgradeCategory);
+        drawPoolInventory.SetVisibilityData(pagesController, shopPageIndex);
 
         if(drawPoolInventory.TryOpen(keyPromptController,drawPoolOpenSettings))
-            shopPagesController.ShowDrawPool();
+            pagesController.ShowPage(drawPoolPageIndex);
         
         return true;
     }
@@ -788,7 +803,7 @@ public class ShopManager : MonoBehaviour
             .Select(card => card.Base)
             .ToHashSet();
 
-        List<UpgradeBase> pool = CreateDrawPool(_currentShopCategory)
+        List<UpgradeBase> pool = CreateDrawPool(_currentShopCategory, exclusions: _currentExclusions)
             .Where(option => !validCardsToAvoid.Contains(option))
             .ToList();
 
@@ -814,7 +829,7 @@ public class ShopManager : MonoBehaviour
     {
         _purchasedCardsRound.Add(upgrade);
         upgrade.OnSelected(); 
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.purchase, transform.position);
+        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
         RegisterPurchase(upgrade);
     }
 
@@ -856,6 +871,7 @@ public class ShopManager : MonoBehaviour
         {
             case ShopMode.FreePick:
                 transactionSucceeded = true;
+                AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
                 break;
             case ShopMode.Normal:
 
@@ -863,8 +879,11 @@ public class ShopManager : MonoBehaviour
                                                              currentCards[selectedIndex].Base.Cost;
                 
                 if(CurrencyManager.Instance.TrySpendCurrency(finalCost))
+                {
                     transactionSucceeded = true;
-
+                    AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.purchase, transform.position);
+                }
+                    
                 break;
 
         }
@@ -896,8 +915,7 @@ public class ShopManager : MonoBehaviour
         //_filteredPurchasedCards.Add(upgradeBase);
         
 
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.purchase, transform.position);
-
+      
         // We store a history of all the cards that we have purchased for a few things (like displaying all the cards
         // the player chose at the end of the game). We use a dictionary here so that we can store the card with how
         // many of that card the player has purchased.
@@ -970,7 +988,7 @@ public class ShopManager : MonoBehaviour
     private void HighlightCard()
     {
         AudioHelpers.PlaySoundEffect(
-            AudioLibrary.Instance.Database.navigate,
+            AudioLibrary.Instance.Database.navigateMajor,
             transform.position
         );
 
@@ -1104,6 +1122,29 @@ public class ShopManager : MonoBehaviour
             );
         }
         */
+    }
+
+    public List<UpgradeBase> GrantSetCards(int amount)
+    {
+        List<UpgradeBase> grantedCards = new();
+
+        amount = Mathf.Clamp(amount, 0, setCardPool.Count);
+
+        for (int i = 0; i < amount; i++)
+        {
+            UpgradeBase selected = setCardPool[i];
+
+            // Register FIRST so OnSelected sees the new stack count.
+            RegisterPurchase(selected);
+
+            selected.OnSelected();
+
+            OnCardPurchased?.Invoke(selected);
+
+            grantedCards.Add(selected);
+        }
+
+        return grantedCards;
     }
 
     public List<UpgradeBase> GrantRandomCards(int amount,UpgradeCategory category = UpgradeCategory.General,bool useWeights = true)

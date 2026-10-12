@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db6fa1bb419fe6b418ba32663d8dcda7, type: 3}
   m_Name: RerollModifier
   m_EditorClassIdentifier: Assembly-CSharp::RunModifierDefinition
-  displayName: Fortune
-  description: After beating a level, gain +1 rerolls.
-  icon: {fileID: -863677058, guid: 88d76b0b15dabe949804a049add3668d, type: 3}
+  displayName: Loaded
+  description: After beating a level, gain [VALUE] rerolls.
+  icon: {fileID: 1924243009, guid: 910762d1a3b570b479b60a96cfd249e1, type: 3}
   summaryName: Round Rerolls
-  summaryIcon: {fileID: -863677058, guid: 88d76b0b15dabe949804a049add3668d, type: 3}
+  summaryIcon: {fileID: 2119881665, guid: cf8e3d9803c43f648bec853b2993de62, type: 3}
   type: 2
   category: 0
   minValue: 0
-  maxValue: 5
+  maxValue: 1
   step: 1
   scoreMultiplierPerStep: 0
   valueSuffix: 

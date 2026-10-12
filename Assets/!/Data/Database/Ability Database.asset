@@ -14,5 +14,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityDatabase
   abilities:
   - {fileID: 11400000, guid: 9d65b6d673385eb4db11fe00b3cf3f5f, type: 2}
-  - {fileID: 11400000, guid: 8251ca0d00f04384ab716b404d2e3913, type: 2}
-  - {fileID: 11400000, guid: f48c7349da64e9f47acc40bfd2b19d69, type: 2}

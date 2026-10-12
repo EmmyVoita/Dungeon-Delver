@@ -30,8 +30,7 @@ public class BlackHoleSpawner : ChallengeBase
 
     void OnEnable()
     {
-        center = transform.position; // or Camera.main.transform.position
-        Begin();
+         // or Camera.main.transform.position
     }
 
     void OnDisable()
@@ -110,6 +109,7 @@ public class BlackHoleSpawner : ChallengeBase
 
     public override void Begin(object config = null)
     {
+        center = Vector3.zero;
         base.Begin();
         StartCoroutine(SpawnLoop());
     }

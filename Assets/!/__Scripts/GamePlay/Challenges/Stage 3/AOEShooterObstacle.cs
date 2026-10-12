@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class AOEShooterObstacle : MonoBehaviour
 {
     [SerializeField] private LaneDodgerConfig config;
+    [SerializeField] private Transform weaponTransform;
 
     [Header("Projectile")]
     [SerializeField] private GameObject projectilePrefab;
@@ -37,6 +38,12 @@ public class AOEShooterObstacle : MonoBehaviour
     void Update()
     {
         TrackPlayer();
+
+        Vector3 lookDirection = Player.Instance.transform.position - weaponTransform.position;
+
+        float angle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg;
+
+        weaponTransform.eulerAngles = new Vector3(0f, 0f, angle);
     }
 
     void TrackPlayer()
@@ -52,6 +59,8 @@ public class AOEShooterObstacle : MonoBehaviour
         );
 
         transform.position = new Vector3(spawnX, newY, 0f);
+
+    
     }
 
     IEnumerator FireRoutine()

@@ -7,7 +7,7 @@ public class HighScoreUnlockRequirement : RunModifierUnlockRequirement
 
     public override string GetRequirementRatioText()
     {
-        return $"{ScoreManager.Instance.HighScore().ToString("N0")}/{scoreRequirement.ToString("N0")}";
+        return $"{RunHistoryManager.Instance.GetHighScore().ToString("N0")}/{scoreRequirement.ToString("N0")}";
     }
 
     public override string GetUnlockDescriptionText()
@@ -17,6 +17,6 @@ public class HighScoreUnlockRequirement : RunModifierUnlockRequirement
 
     public override bool IsUnlocked()
     {
-        return ScoreManager.Instance.HighScore() >= scoreRequirement;
+        return RunHistoryManager.Instance.GetHighScore() >= scoreRequirement;
     }
 }

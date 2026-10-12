@@ -18,7 +18,7 @@ public class SceneStateInitializer : MonoBehaviour
             !BackgroundPreference.UseSimpleBackground)
         {
             visualManager.ChangeDefaultBackground(
-                RoundManager.Instance.stages[0].backgroundData
+                RoundManager.Instance.StageObjects[0].backgroundData
             );
         }
     }
@@ -46,7 +46,6 @@ public class SceneStateInitializer : MonoBehaviour
         
         CurrencyManager.Instance.AddCurrencyModifier(
             new CurrencyScaleModifier(
-                "GameSpeed_Currency",
                 config.CurrencyMultiplier
             )
         );

@@ -25,8 +25,8 @@ MonoBehaviour:
   iconMaterial: {fileID: 0}
   displayName: Fortune's Flight
   descriptionTemplate: During challenges you can {DJ} at the cost of {CURRENCY_AMOUNT}.
-  detailsTemplate: This upgrade does not stack. This only applies to challenges where
-    you jump. You can not change direction when you double jump.
+  detailsTemplate: This only applies to challenges where you jump. You can not change
+    direction when you double jump.
   currencyStep: 500
   weightPerCurrencyStep: 0.5
   maximumCurrencyWeightBonus: 1.5

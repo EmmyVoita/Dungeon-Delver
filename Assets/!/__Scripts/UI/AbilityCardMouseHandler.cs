@@ -14,7 +14,7 @@ public class AbilityCardMouseHandler : MonoBehaviour, IPointerClickHandler
             != InputModeManager.InputMode.Mouse)
             return;
 
-        AudioHelpers.PlaySoundEffect(AudioLibrary.Instance.Database.select, transform.position);
+      
 
         OnAbilityCardClicked?.Invoke(cardUI.Card);
     }

@@ -15,7 +15,7 @@ public class NthCritBonus : UpgradeBase, IActivatableUpgrade
 
     public SoundEffect bonusSound;
 
-    public override string GetFormattedDescription()
+    public override string GetFormattedDescription(bool isInventory)
     {
         return descriptionTemplate
             .Replace("{CRITS_REQUIRED}", critsRequired.ToString())

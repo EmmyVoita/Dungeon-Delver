@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu( menuName = "Upgrades/Card Discount")]
@@ -19,10 +20,12 @@ public class CardDiscountUpgrade : UpgradeBase
         UpgradeCostManager.Instance.RegisterPermanent(new UpgradeCategoryCostModifier(targetCategory,costMultiplier),this);
     }
 
-    public override string GetFormattedDescription()
+
+    protected override void AddReplacements(Dictionary<string, string> replacements, bool isInventory)
     {
-        return descriptionTemplate
-        .Replace("{COST_MULTIPLIER}", $"<color=#{UIColors.ToHex(UIColors.Green)}>{costMultiplier.ToString("P0")}</color>")
-        .Replace("{CATEGORY}", $"<color=#{UIColors.ToHex(UIColors.Purple)}>{targetCategory} Cards</color>");
+        replacements["{COST_MULTIPLIER}"] =  $"<color=#{UIColors.ToHex(UIColors.Green)}>{costMultiplier.ToString("P0")}</color>";
+        replacements["{TARGET_CATEGORY}"] = $"<color=#{UIColors.ToHex(UIColors.Purple)}>{targetCategory} Cards</color>";
+
+        base.AddReplacements(replacements,isInventory);
     }
 }

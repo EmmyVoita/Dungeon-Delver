@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: TimeSlowIcon
   m_EditorClassIdentifier: Assembly-CSharp::IconData
   frames:
-  - {fileID: 1180298756, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
-  - {fileID: 1279397912, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
-  - {fileID: -1293106731, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
-  - {fileID: -1420164527, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
-  - {fileID: 658488341, guid: 04f5b5b31b236ec4489c16629235ed50, type: 3}
+  - {fileID: -1585132022, guid: fb4c2775fb73f854e91789b61a5fb227, type: 3}
+  - {fileID: 857484236, guid: fb4c2775fb73f854e91789b61a5fb227, type: 3}
+  - {fileID: -505099618, guid: fb4c2775fb73f854e91789b61a5fb227, type: 3}
+  - {fileID: -24391367, guid: fb4c2775fb73f854e91789b61a5fb227, type: 3}
+  - {fileID: -921367535, guid: fb4c2775fb73f854e91789b61a5fb227, type: 3}
   animated: 1
   frameDuration: 0.1
   loop: 1

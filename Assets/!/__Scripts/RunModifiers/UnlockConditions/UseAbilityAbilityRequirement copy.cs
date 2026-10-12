@@ -7,7 +7,7 @@ public class TotalCardsUnlockRequirement : RunModifierUnlockRequirement
 
     public override string GetRequirementRatioText()
     {
-        return $"{ScoreManager.Instance.TotalCardsGained().ToString("N0")}/{cardRequirement.ToString("N0")}";
+        return $"{RunHistoryManager.Instance.TotalCardsGained.ToString("N0")}/{cardRequirement.ToString("N0")}";
     }
 
     public override string GetUnlockDescriptionText()
@@ -17,6 +17,8 @@ public class TotalCardsUnlockRequirement : RunModifierUnlockRequirement
 
     public override bool IsUnlocked()
     {
-        return ScoreManager.Instance.TotalCardsGained() >= cardRequirement;
+        return RunHistoryManager.Instance.TotalCardsGained >= cardRequirement;
     }
 }
+
+

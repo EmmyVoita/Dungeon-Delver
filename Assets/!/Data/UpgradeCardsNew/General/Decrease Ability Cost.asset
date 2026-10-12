@@ -24,10 +24,7 @@ MonoBehaviour:
   centerIcon: {fileID: 21300000, guid: 8ecd6498ec41f4e4e82f3fd7c8ac9ede, type: 3}
   iconMaterial: {fileID: 0}
   displayName: Flash Sale
-  descriptionTemplate: 'Temporarily lower the ability cost by {ABILITY_COST} and
-    gain {REROLLS} shop rerolls. '
-  detailsTemplate: This upgrade does stack. Each stack further decreases the ability
-    cost by {ABILITY_COST}. If you have multiple, all of them will expire at the
-    end of the level.
-  rerollAmount: 1
-  tempAbilityCostMult: 0.75
+  descriptionTemplate: 'Temporarily lower the ability cost by {ABILITY_COST}. '
+  detailsTemplate: '{MAXABILITY_STATEMENT}'
+  rerollAmount: 0
+  tempAbilityCostMult: 0.5

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine.VFX;
+using System;
 
 public class Player : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class Player : MonoBehaviour
     public static event System.Action OnMaxHealthChanged;
     public static event System.Action<HitData> OnProcessHit;
     public static event System.Action<int> OnPreDamageTaken;
+    public static event Action OnDeath;
     public static event System.Action<PlayerControlState> OnControlStateChanged;
 
 
@@ -38,6 +40,7 @@ public class Player : MonoBehaviour
     [SerializeField] private SoundEffect abilityChargedSoundEffect;
     [SerializeField] private float _critWindow = 0.2f;
     [SerializeField] private int _abilityChargeGain = 1;
+    [SerializeField] private int minimumAllowedMaxAbilityCharge = 15;
     
   
     [Header("Rotation Settings")]
@@ -137,6 +140,10 @@ public class Player : MonoBehaviour
     private float _healAudioTime = 0;
     private float _abilityFullyChargedTime = float.NegativeInfinity;
 
+
+    // State
+    private bool _isDead = false;
+
     public PlayerControlState playerControlState { get; private set; } = PlayerControlState.Normal;
     public string LastDamageSource { get; private set; } = "Unknown";
     public Vector2 LastFacingDirection => _lastFacingDir;
@@ -150,6 +157,7 @@ public class Player : MonoBehaviour
     public bool CanJump => playerControlState == PlayerControlState.Shooter || playerControlState ==  PlayerControlState.BasicJump;
     public bool CanTakeDamage => GameStateEffectManager.PlayerDamageAllowed && !DevCheats.Invincible;
     public float TimeSinceAbilityFullyCharged=> Time.time - _abilityFullyChargedTime;
+    public float MinimumAllowedMaxAbilityCharge => minimumAllowedMaxAbilityCharge;
 
   
     public bool Invincible
@@ -202,7 +210,7 @@ public class Player : MonoBehaviour
 
             return Mathf.Max(
                 AbilityChargeManager.Instance.GetModifiedAbilityCost(_maxAbilityCharge),
-                10
+                minimumAllowedMaxAbilityCharge
             );
         }
 
@@ -212,27 +220,34 @@ public class Player : MonoBehaviour
     public int AbilityCharge
     {
         get => _abilityCharge;
-        set
+        set => SetAbilityCharge(value);
+    }
+
+    public void SetAbilityCharge(int value, bool allowWhileActive = false)
+    {
+        int previous = _abilityCharge;
+
+        int attemptedDelta = value - previous;
+
+        int clamped = Mathf.Clamp(value, 0, MaxAbilityCharge);
+        int appliedDelta = clamped - previous;
+
+        if(CurrentAbility.IsActive && appliedDelta > 0 && !allowWhileActive)
+            return;
+
+        _abilityCharge = clamped;
+
+        
+
+        // Feedback / juice / UI
+        OnAbilityChargeChanged?.Invoke(previous, attemptedDelta, appliedDelta);
+
+        // Filled event
+        if (previous < MaxAbilityCharge && clamped >= MaxAbilityCharge)
         {
-            int previous = _abilityCharge;
-
-            int attemptedDelta = value - previous;
-
-            int clamped = Mathf.Clamp(value, 0, MaxAbilityCharge);
-            int appliedDelta = clamped - previous;
-
-            _abilityCharge = clamped;
-
-            // Feedback / juice / UI
-            OnAbilityChargeChanged?.Invoke(previous, attemptedDelta, appliedDelta);
-
-            // Filled event
-            if (previous < MaxAbilityCharge && clamped >= MaxAbilityCharge)
-            {
-                AudioHelpers.PlaySoundEffect(abilityChargedSoundEffect, Camera.main.transform.position);
-                OnAbilityFilled?.Invoke();
-                _abilityFullyChargedTime = Time.time;
-            }
+            AudioHelpers.PlaySoundEffect(abilityChargedSoundEffect, Camera.main.transform.position);
+            OnAbilityFilled?.Invoke();
+            _abilityFullyChargedTime = Time.time;
         }
     }
 
@@ -275,6 +290,7 @@ public class Player : MonoBehaviour
         RoundManager.OnRoundStart += HandleRoundStart;
         RoundManager.OnRoundEnd += HandleRoundEnd;
         GameStateManager.OnStateChanged += HandleStateChanged;
+        CurrencyManager.OnCurrencyAdded += HandleCurrencyAdded;
     }
 
     void OnDisable()
@@ -282,6 +298,12 @@ public class Player : MonoBehaviour
         RoundManager.OnRoundStart -= HandleRoundStart;
         RoundManager.OnRoundEnd -= HandleRoundEnd;
         GameStateManager.OnStateChanged -= HandleStateChanged;
+        CurrencyManager.OnCurrencyAdded -= HandleCurrencyAdded;
+    }
+
+    void HandleCurrencyAdded(int amount)
+    {
+        AbilityCharge += GameSessionBootstrap.Config.AbilityChargeOnCurrency;
     }
 
     void HandleStateChanged(GameState previousState, GameState newState)
@@ -345,26 +367,29 @@ public class Player : MonoBehaviour
         _centerPosition = transform.position; // cache original center
         _rb = GetComponent<Rigidbody2D>();
         _healAudioTime = 0;
+        _isDead = false;
     }
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Keypad1))
-        {
-            HealPlayer(1,true);
-        }
+        #if UNITY_EDITOR
+            if(Input.GetKeyDown(KeyCode.Keypad1))
+            {
+                HealPlayer(1,true);
+            }
 
-        if(Input.GetKeyDown(KeyCode.Keypad2))
-        {
-            OnPreDamageTaken?.Invoke(1);
-            Health -= 1;
-            OnDamageTaken?.Invoke(1);
-        }
+            if(Input.GetKeyDown(KeyCode.Keypad2))
+            {
+                OnPreDamageTaken?.Invoke(1);
+                Health -= 1;
+                OnDamageTaken?.Invoke(1);
+            }
 
-        if(Input.GetKeyDown(KeyCode.Keypad3))
-        {
-            AbilityCharge = MaxAbilityCharge;
-        }
+            if(Input.GetKeyDown(KeyCode.Keypad3))
+            {
+                AbilityCharge = MaxAbilityCharge;
+            }
+        #endif
 
         goal.transform.position = transform.position;
 
@@ -637,10 +662,12 @@ public class Player : MonoBehaviour
 
     private void CheckForDeath()
     {
-        if(Health <= 0 && GameStateEffectManager.PlayerDeathAllowed)
+        if(Health <= 0 && GameStateEffectManager.PlayerDeathAllowed && !_isDead)
         {
             goal.SetActive(false);
             GameStateManager.Instance.SetState(GameState.DeathSequence);
+            OnDeath?.Invoke();
+            _isDead = true;
         }
     }
 
@@ -751,11 +778,29 @@ public class Player : MonoBehaviour
         activeUpgrades.Add(effect);
     }
 
+    public void HealFull(bool useEffects = true)
+    {
+        int previousHealth = Health;
+
+        Health = MaxHealth;
+
+        int actualHealing = Health - previousHealth;
+        bool wasFullHealth = previousHealth >= MaxHealth;
+
+        OnHeal?.Invoke(MaxHealth, wasFullHealth);
+
+        if (useEffects && actualHealing > 0)
+        {
+            PlayHealEffects();
+        }
+    }
+
     public void HealPlayer(int amount, bool useEffects = true)
     {
         int previousHealth = Health;
 
-        int finalAmount = amount + GameSessionBootstrap.Config.AdditionalHealingModifier;
+        int finalAmount = amount + 
+                        GameSessionBootstrap.Config.AdditionalHealingModifier;
 
         Health = Mathf.Min(MaxHealth, Health + finalAmount);
 
@@ -816,9 +861,14 @@ public class Player : MonoBehaviour
 
     public void OnCriticalCatch()
     {
+        if(GameSessionBootstrap.Config.CritsLoseCurrencyAmount > 0)
+            CurrencyManager.Instance.TrySpendCurrency(GameSessionBootstrap.Config.CritsLoseCurrencyAmount);
+
         if (AbilityChargeLocked)
             return;
-        AbilityCharge += _abilityChargeGain;
+
+    
+        AbilityCharge += _abilityChargeGain + GameSessionBootstrap.Config.CritsAbilityChargeMod;
     }
 
     public void OnNormalCatch()
@@ -830,7 +880,7 @@ public class Player : MonoBehaviour
         if(GameSessionBootstrap.Config.NormalArrowAbilityChargeRoll == 0)
             return;
 
-        bool addAbilityCharge = Random.value <= GameSessionBootstrap.Config.NormalArrowAbilityChargeRoll;
+        bool addAbilityCharge = UnityEngine.Random.value <= GameSessionBootstrap.Config.NormalArrowAbilityChargeRoll;
 
         if(addAbilityCharge)
             AbilityCharge += _abilityChargeGain;
@@ -1007,7 +1057,6 @@ public class Player : MonoBehaviour
         bool distanceCheck = Vector2.Distance(transform.position, _centerPosition) <= 0.175f && Vector2.Dot(_rb.linearVelocity, currentToCenter) > 0f;
         bool dotCheck = _lastToCenter != Vector2.zero && Vector2.Dot(_lastToCenter, currentToCenter) <= 0f;
 
-        // 🔒 Only check crossing AFTER lastToCenter is valid
         if (distanceCheck || dotCheck)
         {
             _rb.linearVelocity = Vector2.zero;

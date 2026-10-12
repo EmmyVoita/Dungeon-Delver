@@ -44,8 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab8821f62409034da4b837180a5ff21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossSafeLaneChallenge
+  registerWithManager: 1
   priority: 0
   controlMode: 4
+  childChallenges: []
   config:
     maxLanes: 5
     laneSpacing: 1
@@ -54,6 +56,7 @@ MonoBehaviour:
   spawnPrefabs:
   - {fileID: 2209782324246233958, guid: cb3d57ff39828094c8a78df7a4362069, type: 3}
   safeLaneInterval: 3
+  safeLaneVisualDelay: 1
   safeLaneWarningDuration: 1
   obstacleActiveTime: 10
   spawnX: 7
@@ -102,8 +105,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dee909c07ef881f4e86e61862a63a9e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RotatingLinesLaneDodger
+  registerWithManager: 1
   priority: 0
   controlMode: 4
+  childChallenges:
+  - {fileID: 7021532044263244199}
   config:
     maxLanes: 7
     laneSpacing: 0.8
